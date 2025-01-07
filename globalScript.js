@@ -1,4 +1,4 @@
-let activeScreen = "home-screen";
+let activeScreen = "colors-screen";
 
 document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('.nav-btn');
@@ -27,4 +27,27 @@ function SwitchScreen(screenName){
 
     activeScreen = screenName;
 }
+
+// Adding colors tab switching
+const primitivesTabButton = document.getElementById("primitives-tab");
+const semanticTabButton = document.getElementById("semantic-tab");
+
+primitivesTabButton.addEventListener('click', () => {
+    document.getElementById("primitives-screen").classList.replace("hidden", "visible");
+    document.getElementById("semantic-screen").classList.replace("visible", "hidden");
+
+    semanticTabButton.className = "inline-block p-2 hover:text-blue-600";
+    primitivesTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+  });
+
+semanticTabButton.addEventListener('click', () => {
+    document.getElementById("primitives-screen").classList.replace("visible", "hidden");
+    document.getElementById("semantic-screen").classList.replace("hidden", "visible");
+
+    primitivesTabButton.className = "inline-block p-2 hover:text-blue-600";
+    semanticTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+});
+
+
+
 
