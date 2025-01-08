@@ -44,7 +44,7 @@
         </button>
       </div>
 
-      <div class="mb-4 border-b border-blue-200 dark:border-gray-700">
+      <div class=" border-b border-blue-200 dark:border-gray-700">
         <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="colors-tab">
             <li class="me-2">
                 <button class="inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white" id="primitives-tab" color-tab-target="primitives-screen" color-tab-selected="true">Primitives</button>
@@ -55,18 +55,21 @@
         </ul>
       </div>
       <div id="colors-tab-content">
-        <div class="visible p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="primitives-screen">
+        <div id="primitives-screen" class="visible p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
 
           <div class="relative overflow-x-auto">
-            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <table id="primitives-table" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="sticky z-10 px-6 py-3">
                             Name
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="sticky z-10 px-6 py-3">
                           <div class="flex items-center w-full">
-                            Value<div id="color-picker" class="hidden"></div>
+                            Value
+                            <div id="color-picker-container">
+                              <div id="color-picker" class="hidden"></div>
+                            </div>
                           </div>
                             
                         </th>
@@ -76,9 +79,7 @@
                   <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
                       <div class="flex items-center w-full">
-                        <svg id="colors-screen-icon" class="flex-shrink-0 w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <path fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-width="1" d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 0 0 0-1.732 1"/>
-                        </svg>
+                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
                         <input 
                           type="text" 
                           value="g50" 
@@ -98,9 +99,7 @@
                   <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
                       <div class="flex items-center w-full">
-                        <svg id="colors-screen-icon" class="flex-shrink-0 w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <path fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-width="1" d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 0 0 0-1.732 1"/>
-                        </svg>
+                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
                         <input 
                           type="text" 
                           value="g50" 
@@ -120,9 +119,7 @@
                   <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
                       <div class="flex items-center w-full">
-                        <svg id="colors-screen-icon" class="flex-shrink-0 w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <path fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-width="1" d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 0 0 0-1.732 1"/>
-                        </svg>
+                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
                         <input 
                           type="text" 
                           value="g50" 
@@ -142,9 +139,7 @@
                   <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
                       <div class="flex items-center w-full">
-                        <svg id="colors-screen-icon" class="flex-shrink-0 w-6 h-6 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <path fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-width="1" d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 0 0 0-1.732 1"/>
-                        </svg>
+                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
                         <input 
                           type="text" 
                           value="g50" 
@@ -163,20 +158,31 @@
                   
                 </tbody>
             </table>
+            <div class="flex justify-center items-center w-full">
+              <button id="addRowToPrimitives" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 mt-3 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+                </svg>
+                Add New Color
+              </button>
+            </div>
+
+            
+
           </div>
           
-          
+          <div class="h-24"></div>
         </div>
 
 
-        <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="semantic-screen">
+        <div id="semantic-screen" class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" >
             <p class="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong class="font-medium text-gray-800 dark:text-white">semantic tab's associated content</strong>. Clicking another tab will toggle the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.</p>
         </div>
       </div>
 
     </div>
 
-    <div id="filter-components-screen" class="hidden">
+    <div id="tools-screen" class="hidden">
       <span>filter component screen</span>
     </div>
 
@@ -199,8 +205,23 @@
               <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
           <button data-tooltip-target="tooltip-colors" data-nav-button-screen-target="colors-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
-            <svg id="colors-screen-icon" class="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <path fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-width="1"  d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"/>
+            <svg id="colors-screen-icon" class="flex-shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 330 330">
+              <g>
+                <g>
+                  <g>
+                    <path fill="currentColor" d="M277.712,57.549c-2.609-3.01-5.323-5.922-8.139-8.738C236.512,15.748,191.073-6.413,143.36,1.669
+                      c-37.348,6.327-60.382,34.548-58.499,71.529c0.479,9.381,2.465,18.711,6.272,27.318c4.313,9.748,13,16.633,17.102,26.218
+                      c8.732,20.415-9.968,33.76-28.095,33.76c-47.276-2.599-78.503,51.443-63.374,92.725c13.696,37.372,59.732,62.813,96.103,71.896
+                      c41.408,10.339,86.191,4.129,123.1-17.348C323.773,256.679,344.321,134.368,277.712,57.549z M141.002,290.888
+                      c-13.254,0-23.999-10.745-23.999-23.999c0-13.255,10.745-23.999,23.999-23.999s23.999,10.744,23.999,23.999
+                      S154.255,290.888,141.002,290.888z M190.097,82.398c0-13.254,10.744-23.999,23.999-23.999c13.253,0,23.998,10.745,23.998,23.999
+                      s-10.745,23.999-23.998,23.999C200.84,106.396,190.097,95.652,190.097,82.398z M224.594,261.889
+                      c-13.254,0-23.998-10.745-23.998-23.999c0-13.255,10.744-23.999,23.998-23.999s23.999,10.744,23.999,23.999
+                      C248.592,251.145,237.848,261.889,224.594,261.889z M256.092,181.894c-13.254,0-23.999-10.744-23.999-24
+                      c0-13.254,10.745-23.999,23.999-23.999s23.999,10.745,23.999,23.999C280.091,171.148,269.346,181.894,256.092,181.894z"/>
+                  </g>
+                </g>
+              </g>
             </svg>
               <span class="sr-only">Colors</span>
           </button>
@@ -208,14 +229,14 @@
               Colors
               <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
-          <button data-tooltip-target="tooltip-filter-components" data-nav-button-screen-target="filter-components-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
-              <svg id="filter-components-screen-icon" class="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+          <button data-tooltip-target="tooltip-tools" data-nav-button-screen-target="tools-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+              <svg id="tools-screen-icon" class="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                   <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12.25V1m0 11.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M4 19v-2.25m6-13.5V1m0 2.25a2.25 2.25 0 0 0 0 4.5m0-4.5a2.25 2.25 0 0 1 0 4.5M10 19V7.75m6 4.5V1m0 11.25a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM16 19v-2"/>
               </svg>
-              <span class="sr-only">Filter Components</span>
+              <span class="sr-only">Tools</span>
           </button>
-          <div id="tooltip-filter-components" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-              Filter Components
+          <div id="tooltip-tools" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
+              Tools
               <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
           <button data-tooltip-target="tooltip-profile" data-nav-button-screen-target="profile-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
