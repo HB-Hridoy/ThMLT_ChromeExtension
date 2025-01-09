@@ -1,6 +1,5 @@
   let activeScreen = "colors-screen";
 
-
   document.addEventListener('DOMContentLoaded', () => {
       const buttons = document.querySelectorAll('[data-nav-button-screen-target]');
 
@@ -159,7 +158,7 @@
       }
 
       // Move the Pickr container to the new location
-      parentRow.querySelector(".color-box-parent").appendChild(document.getElementById("color-picker-container"));
+      parentRow.querySelector("#temp-primitive-color-picker").appendChild(document.getElementById("color-picker-container"));
       pickrInstance.show();
     } else if (target.classList.contains("color-text")) {
       currentColorTextview = target;
@@ -168,8 +167,32 @@
       }).catch(err => {
         console.error('Error copying text: ', err);
       });
+    } else if (target.closest('.delete-row')) {
+      // If the delete button is clicked, remove the respective row
+      parentRow.remove();
     }
   });
+
+  // Adding event listener for hover functionality to show the delete button
+  document.querySelector("#primitives-table tbody").addEventListener("mouseover", function(event) {
+    const target = event.target;
+    const parentRow = target.closest("tr");
+
+    // Show delete button on hover
+    if (parentRow) {
+      parentRow.querySelector('.delete-row').style.display = 'inline-flex';  // Show delete button
+    }
+  }, true); // Use capture phase for this to run first
+
+  document.querySelector("#primitives-table tbody").addEventListener("mouseout", function(event) {
+    const target = event.target;
+    const parentRow = target.closest("tr");
+
+    // Hide delete button when hover ends
+    if (parentRow) {
+      parentRow.querySelector('.delete-row').style.display = 'none';  // Hide delete button
+    }
+  }, true); // Use capture phase for this to run first
 
 
   document.getElementById("addRowToPrimitives").addEventListener("click", function () {
@@ -178,29 +201,39 @@
 
     // Create a new row
     const newRow = `
-      <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-          <div class="flex items-center w-full">
-            <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
-            <input 
-              type="text" 
-              value="g50" 
-              class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Give primitive a name" 
-            />
-          </div>
-        </td>
-        <td class="px-6 py-4 w-2/4">
-          <div class="color-box-parent flex justify-start items-center">
-            <div class="color-box h-4 w-4 border rounded-sm bg-white"></div>
-            <p class="color-text ml-2">#FFFFFF</p>
-          </div>
-        </td>
-      </tr>
-    `;
-
+                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+                      <div class="flex items-center w-full">
+                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
+                        <input 
+                          type="text" 
+                          value="g50" 
+                          class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Give primitive a name" 
+                        />
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 w-2/4">
+                      <div class="color-box-parent w-full flex items-center">
+                        <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+                        <p class="color-text mr-2">#FFFFFF</p>
+                        <div id="temp-primitive-color-picker" class="flex-1" ></div> <!-- Takes remaining space -->
+                        <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                          </svg>
+                          <span class="sr-only">Icon description</span>
+                        </button>
+                      </div>
+                                         
+                      
+                    </td>
+                  </tr>
+                  `;
+    
     // Insert the new row into the table body
     tableBody.insertAdjacentHTML("beforeend", newRow);
+   
   });
 
 
