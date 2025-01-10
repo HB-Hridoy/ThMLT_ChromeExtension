@@ -1,17 +1,18 @@
 <!doctype html>
-<html>
+<html class="h-full">
   <head>
     <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css" />
+    <script src="dbOperations.js"></script>
   </head>
-  <body>
+  <body class="h-full m-0 flex flex-col">
 
-    <div id="home-screen" class="hidden">
+    <div id="home-screen" class="visible">
 
       <div class="w-full p-3 flex justify-between items-center">
 
         <h3 class="text-lg font-extrabold dark:text-white">My projects</h3>
-        <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+        <button id="add-new-template-toggle" data-modal-target="crud-modal" data-modal-toggle="crud-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
           <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
           </svg>
@@ -19,22 +20,28 @@
         </button>
 
       </div>
+      <div id="templates-container">
+        <div class="block max-w-[clac(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+          <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">My First Template</h5>
+          <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Last modified: 07 January, 2025</p>
+        </div>
 
-      <a href="#" class="block max-w-full p-6 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-        <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">My First Template</h5>
-        <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Last modified: 07 January, 2025</p>
-      </a>
-
-      <a href="#" class="block max-w-full p-6 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-        <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">My second Template</h5>
-        <p class="text-xs text-gray-700 dark:text-gray-400">Last modified: 07 January, 2025</p>
-      </a>
+        <div class="block max-w-[clac(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+          <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">My second Template</h5>
+          <p class="text-xs text-gray-700 dark:text-gray-400">Last modified: 07 January, 2025</p>
+        </div>
+      </div>
+      <div class="h-24"></div>
     </div>
 
-    <div id="colors-screen" class="visible">
+    <div id="colors-screen" class="hidden bg-gray-50 h-full">
 
       <div class="w-full p-3 flex justify-between items-center">
-        <h3 class="text-lg font-extrabold dark:text-white">Color Themes</h3>
+        <div>
+          <h3 class="text-lg font-extrabold dark:text-white">Color Themes</h3>
+          <p id="template-name-colors-screen" class="text-xs text-gray-500 dark:text-white"></p>
+        </div>
+        <div id="header-color-picker-container"></div>
         <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
           <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
             <path fill-rule="evenodd" d="M17.44 3a1 1 0 0 1 .707.293l2.56 2.56a1 1 0 0 1 0 1.414L18.194 9.78 14.22 5.806l2.513-2.513A1 1 0 0 1 17.44 3Zm-4.634 4.22-9.513 9.513a1 1 0 0 0 0 1.414l2.56 2.56a1 1 0 0 0 1.414 0l9.513-9.513-3.974-3.974ZM6 6a1 1 0 0 1 1 1v1h1a1 1 0 0 1 0 2H7v1a1 1 0 1 1-2 0v-1H4a1 1 0 0 1 0-2h1V7a1 1 0 0 1 1-1Zm9 9a1 1 0 0 1 1 1v1h1a1 1 0 1 1 0 2h-1v1a1 1 0 1 1-2 0v-1h-1a1 1 0 1 1 0-2h1v-1a1 1 0 0 1 1-1Z" clip-rule="evenodd"/>
@@ -54,8 +61,8 @@
             </li>
         </ul>
       </div>
-      <div id="colors-tab-content">
-        <div id="primitives-screen" class="visible p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+      <div id="colors-tab-content" class="h-full">
+        <div id="primitives-screen" class="visible h-full p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
 
           <div id="primitives-table-container" class="relative overflow-x-auto">
             <table id="primitives-table" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -123,8 +130,102 @@
         </div>
 
 
-        <div id="semantic-screen" class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" >
-            <p class="text-sm text-gray-500 dark:text-gray-400">This is some placeholder content the <strong class="font-medium text-gray-800 dark:text-white">semantic tab's associated content</strong>. Clicking another tab will toggle the visibility of this one for the next. The tab JavaScript swaps classes to control the content visibility and styling.</p>
+        <div id="semantic-screen" class="hidden p-3 rounded-lg bg-gray-50 dark:bg-gray-800" >
+          <div id="semantic-table-container" class="relative overflow-x-auto">
+            <table id="semantic-table" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="sticky z-10 px-6 py-3">
+                            Name
+                        </th>
+                        <th scope="col" class="sticky z-10 px-6 py-3">
+                          <div class="flex items-center w-full">
+                            Value
+                            <div id="color-picker-container">
+                              <div id="color-picker" class="hidden"></div>
+                            </div>
+                          </div>
+                            
+                        </th>
+                    </tr>
+                </thead>
+                <tbody >
+                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+                      <div class="flex items-center w-full">
+                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
+                        <input 
+                          type="text" 
+                          value="g50" 
+                          class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Give primitive a name" 
+                        />
+                      </div>
+                    </td>
+                    <td  class="px-6 py-4 w-2/4 primitive-link">
+                      <div class="color-box-parent w-full flex items-center">
+                        <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+                        <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+                        </svg>
+                        <p class="color-text mr-2 flex-1">#FFFFFF</p>
+                        <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                          </svg>
+                          <span class="sr-only">Icon description</span>
+                        </button>
+                      </div>
+                                         
+                      
+                    </td>
+                  </tr>
+                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+                      <div class="flex items-center w-full">
+                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
+                        <input 
+                          type="text" 
+                          value="g50" 
+                          class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Give primitive a name" 
+                        />
+                      </div>
+                    </td>
+                    <td  class="px-6 py-4 w-2/4 primitive-link">
+                      <div class="color-box-parent w-full flex items-center">
+                        <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+                        <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+                        </svg>
+                        <p class="color-text mr-2 flex-1">#FFFFFF</p>
+                        <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                          </svg>
+                          <span class="sr-only">Icon description</span>
+                        </button>
+                      </div>
+                                         
+                      
+                    </td>
+                  </tr>
+                </tbody>
+            </table>
+            <div class="flex justify-center items-center w-full">
+              <button id="addRowToSemantic" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 mt-3 mb-10 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+                </svg>
+                Add New Color
+              </button>
+            </div>
+
+            
+
+          </div>
+          
+          <div class="h-24"></div>
         </div>
       </div>
 
@@ -138,10 +239,88 @@
       <span>profile screen</span>
     </div>
 
+    <!-- Main modal -->
+    <div id="crud-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative p-4 w-full max-w-md max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Create New Template
+                    </h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <form class="p-4 md:p-5">
+                    <div class="grid gap-4 mb-4 grid-cols-2">
+                        <div class="col-span-2">
+                            <label for="templateNameInput" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Template name</label>
+                            <input type="text" name="templateNameInput" id="templateNameInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Type Template name" required="">
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                            <label for="authorNameInput" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Author</label>
+                            <input type="text" name="authorNameInput" id="authorNameInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Type Author Name" required="">
+                        </div>
+                        <div class="col-span-2 sm:col-span-1">
+                          <label for="versionNameInput" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Version</label>
+                          <input type="text" name="versionNameInput" id="versionNameInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Type Version Name" required="">
+                      </div>
+                    </div>
+                    <button id="add-new-template" class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
+                        Add template
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div> 
+
+
+      <!-- Main modal -->
+      <div id="select-primitive-modal" class="hidden  overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full h-[calc(100%-1rem)] max-h-full">
+          <div class="relative p-4 pb-24 w-full max-w-md max-h-full">
+              <!-- Modal content -->
+              <div class="relative border-2 border-black bg-white rounded-lg shadow-2xl dark:bg-gray-700">
+                  <!-- Modal header -->
+                  <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                          Choose primitive
+                      </h3>
+                      <button id="close-primitive-modal" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                          <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                          </svg>
+                          <span class="sr-only">Close primitive modal</span>
+                      </button>
+                  </div>
+                  <!-- Modal body -->
+                  <div class="p-4 md:p-5">
+                      <p class="text-xs font-normal text-gray-500 dark:text-gray-400">Your choosen primitive color will be linked with respective semantic color.</p>
+                      <ul class="my-4 space-y-3">
+                          <li>
+                              <div href="#" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                                <div class="color-box h-5 w-5 mr-2 border rounded-md bg-white"></div>
+                                <p class="color-text text-sm mr-2 flex-1">White</p>
+                              </div>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+          </div>
+      </div>
+      
+  
+
 
     <!-- Bottom navigation bar UI -->
-    <div class="fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 bg-white border border-gray-200 rounded-full bottom-4 left-1/2 dark:bg-gray-700 dark:border-gray-600">
-      <div class="grid h-full max-w-lg grid-cols-4 mx-auto">
+    <div id="bottom-nav-bar" class="visible fixed z-50 w-full h-16 max-w-lg -translate-x-1/2 bg-white border border-gray-200 rounded-full bottom-4 left-1/2 dark:bg-gray-700 dark:border-gray-600">
+      <div class="grid h-full max-w-lg grid-cols-3 mx-auto">
           <button data-tooltip-target="tooltip-home" data-nav-button-screen-target="home-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 rounded-s-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
               <svg id="home-screen-icon" class="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                   <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
@@ -150,31 +329,6 @@
           </button>
           <div id="tooltip-home" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
               Home
-              <div class="tooltip-arrow" data-popper-arrow></div>
-          </div>
-          <button data-tooltip-target="tooltip-colors" data-nav-button-screen-target="colors-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
-            <svg id="colors-screen-icon" class="flex-shrink-0 w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 330 330">
-              <g>
-                <g>
-                  <g>
-                    <path fill="currentColor" d="M277.712,57.549c-2.609-3.01-5.323-5.922-8.139-8.738C236.512,15.748,191.073-6.413,143.36,1.669
-                      c-37.348,6.327-60.382,34.548-58.499,71.529c0.479,9.381,2.465,18.711,6.272,27.318c4.313,9.748,13,16.633,17.102,26.218
-                      c8.732,20.415-9.968,33.76-28.095,33.76c-47.276-2.599-78.503,51.443-63.374,92.725c13.696,37.372,59.732,62.813,96.103,71.896
-                      c41.408,10.339,86.191,4.129,123.1-17.348C323.773,256.679,344.321,134.368,277.712,57.549z M141.002,290.888
-                      c-13.254,0-23.999-10.745-23.999-23.999c0-13.255,10.745-23.999,23.999-23.999s23.999,10.744,23.999,23.999
-                      S154.255,290.888,141.002,290.888z M190.097,82.398c0-13.254,10.744-23.999,23.999-23.999c13.253,0,23.998,10.745,23.998,23.999
-                      s-10.745,23.999-23.998,23.999C200.84,106.396,190.097,95.652,190.097,82.398z M224.594,261.889
-                      c-13.254,0-23.998-10.745-23.998-23.999c0-13.255,10.744-23.999,23.998-23.999s23.999,10.744,23.999,23.999
-                      C248.592,251.145,237.848,261.889,224.594,261.889z M256.092,181.894c-13.254,0-23.999-10.744-23.999-24
-                      c0-13.254,10.745-23.999,23.999-23.999s23.999,10.745,23.999,23.999C280.091,171.148,269.346,181.894,256.092,181.894z"/>
-                  </g>
-                </g>
-              </g>
-            </svg>
-              <span class="sr-only">Colors</span>
-          </button>
-          <div id="tooltip-colors" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-              Colors
               <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
           <button data-tooltip-target="tooltip-tools" data-nav-button-screen-target="tools-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group">
@@ -202,6 +356,9 @@
 
     <script src="assets/js/pickr.min.js"></script>
     <script src="globalScript.js"></script>
-    <script src="assets/js/flowbite.min.js"></script>
+    <script src="colorsScreenScript.js"></script>
+    <script src="homeScript.js"></script>
+    
+    <script  type="module" src="assets/js/flowbite.min.js"></script>
   </body>
 </html>
