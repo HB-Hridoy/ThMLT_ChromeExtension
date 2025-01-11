@@ -4,22 +4,29 @@ let isDBOpenSuccess = false;
 
 openDB.onupgradeneeded = function (event) {
   db = event.target.result;
-  // Create 'templates' object store if it doesn't exist
+
+  // Create 'templates' object store
   if (!db.objectStoreNames.contains("templates")) {
-    let request = db.createObjectStore("templates", { keyPath: "id" });
-    request.createIndex("templateName", "templateName", {unique: true});
+    let templatesStore = db.createObjectStore("templates", { keyPath: "templateName" });
+    templatesStore.createIndex("templateName", "templateName", { unique: true });
+    templatesStore.createIndex("author", "author", { unique: false });
+    templatesStore.createIndex("version", "version", { unique: false });
   }
 
+  // Create 'primitiveColors' object store
   if (!db.objectStoreNames.contains("primitiveColors")) {
-    let request = db.createObjectStore("primitiveColors", { keyPath: "id" });
-    request.createIndex("primitiveName", "primitiveName", {unique: true});
-    request.createIndex("primitiveValue", "primitiveValue", {unique: false});
+    let primitiveColorsStore = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true  });
+    primitiveColorsStore.createIndex("templateName", "templateName", { unique: false });
+    primitiveColorsStore.createIndex("primitiveName", "primitiveName", { unique: true });
+    primitiveColorsStore.createIndex("primitiveValue", "primitiveValue", { unique: false });
   }
 
+  // Create 'semanticColors' object store
   if (!db.objectStoreNames.contains("semanticColors")) {
-    let request = db.createObjectStore("primitiveColors", { keyPath: "id" });
-    request.createIndex("semanticName", "semanticName", {unique: true});
-    request.createIndex("semanticValue", "semanticValue", {unique: false});
+    let semanticColorsStore = db.createObjectStore("semanticColors", { keyPath: "id", autoIncrement: true  });
+    semanticColorsStore.createIndex("templateName", "templateName", { unique: false });
+    semanticColorsStore.createIndex("semanticName", "semanticName", { unique: true });
+    semanticColorsStore.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
   }
 
 };
@@ -112,33 +119,6 @@ function getAllTemplates() {
   };
 }
 
-function addPrimitiveColor(colors) {
-  return new Promise((resolve, reject) => {
-    if (isDBOpenSuccess && db) {
-      console.log("Adding primiotive color...");
-      const transaction = db.transaction(["primitiveColors"], "readwrite");
-      const store = transaction.objectStore("primitiveColors");
-
-      let request = store.put(colors);
-      
-      request.onsuccess = () => {
-        console.log("Template added!");
-        resolve("Template added!");
-      };
-
-      request.onerror = (event) => {
-        const error = "Error adding template: " + event.target.error;
-        console.error(error);
-        reject(error);
-      };
-    } else {
-      const error = "Database is not initialized";
-      console.error(error);
-      reject(error);
-    }
-  });
-}
-
 function getAllPrimitiveColors() {
   console.log("Getting primitive colors...");
   const transaction = db.transaction(["primitiveColors"], "readonly");
@@ -198,6 +178,136 @@ function getAllPrimitiveColors() {
     console.error(error);
   };
 }
+
+function addNewPrimitive(primitiveName, primitiveValue, id, inputElement) {
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+      // Open a transaction to the IndexedDB object store
+      const transaction = db.transaction(["primitiveColors"], "readwrite");
+      const store = transaction.objectStore("primitiveColors");
+
+      // Check if the primitiveName exists
+      const request = store.index("primitiveName").get(primitiveName);
+
+      request.onsuccess = () => {
+        const result = request.result;
+
+        if (result) {
+          // Primitive already exists
+          if (inputElement) {
+            inputElement.classList.add("border-red-500"); // Highlight input with red border
+          }
+          reject("Primitive already exists");
+        } else {
+          // Add new primitive to the store
+          const newPrimitive = {
+            id: id,
+            primitiveName: primitiveName,
+            primitiveValue: primitiveValue,
+          };
+
+          const addRequest = store.add(newPrimitive);
+
+          addRequest.onsuccess = () => {
+            resolve("Primitive added successfully");
+          };
+
+          addRequest.onerror = (errorEvent) => {
+            reject(`Error adding primitive: ${errorEvent.target.error}`);
+          };
+        }
+      };
+
+      request.onerror = (errorEvent) => {
+        reject(`Error checking primitive name: ${errorEvent.target.error}`);
+      };
+    } else {
+      const error = "Database is not initialized";
+      console.error(error);
+      reject(error);
+    }
+  });
+}
+
+function addPrimitiveColor(templateName, primitiveName, primitiveValue) {
+
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+          
+      let transaction = db.transaction(["templates", "primitiveColors"], "readwrite");
+      let templatesStore = transaction.objectStore("templates");
+      let primitiveColorsStore = transaction.objectStore("primitiveColors");
+
+      // Check if templateName exists in templates store
+      let templateRequest = templatesStore.index("templateName").get(templateName);
+
+      templateRequest.onsuccess = function(event) {
+        let template = event.target.result;
+        if (template) {
+          // Template exists, check if primitiveName exists
+          let colorRequest = primitiveColorsStore.index("templateName").getAll(templateName);
+          colorRequest.onsuccess = function(event) {
+            let colors = event.target.result;
+            let existingColor = colors.find(color => color.primitiveName === primitiveName);
+
+            let primitiveColorStoreRequest;
+            if (existingColor) {
+              // Update the value of existing primitiveColor
+              existingColor.primitiveValue = primitiveValue;
+              primitiveColorStoreRequest = primitiveColorsStore.put(existingColor);
+              primitiveColorStoreRequest.onsuccess = (e) => {
+                resolve("Primitive color updated");
+                console.log("Primitive color updated");
+              }
+  
+              primitiveColorStoreRequest.onerror = (e) => {
+                reject("Primitive Color update failed");
+                console.log("Primitive Color update failed");
+              }
+            } else {
+              // Store the new primitiveColor
+              let newColor = {
+                templateName: templateName,
+                primitiveName: primitiveName,
+                primitiveValue: primitiveValue
+              };
+              primitiveColorStoreRequest = primitiveColorsStore.add(newColor);
+              primitiveColorStoreRequest.onsuccess = (e) => {
+                resolve("Primitive color added");
+                console.log("Primitive color added");
+              }
+  
+              primitiveColorStoreRequest.onerror = (e) => {
+                reject("Primitive Color adding failed");
+                console.log("Primitive Color adding failed");
+              }
+            }
+          };
+        } else {
+          console.log("Template not found.");
+          reject("Template not found.");
+        }
+      };
+    } else {
+      const error = "Database is not initialized";
+      console.error(error);
+      reject(error);
+    }
+  });
+
+}
+
+// return new Promise((resolve, reject) => {
+//   if (isDBOpenSuccess && db) {
+    
+//   } else {
+//     const error = "Database is not initialized";
+//     console.error(error);
+//     reject(error);
+//   }
+// });
+
+
 
 
 

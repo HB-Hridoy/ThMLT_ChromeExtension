@@ -30,10 +30,15 @@
   let currentPrimitiveColorTextview = null;
   let pickrInstance = null; 
 
+  const primitiveTableBody = document.querySelector("#primitives-table tbody");
+
   // listen for clicks on color-box or color-text elements within the table body
-  document.querySelector("#primitives-table tbody").addEventListener("click", function (event) {
+  primitiveTableBody.addEventListener("click", function (event) {
     const target = event.target;
     const parentRow = target.closest("tr");
+
+    let refreshRowButton =  target.closest('.refresh-row');
+
       
     currentPrimitiveColorTextview = parentRow.querySelector(".color-text");
 
@@ -102,7 +107,62 @@
         }
 
         parentRow.remove();
+    } else if (refreshRowButton) {
+      const parentRow = target.closest("tr");
+      handlePrimitiveRowRefresh(parentRow);
+      refreshRowButton.classList.replace("visible", "hidden");
     }
+  
+  });
+
+  primitiveTableBody.addEventListener("input", (event) => {
+    const target = event.target;
+  
+    // If input changed and it's a text input
+    if (target.tagName === "INPUT" && target.type === "text") {
+      // Find the closest tr (row) containing the input element
+      const parentRow = target.closest("tr");
+  
+      if (parentRow) {
+        // Find the .refresh-row button inside this row
+        const refreshRowButton = parentRow.querySelector(".refresh-row");
+  
+        // Debug log if refresh-row is not found
+        if (refreshRowButton) {
+          console.log("Found refresh-row button:", refreshRowButton);
+          // Replace "hidden" with "visible" if the button exists
+          refreshRowButton.classList.replace("hidden", "visible");
+        } else {
+          console.error("refresh-row button not found inside parentRow");
+        }
+      } else {
+        console.error("parentRow not found");
+      }
+    }
+  });
+  
+  
+
+  // Monitor changes to <p class="color-text">
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (
+        mutation.type === "characterData" || 
+        mutation.target.nodeType === Node.ELEMENT_NODE
+      ) {
+        const target = mutation.target;
+
+        if (target.tagName === "P" && target.classList.contains("color-text")) {
+          target.closest("td").querySelector(".refresh-row").classList.replace("hidden", "visible");
+        }
+      }
+    });
+  });
+
+  observer.observe(primitiveTableBody, {
+    subtree: true, // Observe all descendants
+    childList: true, // Observe added/removed nodes
+    characterData: true, // Observe text changes
   });
 
   // Adding event listener for hover functionality to show the delete button
@@ -142,7 +202,7 @@
                         <input 
                           type="text" 
                           value="" 
-                          class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          class="primitive-name-input text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Give primitive a name" 
                         />
                       </div>
@@ -158,9 +218,13 @@
                           </svg>
                           <span class="sr-only">Icon description</span>
                         </button>
+                        <button  type="button" class="hidden refresh-row text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
+                          </svg>
+                          <span class="sr-only">Icon description</span>
+                        </button>
                       </div>
-                                         
-                      
                     </td>
                   </tr>
                   `;
@@ -256,9 +320,13 @@
                           </svg>
                           <span class="sr-only">Icon description</span>
                         </button>
+                        <button type="button" class=" text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+                          </svg>
+                          <span class="sr-only">Icon description</span>
+                        </button>
                       </div>
-                                         
-                      
                     </td>
                   </tr>
                   `;
@@ -267,5 +335,39 @@
     tableBody.insertAdjacentHTML("beforeend", newRow);
   });
 
+  async function handlePrimitiveRowRefresh(tableRow) {
 
+    console.log("handling refresh btn");
+    const primitiveNameInput = tableRow.querySelector(".primitive-name-input");
+    const colorText = tableRow.querySelector(".color-text");
+    const idElement = document.querySelector("#template-name-colors-screen");
 
+    if (!primitiveNameInput || !colorText || !idElement){
+      console.log("This is the problem");
+      return;
+    } 
+
+    const primitiveName = primitiveNameInput.value.trim();
+    const primitiveValue = colorText.textContent.trim();
+    const id = idElement.textContent.trim();
+
+    if (!primitiveName || !primitiveValue || !id) {
+      alert("Missing required values");
+      return;
+    }
+
+    try {
+      console.log("Adding new primitive...");
+      
+      // Await the result of addNewPrimitive
+      //const result = await addNewPrimitive(primitiveName, primitiveValue, id, primitiveNameInput);
+      const result = await addPrimitiveColor(id, primitiveName, primitiveValue);
+      console.log(result); // Log success message
+      ShowAlert();
+      //return (result);
+  
+    } catch (error) {
+      alert(error); // Display error to the user
+      console.error(error); // Log the error for debugging
+    }
+  }

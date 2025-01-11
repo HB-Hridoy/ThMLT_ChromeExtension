@@ -10,6 +10,7 @@
               SwitchScreen(targetScreenId);
           });
       });
+      
   });
 
 
@@ -26,4 +27,8 @@
     targetIcon.classList.replace("text-gray-500", "text-blue-600");
 
     activeScreen = screenName;
+  }
+
+  function ShowAlert(){
+    document.getElementById("my-custom alert").classList.replace("hidden", "flex");
   }
