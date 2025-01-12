@@ -1,12 +1,14 @@
 const openDB = indexedDB.open("ThMLT DB", 1); // Name and version
 let db;
 let isDBOpenSuccess = false;
+
 let currentPrimitiveRowId = 1;
 let currentSemanticRowId = 1;
 
 const nameRegex = /^[A-Za-z0-9-_]+$/;
 
 let oldPrimitiveInputValues = new Map();
+
 
 openDB.onupgradeneeded = function (event) {
   db = event.target.result;
@@ -125,11 +127,15 @@ function getAllTemplates() {
   };
 }
 
-function getAllPrimitiveColors() {
-  console.log("Getting primitive colors...");
+function getAllPrimitiveColors(templateName) {
+
+  console.log(`Getting primitive colors of '${templateName}' template...`);
   const transaction = db.transaction(["primitiveColors"], "readonly");
   const store = transaction.objectStore("primitiveColors");
-  const request = store.getAll();
+  // Open the index on projectId
+  const index = store.index("templateName");
+    
+  const request = index.getAll(templateName);
 
   request.onsuccess = () => {
     console.log("Got All Primitive Colors!");

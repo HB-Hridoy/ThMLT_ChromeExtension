@@ -1,12 +1,32 @@
+    
     const templatesContainer = document.getElementById("templates-container");
     const homeScreen = document.getElementById("home-screen");
     const colorsScreen = document.getElementById("colors-screen");
+    let importJsonEditor
 
-  
-    //Add new template
+    document.addEventListener('DOMContentLoaded', () => {
 
+      importJsonEditor = CodeMirror.fromTextArea(document.getElementById("import-json-code-editor"), {
+        mode: "application/json", 
+        lineNumbers: true,        
+        theme: "dracula",         
+        tabSize: 2,   
+        indentUnit: 2,               // Number of spaces for each indent
+        indentWithTabs: false,            
+        autoCloseBrackets: true
+      });
+    
+      
+    });
+    
     document.getElementById("add-new-template-toggle").addEventListener("click", function(){
         bottomNavBar.classList.replace("visible","hidden");
+    });
+
+    document.getElementById("import-json-screen-back-button").addEventListener("click", function(){
+      document.getElementById("import-json-screen").classList.replace("visible", "hidden");
+      document.getElementById("home-screen").classList.replace("hidden", "visible");
+      bottomNavBar.classList.replace("hidden","visible");
     });
 
     document.getElementById("add-new-template").addEventListener("click", async function () {
@@ -47,6 +67,12 @@
         }
     });
 
+    document.getElementById("open-import-json").addEventListener("click", function(){
+      document.getElementById("import-json-screen").classList.replace("hidden", "visible");
+      document.getElementById("home-screen").classList.replace("visible", "hidden");
+      bottomNavBar.classList.replace("hidden","visible");
+    });
+
     document.getElementById("templates-container").addEventListener("click", function(event) {
         // Check if the clicked element or any of its parents has the 'template-preview-parent' class
         if (event.target.closest('.template-preview-parent')) {
@@ -61,7 +87,7 @@
 
             document.getElementById("template-name-colors-screen").innerText = templateId;
 
-          getAllPrimitiveColors();
+          getAllPrimitiveColors(templateId);
 
         }
       });

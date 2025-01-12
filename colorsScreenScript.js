@@ -8,6 +8,11 @@
 
   let primitiveInputValues = new Map();
 
+  document.getElementById("color-screen-back-button").addEventListener("click", () => {
+    document.getElementById("colors-screen").classList.replace("visible", "hidden");
+    document.getElementById("home-screen").classList.replace("hidden", "visible");
+  });
+
   
 
   primitivesTabButton.addEventListener('click', () => {
