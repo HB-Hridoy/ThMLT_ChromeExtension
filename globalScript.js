@@ -1,5 +1,6 @@
   let activeScreen = "home-screen";
 
+
   document.addEventListener('DOMContentLoaded', () => {
       const buttons = document.querySelectorAll('[data-nav-button-screen-target]');
 
@@ -29,6 +30,15 @@
     activeScreen = screenName;
   }
 
-  function ShowAlert(){
-    document.getElementById("my-custom alert").classList.replace("hidden", "flex");
+  function ShowAlert(alertId, meassage = "", duration = 5000) {
+    const alert = document.getElementById(alertId+"-alert");
+    const alertText = document.getElementById(alertId+"-alert-text");
+    if (alert && alertText) {
+      alertText.innerHTML = meassage;
+      alert.classList.replace('hidden', 'flex'); // Show the alert
+      if (duration > 0) {
+        setTimeout(() => alert.classList.replace('flex', 'hidden'), duration); // Hide after duration
+      }
+    }
   }
+  
