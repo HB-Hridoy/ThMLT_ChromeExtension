@@ -4,6 +4,18 @@
   const primitivesTabButton = document.getElementById("primitives-tab");
   const semanticTabButton = document.getElementById("semantic-tab");
 
+  const semanticRowEditButton = document.getElementById("semantic-row-edit-button");
+  const semanticRowDeleteButton = document.getElementById("semantic-row-delete-button");
+
+  const addRowToSemanticButton = document.getElementById("add-row-to-semantic-button");
+  const addNewSemanticRowInput = document.getElementById("add-new-semantic-row-input");
+  const addNewSemanticRowErrors = document.getElementById("add-new-semantic-row-errors");
+
+  const updateSemanticRowButton = document.getElementById("update-semantic-row-button");
+  const editSemanticRowInput = document.getElementById("edit-semantic-row-input");
+  const editSemanticRowErrors = document.getElementById("edit-semantic-row-errors")
+
+
   const bottomNavBar = document.getElementById("bottom-nav-bar");
 
   let semanticTableColumns = 3;
@@ -161,7 +173,7 @@
       }
 
       if (!nameRegex.test(primitiveName)) {
-        ShowAlert("warning","bOnly letters, numbers, hyphens (-), and underscores (_) are allowed.", 3500);
+        ShowAlert("warning","Only letters, numbers, hyphens (-), and underscores (_) are allowed.", 3500);
         console.log(primitiveValue);
         return;
       }
@@ -414,7 +426,7 @@
     
 
     const newTdHTML = `
-                        <td class="semantic-table-cell">
+                        <td class="semantic-table-cell" data-index = "${currentSemanticRowId}">
                               <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
                                   <div class="semantic-alias-pill-cell semantic-alias-pill-base">
                                       <div class="semantic-pill-cover "
@@ -427,7 +439,7 @@
                                                   </div>
                                               </div>
                                               <div class="semantic-pill-text">
-                                                          <span class="">color/brand/900</span>
+                                                          <span class="">color/brand/${currentSemanticRowId}</span>
                                               </div>
                                           </div>
                                       </div>
@@ -480,51 +492,8 @@
 
       table.style.gridTemplateColumns = newGridTemplateColumns;
 
-    //addNewColumnToSemantic();
   })
 
-  // function addNewColumnToSemantic(){
-  //   const table = document.getElementById('semantic-table');
-  //   const theadRow = table.querySelector('thead tr');
-  //   const bodyRows = table.querySelectorAll('tbody tr');
-
-  //   // Define the new <th> content (header)
-  //   const newThHTML = `
-  //     <th scope="col" class="border-l border-gray-300 px-6 py-3" style="width: 180px;">
-  //       <input 
-  //       type="text"
-  //       value="New Theme"
-  //       class="text-xs text-gray-700 uppercase bg-gray-200 border-0"
-  //       />
-  //     </th>
-  //   `;
-
-  //   // Define the new <td> content (cell)
-  //   const newTdHTML = `
-  //     <td class="border-l border-gray-300 px-6 py-4">
-  //       <div class="color-box-parent w-full flex items-center">
-  //         <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-  //         <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-  //           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
-  //         </svg>
-  //         <p class="color-text mr-2 flex-1">#FFFFFF</p>
-  //       </div>
-  //     </td>
-  //   `;
-
-  //   // Add the new <th> to the header row
-  //   const newTh = document.createElement('th');
-  //   newTh.innerHTML = newThHTML;
-  //   theadRow.insertBefore(newTh, theadRow.lastElementChild);
-
-  //   // Add the new <td> to each row in tbody
-  //   bodyRows.forEach(row => {
-  //     const newTd = document.createElement('td');
-  //     newTd.innerHTML = newTdHTML;
-  //     row.insertBefore(newTd, row.lastElementChild);
-  //   });
-
-  // }
 
   function linkPrimitiveToSemantic(primitiveLinkCell){
     bottomNavBar.classList.replace("visible","hidden");
@@ -537,73 +506,98 @@
   });
   
 
-  // // Adding event listener for hover functionality to show the delete button
-  // document.querySelector("#semantic-table tbody").addEventListener("mouseover", function(event) {
-  //   const target = event.target;
-  //   const parentRow = target.closest("tr");
+  document.querySelector("#semantic-table tbody").addEventListener("mouseover", function(event) {
+    const target = event.target;
+    const parentRow = target.closest("tr");
 
-  //   // Show delete button on hover
-  //   if (parentRow) {
-  //     parentRow.querySelector('.delete-row').style.display = 'inline-flex';  // Show delete button
-  //   }
-  // }, true); // Use capture phase for this to run first
+    if (parentRow) {
+      const rowId = parentRow.getAttribute("data-index");
+      if(rowId){
+        const editButtonContainer = document.getElementById("semantic-row-edit-button-container-"+rowId);
+        semanticRowEditButton.classList.replace("hidden", "flex");
+        semanticRowEditButton.setAttribute("data-index", rowId);
+        editButtonContainer.appendChild(semanticRowEditButton);
 
-  // document.querySelector("#semantic-table tbody").addEventListener("mouseout", function(event) {
-  //   const target = event.target;
-  //   const parentRow = target.closest("tr");
+      }
+      
+    }
+  }, true); 
 
-  //   // Hide delete button when hover ends
-  //   if (parentRow) {
-  //     parentRow.querySelector('.delete-row').style.display = 'none';  // Hide delete button
-  //   }
-  // }, true); // Use capture phase for this to run first
+  document.querySelector("#semantic-table tbody").addEventListener("mouseout", function(event) {
+    const target = event.target;
+    const parentRow = target.closest("tr");
+
+    if (parentRow) {
+      semanticRowEditButton.classList.replace("felx", "hidden");
+    }
+  }, true); 
 
 
-  // document.getElementById("addRowToSemantic").addEventListener("click", function () {
-  //   // Get the table body
-  //   const tableBody = document.querySelector("#semantic-table tbody");
+  addRowToSemanticButton.addEventListener("click", function () {
 
-  //   // Create a new row
-  //   const newRow = `
-  //                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-  //                   <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-  //                     <div class="flex items-center w-full">
-  //                       <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
-  //                       <input 
-  //                         type="text" 
-  //                         value="g50" 
-  //                         class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-  //                         placeholder="Give primitive a name" 
-  //                       />
-  //                     </div>
-  //                   </td>
-  //                   <td data-dropdown-toggle="dropdownInformation" class="px-6 py-4 w-2/4 primitive-link">
-  //                     <div class="color-box-parent w-full flex items-center">
-  //                       <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-  //                       <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-  //                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
-  //                       </svg>
-  //                       <p class="color-text mr-2 flex-1">#FFFFFF</p>
-  //                       <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-  //                         <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-  //                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-  //                         </svg>
-  //                         <span class="sr-only">Icon description</span>
-  //                       </button>
-  //                       <button type="button" class=" text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-  //                         <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-  //                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-  //                         </svg>
-  //                         <span class="sr-only">Icon description</span>
-  //                       </button>
-  //                     </div>
-  //                   </td>
-  //                 </tr>
-  //                 `;
-    
-  //   // Insert the new row into the table body
-  //   tableBody.insertAdjacentHTML("beforeend", newRow);
-  // });
+      const tableBody = document.querySelector("#semantic-table tbody");
+      const inputValue = addNewSemanticRowInput.value.trim();
+
+      let normalValueCells =""; 
+
+      for (let i = 0; i < (semanticTableColumns - 2); i++) {
+        normalValueCells = normalValueCells +`
+                            <td class="semantic-table-cell" data-index = "${currentSemanticRowId}">
+                                <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
+                                    <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                                        <div class="semantic-pill-cover "
+                                            aria-disabled="false" 
+                                            style="transform: translate(0px, 0px);">
+                                            <div class="semantic-pill" >
+                                                <div class="semantic-color-thumbnail-container">
+                                                    <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                                        style="background-color: rgb(22, 22, 27);">
+                                                    </div>
+                                                </div>
+                                                <div class="semantic-pill-text">
+                                                            <span class="">color/brand/${currentSemanticRowId}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                          `;
+      }
+
+      const newRow = `
+                      <tr data-index="${currentSemanticRowId}"
+                            class="semantic-table-row  semantic-table-item-row">
+                            <td data-index = "${currentSemanticRowId}" class="semantic-table-cell semantic-table-cell-has-padding">
+                                <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
+                                    <div class="row-icon">
+                                        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path fill="var(--color-icon)" fill-rule="evenodd"
+                                                d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="semantic-name inline-flex min-w-0">
+                                        ${inputValue}
+                                    </div>
+                                </div>
+                            </td>
+                            ${normalValueCells}
+                            <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
+                              <div id="semantic-row-edit-button-container-${currentSemanticRowId}" class="h-full w-full">
+                              </div>
+                            </td>
+                        </tr>
+                    `;
+      
+      // Insert the new row into the table body
+      tableBody.insertAdjacentHTML("beforeend", newRow);
+      currentSemanticRowId++;
+      addNewSemanticRowInput.value = "";
+      addRowToSemanticButton.classList.replace("visible","hidden");
+
+
+  });
 
   async function handlePrimitiveRowRefresh(rowId) {
 
@@ -634,3 +628,102 @@
       console.error(error); // Log the error for debugging
     }
   }
+
+  addNewSemanticRowInput.addEventListener("input", (event) => {
+
+
+    if (addNewSemanticRowInput.value.trim() !== "") {
+      
+      const inputValue = addNewSemanticRowInput.value.trim();
+
+      const allSemanticNames = document.querySelectorAll(".semantic-name");
+
+      let isDuplicate = false;
+      let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+
+      // Loop through the semantic names to check for duplicates
+      for (const item of allSemanticNames) {
+        if (item.textContent.trim() === inputValue) {
+          isDuplicate = true;
+          break; // Exit the loop early if a duplicate is found
+        }
+      }
+      
+      if(isDuplicate){
+        addNewSemanticRowErrors.innerHTML = "Semantic name already exist!";
+        addNewSemanticRowErrors.classList.replace("hidden", "visible");
+        addRowToSemanticButton.classList.replace("visible","hidden");
+      } else if (isRegEx){
+        addNewSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+        addNewSemanticRowErrors.classList.replace("hidden", "visible");
+        addRowToSemanticButton.classList.replace("visible","hidden");
+      } else {
+        addNewSemanticRowErrors.classList.replace("visible", "hidden");
+        addRowToSemanticButton.classList.replace("hidden","visible");
+      }
+
+    } else {
+      addRowToSemanticButton.classList.replace("visible","hidden");
+    }
+
+  });
+
+  semanticRowEditButton.addEventListener("click", (e) =>{
+    const rowId = semanticRowEditButton.getAttribute("data-index");
+
+    semanticRowDeleteButton.setAttribute("data-index", rowId);
+
+    const parentRow = document.querySelector(`tr[data-index="${rowId}"]`);
+    editSemanticRowInput.value = parentRow?.querySelector(".semantic-name")?.textContent.trim() || null;
+
+  });
+
+  semanticRowDeleteButton.addEventListener("click", (e) =>{
+    const rowId = semanticRowDeleteButton.getAttribute("data-index");
+    // Select the row with the matching data-index attribute
+    const row = document.querySelector(`tr[data-index="${rowId}"]`);
+    
+    // Check if the row exists
+    if (row) {
+        row.remove(); // Remove the row from the DOM
+    }
+  });
+
+  editSemanticRowInput.addEventListener("input", (event) => {
+
+
+    if (editSemanticRowInput.value.trim() !== "") {
+      
+      const inputValue = editSemanticRowInput.value.trim();
+
+      const allSemanticNames = document.querySelectorAll(".semantic-name");
+
+      let isDuplicate = false;
+      let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+
+      // Loop through the semantic names to check for duplicates
+      for (const item of allSemanticNames) {
+        if (item.textContent.trim() === inputValue) {
+          isDuplicate = true;
+          break; // Exit the loop early if a duplicate is found
+        }
+      }
+      
+      if(isDuplicate){
+        editSemanticRowErrors.innerHTML = "Semantic name already exist!";
+        editSemanticRowErrors.classList.replace("hidden", "visible");
+        updateSemanticRowButton.classList.replace("visible","hidden");
+      } else if (isRegEx){
+        editSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+        editSemanticRowErrors.classList.replace("hidden", "visible");
+        updateSemanticRowButton.classList.replace("visible","hidden");
+      } else {
+        editSemanticRowErrors.classList.replace("visible", "hidden");
+        updateSemanticRowButton.classList.replace("hidden","visible");
+      }
+
+    } else {
+      updateSemanticRowButton.classList.replace("visible","hidden");
+    }
+
+  });

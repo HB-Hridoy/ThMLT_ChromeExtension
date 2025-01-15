@@ -1,4 +1,4 @@
-  let activeScreen = "colors-screen";
+  let activeScreen = "home-screen";
 
 
   document.addEventListener('DOMContentLoaded', () => {
