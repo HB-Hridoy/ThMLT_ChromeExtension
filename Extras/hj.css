@@ -1,0 +1,204 @@
+
+.hide-border {
+    border: none
+}
+.semantic-pill-text {
+    -webkit-user-select: none;
+    user-select: none;
+    flex: 1 1 auto;
+    overflow: hidden
+}
+
+.semantic-pill {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    max-width: 100%
+}
+
+.semantic-color-thumbnail-container .semantic-color-thumbnail-container {
+    height: 24px;
+    width: 24px;
+    min-width: 24px;
+    flex: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+
+.semantic-mode-cell {
+    width: 100%;
+    border-right: 1px solid var(--color-border)
+}
+.semantic-mode-cell .icon-hover-visible {
+    margin-right: 8px;
+    margin-left: -8px
+}
+.semantic-mode-cell.hide-border {
+    border: none
+}
+
+.semantic-table-root {
+    position: relative;
+    display: grid;
+    transform: "translateX(0px)",
+}
+
+.semantic-name {
+    flex: 1 1 auto;
+    overflow: hidden
+}
+
+.semantic-table-cell {
+    min-height: 40px;
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #e5e6e7;
+    border-collapse: collapse;
+}
+.semantic-table-cell {
+    font-weight: 600
+}
+.header-row .semantic-table-cell {
+    background-color: #F3F4F6;
+    font-weight: 600
+}
+.semantic-table-row {
+    display: grid;
+    grid-column-start: 1;
+    grid-column-end: -1;
+    grid-template-columns: inherit;
+    width: 100%;
+    
+    
+}
+.semantic-table-cell {
+    display: flex
+}
+.row-icon {
+    display: flex;
+    flex: 0 0 auto
+}
+.row-icon svg {
+    fill: black;
+}
+.pill {
+    display: flex;
+    gap: 3px
+}
+.pill,body[data-fpl-version=ui2]:where(body.feature_flag_ui3_mixin_changes) :where([data-fpl-ui3-override]) .pill {
+    gap: 0
+}
+.pill.variable_pill--useHover--S6o02:hover,.pill.variable_pill--forceHover--EDu9s {
+    background-color: var(--color-bg-tertiary);
+    border-color: var(--color-bg-tertiary)
+}
+.semantic-table-cell-has-padding {
+    padding: 0 16px;
+    align-items: center
+}
+.icon-hover-visible {
+    display: none
+}
+.icon-hover-visible {
+    display: flex
+}
+.icon-hover-visible {
+    display: flex
+}
+.icon-hover-visible {
+    margin-right: 8px;
+    margin-left: -8px
+}
+.semantic-color-thumbnail {
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    height: 16px;
+    width: 16px
+}
+.semantic-color-thumbnail,body[data-fpl-version=ui2]:where(body.feature_flag_ui3_mixin_changes) :where([data-fpl-ui3-override]) .semantic-color-thumbnail {
+    border-radius: 20%
+}
+.semantic-color-thumbnail:focus-visible:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 1px var(--color-border-selected);
+    transform: scale(1)
+}
+.semantic-pill-cover {
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+}
+.ellipsis--ellipsis--Tjyfa {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+.pill-name-and-icon {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%
+}
+
+.semantic-alias-pill-base {
+    max-width: calc(100% - 32px);
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: center
+}
+.semantic-alias-pill-cell {
+    margin-left: 12px;
+    margin-right: 16px
+}
+.semantic-table-body {
+    grid-column-start: 1;
+    grid-column-end: -1;
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: inherit;
+    justify-content: stretch;
+    align-items: stretch;
+    position: relative
+}
+
+.semantic-table-sticky-left td:first-of-type {
+    left: 0;
+    position: sticky;
+    z-index: 100
+}
+.new-mode-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px
+}
+.semantic-table-sticky-top tr:first-of-type {
+    top: 0;
+    position: sticky;
+    z-index: 200
+}
+.semantic-mode-value {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+}
+.semantic-mode-value .icon-hover-visible {
+    display: none
+}
+.semantic-mode-value:hover .icon-hover-visible {
+    display: flex
+}
+.semantic-mode-value:focus-within .icon-hover-visible {
+    display: flex
+}

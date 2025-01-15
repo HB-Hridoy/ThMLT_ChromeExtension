@@ -1,0 +1,129 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Table Example</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="hj.css">
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="rounded-br-sm overflow-auto flex-grow ">
+        <table
+        class="semantic-table relative grid transform translate-x-0 semantic-table-sticky-top semantic-table-sticky-left gap-1 text-black w-full text-xs"
+        style="grid-template-columns: 200px minmax(200px, 1fr) 40px; height: 286px;">
+
+            <tbody class="semantic-table-body">
+                <!-- Table head -->
+                <tr class="semantic-table-row header-row">
+                    <td class="semantic-table-cell semantic-table-cell-has-padding ">
+                        Name
+                    </td>
+                    <td class="semantic-table-cell semantic-table-cell-has-padding">
+                        Value
+                    </td>
+                    <td class="semantic-table-cell"
+                        style="position: sticky; right: 0px; z-index: 100;">
+                        <div class="new-mode-button">
+                            +
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Table Rows -->
+                <tr data-index="0"
+                    class="semantic-table-row  semantic-table-item-row">
+                    <td class="semantic-table-cell semantic-table-cell-has-padding">
+                        <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
+                            <div class="row-icon">
+                                <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path fill="var(--color-icon)" fill-rule="evenodd"
+                                        d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="semantic-name inline-flex min-w-0">
+                                surface-primary
+                            </div>
+                        </div>
+                    </td>
+                    <td class="semantic-table-cell">
+                        <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
+                            <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                                <div class="semantic-pill-cover "
+                                     aria-disabled="false" 
+                                     style="transform: translate(0px, 0px);">
+                                    <div class="semantic-pill" >
+                                        <div class="semantic-color-thumbnail-container">
+                                            <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                                style="background-color: rgb(22, 22, 27);">
+                                            </div>
+                                        </div>
+                                        <div class="semantic-pill-text">
+                                                    <span class="">color/brand/900</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="semantic-table-cell"
+                        style="position: sticky; right: 0px; z-index: 100;">
+                        
+                    </td>
+                </tr>
+
+                <tr data-index="0"
+                    class="semantic-table-row  semantic-table-item-row">
+                    <td class="semantic-table-cell semantic-table-cell-has-padding">
+                        <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
+                            <div class="row-icon">
+                                <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path fill="var(--color-icon)" fill-rule="evenodd"
+                                        d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="semantic-name inline-flex min-w-0">
+                                surface-primary
+                            </div>
+                        </div>
+                    </td>
+                    <td class="semantic-table-cell">
+                        <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
+                            <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                                <div class="semantic-pill-cover "
+                                     aria-disabled="false" 
+                                     style="transform: translate(0px, 0px);">
+                                    <div class="semantic-pill" >
+                                        <div class="semantic-color-thumbnail-container">
+                                            <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                                style="background-color: rgb(22, 22, 27);">
+                                            </div>
+                                        </div>
+                                        <div class="semantic-pill-text">
+                                                    <span class="">color/brand/900</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="semantic-table-cell justify-center items-center"
+                        style="position: sticky; right: 0px; z-index: 100;">
+                        <svg class=" w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                            <path stroke="#1F2937" stroke-linecap="round" stroke-width="2" d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
+                          </svg>
+                          
+                    </td>
+                </tr>
+
+                
+            </tbody>
+
+        </table>
+    </div>
+        
+
+</body>
+</html>

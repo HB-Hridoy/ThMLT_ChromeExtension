@@ -9,10 +9,11 @@
     <script src="assets/js/codemirror.min.js"></script>
     <script src="assets/js/javascript.min.js"></script>
     <link rel="stylesheet" href="global.css">
+    <link rel="stylesheet" href="semanticTable.css">
   </head>
   <body class="h-full m-0 flex flex-col">
 
-    <div id="home-screen" class="visible">
+    <div id="home-screen" class="hidden">
 
       <div class="w-full p-3 flex justify-start items-center">
 
@@ -53,15 +54,31 @@
           </svg>
           <span class="sr-only">Icon description</span>
         </button>
-        <h3 class="text-lg flex-1 font-extrabold dark:text-white">Import from JSON</h3>
+        <h3 id="import-json-screen-title" class="text-lg flex-1 font-extrabold dark:text-white">Import from JSON</h3>
+
+        <button id="import-json-error-button" type="button" class="hidden mr-3 relative items-center p-3 text-sm font-medium text-center text-white bg-red-700 rounded-full hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v5a1 1 0 1 0 2 0V8Zm-1 7a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H12Z" clip-rule="evenodd"/>
+          </svg>
+          <span class="sr-only">Notifications</span>
+            <div id="import-json-error-count" class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -end-2 dark:border-gray-900">20</div>
+        </button>
+
+        <button id="import-json-screen-done-button" type="button" class="hidden text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+          <svg  class="w-6 h-6 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11.917 9.724 16.5 19 7.5"/>
+          </svg>
+          <p class="mr-3">Done</p>
+          <span class="sr-only">Icon description</span>
+        </button>
         
       </div>
       <div class="h-full w-full">
         <textarea name="" id="import-json-code-editor" class="h-full w-full"></textarea>
-      </div>
+        </div>
     </div>
 
-    <div id="colors-screen" class="hidden bg-gray-50 h-full">
+    <div id="colors-screen" class="visible bg-gray-50 h-full">
 
       <div class="w-full p-3 flex justify-start items-center">
         <button id="color-screen-back-button" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
@@ -96,7 +113,7 @@
         </ul>
       </div>
       <div id="colors-tab-content" class="h-full">
-        <div id="primitives-screen" class="visible h-full p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+        <div id="primitives-screen" class="hidden h-full p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
 
           <div id="primitives-table-container" class="relative overflow-x-auto">
             <table id="primitives-table" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -164,100 +181,157 @@
         </div>
 
 
-        <div id="semantic-screen" class="hidden p-3 rounded-lg bg-gray-50 dark:bg-gray-800" >
-          <div id="semantic-table-container" class="relative overflow-x-auto">
-            <table id="semantic-table" class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" class="sticky z-10 px-6 py-3">
-                            Name
-                        </th>
-                        <th scope="col" class="sticky z-10 px-6 py-3">
-                          <div class="flex items-center w-full">
-                            Value
-                            <div id="color-picker-container">
-                              <div id="color-picker" class="hidden"></div>
-                            </div>
-                          </div>
-                            
-                        </th>
-                    </tr>
-                </thead>
-                <tbody >
-                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-                      <div class="flex items-center w-full">
-                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
-                        <input 
-                          type="text" 
-                          value="g50" 
-                          class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Give primitive a name" 
-                        />
-                      </div>
-                    </td>
-                    <td  class="px-6 py-4 w-2/4 primitive-link">
-                      <div class="color-box-parent w-full flex items-center">
-                        <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-                        <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
-                        </svg>
-                        <p class="color-text mr-2 flex-1">#FFFFFF</p>
-                        <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                          </svg>
-                          <span class="sr-only">Icon description</span>
-                        </button>
-                      </div>
-                                         
+        <div id="semantic-screen" class="visible p-3 rounded-lg bg-gray-50 dark:bg-gray-800" >
+
+          <div class="rounded-br-sm overflow-auto flex-grow ">
+            <table
+              id="semantic-table"
+              class=" relative grid transform translate-x-0 semantic-table-sticky-top semantic-table-sticky-left gap-1 text-black w-full text-xs"
+              style="grid-template-columns: 200px minmax(200px, 1fr) 40px; height: 286px;">
+      
+                  <tbody class="semantic-table-body">
+                      <!-- Table head -->
+                      <tr id="semantic-table-header-row" class="semantic-table-row header-row">
+                          <td class="semantic-table-cell semantic-table-cell-has-padding ">
+                              Name
+                          </td>
+                          <td class="semantic-table-cell semantic-table-cell-has-padding">
+                              Value
+                          </td>
+                          <td id="add-new-theme" class="semantic-table-cell"
+                              style="position: sticky; right: 0px; z-index: 100;">
+                              <div class="new-mode-button">
+                                  +
+                              </div>
+                          </td>
+                      </tr>
+      
+                      <!-- Table Rows -->
+                      <tr data-index="0"
+                          class="semantic-table-row  semantic-table-item-row">
+                          <td class="semantic-table-cell semantic-table-cell-has-padding">
+                              <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
+                                  <div class="row-icon">
+                                      <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                          <path fill="var(--color-icon)" fill-rule="evenodd"
+                                              d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                              clip-rule="evenodd"></path>
+                                      </svg>
+                                  </div>
+                                  <div class="semantic-name inline-flex min-w-0">
+                                      surface-primary
+                                  </div>
+                              </div>
+                          </td>
+                          <td class="semantic-table-cell">
+                              <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
+                                  <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                                      <div class="semantic-pill-cover "
+                                          aria-disabled="false" 
+                                          style="transform: translate(0px, 0px);">
+                                          <div class="semantic-pill" >
+                                              <div class="semantic-color-thumbnail-container">
+                                                  <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                                      style="background-color: rgb(22, 22, 27);">
+                                                  </div>
+                                              </div>
+                                              <div class="semantic-pill-text">
+                                                          <span class="">color/brand/900</span>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </td>
+                          <td class="semantic-table-cell justify-center items-center"
+                              style="position: sticky; right: 0px; z-index: 100;">
+                              <svg class="w-5 h-5 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="#6b7280" stroke-linecap="round" stroke-width="2" d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
+                              </svg>
+                              
+                          </td>
+                      </tr>
+      
                       
-                    </td>
-                  </tr>
-                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-                      <div class="flex items-center w-full">
-                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
-                        <input 
-                          type="text" 
-                          value="g50" 
-                          class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Give primitive a name" 
-                        />
-                      </div>
-                    </td>
-                    <td  class="px-6 py-4 w-2/4 primitive-link">
-                      <div class="color-box-parent w-full flex items-center">
-                        <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-                        <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+                  </tbody>
+      
+              </table>
+          </div>
+
+          <!-- <div id="semantic-table-container" class="relative overflow-x-auto">
+            <table id="semantic-table" class="w-full table-fixed border-collapse text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <thead class="text-xs text-gray-700 uppercase bg-gray-200 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                  <th scope="col" class="semantic-table-th px-6 py-3" style="width: 180px;">Name</th>
+                  <th scope="col" class="semantic-table-th border-l border-gray-300 px-6 py-3" style="width: 180px;">
+                    <input 
+                      type="text"
+                      value="Light"
+                      class="text-xs text-gray-700 uppercase bg-gray-200 border-0 semantic-table-input"
+                    />
+                  </th>
+                  <th id="add-new-theme" scope="col" class="semantic-table-th border-l border-gray-300 px-6 py-3" style="width: 30px;">+</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                  <td class="semantic-table-td border-l border-gray-300 px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <div class="flex items-center w-full">
+                      <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
+                      <input 
+                        type="text" 
+                        value="g50" 
+                        class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 semantic-table-input"
+                        placeholder="Give primitive a name" 
+                      />
+                    </div>
+                  </td>
+            
+                  <td class="semantic-table-td border-l border-gray-300 px-6 py-4">
+                    <div class="color-box-parent w-full flex items-center">
+                      <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+                      <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+                      </svg>
+                      <p class="color-text mr-2 flex-1">#FFFFFF</p>
+                      <button id="primitive-delete-row-${currentPrimitiveRowId}" type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
                         </svg>
-                        <p class="color-text mr-2 flex-1">#FFFFFF</p>
-                        <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                          </svg>
-                          <span class="sr-only">Icon description</span>
-                        </button>
-                      </div>
-                                         
-                      
-                    </td>
-                  </tr>
-                </tbody>
+                        <span class="sr-only">Icon description</span>
+                      </button>
+                    </div>
+                  </td>
+            
+                  <td class="semantic-table-td border-l border-gray-300 px-1 py-4">
+                    <div class="flex justify-center items-center">
+                      <button id="primitive-refresh-row-100" type="button" class="visible refresh-row text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
+                        </svg>
+                        <span class="sr-only">Icon description</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
             </table>
+            
+            
+            
+            
             <div class="flex justify-center items-center w-full">
               <button id="addRowToSemantic" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 mt-3 mb-10 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+                <svg class="w-3.5 h-3.5 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
                 </svg>
-                Add New Color
+                Link new primitive
               </button>
             </div>
 
             
 
-          </div>
+          </div> -->
           
           <div class="h-24"></div>
         </div>
@@ -312,7 +386,7 @@
                     </button>
                    
                 </form> 
-                
+             </div>   
         </div>
     </div> 
 

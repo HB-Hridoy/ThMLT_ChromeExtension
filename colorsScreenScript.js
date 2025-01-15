@@ -6,6 +6,8 @@
 
   const bottomNavBar = document.getElementById("bottom-nav-bar");
 
+  let semanticTableColumns = 3;
+
   let primitiveInputValues = new Map();
 
   document.getElementById("color-screen-back-button").addEventListener("click", () => {
@@ -380,20 +382,149 @@
   const selectPrimitiveModal = document.getElementById("select-primitive-modal");
 
 
-  // listen for clicks on color-box or color-text elements within the table body
-  document.querySelector("#semantic-table tbody").addEventListener("click", function (event) {
+  // // listen for clicks on color-box or color-text elements within the table body
+  // document.querySelector("#semantic-table tbody").addEventListener("click", function (event) {
     
-    // Find the closest <tr> element from the clicked target
-    const clickedRow = event.target.closest("tr");
+  //   const target = event.target;
+  //   // Find the closest <tr> element from the clicked target
+  //   const clickedRow = event.target.closest("tr");
+    
 
-    if (event.target.closest('.delete-row')) {
-        clickedRow.remove();
-    } else if (event.target.closest('.primitive-link')) {
-      // Find the <td> with the class 'primitive-link' inside the row
-      const primitiveLinkCell = clickedRow.querySelector(".primitive-link");
-      linkPrimitiveToSemantic(primitiveLinkCell);
-    } 
-  });
+
+  //   // if (event.target.closest('.delete-row')) {
+  //   //     clickedRow.remove();
+  //   // } else if (event.target.closest('.primitive-link')) {
+  //   //   // Find the <td> with the class 'primitive-link' inside the row
+  //   //   const primitiveLinkCell = clickedRow.querySelector(".primitive-link");
+  //   //   linkPrimitiveToSemantic(primitiveLinkCell);
+  //   // } 
+  // });
+
+  document.getElementById("add-new-theme").addEventListener("click", function(){
+
+    const table = document.getElementById('semantic-table');
+    const theadRow = document.getElementById('semantic-table-header-row');
+    const bodyRows = table.querySelectorAll('tbody tr');
+
+    const newThHTML = `
+                        <td class="semantic-table-cell semantic-table-cell-has-padding">
+                            Value
+                        </td>
+                      `;
+    
+
+    const newTdHTML = `
+                        <td class="semantic-table-cell">
+                              <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
+                                  <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                                      <div class="semantic-pill-cover "
+                                          aria-disabled="false" 
+                                          style="transform: translate(0px, 0px);">
+                                          <div class="semantic-pill" >
+                                              <div class="semantic-color-thumbnail-container">
+                                                  <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                                      style="background-color: rgb(22, 22, 27);">
+                                                  </div>
+                                              </div>
+                                              <div class="semantic-pill-text">
+                                                          <span class="">color/brand/900</span>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </td>
+                      `;
+
+      
+
+      const newTh = document.createElement('td');
+      newTh.classList.add("semantic-table-cell");
+      newTh.classList.add("semantic-table-cell-has-padding");
+      newTh.innerHTML = newThHTML;
+      theadRow.insertBefore(newTh, theadRow.lastElementChild);
+
+      // Add the new <td> to each row in tbody
+      bodyRows.forEach(row => {
+        if(row.id !== "semantic-table-header-row"){
+
+        const newTd = document.createElement('td');
+        newTd.classList.add("semantic-table-cell");
+        newTd.innerHTML = newTdHTML;
+        row.insertBefore(newTd, row.lastElementChild);
+        }
+      });
+
+      // Create the new column (e.g., add 200px as the width for the new column)
+      semanticTableColumns += 1; // Increase the column count (example)
+
+      // Initialize the new grid-template-columns
+      let newGridTemplateColumns = '';
+
+      // Loop through the columns and create the column definitions
+      for (let i = 0; i < semanticTableColumns; i++) {
+        if (i === semanticTableColumns - 1) {
+          newGridTemplateColumns += '40px';  // Last column is 40px
+        } else if (i === semanticTableColumns - 2) {
+          newGridTemplateColumns += 'minmax(200px, 1fr)';  // Second last column is minmax(200px, 1fr)
+        } else {
+          newGridTemplateColumns += '200px ';  // Regular columns are 200px
+        }
+
+        // Add a space between columns if it's not the last column
+        if (i !== semanticTableColumns - 1) {
+          newGridTemplateColumns += ' ';
+        }
+      }
+
+
+      table.style.gridTemplateColumns = newGridTemplateColumns;
+
+    //addNewColumnToSemantic();
+  })
+
+  // function addNewColumnToSemantic(){
+  //   const table = document.getElementById('semantic-table');
+  //   const theadRow = table.querySelector('thead tr');
+  //   const bodyRows = table.querySelectorAll('tbody tr');
+
+  //   // Define the new <th> content (header)
+  //   const newThHTML = `
+  //     <th scope="col" class="border-l border-gray-300 px-6 py-3" style="width: 180px;">
+  //       <input 
+  //       type="text"
+  //       value="New Theme"
+  //       class="text-xs text-gray-700 uppercase bg-gray-200 border-0"
+  //       />
+  //     </th>
+  //   `;
+
+  //   // Define the new <td> content (cell)
+  //   const newTdHTML = `
+  //     <td class="border-l border-gray-300 px-6 py-4">
+  //       <div class="color-box-parent w-full flex items-center">
+  //         <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+  //         <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+  //           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+  //         </svg>
+  //         <p class="color-text mr-2 flex-1">#FFFFFF</p>
+  //       </div>
+  //     </td>
+  //   `;
+
+  //   // Add the new <th> to the header row
+  //   const newTh = document.createElement('th');
+  //   newTh.innerHTML = newThHTML;
+  //   theadRow.insertBefore(newTh, theadRow.lastElementChild);
+
+  //   // Add the new <td> to each row in tbody
+  //   bodyRows.forEach(row => {
+  //     const newTd = document.createElement('td');
+  //     newTd.innerHTML = newTdHTML;
+  //     row.insertBefore(newTd, row.lastElementChild);
+  //   });
+
+  // }
 
   function linkPrimitiveToSemantic(primitiveLinkCell){
     bottomNavBar.classList.replace("visible","hidden");
@@ -406,73 +537,73 @@
   });
   
 
-  // Adding event listener for hover functionality to show the delete button
-  document.querySelector("#semantic-table tbody").addEventListener("mouseover", function(event) {
-    const target = event.target;
-    const parentRow = target.closest("tr");
+  // // Adding event listener for hover functionality to show the delete button
+  // document.querySelector("#semantic-table tbody").addEventListener("mouseover", function(event) {
+  //   const target = event.target;
+  //   const parentRow = target.closest("tr");
 
-    // Show delete button on hover
-    if (parentRow) {
-      parentRow.querySelector('.delete-row').style.display = 'inline-flex';  // Show delete button
-    }
-  }, true); // Use capture phase for this to run first
+  //   // Show delete button on hover
+  //   if (parentRow) {
+  //     parentRow.querySelector('.delete-row').style.display = 'inline-flex';  // Show delete button
+  //   }
+  // }, true); // Use capture phase for this to run first
 
-  document.querySelector("#semantic-table tbody").addEventListener("mouseout", function(event) {
-    const target = event.target;
-    const parentRow = target.closest("tr");
+  // document.querySelector("#semantic-table tbody").addEventListener("mouseout", function(event) {
+  //   const target = event.target;
+  //   const parentRow = target.closest("tr");
 
-    // Hide delete button when hover ends
-    if (parentRow) {
-      parentRow.querySelector('.delete-row').style.display = 'none';  // Hide delete button
-    }
-  }, true); // Use capture phase for this to run first
+  //   // Hide delete button when hover ends
+  //   if (parentRow) {
+  //     parentRow.querySelector('.delete-row').style.display = 'none';  // Hide delete button
+  //   }
+  // }, true); // Use capture phase for this to run first
 
 
-  document.getElementById("addRowToSemantic").addEventListener("click", function () {
-    // Get the table body
-    const tableBody = document.querySelector("#semantic-table tbody");
+  // document.getElementById("addRowToSemantic").addEventListener("click", function () {
+  //   // Get the table body
+  //   const tableBody = document.querySelector("#semantic-table tbody");
 
-    // Create a new row
-    const newRow = `
-                  <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-                      <div class="flex items-center w-full">
-                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
-                        <input 
-                          type="text" 
-                          value="g50" 
-                          class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Give primitive a name" 
-                        />
-                      </div>
-                    </td>
-                    <td data-dropdown-toggle="dropdownInformation" class="px-6 py-4 w-2/4 primitive-link">
-                      <div class="color-box-parent w-full flex items-center">
-                        <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-                        <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
-                        </svg>
-                        <p class="color-text mr-2 flex-1">#FFFFFF</p>
-                        <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                          </svg>
-                          <span class="sr-only">Icon description</span>
-                        </button>
-                        <button type="button" class=" text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                          </svg>
-                          <span class="sr-only">Icon description</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  `;
+  //   // Create a new row
+  //   const newRow = `
+  //                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+  //                   <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+  //                     <div class="flex items-center w-full">
+  //                       <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
+  //                       <input 
+  //                         type="text" 
+  //                         value="g50" 
+  //                         class="text-sm text-gray-500 ml-2 w-full border-0 px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+  //                         placeholder="Give primitive a name" 
+  //                       />
+  //                     </div>
+  //                   </td>
+  //                   <td data-dropdown-toggle="dropdownInformation" class="px-6 py-4 w-2/4 primitive-link">
+  //                     <div class="color-box-parent w-full flex items-center">
+  //                       <div class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+  //                       <svg class="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+  //                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+  //                       </svg>
+  //                       <p class="color-text mr-2 flex-1">#FFFFFF</p>
+  //                       <button type="button" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+  //                         <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+  //                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+  //                         </svg>
+  //                         <span class="sr-only">Icon description</span>
+  //                       </button>
+  //                       <button type="button" class=" text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+  //                         <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+  //                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+  //                         </svg>
+  //                         <span class="sr-only">Icon description</span>
+  //                       </button>
+  //                     </div>
+  //                   </td>
+  //                 </tr>
+  //                 `;
     
-    // Insert the new row into the table body
-    tableBody.insertAdjacentHTML("beforeend", newRow);
-  });
+  //   // Insert the new row into the table body
+  //   tableBody.insertAdjacentHTML("beforeend", newRow);
+  // });
 
   async function handlePrimitiveRowRefresh(rowId) {
 

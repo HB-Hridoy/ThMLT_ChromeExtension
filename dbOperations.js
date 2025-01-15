@@ -35,6 +35,7 @@ openDB.onupgradeneeded = function (event) {
     semanticColorsStore.createIndex("templateName", "templateName", { unique: false });
     semanticColorsStore.createIndex("semanticName", "semanticName", { unique: true });
     semanticColorsStore.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
+    semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
   }
 
 };

@@ -7,8 +7,7 @@
 
 .CodeMirror-gutters {
     width: 40px; /* Ensure gutter has a width */
-    position: absolute; /* Gutter must be positioned absolutely */
-    left: 0;
-    top: 0;
+    
     height: 100%;
 }
+

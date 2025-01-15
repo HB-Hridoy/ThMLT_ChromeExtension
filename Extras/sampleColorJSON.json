@@ -1,0 +1,27 @@
+{
+    "TemplateName": "My first project",
+    "Author": "Hridoy",
+    "Version": "1.0",
+    "Modes": ["Light","Dark"],
+    "DefaultMode": "Light",
+    "Primitives":{
+        "t50": "#007B7F",
+        "t100": "#009B9F",
+        "t150": "#00B9B9",
+        "r50": "#591B1B",
+        "r100": "#8C0E03",
+        "r150": "#D91807"
+    },
+    "Semantic":{
+        "Light":{
+            "text": "t50",
+            "title": "t100",
+            "btn": "t150"
+        },
+        "Dark":{
+            "text": "r50",
+            "title": "r100",
+            "btn": "r150"
+        }
+    }
+}
