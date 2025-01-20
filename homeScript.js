@@ -138,18 +138,28 @@
     document.getElementById("templates-container").addEventListener("click", function(event) {
         // Check if the clicked element or any of its parents has the 'template-preview-parent' class
         if (event.target.closest('.template-preview-parent')) {
-          // Do your actions here
+          
           const templateDiv = event.target.closest('.template-preview-parent');
       
           // Example: You can get the template id or other data from the div
-          const templateId = templateDiv.getAttribute('template-id');
+          activeTemplateName = templateDiv.getAttribute('template-id');
       
           homeScreen.classList.replace("visible", "hidden");
           colorsScreen.classList.replace("hidden", "visible");
 
-            document.getElementById("template-name-colors-screen").innerText = templateId;
+          document.getElementById("template-name-colors-screen").innerText = activeTemplateName;
 
-          getAllPrimitiveColors(templateId);
+          // Clear the existing data in variables
+          activeThemeModesInSemantic.length = 0; 
+          activeSemanticNames.length = 0;
+          activeSemantics.clear(); 
+
+          currentPrimitiveRowId = 1;
+          currentSemanticRowId = 1;
+
+          getAllPrimitiveColors(activeTemplateName);
+          
+          getAllSemanticColors(activeTemplateName);
 
         }
       });

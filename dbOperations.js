@@ -2,12 +2,7 @@ const openDB = indexedDB.open("ThMLT DB", 1); // Name and version
 let db;
 let isDBOpenSuccess = false;
 
-let currentPrimitiveRowId = 1;
-let currentSemanticRowId = 1;
 
-const nameRegex = /^[A-Za-z0-9-_]+$/;
-
-let oldPrimitiveInputValues = new Map();
 
 
 openDB.onupgradeneeded = function (event) {
@@ -25,7 +20,7 @@ openDB.onupgradeneeded = function (event) {
   if (!db.objectStoreNames.contains("primitiveColors")) {
     let primitiveColorsStore = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true  });
     primitiveColorsStore.createIndex("templateName", "templateName", { unique: false });
-    primitiveColorsStore.createIndex("primitiveName", "primitiveName", { unique: true });
+    primitiveColorsStore.createIndex("primitiveName", "primitiveName", { unique: false });
     primitiveColorsStore.createIndex("primitiveValue", "primitiveValue", { unique: false });
   }
 
@@ -33,7 +28,7 @@ openDB.onupgradeneeded = function (event) {
   if (!db.objectStoreNames.contains("semanticColors")) {
     let semanticColorsStore = db.createObjectStore("semanticColors", { keyPath: "id", autoIncrement: true  });
     semanticColorsStore.createIndex("templateName", "templateName", { unique: false });
-    semanticColorsStore.createIndex("semanticName", "semanticName", { unique: true });
+    semanticColorsStore.createIndex("semanticName", "semanticName", { unique: false });
     semanticColorsStore.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
     semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
   }
@@ -332,112 +327,487 @@ function deletePrimitiveColor(templateName, primitiveName) {
 //     reject(error);
 //   }
 // });
+function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive){
 
-function addSemanticColor(db, templateName, semanticName, primitiveName, primitiveValue) {
-  let transaction = db.transaction(["templates", "primitiveColors", "semanticColors"], "readwrite");
-  let templatesStore = transaction.objectStore("templates");
-  let primitiveColorsStore = transaction.objectStore("primitiveColors");
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+      let transaction = db.transaction(["semanticColors"], "readwrite");
+      let semanticColorsStore = transaction.objectStore("semanticColors");
+
+      let newSemanticColor = {
+        templateName: templateName,
+        semanticName: semanticName,
+        themeMode: themeMode,
+        linkedPrimitive: linkedPrimitive
+      };
+      let semanticColorStoreRequest = semanticColorsStore.put(newSemanticColor);
+
+      semanticColorStoreRequest.onsuccess = (e) => {
+        resolve("Semantic color added");
+        console.log(`Semantic color '${semanticName}' added to '${themeMode}' mode`);
+      }
+
+      semanticColorStoreRequest.onerror = (e) => {
+        reject("Error adding semantic color");
+        console.log(`Semantic color '${semanticName}' adding failed to '${themeMode}' mode`);
+      }
+
+    } else {
+      const error = "Database is not initialized";
+      console.error(error);
+      reject(error);
+    }
+  });
+
+  
+}
+
+
+function getAllSemanticColors(templateName) {
+  let transaction = db.transaction(["semanticColors"], "readonly");
   let semanticColorsStore = transaction.objectStore("semanticColors");
 
-  // Check if templateName exists in templates store
-  let templateRequest = templatesStore.index("templateName").get(templateName);
+  let semanticRequest = semanticColorsStore.index("templateName").getAll(templateName);
 
-  templateRequest.onsuccess = function(event) {
-    let template = event.target.result;
-    if (template) {
-      // Template exists, check if semanticName exists
-      let semanticRequest = semanticColorsStore.index("templateName").getAll(templateName);
-      semanticRequest.onsuccess = function(event) {
-        let semantics = event.target.result;
-        let existingSemantic = semantics.find(semantic => semantic.semanticName === semanticName);
+  semanticRequest.onsuccess = () => {
+    console.log("Got All semantic Colors!");
+    let result = semanticRequest.result;
 
-        if (existingSemantic) {
-          // Update the value of the existing semanticColor
-          existingSemantic.primitiveName = primitiveName;
-          existingSemantic.primitiveValue = primitiveValue;
-          semanticColorsStore.put(existingSemantic);
+    result.forEach(item => {
+      // Add unique theme modes to activeThemeModesInSemantic
+      if (!activeThemeModesInSemantic.includes(item.themeMode)) {
+        activeThemeModesInSemantic.push(item.themeMode);
+      }
+
+      // Add all semantic names to activeSemanticNames
+      if (!activeSemanticNames.includes(item.semanticName)) {
+        activeSemanticNames.push(item.semanticName);
+      }
+
+      const { semanticName, themeMode, linkedPrimitive } = item;
+
+      // Check if the themeMode exists in the map, if not, create a new object for it
+      if (!activeSemantics.has(themeMode)) {
+        activeSemantics.set(themeMode, {});
+      }
+
+      // Add the semanticName and linkedPrimitive to the themeMode
+      activeSemantics.get(themeMode)[semanticName] = linkedPrimitive;
+
+    });
+
+
+    const table = document.getElementById('semantic-table');
+    const tableBody = document.querySelector("#semantic-table tbody");
+    semanticTableColumns = 2;
+    table.style.gridTemplateColumns = "200px 40px";
+    const theadRow = document.getElementById('semantic-table-header-row');
+
+    const rows = Array.from(tableBody.children);
+  
+    rows.forEach(row => {
+      if (row !== theadRow) {
+        tableBody.removeChild(row);
+      }
+    });
+
+    if (theadRow) {
+      // Get all the <td> elements in the header row
+      const allCells = Array.from(theadRow.children);
+    
+      // IDs of the <td> elements to keep
+      const keepIds = ["semantic-name-column", "open-new-theme-modal"];
+    
+      // Iterate through all cells and remove the ones that don't match the criteria
+      allCells.forEach(td => {
+        if (!keepIds.includes(td.id)) {
+          theadRow.removeChild(td);
+        }
+      });
+    }
+
+    
+    
+    
+
+    // Iterate over each theme mode in the activeSemantics Map
+    activeSemantics.forEach((semanticNames, themeMode) => {
+
+      const newTh = document.createElement('td');
+      newTh.setAttribute("theme-mode", themeMode)
+      newTh.classList.add("semantic-table-cell");
+      newTh.classList.add("semantic-table-cell-has-padding");
+      newTh.innerHTML = themeMode;
+      theadRow.insertBefore(newTh, theadRow.lastElementChild);
+
+      semanticTableColumns += 1; // Increase the column count
+
+        let newGridTemplateColumns = '';
+
+        // Loop through the columns and create the column definitions
+        for (let i = 0; i < semanticTableColumns; i++) {
+          if (i === semanticTableColumns - 1) {
+            newGridTemplateColumns += '40px';  // Last column is 40px
+          } else if (i === semanticTableColumns - 2) {
+            newGridTemplateColumns += 'minmax(200px, 1fr)';  // Second last column is minmax(200px, 1fr)
+          } else {
+            newGridTemplateColumns += '200px ';  // Regular columns are 200px
+          }
+
+          // Add a space between columns if it's not the last column
+          if (i !== semanticTableColumns - 1) {
+            newGridTemplateColumns += ' ';
+          }
+        }
+
+        table.style.gridTemplateColumns = newGridTemplateColumns;
+    });
+
+    
+    activeSemanticNames.forEach(semanticName => {
+
+      let semanticValues = [];
+      
+      activeThemeModesInSemantic.forEach(themeMode => {
+        semanticValues.push(getSemanticNameForMode(themeMode, semanticName));
+      });
+      
+      if (semanticValues.length === activeThemeModesInSemantic.length) {
+        addNewRowToSemanticTable(semanticName, semanticValues, activeThemeModesInSemantic);
+      }
+    });
+  }
+
+}
+
+function deleteSemanticColor(semanticName, templateName) {
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+
+      const transaction = db.transaction("semanticColors", "readwrite");
+      const store = transaction.objectStore("semanticColors");
+
+      const query = store.openCursor(); // Open cursor to iterate over all records
+      let deletionCount = 0; // Track the number of deletions
+
+      query.onerror = (event) => {
+        console.error("Cursor query failed:", event.target.error);
+        reject("Failed to query records.");
+      };
+
+      query.onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+          const record = cursor.value;
+
+          if (
+            record.semanticName === semanticName &&
+            record.templateName === templateName
+          ) {
+            const deleteRequest = cursor.delete(); // Delete the matching record
+            deleteRequest.onerror = (event) => {
+              console.error("Delete operation failed:", event.target.error);
+              reject("Failed to delete a record.");
+            };
+            deleteRequest.onsuccess = () => {
+              deletionCount++;
+            };
+          }
+
+          cursor.continue(); // Move to the next record, regardless of a match
         } else {
-          // Check if primitiveColor exists for the given primitiveName
-          let colorRequest = primitiveColorsStore.index("templateName").getAll(templateName);
-          colorRequest.onsuccess = function(event) {
-            let colors = event.target.result;
-            let existingColor = colors.find(color => color.primitiveName === primitiveName);
-
-            if (existingColor) {
-              // Store the new semanticColor
-              let newSemanticColor = {
-                templateName: templateName,
-                semanticName: semanticName,
-                primitiveName: primitiveName,
-                primitiveValue: primitiveValue
-              };
-              semanticColorsStore.add(newSemanticColor);
-            } else {
-              console.log("Primitive color not found.");
-            }
-          };
+          // Cursor exhausted: all records have been processed
+          if (deletionCount > 0) {
+            console.log(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
+            resolve(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
+          } else {
+            console.warn(`No matching records found named '${semanticName}'.`);
+            reject(`No matching records found named '${semanticName}'.`);
+          }
         }
       };
-    } else {
-      console.log("Template not found.");
-    }
-  };
-}
 
+      transaction.oncomplete = () => {
+        //console.log("Transaction completed.");
+      };
 
-function getAllSemanticColors(db, templateName, callback) {
-  let transaction = db.transaction(["templates", "semanticColors"], "readonly");
-  let templatesStore = transaction.objectStore("templates");
-  let semanticColorsStore = transaction.objectStore("semanticColors");
-
-  // Check if templateName exists in templates store
-  let templateRequest = templatesStore.index("templateName").get(templateName);
-
-  templateRequest.onsuccess = function(event) {
-    let template = event.target.result;
-    if (template) {
-      // Template exists, retrieve all semantic colors for the template
-      let semanticRequest = semanticColorsStore.index("templateName").getAll(templateName);
-      semanticRequest.onsuccess = function(event) {
-        callback(event.target.result);
+      transaction.onerror = (event) => {
+        console.error("Transaction failed:", event.target.error);
+        reject("Transaction failed.");
       };
     } else {
-      console.log("Template not found.");
+      reject("Database is not open or not available.");
     }
-  };
+  });
 }
 
-function deleteSemanticColor(db, templateName, semanticName) {
-  let transaction = db.transaction(["templates", "semanticColors"], "readwrite");
-  let templatesStore = transaction.objectStore("templates");
-  let semanticColorsStore = transaction.objectStore("semanticColors");
 
-  // Check if templateName exists in templates store
-  let templateRequest = templatesStore.index("templateName").get(templateName);
+function renameSemantic(oldSemanticName, newSemanticName, templateName) {
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
 
-  templateRequest.onsuccess = function(event) {
-    let template = event.target.result;
-    if (template) {
-      // Template exists, check if semanticName exists in semanticColors
-      let semanticRequest = semanticColorsStore.index("templateName").getAll(templateName);
+      const transaction = db.transaction("semanticColors", "readwrite");
+      const store = transaction.objectStore("semanticColors");
 
-      semanticRequest.onsuccess = function(event) {
-        let semantics = event.target.result;
-        let semanticToDelete = semantics.find(semantic => semantic.semanticName === semanticName);
+      const query = store.openCursor(); // Open a cursor to iterate over all records
+      let updateCount = 0; // Track the number of updates
 
-        if (semanticToDelete) {
-          // Delete the semantic color
-          semanticColorsStore.delete(semanticToDelete.id);
-          console.log(`Semantic color '${semanticName}' deleted.`);
+      query.onerror = (event) => {
+        console.error("Cursor query failed:", event.target.error);
+        reject("Failed to query records.");
+      };
+
+      query.onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+          const record = cursor.value;
+
+          if (
+            record.semanticName === oldSemanticName &&
+            record.templateName === templateName
+          ) {
+            record.semanticName = newSemanticName; // Update the semanticName
+
+            const updateRequest = cursor.update(record); // Save the updated record
+            updateRequest.onerror = (event) => {
+              console.error("Update operation failed:", event.target.error);
+              reject("Failed to update a record.");
+            };
+
+            updateRequest.onsuccess = () => {
+              updateCount++;
+            };
+          }
+
+          cursor.continue(); // Move to the next record, regardless of a match
         } else {
-          console.log(`Semantic color '${semanticName}' not found.`);
+          // Cursor exhausted: all records have been processed
+          if (updateCount > 0) {
+            console.log(`${updateCount} record(s) successfully renamed '${oldSemanticName}' to '${newSemanticName}'`);
+            resolve(`${updateCount} record(s) successfully renamed '${oldSemanticName}' to '${newSemanticName}'`);
+          } else {
+            console.warn(`No matching records found for ${oldSemanticName}.`);
+            reject(`No matching records found for ${oldSemanticName}.`);
+          }
         }
       };
+
+      transaction.oncomplete = () => {
+        //console.log("Transaction completed.");
+      };
+
+      transaction.onerror = (event) => {
+        console.error("Transaction failed:", event.target.error);
+        reject("Transaction failed.");
+      };
     } else {
-      console.log(`Template '${templateName}' not found.`);
+      reject("Database is not open or not available.");
     }
-  };
+  });
 }
+
+function updateSemanticValue(templateName, semanticName, themeMode, newSemanticValue) {
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+      if (!db.objectStoreNames.contains("semanticColors")) {
+        reject("Object store 'semanticColors' does not exist.");
+        return;
+      }
+
+      const transaction = db.transaction("semanticColors", "readwrite");
+      const store = transaction.objectStore("semanticColors");
+
+      const query = store.openCursor(); // Open a cursor to iterate over all records
+      let updateCount = 0; // Track the number of updates
+
+      query.onerror = (event) => {
+        console.error("Cursor query failed:", event.target.error);
+        reject("Failed to query records.");
+      };
+
+      query.onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+          const record = cursor.value;
+
+          // Check for records matching templateName, semanticName, and themeMode
+          if (
+            record.templateName === templateName &&
+            record.semanticName === semanticName &&
+            record.themeMode === themeMode
+          ) {
+            record.semanticValue = newSemanticValue; // Update the semanticValue
+
+            const updateRequest = cursor.update(record); // Save the updated record
+            updateRequest.onerror = (event) => {
+              console.error("Update operation failed:", event.target.error);
+              reject("Failed to update a record.");
+            };
+
+            updateRequest.onsuccess = () => {
+              updateCount++;
+            };
+          }
+
+          cursor.continue(); // Continue to the next record, regardless of a match
+        } else {
+          // Cursor exhausted: all records have been processed
+          if (updateCount > 0) {
+            console.log(`Successfully updated ${updateCount} record(s) with the new semantic value '${newSemanticValue}' in '${semanticName}' for '${themeMode}' mode.`);
+            resolve(`Successfully updated ${updateCount} record(s) with the new semantic value '${newSemanticValue}' in '${semanticName}' for '${themeMode}' mode.`);
+          } else {
+            console.warn("No matching records found.");
+            reject("No matching records found.");
+          }
+        }
+      };
+
+      transaction.oncomplete = () => {
+        //console.log("Transaction completed.");
+      };
+
+      transaction.onerror = (event) => {
+        console.error("Transaction failed:", event.target.error);
+        reject("Transaction failed.");
+      };
+    } else {
+      reject("Database is not open or not available.");
+    }
+  });
+}
+
+
+function deleteTheme(templateName, themeMode) {
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+
+      const transaction = db.transaction("semanticColors", "readwrite");
+      const store = transaction.objectStore("semanticColors");
+
+      const query = store.openCursor(); // Open a cursor to iterate over all records
+      let deletionCount = 0; // Track the number of deletions
+
+      query.onerror = (event) => {
+        console.error("Cursor query failed:", event.target.error);
+        reject("Failed to query records.");
+      };
+
+      query.onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+          const record = cursor.value;
+
+          if (record.templateName === templateName && record.themeMode === themeMode) {
+            const deleteRequest = cursor.delete(); // Delete the matching record
+            deleteRequest.onerror = (event) => {
+              console.error("Delete operation failed:", event.target.error);
+              reject("Failed to delete a record.");
+            };
+
+            deleteRequest.onsuccess = () => {
+              deletionCount++;
+            };
+          }
+
+          cursor.continue(); // Move to the next record, regardless of a match
+        } else {
+          // Cursor exhausted: all records have been processed
+          if (deletionCount > 0) {
+            console.log(`${deletionCount} record(s) from '${themeMode}' theme deleted successfully.`);
+            resolve(`${deletionCount} record(s) from '${themeMode}' theme deleted successfully.`);
+          } else {
+            console.warn("No matching records found.");
+            reject("No matching records found.");
+          }
+        }
+      };
+
+      transaction.oncomplete = () => {
+        //console.log("Transaction completed.");
+      };
+
+      transaction.onerror = (event) => {
+        console.error("Transaction failed:", event.target.error);
+        reject("Transaction failed.");
+      };
+    } else {
+      reject("Database is not open or not available.");
+    }
+  });
+}
+
+function updateTheme(templateName, oldThemeMode, newThemeMode) {
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+
+      const transaction = db.transaction("semanticColors", "readwrite");
+      const store = transaction.objectStore("semanticColors");
+
+      const query = store.openCursor(); // Open a cursor to iterate over all records
+      let updateCount = 0; // Track the number of updates
+
+      query.onerror = (event) => {
+        console.error("Cursor query failed:", event.target.error);
+        reject("Failed to query records.");
+      };
+
+      query.onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+          const record = cursor.value;
+
+          if (record.templateName === templateName && record.themeMode === oldThemeMode) {
+            record.themeMode = newThemeMode; // Update the themeMode
+
+            const updateRequest = cursor.update(record); // Save the updated record
+            updateRequest.onerror = (event) => {
+              console.error("Update operation failed:", event.target.error);
+              reject("Failed to update a record.");
+            };
+
+            updateRequest.onsuccess = () => {
+              updateCount++;
+            };
+          }
+
+          cursor.continue(); // Move to the next record, regardless of a match
+        } else {
+          // Cursor exhausted: all records have been processed
+          if (updateCount > 0) {
+            console.log(`${updateCount} record(s) theme mode changed successfully from '${oldThemeMode}' to '${newThemeMode}'.`);
+            resolve(`${updateCount} record(s) theme mode changed successfully from '${oldThemeMode}' to '${newThemeMode}'.`);
+          } else {
+            console.warn("No matching records found.");
+            reject("No matching records found.");
+          }
+        }
+      };
+
+      transaction.oncomplete = () => {
+        //console.log("Transaction completed.");
+      };
+
+      transaction.onerror = (event) => {
+        console.error("Transaction failed:", event.target.error);
+        reject("Transaction failed.");
+      };
+    } else {
+      reject("Database is not open or not available.");
+    }
+  });
+}
+
+
+
+
+
+
+
 
 
 

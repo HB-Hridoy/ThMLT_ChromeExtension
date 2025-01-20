@@ -120,13 +120,20 @@
     margin-right: 8px;
     margin-left: -8px
 }
+.semantic-value-cell{
+    cursor: context-menu;
+}
+.seamntic-name-cell{
+    cursor: copy;
+}
 .semantic-color-thumbnail {
     border-radius: 1px;
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
     height: 16px;
-    width: 16px
+    width: 16px;
+    
 }
 .semantic-color-thumbnail,body[data-fpl-version=ui2]:where(body.feature_flag_ui3_mixin_changes) :where([data-fpl-ui3-override]) .semantic-color-thumbnail {
     border-radius: 20%

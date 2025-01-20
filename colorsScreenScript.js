@@ -11,24 +11,32 @@
   const addNewSemanticRowInput = document.getElementById("add-new-semantic-row-input");
   const addNewSemanticRowErrors = document.getElementById("add-new-semantic-row-errors");
 
-  const updateSemanticRowButton = document.getElementById("update-semantic-row-button");
+  const renameSemanticRowButton = document.getElementById("rename-semantic-row-button");
   const editSemanticRowInput = document.getElementById("edit-semantic-row-input");
-  const editSemanticRowErrors = document.getElementById("edit-semantic-row-errors")
+  const editSemanticRowErrors = document.getElementById("edit-semantic-row-errors");
+
+  const addNewThemeButton = document.getElementById("add-new-theme-button");
+  const newThemeInput = document.getElementById("add-new-theme-input");
+  const newThemeInputErrors = document.getElementById("add-new-theme-errors");
+
+  const primitiveTable = document.getElementById('primitive-table');
+  const primitiveTableBody = document.querySelector("#primitives-table tbody");
+
+  const semanticTable = document.getElementById('semantic-table');
+  const semanticTableBody = document.querySelector("#semantic-table tbody");
+
+  const selectPrimitiveModal = document.getElementById("select-primitive-modal");
 
 
-  const bottomNavBar = document.getElementById("bottom-nav-bar");
-
-  let semanticTableColumns = 3;
-
-  let primitiveInputValues = new Map();
-
+  
+  //Open home screen
   document.getElementById("color-screen-back-button").addEventListener("click", () => {
     document.getElementById("colors-screen").classList.replace("visible", "hidden");
     document.getElementById("home-screen").classList.replace("hidden", "visible");
   });
 
   
-
+  // open primitives tab
   primitivesTabButton.addEventListener('click', () => {
       document.getElementById("primitives-screen").classList.replace("hidden", "visible");
       document.getElementById("semantic-screen").classList.replace("visible", "hidden");
@@ -36,24 +44,23 @@
       semanticTabButton.className = "inline-block p-2 hover:text-blue-600";
       primitivesTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
     });
+    // Open semantic screen
+    semanticTabButton.addEventListener('click', () => {
+        document.getElementById("primitives-screen").classList.replace("visible", "hidden");
+        document.getElementById("semantic-screen").classList.replace("hidden", "visible");
 
-  semanticTabButton.addEventListener('click', () => {
-      document.getElementById("primitives-screen").classList.replace("visible", "hidden");
-      document.getElementById("semantic-screen").classList.replace("hidden", "visible");
+        primitivesTabButton.className = "inline-block p-2 hover:text-blue-600";
+        semanticTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+    });
 
-      primitivesTabButton.className = "inline-block p-2 hover:text-blue-600";
-      semanticTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
-  });
 
   //Primitives Screen
-
   let currentPrimitiveColorDiv = null; 
   let currentPrimitiveColorTextview = null;
   let pickrInstance = null; 
 
-  const primitiveTableBody = document.querySelector("#primitives-table tbody");
+  
 
-  // listen for clicks on color-box or color-text elements within the table body
   primitiveTableBody.addEventListener("click", async function (event) {
     const target = event.target;
     const parentRow = target.closest("tr");
@@ -388,124 +395,80 @@
   });
 
   //Semantic Screen
+  
 
-  let currentSemanticeColorDiv = null; 
-  let currentSemanticColorTextview = null;
-  const selectPrimitiveModal = document.getElementById("select-primitive-modal");
+  // New mode button on table clicked. empty modal input text and hide addNewThemeButton
+  document.getElementById("open-new-theme-modal").addEventListener("click", function(){
+
+  newThemeInput.value = "";
+  addNewThemeButton.classList.replace("visible","hidden");
+
+  });
+
+  // New theme name input from add new theme modal
+  newThemeInput.addEventListener("input", (event) => {
 
 
-  // // listen for clicks on color-box or color-text elements within the table body
-  // document.querySelector("#semantic-table tbody").addEventListener("click", function (event) {
-    
-  //   const target = event.target;
-  //   // Find the closest <tr> element from the clicked target
-  //   const clickedRow = event.target.closest("tr");
-    
+    if (newThemeInput.value.trim() !== "") {
+      
+      const inputValue = newThemeInput.value.trim();
 
-
-  //   // if (event.target.closest('.delete-row')) {
-  //   //     clickedRow.remove();
-  //   // } else if (event.target.closest('.primitive-link')) {
-  //   //   // Find the <td> with the class 'primitive-link' inside the row
-  //   //   const primitiveLinkCell = clickedRow.querySelector(".primitive-link");
-  //   //   linkPrimitiveToSemantic(primitiveLinkCell);
-  //   // } 
-  // });
-
-  document.getElementById("add-new-theme").addEventListener("click", function(){
-
-    const table = document.getElementById('semantic-table');
-    const theadRow = document.getElementById('semantic-table-header-row');
-    const bodyRows = table.querySelectorAll('tbody tr');
-
-    const newThHTML = `
-                        <td class="semantic-table-cell semantic-table-cell-has-padding">
-                            Value
-                        </td>
-                      `;
-    
-
-    const newTdHTML = `
-                        <td class="semantic-table-cell" data-index = "${currentSemanticRowId}">
-                              <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
-                                  <div class="semantic-alias-pill-cell semantic-alias-pill-base">
-                                      <div class="semantic-pill-cover "
-                                          aria-disabled="false" 
-                                          style="transform: translate(0px, 0px);">
-                                          <div class="semantic-pill" >
-                                              <div class="semantic-color-thumbnail-container">
-                                                  <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                                                      style="background-color: rgb(22, 22, 27);">
-                                                  </div>
-                                              </div>
-                                              <div class="semantic-pill-text">
-                                                          <span class="">color/brand/${currentSemanticRowId}</span>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          </td>
-                      `;
-
+      // Select all elements with the theme-mode attribute
+      const elements = document.querySelectorAll('[theme-mode]');
+      
+      // Map to get all attribute values
+      const themeModeValues = Array.from(elements).map(el => el.getAttribute('theme-mode'));
       
 
-      const newTh = document.createElement('td');
-      newTh.classList.add("semantic-table-cell");
-      newTh.classList.add("semantic-table-cell-has-padding");
-      newTh.innerHTML = newThHTML;
-      theadRow.insertBefore(newTh, theadRow.lastElementChild);
+      let isDuplicate = activeThemeModesInSemantic.includes(inputValue);
+      let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
 
-      // Add the new <td> to each row in tbody
-      bodyRows.forEach(row => {
-        if(row.id !== "semantic-table-header-row"){
+      // Process each value with a for loop
+      // for (let i = 0; i < themeModeValues.length; i++) {
+      //   const value = themeModeValues[i];
+      //   if (value === inputValue) {
+      //     isDuplicate = true;
+      //     break;
+      //   }
+      // }
 
-        const newTd = document.createElement('td');
-        newTd.classList.add("semantic-table-cell");
-        newTd.innerHTML = newTdHTML;
-        row.insertBefore(newTd, row.lastElementChild);
-        }
-      });
-
-      // Create the new column (e.g., add 200px as the width for the new column)
-      semanticTableColumns += 1; // Increase the column count (example)
-
-      // Initialize the new grid-template-columns
-      let newGridTemplateColumns = '';
-
-      // Loop through the columns and create the column definitions
-      for (let i = 0; i < semanticTableColumns; i++) {
-        if (i === semanticTableColumns - 1) {
-          newGridTemplateColumns += '40px';  // Last column is 40px
-        } else if (i === semanticTableColumns - 2) {
-          newGridTemplateColumns += 'minmax(200px, 1fr)';  // Second last column is minmax(200px, 1fr)
-        } else {
-          newGridTemplateColumns += '200px ';  // Regular columns are 200px
-        }
-
-        // Add a space between columns if it's not the last column
-        if (i !== semanticTableColumns - 1) {
-          newGridTemplateColumns += ' ';
-        }
+      if(isDuplicate){
+        newThemeInputErrors.innerHTML = "Theme mode already exist!";
+        newThemeInputErrors.classList.replace("hidden", "visible");
+        addNewThemeButton.classList.replace("visible","hidden");
+      } else if (isRegEx){
+        newThemeInputErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+        newThemeInputErrors.classList.replace("hidden", "visible");
+        addNewThemeButton.classList.replace("visible","hidden");
+      } else {
+        newThemeInputErrors.classList.replace("visible", "hidden");
+        addNewThemeButton.classList.replace("hidden","visible");
       }
 
+    } else {
+      addNewThemeButton.classList.replace("visible","hidden");
+    }
 
-      table.style.gridTemplateColumns = newGridTemplateColumns;
+  });
 
-  })
+  // Adds new theme. (Modal Button)
+  addNewThemeButton.addEventListener("click", async function(){
+    addNewTheme();
+    
+  });
 
-
-  function linkPrimitiveToSemantic(primitiveLinkCell){
-    bottomNavBar.classList.replace("visible","hidden");
+  // Show primitives modal
+  function ShowPrimitivesModal(){
     selectPrimitiveModal.classList.replace("hidden","flex");
   }
 
+  // Close primitives modal
   document.getElementById("close-primitive-modal").addEventListener("click", function(event){
     selectPrimitiveModal.classList.replace("flex","hidden");
-    bottomNavBar.classList.replace("hidden","visible");
+   
   });
   
-
+  // Show row edit button on semantic table row hover
   document.querySelector("#semantic-table tbody").addEventListener("mouseover", function(event) {
     const target = event.target;
     const parentRow = target.closest("tr");
@@ -523,6 +486,7 @@
     }
   }, true); 
 
+  // hide row edit button on semantic table row hover
   document.querySelector("#semantic-table tbody").addEventListener("mouseout", function(event) {
     const target = event.target;
     const parentRow = target.closest("tr");
@@ -532,69 +496,66 @@
     }
   }, true); 
 
+  semanticTableBody.addEventListener("click", async function (event) {
+    const target = event.target;
+    
+    //console.log(target);
 
-  addRowToSemanticButton.addEventListener("click", function () {
+    // if (target.tagName === "TD" && target.getAttribute("theme-mode")) {
 
-      const tableBody = document.querySelector("#semantic-table tbody");
-      const inputValue = addNewSemanticRowInput.value.trim();
+    // }
 
-      let normalValueCells =""; 
+    if (target.closest(".semantic-value-cell")){
+      //console.log(target.closest(".semantic-value-cell"));
 
-      for (let i = 0; i < (semanticTableColumns - 2); i++) {
-        normalValueCells = normalValueCells +`
-                            <td class="semantic-table-cell" data-index = "${currentSemanticRowId}">
-                                <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
-                                    <div class="semantic-alias-pill-cell semantic-alias-pill-base">
-                                        <div class="semantic-pill-cover "
-                                            aria-disabled="false" 
-                                            style="transform: translate(0px, 0px);">
-                                            <div class="semantic-pill" >
-                                                <div class="semantic-color-thumbnail-container">
-                                                    <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                                                        style="background-color: rgb(22, 22, 27);">
-                                                    </div>
-                                                </div>
-                                                <div class="semantic-pill-text">
-                                                            <span class="">color/brand/${currentSemanticRowId}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                          `;
-      }
+      const parentTd = target.closest('td');
+      const dataIndex = parentTd ? parentTd.getAttribute('data-index') : null;
+      const semanticName = activeSemanticNames[dataIndex-1];
+      const themeMode = parentTd ? parentTd.getAttribute('theme-mode') : null;
 
-      const newRow = `
-                      <tr data-index="${currentSemanticRowId}"
-                            class="semantic-table-row  semantic-table-item-row">
-                            <td data-index = "${currentSemanticRowId}" class="semantic-table-cell semantic-table-cell-has-padding">
-                                <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
-                                    <div class="row-icon">
-                                        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-                                            <path fill="var(--color-icon)" fill-rule="evenodd"
-                                                d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
-                                                clip-rule="evenodd"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="semantic-name inline-flex min-w-0">
-                                        ${inputValue}
-                                    </div>
-                                </div>
-                            </td>
-                            ${normalValueCells}
-                            <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
-                              <div id="semantic-row-edit-button-container-${currentSemanticRowId}" class="h-full w-full">
-                              </div>
-                            </td>
-                        </tr>
-                    `;
+      // Log the extracted values
+      console.log('data-index:', dataIndex);
+      console.log('theme-mode:', themeMode);
+      console.log('semantic-name: ', semanticName);
       
-      // Insert the new row into the table body
-      tableBody.insertAdjacentHTML("beforeend", newRow);
-      currentSemanticRowId++;
-      addNewSemanticRowInput.value = "";
-      addRowToSemanticButton.classList.replace("visible","hidden");
+      linkPrimitiveToSemantic();
+    
+        
+    }
+    
+    
+  });
+
+  // add semantic row modal button
+  addRowToSemanticButton.addEventListener("click", async function () {
+
+  const semanticNameFromInput = addNewSemanticRowInput.value.trim();
+  // let normalValueCellsCount = 0; 
+  // let normalValueCells =""; 
+
+  let semanticValues = [];
+    try {
+
+      for (const themeMode of activeThemeModesInSemantic) {
+        const result = await addSemanticColor(activeTemplateName, semanticNameFromInput, themeMode, "Click to link color");
+        semanticValues.push("Click to link color");
+        
+      }
+      
+      
+    } catch (error) {
+      ShowAlert("danger", error, 2500);
+    }
+    
+    if (semanticValues.length === activeThemeModesInSemantic.length) {
+
+      addNewRowToSemanticTable(semanticNameFromInput, semanticValues, activeThemeModesInSemantic);
+    } else {
+      ShowAlert("danger", "Error adding semantic", 2500);
+    }
+
+    addNewSemanticRowInput.value = "";
+    addRowToSemanticButton.classList.replace("visible","hidden");
 
 
   });
@@ -628,7 +589,7 @@
       console.error(error); // Log the error for debugging
     }
   }
-
+  // Add semantic Row input from add semantic row modal
   addNewSemanticRowInput.addEventListener("input", (event) => {
 
 
@@ -668,6 +629,7 @@
 
   });
 
+  // Open edit semantic modal
   semanticRowEditButton.addEventListener("click", (e) =>{
     const rowId = semanticRowEditButton.getAttribute("data-index");
 
@@ -676,19 +638,20 @@
     const parentRow = document.querySelector(`tr[data-index="${rowId}"]`);
     editSemanticRowInput.value = parentRow?.querySelector(".semantic-name")?.textContent.trim() || null;
 
+    renameSemanticRowButton.classList.replace("visible", "hidden");
+
   });
 
+  // Delete button form edit semantic row modal
   semanticRowDeleteButton.addEventListener("click", (e) =>{
-    const rowId = semanticRowDeleteButton.getAttribute("data-index");
-    // Select the row with the matching data-index attribute
-    const row = document.querySelector(`tr[data-index="${rowId}"]`);
-    
-    // Check if the row exists
-    if (row) {
-        row.remove(); // Remove the row from the DOM
-    }
+    deleteRowFromSemanticTable();
   });
 
+  renameSemanticRowButton.addEventListener("click", (e) => {
+    renameSemanticRow();
+  });
+
+  // Edit semantic Row input from edit semantic row modal
   editSemanticRowInput.addEventListener("input", (event) => {
 
 
@@ -712,18 +675,217 @@
       if(isDuplicate){
         editSemanticRowErrors.innerHTML = "Semantic name already exist!";
         editSemanticRowErrors.classList.replace("hidden", "visible");
-        updateSemanticRowButton.classList.replace("visible","hidden");
+        renameSemanticRowButton.classList.replace("visible","hidden");
       } else if (isRegEx){
         editSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
         editSemanticRowErrors.classList.replace("hidden", "visible");
-        updateSemanticRowButton.classList.replace("visible","hidden");
+        renameSemanticRowButton.classList.replace("visible","hidden");
       } else {
         editSemanticRowErrors.classList.replace("visible", "hidden");
-        updateSemanticRowButton.classList.replace("hidden","visible");
+        renameSemanticRowButton.classList.replace("hidden","visible");
       }
 
     } else {
-      updateSemanticRowButton.classList.replace("visible","hidden");
+      renameSemanticRowButton.classList.replace("visible","hidden");
     }
 
   });
+
+
+  function addNewRowToSemanticTable(semanticName, semanticValues, themeModes){
+
+    const tableBody = document.querySelector("#semantic-table tbody");
+    
+    let semanticValueCells =""; 
+
+    for (let i = 0; i < themeModes.length; i++) {
+      const semanticValue = semanticValues[i] || '';
+      semanticValueCells = semanticValueCells +`
+                            <td class="semantic-table-cell semantic-value-cell" data-index = "${currentSemanticRowId}" theme-mode = ${themeModes[i]}>
+                                <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border bg-red-200">
+                                    <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                                        <div class="semantic-pill-cover "
+                                            aria-disabled="false" 
+                                            style="transform: translate(0px, 0px);">
+                                            <div class="semantic-pill" >
+                                                <div class="semantic-color-thumbnail-container">
+                                                    <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                                        style="background-color: rgb(22, 22, 27);">
+                                                    </div>
+                                                </div>
+                                                <div class="semantic-pill-text">
+                                                            ${semanticValue}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                          `;
+    }
+    themeModes.forEach(themeMode => {
+      
+    });
+
+    const newRow = `
+                      <tr data-index="${currentSemanticRowId}" class=" seamntic-name-cell semantic-table-row  semantic-table-item-row">
+                            <td data-index = "${currentSemanticRowId}" class="cursor-copy semantic-table-cell semantic-table-cell-has-padding">
+                                <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
+                                    <div class="row-icon">
+                                        <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path fill="var(--color-icon)" fill-rule="evenodd"
+                                                d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="semantic-name inline-flex min-w-0 ">
+                                        ${semanticName}
+                                    </div>
+                                </div>
+                            </td>
+                            ${semanticValueCells}
+                            <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
+                              <div id="semantic-row-edit-button-container-${currentSemanticRowId}" class="h-full w-full">
+                              </div>
+                            </td>
+                        </tr>
+                    `;
+      
+      // Insert the new row into the table body
+      tableBody.insertAdjacentHTML("beforeend", newRow);
+      currentSemanticRowId++;
+
+
+  }
+
+  async function deleteRowFromSemanticTable(){
+    const rowId = semanticRowDeleteButton.getAttribute("data-index");
+    const tableBody = document.querySelector("#semantic-table tbody");
+    const row = tableBody.querySelector(`tr[data-index="${rowId}"]`);
+
+    const selectedSemanticName = row.querySelector(".semantic-name").textContent.trim();
+
+    
+
+    try {
+
+      const result = deleteSemanticColor(selectedSemanticName, activeTemplateName);
+
+        // Check if the row exists
+      if (row) {
+          row.remove(); // Remove the row from the DOM
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    
+    
+  }
+
+  async function renameSemanticRow() {
+    const rowId = semanticRowDeleteButton.getAttribute("data-index");
+    const tableBody = document.querySelector("#semantic-table tbody");
+    const row = tableBody.querySelector(`tr[data-index="${rowId}"]`);
+
+    const selectedSemanticCell = row.querySelector(".semantic-name");
+
+    
+
+    try {
+
+      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, activeTemplateName)
+
+      selectedSemanticCell.textContent = editSemanticRowInput.value;
+    } catch (error) {
+      console.error(error);
+    }
+    
+  }
+
+  async function addNewTheme() {
+    
+    const newThemeMode = newThemeInput.value;
+    const table = document.getElementById('semantic-table');
+    const theadRow = document.getElementById('semantic-table-header-row');
+    const bodyRows = table.querySelectorAll('tbody tr');
+    try {
+
+      for (const semanticName of activeSemanticNames){
+       const result = await addSemanticColor(activeTemplateName, semanticName, newThemeMode, "Click to link color");
+      }
+
+      const newThHTML = `
+                              <td theme-mode="${newThemeMode}" class="semantic-table-cell semantic-table-cell-has-padding">
+                                  ${newThemeMode}
+                              </td>
+                            `;
+
+      const newTdHTML = `
+                          <td class="semantic-table-cell" data-index = "${currentSemanticRowId}">
+                                <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border bg-red-200">
+                                    <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                                        <div class="semantic-pill-cover "
+                                            aria-disabled="false" 
+                                            style="transform: translate(0px, 0px);">
+                                            <div class="semantic-pill" >
+                                                <div class="semantic-color-thumbnail-container">
+                                                    <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                                        style="background-color: rgb(22, 22, 27);">
+                                                    </div>
+                                                </div>
+                                                <div class="semantic-pill-text">
+                                                            <span class="">Click to link color</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+
+        const newTh = document.createElement('td');
+        newTh.classList.add("semantic-table-cell");
+        newTh.classList.add("semantic-table-cell-has-padding");
+        newTh.innerHTML = newThHTML;
+        theadRow.insertBefore(newTh, theadRow.lastElementChild);
+
+        // Add the new <td> to each row in tbody
+        bodyRows.forEach(row => {
+          if(row.id !== "semantic-table-header-row"){
+
+          const newTd = document.createElement('td');
+          newTd.classList.add("semantic-table-cell");
+          newTd.innerHTML = newTdHTML;
+          row.insertBefore(newTd, row.lastElementChild);
+          }
+        });
+
+        semanticTableColumns += 1; // Increase the column count
+
+        let newGridTemplateColumns = '';
+
+        // Loop through the columns and create the column definitions
+        for (let i = 0; i < semanticTableColumns; i++) {
+          if (i === semanticTableColumns - 1) {
+            newGridTemplateColumns += '40px';  // Last column is 40px
+          } else if (i === semanticTableColumns - 2) {
+            newGridTemplateColumns += 'minmax(200px, 1fr)';  // Second last column is minmax(200px, 1fr)
+          } else {
+            newGridTemplateColumns += '200px ';  // Regular columns are 200px
+          }
+
+          // Add a space between columns if it's not the last column
+          if (i !== semanticTableColumns - 1) {
+            newGridTemplateColumns += ' ';
+          }
+        }
+
+        activeThemeModesInSemantic.push(newThemeMode);
+        table.style.gridTemplateColumns = newGridTemplateColumns;
+      
+      
+    } catch (error) {
+      ShowAlert("danger", error, 2500);
+    }
+  }
+
