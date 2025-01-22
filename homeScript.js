@@ -154,6 +154,9 @@
           activeSemanticNames.length = 0;
           activeSemantics.clear(); 
 
+          activePrimitiveNames.length = 0;
+          activePrimitives.clear();
+
           currentPrimitiveRowId = 1;
           currentSemanticRowId = 1;
 

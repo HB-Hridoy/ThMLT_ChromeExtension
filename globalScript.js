@@ -65,7 +65,7 @@
   
 
   // Function to get the semantic name for a specific theme mode and semantic name
-function getSemanticNameForMode(themeMode, semanticName) {
+function GetSemanticValueForMode(themeMode, semanticName) {
   // Check if the theme mode exists in the map
   if (activeSemantics.has(themeMode)) {
     const semanticNames = activeSemantics.get(themeMode);

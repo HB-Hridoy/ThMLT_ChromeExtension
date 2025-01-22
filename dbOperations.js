@@ -137,12 +137,24 @@ function getAllPrimitiveColors(templateName) {
     console.log("Got All Primitive Colors!");
     let result = request.result;
 
+    console.log(result);
+
+    
+
     const tableBody = document.querySelector("#primitives-table tbody");
     tableBody.innerHTML = "";
     // Iterate over the result array and inject HTML for each template
     result.forEach((primitive) => {
-      // Get the table body
-    
+
+      // Add all primitive names to activePrimitiveNames
+      if (!activePrimitiveNames.includes(primitive.primitiveName)) {
+        activePrimitiveNames.push(primitive.primitiveName);
+      }
+
+      // add all primitive Name and Value as map in active primitives
+      if (!activePrimitives.has(primitive.primitiveName)) {
+        activePrimitives.set(primitive.primitiveName, primitive.primitiveValue);
+      }
 
     // Create a new row
     const newRow = `
@@ -186,6 +198,11 @@ function getAllPrimitiveColors(templateName) {
       
       currentPrimitiveRowId++;
     });
+
+    console.log(activePrimitives);
+    
+
+    
     tableBody.querySelectorAll('.name-input').forEach(input => {
       const inputRowId = input.id.split('-').pop();
       const inputValue = input.value.trim();
@@ -374,6 +391,7 @@ function getAllSemanticColors(templateName) {
     let result = semanticRequest.result;
 
     result.forEach(item => {
+      
       // Add unique theme modes to activeThemeModesInSemantic
       if (!activeThemeModesInSemantic.includes(item.themeMode)) {
         activeThemeModesInSemantic.push(item.themeMode);
@@ -393,7 +411,6 @@ function getAllSemanticColors(templateName) {
 
       // Add the semanticName and linkedPrimitive to the themeMode
       activeSemantics.get(themeMode)[semanticName] = linkedPrimitive;
-
     });
 
 
@@ -469,8 +486,13 @@ function getAllSemanticColors(templateName) {
       let semanticValues = [];
       
       activeThemeModesInSemantic.forEach(themeMode => {
-        semanticValues.push(getSemanticNameForMode(themeMode, semanticName));
+        const semanticValue = GetSemanticValueForMode(themeMode, semanticName);
+        semanticValues.push(semanticValue);
+
+        
       });
+
+      
       
       if (semanticValues.length === activeThemeModesInSemantic.length) {
         addNewRowToSemanticTable(semanticName, semanticValues, activeThemeModesInSemantic);
@@ -639,7 +661,7 @@ function updateSemanticValue(templateName, semanticName, themeMode, newSemanticV
             record.semanticName === semanticName &&
             record.themeMode === themeMode
           ) {
-            record.semanticValue = newSemanticValue; // Update the semanticValue
+            record.linkedPrimitive = newSemanticValue; // Update the linkedPrimitive
 
             const updateRequest = cursor.update(record); // Save the updated record
             updateRequest.onerror = (event) => {

@@ -328,8 +328,8 @@
     </div> 
 
 
-      <!-- Main modal -->
-      <div id="select-primitive-modal" class="hidden  overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full h-[calc(100%-1rem)] max-h-full">
+      <!-- select primitive modal -->
+      <div data-index="" theme-mode="" semantic-name="" id="select-primitive-modal" class="hidden  overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full h-[calc(100%-1rem)] max-h-full" style="background-color: #00000051;">
           <div class="relative p-4 pb-24 w-full max-w-md max-h-full">
               <!-- Modal content -->
               <div class="relative border-2 border-black bg-white rounded-lg shadow-2xl dark:bg-gray-700">
@@ -348,9 +348,9 @@
                   <!-- Modal body -->
                   <div class="p-4 md:p-5">
                       <p class="text-xs font-normal text-gray-500 dark:text-gray-400">Your choosen primitive color will be linked with respective semantic color.</p>
-                      <ul class="my-4 space-y-3">
-                          <li>
-                              <div href="#" class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                      <ul id="select-primitive-modal-primitives-container" class="my-4 space-y-3">
+                          <li data-primitive-name = "" data-primitive-value = "">
+                              <div class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
                                 <div class="color-box h-5 w-5 mr-2 border rounded-md bg-white"></div>
                                 <p class="color-text text-sm mr-2 flex-1">White</p>
                               </div>

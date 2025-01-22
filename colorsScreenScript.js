@@ -457,15 +457,54 @@
     
   });
 
-  // Show primitives modal
-  function ShowPrimitivesModal(){
-    selectPrimitiveModal.classList.replace("hidden","flex");
-  }
 
   // Close primitives modal
-  document.getElementById("close-primitive-modal").addEventListener("click", function(event){
-    selectPrimitiveModal.classList.replace("flex","hidden");
+  document.getElementById("close-primitive-modal").addEventListener("click", function(){
+    CloseSelectPrimitiveModal();
    
+  });
+
+  document.getElementById("select-primitive-modal-primitives-container").addEventListener("click", async (e) =>{
+    const target = e.target;
+
+    
+
+    if (target.closest("li[data-index][data-primitive-name][data-primitive-value]")){
+
+      try {
+        const liElement = target.closest("li[data-index][data-primitive-name][data-primitive-value]");
+
+        const dataIndex = liElement.getAttribute("data-index");
+        const primitiveName = liElement.getAttribute("data-primitive-name");
+        const primitiveValue = liElement.getAttribute("data-primitive-value");
+
+        const themeMode = selectPrimitiveModal.getAttribute("theme-mode");
+        const semanticName = selectPrimitiveModal.getAttribute("semantic-name");
+
+        const result =  await updateSemanticValue(activeTemplateName, semanticName, themeMode, primitiveName);
+
+        const tableBody = document.querySelector("#semantic-table tbody");
+        // Get the <td> element with the specific data-index and class
+        const targetTd = tableBody.querySelector(`td.semantic-value-cell[data-index="${dataIndex}"][theme-mode="${themeMode}"]`);
+
+        targetTd.querySelector(".semantic-color-thumbnail").style.backgroundColor = primitiveValue;
+        targetTd.querySelector(".semantic-pill-text").textContent = `/ ${primitiveName}`;
+
+        const div = targetTd.querySelector(".semantic-mode-value");
+
+        if (div.classList.contains("bg-red-200")) {
+          div.classList.replace("bg-red-200", "bg-white");
+        }
+
+        CloseSelectPrimitiveModal();
+        
+      } catch (error) {
+        
+      }
+      
+    }
+    
+    
   });
   
   // Show row edit button on semantic table row hover
@@ -513,14 +552,7 @@
       const semanticName = activeSemanticNames[dataIndex-1];
       const themeMode = parentTd ? parentTd.getAttribute('theme-mode') : null;
 
-      // Log the extracted values
-      console.log('data-index:', dataIndex);
-      console.log('theme-mode:', themeMode);
-      console.log('semantic-name: ', semanticName);
-      
-      linkPrimitiveToSemantic();
-    
-        
+      ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName);
     }
     
     
@@ -702,7 +734,7 @@
       const semanticValue = semanticValues[i] || '';
       semanticValueCells = semanticValueCells +`
                             <td class="semantic-table-cell semantic-value-cell" data-index = "${currentSemanticRowId}" theme-mode = ${themeModes[i]}>
-                                <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border bg-red-200">
+                                <div class="semantic-mode-value semantic-mode-cell hide-border bg-red-200">
                                     <div class="semantic-alias-pill-cell semantic-alias-pill-base">
                                         <div class="semantic-pill-cover "
                                             aria-disabled="false" 
@@ -710,7 +742,7 @@
                                             <div class="semantic-pill" >
                                                 <div class="semantic-color-thumbnail-container">
                                                     <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                                                        style="background-color: rgb(22, 22, 27);">
+                                                        style="background-color: ${semanticValue}">
                                                     </div>
                                                 </div>
                                                 <div class="semantic-pill-text">
@@ -723,9 +755,7 @@
                             </td>
                           `;
     }
-    themeModes.forEach(themeMode => {
-      
-    });
+    
 
     const newRow = `
                       <tr data-index="${currentSemanticRowId}" class=" seamntic-name-cell semantic-table-row  semantic-table-item-row">
@@ -821,8 +851,8 @@
                             `;
 
       const newTdHTML = `
-                          <td class="semantic-table-cell" data-index = "${currentSemanticRowId}">
-                                <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border bg-red-200">
+                          <td class="semantic-table-cell semantic-value-cell" data-index = "${currentSemanticRowId}" theme-mode = ${newThemeMode}>
+                                <div class="semantic-mode-value semantic-mode-cell hide-border bg-red-200">
                                     <div class="semantic-alias-pill-cell semantic-alias-pill-base">
                                         <div class="semantic-pill-cover "
                                             aria-disabled="false" 
@@ -830,11 +860,11 @@
                                             <div class="semantic-pill" >
                                                 <div class="semantic-color-thumbnail-container">
                                                     <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                                                        style="background-color: rgb(22, 22, 27);">
+                                                        style="background-color: rgb(22,22,27)">
                                                     </div>
                                                 </div>
                                                 <div class="semantic-pill-text">
-                                                            <span class="">Click to link color</span>
+                                                            Click to link color
                                                 </div>
                                             </div>
                                         </div>
@@ -849,14 +879,24 @@
         newTh.innerHTML = newThHTML;
         theadRow.insertBefore(newTh, theadRow.lastElementChild);
 
+        let tempRowId = 1;
+
         // Add the new <td> to each row in tbody
         bodyRows.forEach(row => {
           if(row.id !== "semantic-table-header-row"){
 
           const newTd = document.createElement('td');
+
           newTd.classList.add("semantic-table-cell");
+          newTd.classList.add("semantic-value-cell");
+
+          newTd.setAttribute("data-index", tempRowId);
+          newTd.setAttribute("theme-mode", newThemeMode);
+          
           newTd.innerHTML = newTdHTML;
           row.insertBefore(newTd, row.lastElementChild);
+
+          tempRowId++;
           }
         });
 
@@ -886,6 +926,35 @@
       
     } catch (error) {
       ShowAlert("danger", error, 2500);
+      console.log(error);
+      
     }
+  }
+
+  function ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName) {
+
+    const primitivesContainer = document.getElementById('select-primitive-modal-primitives-container');
+    primitivesContainer.innerHTML = "";
+
+    for (const [primitiveName, primitiveValue] of activePrimitives) {
+
+      const newPrimitiveItem = ` 
+                          <li data-index = "${dataIndex}" data-primitive-name = "${primitiveName}" data-primitive-value = "${primitiveValue}">
+                              <div class="flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
+                                <div class="color-box h-5 w-5 mr-2 border rounded-md" style="background-color: ${primitiveValue};"></div>
+                                <p class="color-text text-sm mr-2 flex-1">${primitiveName}</p>
+                              </div>
+                          </li>`;
+      
+      primitivesContainer.insertAdjacentHTML("beforeend", newPrimitiveItem);
+    }
+    selectPrimitiveModal.setAttribute("data-index", dataIndex);
+    selectPrimitiveModal.setAttribute("theme-mode", themeMode);
+    selectPrimitiveModal.setAttribute("semantic-name", semanticName);
+    selectPrimitiveModal.classList.replace("hidden","flex");
+  }
+
+  function CloseSelectPrimitiveModal() {
+    selectPrimitiveModal.classList.replace("flex","hidden");
   }
 
