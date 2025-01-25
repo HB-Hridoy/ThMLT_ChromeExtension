@@ -81,3 +81,45 @@ function GetSemanticValueForMode(themeMode, semanticName) {
   }
   return null;  // Return null if not found or error occurred
 }
+
+const cacheOperations = new CacheOperations();
+
+
+class CacheOperations {
+  constructor() {
+      
+  }
+
+  GetAllThemeModes(){
+
+  }
+
+  DeleteThemeMode(themeMode){
+
+  }
+
+  IsThemeModeExist(themeMode){
+
+  }
+
+  GetAllSemanticNames(){
+      return activeSemanticNames;
+  }
+
+  AddSemantic(semanticName, themeMode){
+
+  }
+
+  UpdateSemantic(semanticName, themeMode){
+
+  }
+
+  DeleteSemantic(semanticName, themeMode){
+
+  }
+
+  IsSemanticExist(){
+    
+  }
+
+}

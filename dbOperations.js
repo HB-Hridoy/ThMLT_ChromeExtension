@@ -360,6 +360,16 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
       let semanticColorStoreRequest = semanticColorsStore.put(newSemanticColor);
 
       semanticColorStoreRequest.onsuccess = (e) => {
+        activeSemanticNames.push(semanticName);
+
+        // Check if the themeMode exists in the map, if not, create a new object for it
+        if (!activeSemantics.has(themeMode)) {
+          activeSemantics.set(themeMode, {});
+        }
+
+        // Add the semanticName and linkedPrimitive to the themeMode
+        activeSemantics.get(themeMode)[semanticName] = linkedPrimitive;
+
         resolve("Semantic color added");
         console.log(`Semantic color '${semanticName}' added to '${themeMode}' mode`);
       }
@@ -533,6 +543,19 @@ function deleteSemanticColor(semanticName, templateName) {
               reject("Failed to delete a record.");
             };
             deleteRequest.onsuccess = () => {
+              // Find the index of semantic name
+              const index = activeSemanticNames.indexOf(semanticName);
+
+              if (index !== -1) {
+                activeSemanticNames.splice(index, 1); // Remove the item at the found index
+              }
+              
+              activeSemantics.forEach((themeMode) => {
+                if (themeMode.hasOwnProperty(semanticName)) {
+                  delete themeMode[semanticName];
+                  
+                }
+              });
               deletionCount++;
             };
           }
@@ -542,6 +565,10 @@ function deleteSemanticColor(semanticName, templateName) {
           // Cursor exhausted: all records have been processed
           if (deletionCount > 0) {
             console.log(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
+            console.log(activeSemantics);
+            console.log(activeSemanticNames);
+            
+            
             resolve(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
           } else {
             console.warn(`No matching records found named '${semanticName}'.`);

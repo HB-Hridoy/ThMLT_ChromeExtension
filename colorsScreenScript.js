@@ -734,7 +734,7 @@
       const semanticValue = semanticValues[i] || '';
       semanticValueCells = semanticValueCells +`
                             <td class="semantic-table-cell semantic-value-cell" data-index = "${currentSemanticRowId}" theme-mode = ${themeModes[i]}>
-                                <div class="semantic-mode-value semantic-mode-cell hide-border bg-red-200">
+                                <div class="semantic-mode-value semantic-mode-cell hide-border ${semanticValue === "Click to link color" ? 'bg-red-200' : 'bg-white'} bg-red-200">
                                     <div class="semantic-alias-pill-cell semantic-alias-pill-base">
                                         <div class="semantic-pill-cover "
                                             aria-disabled="false" 
@@ -742,11 +742,11 @@
                                             <div class="semantic-pill" >
                                                 <div class="semantic-color-thumbnail-container">
                                                     <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                                                        style="background-color: ${semanticValue}">
+                                                        style="background-color: ${semanticValue === "Click to link color" ? "#ffffff" : activePrimitives.get(semanticValue)}">
                                                     </div>
                                                 </div>
                                                 <div class="semantic-pill-text">
-                                                            ${semanticValue}
+                                                            ${semanticValue === "Click to link color" ? semanticValue : "/ " + semanticValue}
                                                 </div>
                                             </div>
                                         </div>
