@@ -138,31 +138,24 @@
     document.getElementById("templates-container").addEventListener("click", function(event) {
         // Check if the clicked element or any of its parents has the 'template-preview-parent' class
         if (event.target.closest('.template-preview-parent')) {
+
+          cacheOperations.clearCache();
           
           const templateDiv = event.target.closest('.template-preview-parent');
       
-          // Example: You can get the template id or other data from the div
-          activeTemplateName = templateDiv.getAttribute('template-id');
+          cacheOperations.updateTemplateName(templateDiv.getAttribute('template-id'));
       
           homeScreen.classList.replace("visible", "hidden");
           colorsScreen.classList.replace("hidden", "visible");
 
-          document.getElementById("template-name-colors-screen").innerText = activeTemplateName;
-
-          // Clear the existing data in variables
-          activeThemeModesInSemantic.length = 0; 
-          activeSemanticNames.length = 0;
-          activeSemantics.clear(); 
-
-          activePrimitiveNames.length = 0;
-          activePrimitives.clear();
+          document.getElementById("template-name-colors-screen").innerText = cacheOperations.getTemplateName();
 
           currentPrimitiveRowId = 1;
           currentSemanticRowId = 1;
 
-          getAllPrimitiveColors(activeTemplateName);
+          getAllPrimitiveColors(cacheOperations.getTemplateName());
           
-          getAllSemanticColors(activeTemplateName);
+          getAllSemanticColors(cacheOperations.getTemplateName());
 
         }
       });

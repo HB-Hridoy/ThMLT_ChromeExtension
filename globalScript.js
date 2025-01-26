@@ -1,13 +1,218 @@
+  class CacheOperations {
+    constructor() {
+      this.activeTemplateName = "";
+
+      this.activeThemeModesInSemantic = [];
+      this.activeSemanticNames = new Set();
+      this.activeSemantics = new Map();
+    
+      this.activePrimitiveNames = [];
+      this.activePrimitives = new Map();
+    }
+
+    updateTemplateName(templateName){
+      this.activeTemplateName = templateName;
+    }
+    getTemplateName(){
+      return this.activeTemplateName;
+    }
+
+    addNewThemeMode(themeMode) {
+      if (!this.activeThemeModesInSemantic.includes(themeMode)) {
+        this.activeThemeModesInSemantic.push(themeMode);
+      }
+    }
+
+    getAllThemeModes() {
+      return this.activeThemeModesInSemantic;
+    }
+
+    updateThemeMode(oldThemeMode, newThemeMode) {
+      this.deleteThemeMode(oldThemeMode);
+      this.addNewThemeMode(newThemeMode);
+    }
+
+    deleteThemeMode(themeMode) {
+      this.activeThemeModesInSemantic = this.activeThemeModesInSemantic.filter(item => item !== themeMode);
+    }
+
+    isThemeModeExist(themeMode) {
+      return this.activeThemeModesInSemantic.includes(themeMode);
+    }
+
+    addSemantic(semanticName, themeMode, semanticValue) {
+      // Check if the themeMode exists in the map, if not, create a new object for it
+      if (!this.activeSemantics.has(themeMode)) {
+        this.activeSemantics.set(themeMode, {});
+      }
+
+      // Add the semanticName and semanticValue to the themeMode
+      this.activeSemantics.get(themeMode)[semanticName] = semanticValue;
+      this.activeSemanticNames.add(semanticName);
+    }
+
+    getAllSemanticNames() {
+      return Array.from(this.activeSemanticNames);
+    }
+
+    getAllSemantics(){
+      return this.activeSemantics;
+    }
+
+    getSemanticValueForThemeMode(semanticName, themeMode) {
+      if (this.activeSemantics.has(themeMode)) {
+        const themeData = this.activeSemantics.get(themeMode);
+        return themeData[semanticName] || null; // Return the value or null if not found
+      }
+      return null; // Theme mode doesn't exist
+    }
+
+    updateSemantic(semanticName, themeMode, newSemanticValue) {
+      if (this.activeSemantics.has(themeMode)) {
+        const themeData = this.activeSemantics.get(themeMode);
+        if (themeData.hasOwnProperty(semanticName)) {
+          themeData[semanticName] = newSemanticValue; // Update the value
+          return true; // Update successful
+        }
+      }
+      return false; // Update failed
+    }
+
+    renameSemantic(oldSemanticName, newSemanticName) {
+      // Check if the old semantic name exists
+      if (this.activeSemanticNames.has(oldSemanticName)) {
+        // Rename the semantic name for each theme mode
+        for (const [themeMode, themeData] of this.activeSemantics.entries()) {
+          if (themeData.hasOwnProperty(oldSemanticName)) {
+            const value = themeData[oldSemanticName]; // Get the value of the old semantic name
+            delete themeData[oldSemanticName]; // Delete the old semantic name
+            themeData[newSemanticName] = value; // Add the new semantic name with the same value
+          }
+        }
+    
+        // Remove the old semantic name from the activeSemanticNames set and add the new name
+        this.activeSemanticNames.delete(oldSemanticName);
+        this.activeSemanticNames.add(newSemanticName);
+    
+        return true; // Renaming successful
+      }
+      return false; // Renaming failed, old semantic name not found
+    }
+    
+
+    deleteSemantic(semanticName) {
+      // First check if the semantic name exists in the active semantic names
+      if (this.activeSemanticNames.has(semanticName)) {
+        // If exists, delete the semantic name from all theme modes
+        for (const [themeMode, themeData] of this.activeSemantics.entries()) {
+          if (themeData.hasOwnProperty(semanticName)) {
+            delete themeData[semanticName]; // Delete the semantic from each theme
+          }
+        }
+    
+        // Remove the semantic name from the activeSemanticNames set
+        this.activeSemanticNames.delete(semanticName);
+        return true; // Deletion successful
+      }
+      return false; // Deletion failed, semantic name not found
+    }
+
+    deleteSemanticForThemeMode(semanticName, themeMode) {
+      if (this.activeSemantics.has(themeMode)) {
+        const themeData = this.activeSemantics.get(themeMode);
+        if (themeData.hasOwnProperty(semanticName)) {
+          delete themeData[semanticName]; // Delete the semantic
+
+          // If the semantic name is no longer used across any theme modes, remove it from the set
+          let isUsedElsewhere = false;
+          for (const data of this.activeSemantics.values()) {
+            if (data.hasOwnProperty(semanticName)) {
+              isUsedElsewhere = true;
+              break;
+            }
+          }
+
+          if (!isUsedElsewhere) {
+            this.activeSemanticNames.delete(semanticName);
+          }
+
+          return true; // Deletion successful
+        }
+      }
+      return false; // Deletion failed
+    }
+
+    isSemanticExist(semanticName) {
+      return this.activeSemanticNames.has(semanticName);
+    }
+
+    isSemanticExistInThemeMode(semanticName, themeMode) {
+      if (this.activeSemantics.has(themeMode)) {
+        const themeData = this.activeSemantics.get(themeMode);
+        return themeData.hasOwnProperty(semanticName);
+      }
+      return false;
+    }
+
+    addPrimitive(primitiveName, primitiveValue) {
+      if (!this.activePrimitives.has(primitiveName)) {
+        this.activePrimitives.set(primitiveName, primitiveValue);
+        this.activePrimitiveNames.push(primitiveName);
+      }
+    }
+
+    getPrimitiveValue(primitiveName) {
+      return this.activePrimitives.has(primitiveName) 
+        ? this.activePrimitives.get(primitiveName) 
+        : null;
+    }
+
+    getAllPrimitives() {
+      return Array.from(this.activePrimitives.entries());
+    }
+
+    getAllPrimitiveNames() {
+      return [...this.activePrimitiveNames];
+    }
+
+    renamePrimitive(oldPrimitiveName, newPrimitiveName) {
+      if (this.activePrimitives.has(oldPrimitiveName)) {
+        const value = this.activePrimitives.get(oldPrimitiveName);
+        this.deletePrimitive(oldPrimitiveName);
+        this.addPrimitive(newPrimitiveName, value);
+      }
+    }
+
+    updatePrimitive(primitiveName, newPrimitiveValue) {
+      if (this.activePrimitives.has(primitiveName)) {
+        this.activePrimitives.set(primitiveName, newPrimitiveValue);
+      }
+    }
+
+    deletePrimitive(primitiveName) {
+      if (this.activePrimitives.has(primitiveName)) {
+        this.activePrimitives.delete(primitiveName);
+        this.activePrimitiveNames = this.activePrimitiveNames.filter(name => name !== primitiveName);
+      }
+    }
+
+    isPrimitiveExist(primitiveName) {
+      return this.activePrimitives.has(primitiveName);
+    }
+
+    clearCache() {
+      this.activeTemplateName = "";
+      this.activeThemeModesInSemantic = [];
+      this.activeSemanticNames.clear();
+      this.activeSemantics.clear();
+      this.activePrimitiveNames = [];
+      this.activePrimitives.clear();
+    }
+  }
+  
   let activeScreen = "home-screen";
 
-  let activeTemplateName = "";
-
-  let activeThemeModesInSemantic = [];
-  let activeSemanticNames = [];
-  let activeSemantics = new Map();
-
-  let activePrimitiveNames = [];
-  let activePrimitives = new Map();
+  const cacheOperations = new CacheOperations();
 
   let currentPrimitiveRowId = 1;
   let currentSemanticRowId = 1;
@@ -64,62 +269,7 @@
   }
   
 
-  // Function to get the semantic name for a specific theme mode and semantic name
-function GetSemanticValueForMode(themeMode, semanticName) {
-  // Check if the theme mode exists in the map
-  if (activeSemantics.has(themeMode)) {
-    const semanticNames = activeSemantics.get(themeMode);
-
-    // Check if the semantic name exists in the selected theme mode
-    if (semanticNames.hasOwnProperty(semanticName)) {
-      return semanticNames[semanticName];  // Return the linked primitive
-    } else {
-      console.error(`Error: Semantic name '${semanticName}' does not exist for theme mode '${themeMode}'.`);
-    }
-  } else {
-    console.error(`Error: Theme mode '${themeMode}' does not exist.`);
-  }
-  return null;  // Return null if not found or error occurred
-}
-
-const cacheOperations = new CacheOperations();
 
 
-class CacheOperations {
-  constructor() {
-      
-  }
 
-  GetAllThemeModes(){
 
-  }
-
-  DeleteThemeMode(themeMode){
-
-  }
-
-  IsThemeModeExist(themeMode){
-
-  }
-
-  GetAllSemanticNames(){
-      return activeSemanticNames;
-  }
-
-  AddSemantic(semanticName, themeMode){
-
-  }
-
-  UpdateSemantic(semanticName, themeMode){
-
-  }
-
-  DeleteSemantic(semanticName, themeMode){
-
-  }
-
-  IsSemanticExist(){
-    
-  }
-
-}

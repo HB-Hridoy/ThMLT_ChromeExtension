@@ -420,7 +420,7 @@
       const themeModeValues = Array.from(elements).map(el => el.getAttribute('theme-mode'));
       
 
-      let isDuplicate = activeThemeModesInSemantic.includes(inputValue);
+      let isDuplicate = cacheOperations.isThemeModeExist(inputValue);
       let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
 
       // Process each value with a for loop
@@ -481,7 +481,7 @@
         const themeMode = selectPrimitiveModal.getAttribute("theme-mode");
         const semanticName = selectPrimitiveModal.getAttribute("semantic-name");
 
-        const result =  await updateSemanticValue(activeTemplateName, semanticName, themeMode, primitiveName);
+        const result =  await updateSemanticValue(cacheOperations.getTemplateName(), semanticName, themeMode, primitiveName);
 
         const tableBody = document.querySelector("#semantic-table tbody");
         // Get the <td> element with the specific data-index and class
@@ -549,7 +549,7 @@
 
       const parentTd = target.closest('td');
       const dataIndex = parentTd ? parentTd.getAttribute('data-index') : null;
-      const semanticName = activeSemanticNames[dataIndex-1];
+      const semanticName = cacheOperations.getAllSemanticNames()[dataIndex - 1];
       const themeMode = parentTd ? parentTd.getAttribute('theme-mode') : null;
 
       ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName);
@@ -568,8 +568,8 @@
   let semanticValues = [];
     try {
 
-      for (const themeMode of activeThemeModesInSemantic) {
-        const result = await addSemanticColor(activeTemplateName, semanticNameFromInput, themeMode, "Click to link color");
+      for (const themeMode of cacheOperations.getAllThemeModes()) {
+        const result = await addSemanticColor(cacheOperations.getTemplateName(), semanticNameFromInput, themeMode, "Click to link color");
         semanticValues.push("Click to link color");
         
       }
@@ -579,9 +579,9 @@
       ShowAlert("danger", error, 2500);
     }
     
-    if (semanticValues.length === activeThemeModesInSemantic.length) {
+    if (semanticValues.length === cacheOperations.getAllThemeModes().length) {
 
-      addNewRowToSemanticTable(semanticNameFromInput, semanticValues, activeThemeModesInSemantic);
+      addNewRowToSemanticTable(semanticNameFromInput, semanticValues, cacheOperations.getAllThemeModes());
     } else {
       ShowAlert("danger", "Error adding semantic", 2500);
     }
@@ -742,7 +742,7 @@
                                             <div class="semantic-pill" >
                                                 <div class="semantic-color-thumbnail-container">
                                                     <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                                                        style="background-color: ${semanticValue === "Click to link color" ? "#ffffff" : activePrimitives.get(semanticValue)}">
+                                                        style="background-color: ${semanticValue === "Click to link color" ? "#ffffff" : cacheOperations.getPrimitiveValue(semanticValue)}">
                                                     </div>
                                                 </div>
                                                 <div class="semantic-pill-text">
@@ -799,7 +799,7 @@
 
     try {
 
-      const result = deleteSemanticColor(selectedSemanticName, activeTemplateName);
+      const result = deleteSemanticColor(selectedSemanticName, cacheOperations.getTemplateName());
 
         // Check if the row exists
       if (row) {
@@ -823,7 +823,7 @@
 
     try {
 
-      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, activeTemplateName)
+      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, cacheOperations.getTemplateName())
 
       selectedSemanticCell.textContent = editSemanticRowInput.value;
     } catch (error) {
@@ -840,8 +840,8 @@
     const bodyRows = table.querySelectorAll('tbody tr');
     try {
 
-      for (const semanticName of activeSemanticNames){
-       const result = await addSemanticColor(activeTemplateName, semanticName, newThemeMode, "Click to link color");
+      for (const semanticName of cacheOperations.getAllSemanticNames()){
+       const result = await addSemanticColor(cacheOperations.getTemplateName(), semanticName, newThemeMode, "Click to link color");
       }
 
       const newThHTML = `
@@ -920,7 +920,7 @@
           }
         }
 
-        activeThemeModesInSemantic.push(newThemeMode);
+        cacheOperations.addNewThemeMode(newThemeMode)
         table.style.gridTemplateColumns = newGridTemplateColumns;
       
       
@@ -936,7 +936,7 @@
     const primitivesContainer = document.getElementById('select-primitive-modal-primitives-container');
     primitivesContainer.innerHTML = "";
 
-    for (const [primitiveName, primitiveValue] of activePrimitives) {
+    for (const [primitiveName, primitiveValue] of cacheOperations.getAllPrimitives()) {
 
       const newPrimitiveItem = ` 
                           <li data-index = "${dataIndex}" data-primitive-name = "${primitiveName}" data-primitive-value = "${primitiveValue}">

@@ -137,24 +137,12 @@ function getAllPrimitiveColors(templateName) {
     console.log("Got All Primitive Colors!");
     let result = request.result;
 
-    console.log(result);
-
-    
-
     const tableBody = document.querySelector("#primitives-table tbody");
     tableBody.innerHTML = "";
     // Iterate over the result array and inject HTML for each template
     result.forEach((primitive) => {
 
-      // Add all primitive names to activePrimitiveNames
-      if (!activePrimitiveNames.includes(primitive.primitiveName)) {
-        activePrimitiveNames.push(primitive.primitiveName);
-      }
-
-      // add all primitive Name and Value as map in active primitives
-      if (!activePrimitives.has(primitive.primitiveName)) {
-        activePrimitives.set(primitive.primitiveName, primitive.primitiveValue);
-      }
+    cacheOperations.addPrimitive(primitive.primitiveName, primitive.primitiveValue)
 
     // Create a new row
     const newRow = `
@@ -199,7 +187,6 @@ function getAllPrimitiveColors(templateName) {
       currentPrimitiveRowId++;
     });
 
-    console.log(activePrimitives);
     
 
     
@@ -360,15 +347,9 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
       let semanticColorStoreRequest = semanticColorsStore.put(newSemanticColor);
 
       semanticColorStoreRequest.onsuccess = (e) => {
-        activeSemanticNames.push(semanticName);
 
-        // Check if the themeMode exists in the map, if not, create a new object for it
-        if (!activeSemantics.has(themeMode)) {
-          activeSemantics.set(themeMode, {});
-        }
-
-        // Add the semanticName and linkedPrimitive to the themeMode
-        activeSemantics.get(themeMode)[semanticName] = linkedPrimitive;
+        cacheOperations.addSemantic(semanticName, themeMode, linkedPrimitive);
+        
 
         resolve("Semantic color added");
         console.log(`Semantic color '${semanticName}' added to '${themeMode}' mode`);
@@ -401,26 +382,11 @@ function getAllSemanticColors(templateName) {
     let result = semanticRequest.result;
 
     result.forEach(item => {
-      
-      // Add unique theme modes to activeThemeModesInSemantic
-      if (!activeThemeModesInSemantic.includes(item.themeMode)) {
-        activeThemeModesInSemantic.push(item.themeMode);
-      }
 
-      // Add all semantic names to activeSemanticNames
-      if (!activeSemanticNames.includes(item.semanticName)) {
-        activeSemanticNames.push(item.semanticName);
-      }
+      cacheOperations.addNewThemeMode(item.themeMode);
 
-      const { semanticName, themeMode, linkedPrimitive } = item;
+      cacheOperations.addSemantic(item.semanticName, item.themeMode, item.linkedPrimitive)
 
-      // Check if the themeMode exists in the map, if not, create a new object for it
-      if (!activeSemantics.has(themeMode)) {
-        activeSemantics.set(themeMode, {});
-      }
-
-      // Add the semanticName and linkedPrimitive to the themeMode
-      activeSemantics.get(themeMode)[semanticName] = linkedPrimitive;
     });
 
 
@@ -453,12 +419,7 @@ function getAllSemanticColors(templateName) {
       });
     }
 
-    
-    
-    
-
-    // Iterate over each theme mode in the activeSemantics Map
-    activeSemantics.forEach((semanticNames, themeMode) => {
+    cacheOperations.getAllSemantics().forEach((semanticNames, themeMode) => {
 
       const newTh = document.createElement('td');
       newTh.setAttribute("theme-mode", themeMode)
@@ -491,21 +452,17 @@ function getAllSemanticColors(templateName) {
     });
 
     
-    activeSemanticNames.forEach(semanticName => {
+    cacheOperations.getAllSemanticNames().forEach(semanticName => {
 
       let semanticValues = [];
       
-      activeThemeModesInSemantic.forEach(themeMode => {
-        const semanticValue = GetSemanticValueForMode(themeMode, semanticName);
+      cacheOperations.getAllThemeModes().forEach(themeMode => {
+        const semanticValue = cacheOperations.getSemanticValueForThemeMode(semanticName, themeMode);
         semanticValues.push(semanticValue);
-
-        
       });
-
       
-      
-      if (semanticValues.length === activeThemeModesInSemantic.length) {
-        addNewRowToSemanticTable(semanticName, semanticValues, activeThemeModesInSemantic);
+      if (semanticValues.length === cacheOperations.getAllThemeModes().length) {
+        addNewRowToSemanticTable(semanticName, semanticValues, cacheOperations.getAllThemeModes());
       }
     });
   }
@@ -543,19 +500,8 @@ function deleteSemanticColor(semanticName, templateName) {
               reject("Failed to delete a record.");
             };
             deleteRequest.onsuccess = () => {
-              // Find the index of semantic name
-              const index = activeSemanticNames.indexOf(semanticName);
-
-              if (index !== -1) {
-                activeSemanticNames.splice(index, 1); // Remove the item at the found index
-              }
               
-              activeSemantics.forEach((themeMode) => {
-                if (themeMode.hasOwnProperty(semanticName)) {
-                  delete themeMode[semanticName];
-                  
-                }
-              });
+              cacheOperations.deleteSemantic(semanticName);
               deletionCount++;
             };
           }
@@ -565,9 +511,6 @@ function deleteSemanticColor(semanticName, templateName) {
           // Cursor exhausted: all records have been processed
           if (deletionCount > 0) {
             console.log(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
-            console.log(activeSemantics);
-            console.log(activeSemanticNames);
-            
             
             resolve(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
           } else {
