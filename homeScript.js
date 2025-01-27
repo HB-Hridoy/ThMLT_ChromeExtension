@@ -13,6 +13,21 @@
 
     document.addEventListener('DOMContentLoaded', () => {
 
+      // const sessionScreen = sessionManager.getScreen();
+      // if (sessionScreen) {
+      //   console.log(sessionScreen);
+        
+      // }
+
+      (async () => {
+        const sessionScreen = await sessionManager.getScreen();
+        const sessionColorTab = await sessionManager.getColorTab();
+        const sessionTemplate = await sessionManager.getTemplate();
+        console.log("Screen:", sessionScreen);
+        console.log("Color Tab:", sessionColorTab);
+        console.log("Template:", sessionTemplate);
+      })();
+
       importJsonEditor = CodeMirror.fromTextArea(document.getElementById("import-json-code-editor"), {
         mode: "application/json", 
         lineNumbers: true,        
@@ -156,6 +171,13 @@
           getAllPrimitiveColors(cacheOperations.getTemplateName());
           
           getAllSemanticColors(cacheOperations.getTemplateName());
+
+          sessionManager.setScreen(sessionManager.COLORS_SCREEN);
+          sessionManager.setColorTab(sessionManager.PRIMITIVES_COLOR_TAB);
+          sessionManager.setTemplate(cacheOperations.getTemplateName());
+
+          document.getElementById("bottom-nav-bar").classList.replace("visible", "hidden");
+          
 
         }
       });

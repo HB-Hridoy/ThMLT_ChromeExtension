@@ -15,6 +15,12 @@
   const editSemanticRowInput = document.getElementById("edit-semantic-row-input");
   const editSemanticRowErrors = document.getElementById("edit-semantic-row-errors");
 
+  const addRowToPrimitiveButton = document.getElementById("add-row-to-primitives");
+  const addNewPrimitiveInput = document.getElementById("add-new-primitive-input");
+  const addNewPrimitiveErrors = document.getElementById("add-new-primitive-errors");
+
+  const primitiveRowEditButton = document.getElementById("primitive-row-edit-button");
+
   const addNewThemeButton = document.getElementById("add-new-theme-button");
   const newThemeInput = document.getElementById("add-new-theme-input");
   const newThemeInputErrors = document.getElementById("add-new-theme-errors");
@@ -33,25 +39,45 @@
   document.getElementById("color-screen-back-button").addEventListener("click", () => {
     document.getElementById("colors-screen").classList.replace("visible", "hidden");
     document.getElementById("home-screen").classList.replace("hidden", "visible");
+
+    document.getElementById("bottom-nav-bar").classList.replace("visible", "hidden");
   });
 
   
   // open primitives tab
-  primitivesTabButton.addEventListener('click', () => {
-      document.getElementById("primitives-screen").classList.replace("hidden", "visible");
-      document.getElementById("semantic-screen").classList.replace("visible", "hidden");
+    primitivesTabButton.addEventListener('click', () => {
+      // document.getElementById("primitives-screen").classList.replace("hidden", "visible");
+      // document.getElementById("semantic-screen").classList.replace("visible", "hidden");
 
-      semanticTabButton.className = "inline-block p-2 hover:text-blue-600";
-      primitivesTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+      // semanticTabButton.className = "inline-block p-2 hover:text-blue-600";
+      // primitivesTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+      SwitchTabs("primitives");
+      sessionManager.setColorTab(sessionManager.PRIMITIVES_COLOR_TAB);
     });
     // Open semantic screen
     semanticTabButton.addEventListener('click', () => {
-        document.getElementById("primitives-screen").classList.replace("visible", "hidden");
-        document.getElementById("semantic-screen").classList.replace("hidden", "visible");
+        // document.getElementById("primitives-screen").classList.replace("visible", "hidden");
+        // document.getElementById("semantic-screen").classList.replace("hidden", "visible");
 
-        primitivesTabButton.className = "inline-block p-2 hover:text-blue-600";
-        semanticTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+        // primitivesTabButton.className = "inline-block p-2 hover:text-blue-600";
+        // semanticTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+        SwitchTabs("semantic");
+        sessionManager.setColorTab(sessionManager.SEMANTIC_COLOR_TAB);
+
+
     });
+
+    function SwitchTabs(tabName) {
+
+      const availableTabs = ["primitives", "semantic"];
+      availableTabs.forEach(tab => {
+        document.getElementById(`${tab}-screen`).classList.replace("visible", "hidden");
+        document.getElementById(`${tab}-tab`).className = "inline-block p-2 hover:text-blue-600";
+      });
+      
+      document.getElementById(`${tabName}-screen`).classList.replace("hidden", "visible");
+      document.getElementById(`${tabName}-tab`).className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+    }
 
 
   //Primitives Screen
@@ -330,9 +356,16 @@
     const target = event.target;
     const parentRow = target.closest("tr");
 
-    // Show delete button on hover
     if (parentRow) {
-      parentRow.querySelector('.delete-row').style.display = 'inline-flex';  // Show delete button
+      const rowId = parentRow.getAttribute("primitive-row-index");
+      if(rowId){
+        const editButtonContainer = parentRow.querySelector("#color-box-parent");
+        primitiveRowEditButton.classList.replace("hidden", "flex");
+        primitiveRowEditButton.setAttribute("data-index", rowId);
+        editButtonContainer.appendChild(primitiveRowEditButton);
+
+      }
+      
     }
   }, true); // Use capture phase for this to run first
 
@@ -340,57 +373,119 @@
     const target = event.target;
     const parentRow = target.closest("tr");
 
-    // Hide delete button when hover ends
     if (parentRow) {
-      parentRow.querySelector('.delete-row').style.display = 'none';  // Hide delete button
+      primitiveRowEditButton.classList.replace("felx", "hidden");
     }
   }, true); // Use capture phase for this to run first
 
+  addNewPrimitiveInput.addEventListener("input", () =>{
 
-  document.getElementById("addRowToPrimitives").addEventListener("click", function () {
+
+    if (addNewPrimitiveInput.value.trim() !== "") {
+      
+      const inputValue = addNewPrimitiveInput.value.trim();
+
+
+      let isDuplicate = false;
+      let isRegEx = !nameRegex.test(inputValue);
+
+      
+
+      // Loop through the semantic names to check for duplicates
+      for (const primitiveName of cacheOperations.getAllPrimitiveNames()) {
+        if (primitiveName === inputValue) {
+          isDuplicate = true;
+          break; // Exit the loop early if a duplicate is found
+        }
+      }
+      
+      if(isDuplicate){
+        addNewPrimitiveErrors.innerHTML = "Semantic name already exist!";
+        addNewPrimitiveErrors.classList.replace("hidden", "visible");
+        addRowToPrimitiveButton.classList.replace("visible","hidden");
+      } else if (isRegEx){
+        addNewPrimitiveErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+        addNewPrimitiveErrors.classList.replace("hidden", "visible");
+        addRowToPrimitiveButton.classList.replace("visible","hidden");
+      } else {
+        addNewPrimitiveErrors.classList.replace("visible", "hidden");
+        addRowToPrimitiveButton.classList.replace("hidden","visible");
+      }
+
+    } else {
+      addRowToPrimitiveButton.classList.replace("visible","hidden");
+    }
+
+  });
+
+  addRowToPrimitiveButton.addEventListener("click", function () {
+
+    addNewRowToPrimitiveTable("white","#FFFFFF");
     // Get the table body
-    const tableBody = document.querySelector("#primitives-table tbody");
+    // const tableBody = document.querySelector("#primitives-table tbody");
 
-    // Create a new row
-    const newRow = `
-                  <tr id="primitive-row-${currentPrimitiveRowId}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-                      <div class="flex items-center w-full">
-                        <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
-                        <input 
-                          id="primitive-name-input-${currentPrimitiveRowId}"
-                          type="text" 
-                          value="" 
-                          class="name-input text-sm text-gray-500 ml-2 w-full border-0 border-white rounded-md px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Give primitive a name" 
-                        />
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 w-2/4">
-                      <div class="color-box-parent w-full flex items-center">
-                        <div id="primitive-color-box-${currentPrimitiveRowId}" class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-                        <p id="primitive-value-${currentPrimitiveRowId}" class="color-text mr-2">#------</p>
-                        <div id="temp-primitive-color-picker" class="flex-1" ></div> <!-- Takes remaining space -->
-                        <button id="primitive-delete-row-${currentPrimitiveRowId}" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-                          </svg>
-                          <span class="sr-only">Icon description</span>
-                        </button>
-                         <button id="primitive-refresh-row-${currentPrimitiveRowId}" class="hidden refresh-row text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                          <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
-                          </svg>
-                          <span class="sr-only">Icon description</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  `;
+    // // Create a new row
+    // const newRow = `
+    //               <tr id="primitive-row-${currentPrimitiveRowId}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+    //                 <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+    //                   <div class="flex items-center w-full">
+    //                     <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
+    //                     <input 
+    //                       id="primitive-name-input-${currentPrimitiveRowId}"
+    //                       type="text" 
+    //                       value="" 
+    //                       class="name-input text-sm text-gray-500 ml-2 w-full border-0 border-white rounded-md px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    //                       placeholder="Give primitive a name" 
+    //                     />
+    //                   </div>
+    //                 </td>
+    //                 <td class="px-6 py-4 w-2/4">
+    //                   <div class="color-box-parent w-full flex items-center">
+    //                     <div id="primitive-color-box-${currentPrimitiveRowId}" class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+    //                     <p id="primitive-value-${currentPrimitiveRowId}" class="color-text mr-2">#------</p>
+    //                     <div id="temp-primitive-color-picker" class="flex-1" ></div> <!-- Takes remaining space -->
+    //                     <button id="primitive-delete-row-${currentPrimitiveRowId}" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+    //                       <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    //                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
+    //                       </svg>
+    //                       <span class="sr-only">Icon description</span>
+    //                     </button>
+    //                      <button id="primitive-refresh-row-${currentPrimitiveRowId}" class="hidden refresh-row text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+    //                       <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    //                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
+    //                       </svg>
+    //                       <span class="sr-only">Icon description</span>
+    //                     </button>
+    //                   </div>
+    //                 </td>
+    //               </tr>
+    //               `;
+
+    // const newRow2 = `
+    //               <tr primitive-row-index = "${currentPrimitiveRowId}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+    //                 <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+    //                   <div class="flex items-center w-full">
+    //                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
+    //                       <path fill="#000000" fill-rule="evenodd"
+    //                           d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+    //                           clip-rule="evenodd"></path>
+    //                     </svg>
+    //                     <p id="primitive-name" class="text-xs text-gray-500 ml-2 w-full">g50</p>
+                        
+    //                   </div>
+    //                 </td>
+    //                 <td class="px-6 py-4 w-2/4">
+    //                   <div id="color-box-parent" class="w-full flex items-center">
+    //                     <div id="color-box" class=" h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
+    //                     <p id="color-text" class="text-xs mr-2">#FFFFFF</p>
+    //                   </div>
+    //                 </td>
+    //               </tr>
+    // `;
     
-    // Insert the new row into the table body
-    tableBody.insertAdjacentHTML("beforeend", newRow);
-    currentPrimitiveRowId++;
+    // // Insert the new row into the table body
+    // tableBody.insertAdjacentHTML("beforeend", newRow2);
+    // currentPrimitiveRowId++;
     //addPrimitiveColor({id: document.getElementById("template-name-colors-screen").innerText.trim(), primitiveName: , primitiveValue: })
   });
 
@@ -929,6 +1024,37 @@
       console.log(error);
       
     }
+  }
+
+  function addNewRowToPrimitiveTable(primitiveName, primitiveValue) {
+    
+     const tableBody = document.querySelector("#primitives-table tbody");
+ 
+     const newRow = `
+                   <tr primitive-row-index = "${currentPrimitiveRowId}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                     <td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+                       <div class="flex items-center w-full">
+                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
+                           <path fill="#000000" fill-rule="evenodd"
+                               d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                               clip-rule="evenodd"></path>
+                         </svg>
+                         <p id="primitive-name" class="text-xs text-gray-500 ml-2 w-full">${primitiveName}</p>
+                         
+                       </div>
+                     </td>
+                     <td class="px-6 py-3 w-2/4">
+                       <div id="color-box-parent" class="w-full flex items-center">
+                         <div id="color-box" class=" h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue} ;"></div>
+                         <p id="color-text" class="flex-1 text-xs mr-2">${primitiveValue}</p>
+                       </div>
+                     </td>
+                   </tr>
+     `;
+     
+     tableBody.insertAdjacentHTML("beforeend", newRow);
+     currentPrimitiveRowId++;
+    
   }
 
   function ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName) {

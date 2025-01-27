@@ -8,6 +8,8 @@
     
       this.activePrimitiveNames = [];
       this.activePrimitives = new Map();
+
+      this.activeTemplateNames = [];
     }
 
     updateTemplateName(templateName){
@@ -15,6 +17,27 @@
     }
     getTemplateName(){
       return this.activeTemplateName;
+    }
+
+    addTemplate(templateName) {
+      if (!this.activeTemplateNames.includes(templateName)) {
+          this.activeTemplateNames.push(templateName);
+      }
+    }
+
+    deleteTemplate(templateName) {
+        const index = this.activeTemplateNames.indexOf(templateName);
+        if (index !== -1) {
+            this.activeTemplateNames.splice(index, 1);
+        }
+    }
+
+    isTemplateExist(templateName) {
+        return this.activeTemplateNames.includes(templateName);
+    }
+
+    getAllTemplates() {
+        return [...this.activeTemplateNames];
     }
 
     addNewThemeMode(themeMode) {
@@ -207,12 +230,64 @@
       this.activeSemantics.clear();
       this.activePrimitiveNames = [];
       this.activePrimitives.clear();
+      this.activeTemplateNames = [];
     }
+  }
+
+  class SessionManager {
+    constructor() {
+      this.HOME_SCREEN = "home-screeen";
+      this.COLORS_SCREEN = "colors-screen";
+      this.TOOLS_SCREEN = "tools-screen";
+      this.INFO_SCREEN = "info-screen";
+
+      this.PRIMITIVES_COLOR_TAB = "primitives";
+      this.SEMANTIC_COLOR_TAB = "semantic";
+
+
+    }
+
+    setSessionData(key, value) {
+      chrome.storage.session.set({ [key]: value }, () => {
+          console.log(`${key} set to '${value}' in session.`);
+      });
+    }
+    
+    getSessionData(key) {
+        return new Promise((resolve) => {
+            chrome.storage.session.get(key, (result) => {
+                resolve(result[key]);
+            });
+        });
+    }
+    
+    setScreen(screenName){
+      this.setSessionData("screen", screenName);
+    }
+    async getScreen() {
+      return await this.getSessionData("screen");
+    }
+    setColorTab(colorTab){
+      this.setSessionData("colorTab", colorTab);
+      
+    }
+    async getColorTab() {
+      return await this.getSessionData("colorTab");
+    }
+    setTemplate(template){
+      this.setSessionData("template", template);
+      
+    }
+    async getTemplate() {
+      return await this.getSessionData("template");
+    }
+
   }
   
   let activeScreen = "home-screen";
 
   const cacheOperations = new CacheOperations();
+  const sessionManager = new SessionManager();
 
   let currentPrimitiveRowId = 1;
   let currentSemanticRowId = 1;
@@ -222,8 +297,6 @@
   let oldPrimitiveInputValues = new Map();
 
   let semanticTableColumns = 2;
-
-  const bottomNavBar = document.getElementById("bottom-nav-bar");
   
   document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('[data-nav-button-screen-target]');
@@ -231,6 +304,9 @@
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             const targetScreenId = button.getAttribute("data-nav-button-screen-target");
+
+            console.log(targetScreenId);
+            
 
             SwitchScreen(targetScreenId);
         });
