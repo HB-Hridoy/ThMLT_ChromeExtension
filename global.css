@@ -11,4 +11,17 @@
     height: 100%;
 }
 
-
+/* Placeholder line for drag-and-drop */
+/* .placeholder {
+    height: 2px;
+    background-color: #3b82f6;
+    margin: 2px 0;
+    transition: all 0.2s ease;
+  } */
+  
+  /* Visual feedback for the dragging row */
+  .dragging {
+    opacity: 0.5; 
+    background-color: #c7f3ff;
+    transition: opacity 0.2s ease;
+  }

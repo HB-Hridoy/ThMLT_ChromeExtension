@@ -374,11 +374,19 @@
 
   });
 
-  addRowToPrimitiveButton.addEventListener("click", function () {
+  addRowToPrimitiveButton.addEventListener("click", async () =>  {
 
-    const primitiveName = addNewPrimitiveInput.value.trim();
-    const primitiveVaule = document.getElementById("primitive-modal-color-text").textContent.trim();
-    addNewRowToPrimitiveTable(primitiveName,primitiveVaule);
+    try {
+      const primitiveName = addNewPrimitiveInput.value.trim();
+      const primitiveVaule = document.getElementById("primitive-modal-color-text").textContent.trim();
+      const result = await addPrimitiveColor(cacheOperations.getTemplateName(), primitiveName, primitiveVaule);
+      ShowAlert("success", result, 2500);
+      addNewRowToPrimitiveTable(primitiveName,primitiveVaule);
+    } catch (error) {
+      ShowAlert("danger", error, 2500);
+    }
+
+    
     
   });
 
@@ -921,32 +929,37 @@
 
   function addNewRowToPrimitiveTable(primitiveName, primitiveValue) {
     
-     const tableBody = document.querySelector("#primitives-table tbody");
- 
-     const newRow = `
-                   <tr primitive-row-index = "${currentPrimitiveRowId}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                     <td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-                       <div class="flex items-center w-full">
-                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
-                           <path fill="#000000" fill-rule="evenodd"
-                               d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
-                               clip-rule="evenodd"></path>
-                         </svg>
-                         <p id="primitive-name" class="text-xs text-gray-500 ml-2 w-full">${primitiveName}</p>
-                         
-                       </div>
-                     </td>
-                     <td class="px-6 py-3 w-2/4">
-                       <div id="color-box-parent" class="w-full flex items-center">
-                         <div id="color-box" class=" h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue} ;"></div>
-                         <p id="color-text" class="flex-1 text-xs mr-2">${primitiveValue}</p>
-                       </div>
-                     </td>
-                   </tr>
-     `;
-     
-     tableBody.insertAdjacentHTML("beforeend", newRow);
-     currentPrimitiveRowId++;
+    const tableBody = document.querySelector("#primitives-table tbody");
+
+    const newRow = `
+                  <tr primitive-row-index = "${currentPrimitiveRowId}" order-index="${currentPrimitiveRowId}" draggable="true" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                    <td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+                      <div class="flex items-center w-full">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
+                          <path fill="#000000" fill-rule="evenodd"
+                              d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                              clip-rule="evenodd"></path>
+                        </svg>
+                        <p id="primitive-name" class="text-xs text-gray-500 ml-2 w-full">${primitiveName}</p>
+                        
+                      </div>
+                    </td>
+                    <td class="px-6 py-3 w-2/4">
+                      <div id="color-box-parent" class="w-full flex items-center">
+                        <div id="color-box" class=" h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue} ;"></div>
+                        <p id="color-text" class="flex-1 text-xs mr-2">${primitiveValue}</p>
+                      </div>
+                    </td>
+                  </tr>
+    `;
+    
+    tableBody.insertAdjacentHTML("beforeend", newRow);
+
+    // Make the new row draggable
+    const addedRow = tableBody.lastElementChild;
+    makePrimitiveRowDraggable(addedRow);
+
+    currentPrimitiveRowId++;
     
   }
 
@@ -975,5 +988,92 @@
 
   function CloseSelectPrimitiveModal() {
     selectPrimitiveModal.classList.replace("flex","hidden");
+  }
+
+  function makePrimitiveRowDraggable(row) {
+    row.setAttribute('draggable', true);
+  
+    // Drag Start
+    row.addEventListener('dragstart', function (e) {
+      e.dataTransfer.setData('text/plain', row.getAttribute('primitive-row-index'));
+      row.classList.add('dragging'); // Add a class for visual feedback
+    });
+  
+    // Drag Over
+    row.addEventListener('dragover', function (e) {
+      e.preventDefault(); // Allow dropping
+  
+      const draggingRow = document.querySelector('.dragging'); // Get the row being dragged
+      const currentRow = e.target.closest('tr'); // Get the row being hovered over
+  
+      if (draggingRow && currentRow && draggingRow !== currentRow) {
+        const rows = Array.from(row.parentElement.querySelectorAll('tr'));
+        const currentIndex = rows.indexOf(currentRow);
+        const draggingIndex = rows.indexOf(draggingRow);
+  
+        // // Remove any existing placeholder
+        // const existingPlaceholder = row.parentElement.querySelector('.placeholder');
+        // if (existingPlaceholder) {
+        //   existingPlaceholder.remove();
+        // }
+  
+        // // Create a new placeholder
+        // const placeholder = document.createElement('div');
+        // placeholder.classList.add('placeholder');
+
+        if (draggingIndex < currentIndex) {
+          // Insert the dragging row after the current row
+          row.parentElement.insertBefore(draggingRow, currentRow.nextSibling);
+        } else {
+          // Insert the dragging row before the current row
+          row.parentElement.insertBefore(draggingRow, currentRow);
+        }
+  
+        // // Insert the placeholder at the correct position
+        // if (draggingIndex < currentIndex) {
+
+        //   row.parentElement.insertBefore(placeholder, currentRow.nextSibling);
+        // } else {
+
+        //   row.parentElement.insertBefore(placeholder, currentRow);
+        // }
+      }
+    });
+  
+    // Drop
+    row.addEventListener('drop', function (e) {
+      e.preventDefault();
+
+      const rows = Array.from(row.parentElement.querySelectorAll('tr'));
+  
+      // Update the order-index for all rows
+      rows.forEach((row, index) => {
+        row.setAttribute('order-index', index + 1); // Start from 1
+      });
+  
+      row.classList.remove('dragging'); // Remove the dragging class
+
+      // Remove the placeholder
+      // const placeholder = row.parentElement.querySelector('.placeholder');
+
+      // if (placeholder) {
+      //   placeholder.remove();
+      // }
+
+    });
+  
+    // Drag End
+    row.addEventListener('dragend', function () {
+      
+  
+      row.classList.remove('dragging'); // Remove the dragging class
+
+      // Remove the placeholder if it exists
+      // const placeholder = row.parentElement.querySelector('.placeholder');
+      // if (placeholder) {
+      //   placeholder.remove();
+      // }
+
+    });
   }
 
