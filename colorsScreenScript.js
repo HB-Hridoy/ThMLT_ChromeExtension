@@ -379,7 +379,7 @@
     try {
       const primitiveName = addNewPrimitiveInput.value.trim();
       const primitiveVaule = document.getElementById("primitive-modal-color-text").textContent.trim();
-      const result = await addPrimitiveColor(cacheOperations.getTemplateName(), primitiveName, primitiveVaule);
+      const result = await addPrimitiveColor(cacheOperations.getTemplateName(), primitiveName, primitiveVaule, currentPrimitiveRowId);
       ShowAlert("success", result, 2500);
       addNewRowToPrimitiveTable(primitiveName,primitiveVaule);
     } catch (error) {
@@ -996,7 +996,7 @@
     // Drag Start
     row.addEventListener('dragstart', function (e) {
       e.dataTransfer.setData('text/plain', row.getAttribute('primitive-row-index'));
-      row.classList.add('dragging'); // Add a class for visual feedback
+      row.classList.add('dragging');
     });
   
     // Drag Over
@@ -1010,16 +1010,6 @@
         const rows = Array.from(row.parentElement.querySelectorAll('tr'));
         const currentIndex = rows.indexOf(currentRow);
         const draggingIndex = rows.indexOf(draggingRow);
-  
-        // // Remove any existing placeholder
-        // const existingPlaceholder = row.parentElement.querySelector('.placeholder');
-        // if (existingPlaceholder) {
-        //   existingPlaceholder.remove();
-        // }
-  
-        // // Create a new placeholder
-        // const placeholder = document.createElement('div');
-        // placeholder.classList.add('placeholder');
 
         if (draggingIndex < currentIndex) {
           // Insert the dragging row after the current row
@@ -1028,16 +1018,9 @@
           // Insert the dragging row before the current row
           row.parentElement.insertBefore(draggingRow, currentRow);
         }
-  
-        // // Insert the placeholder at the correct position
-        // if (draggingIndex < currentIndex) {
 
-        //   row.parentElement.insertBefore(placeholder, currentRow.nextSibling);
-        // } else {
-
-        //   row.parentElement.insertBefore(placeholder, currentRow);
-        // }
       }
+
     });
   
     // Drop
@@ -1051,29 +1034,31 @@
         row.setAttribute('order-index', index + 1); // Start from 1
       });
   
-      row.classList.remove('dragging'); // Remove the dragging class
-
-      // Remove the placeholder
-      // const placeholder = row.parentElement.querySelector('.placeholder');
-
-      // if (placeholder) {
-      //   placeholder.remove();
-      // }
+      row.classList.remove('dragging'); 
 
     });
   
     // Drag End
     row.addEventListener('dragend', function () {
       
-  
-      row.classList.remove('dragging'); // Remove the dragging class
+      row.classList.remove('dragging');
 
-      // Remove the placeholder if it exists
-      // const placeholder = row.parentElement.querySelector('.placeholder');
-      // if (placeholder) {
-      //   placeholder.remove();
-      // }
+      // Update Order Indexes in DB
+      const tableBody = document.querySelector("#primitives-table tbody");
+
+      const rows = tableBody.querySelectorAll('tr');
+
+      rows.forEach((row, index) => {
+          const primitiveName = row.querySelector("#primitive-name").textContent.trim();
+          const primitivevalue = row.querySelector("#color-text").textContent.trim();
+          const newOrderIndex = index + 1;
+          //console.log(`Row ${newOrderIndex}: [ PrimitiveName: ${primitiveName}], [ PrimitiveValue: ${primitivevalue}]`, row);
+          updatePrimitiveColor(cacheOperations.getTemplateName(), primitiveName, primitivevalue, newOrderIndex);
+      });
+
 
     });
   }
+
+  
 
