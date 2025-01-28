@@ -221,14 +221,40 @@ function getAllPrimitiveColors(templateName) {
     addNewRowToPrimitiveTable(primitive.primitiveName, primitive.primitiveValue);
     });
 
-    
+    // If there's an open pickr, close it before opening the new one
+    if (pickrInstance && pickrInstance.isOpen()) {
+      pickrInstance.hide();
+    }
 
-    
-    tableBody.querySelectorAll('.name-input').forEach(input => {
-      const inputRowId = input.id.split('-').pop();
-      const inputValue = input.value.trim();
-      oldPrimitiveInputValues.set(inputRowId, inputValue); 
-    });
+    // If Pickr instance doesn't exist, create it
+    if (!pickrInstance) {
+      pickrInstance = Pickr.create({
+        el: '#color-picker', 
+        theme: 'nano',
+        default: "#FFFFFF",
+        swatches: ['#ff0000', '#00ff00', '#0000ff', '#000000', '#ffffff'],
+        components: {
+          preview: true,
+          hue: true,
+          interaction: {
+            hex: true,
+            rgba: true,
+            input: true,
+            save: false
+          }
+        }
+      });
+        const pickrRoot = document.querySelector('.pickr'); // Root element of Pickr
+        pickrRoot.style.border = '1px solid #D1D5DB'; // Set border color
+        pickrRoot.style.borderRadius = '5px'; // Set border color
+
+      pickrInstance.on('change', (color) => {
+        const hex = color.toHEXA().toString(); // Get the hex value
+        pickrInstance.setColor(hex);
+        
+        document.getElementById("primitive-modal-color-text").innerText = hex;  // Update colorTextView with the color
+      });
+    }
 
   };
 

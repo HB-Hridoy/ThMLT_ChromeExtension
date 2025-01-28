@@ -46,25 +46,13 @@
   
   // open primitives tab
     primitivesTabButton.addEventListener('click', () => {
-      // document.getElementById("primitives-screen").classList.replace("hidden", "visible");
-      // document.getElementById("semantic-screen").classList.replace("visible", "hidden");
-
-      // semanticTabButton.className = "inline-block p-2 hover:text-blue-600";
-      // primitivesTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
       SwitchTabs("primitives");
       sessionManager.setColorTab(sessionManager.PRIMITIVES_COLOR_TAB);
     });
     // Open semantic screen
     semanticTabButton.addEventListener('click', () => {
-        // document.getElementById("primitives-screen").classList.replace("visible", "hidden");
-        // document.getElementById("semantic-screen").classList.replace("hidden", "visible");
-
-        // primitivesTabButton.className = "inline-block p-2 hover:text-blue-600";
-        // semanticTabButton.className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
         SwitchTabs("semantic");
         sessionManager.setColorTab(sessionManager.SEMANTIC_COLOR_TAB);
-
-
     });
 
     function SwitchTabs(tabName) {
@@ -101,39 +89,7 @@
 
       if(!parentRow.classList.contains("bg-red-300")){
         
-        // If there's an open pickr, close it before opening the new one
-        if (pickrInstance && pickrInstance.isOpen()) {
-          pickrInstance.hide();
-        }
-        // Store the clicked colorDiv
-        currentPrimitiveColorDiv = target;
-
-        // If Pickr instance doesn't exist, create it
-        if (!pickrInstance) {
-          pickrInstance = Pickr.create({
-            el: '#color-picker', 
-            theme: 'nano',
-            default: "#FFFFFF",
-            swatches: ['#ff0000', '#00ff00', '#0000ff', '#000000', '#ffffff'],
-            components: {
-              preview: true,
-              hue: true,
-              interaction: {
-                hex: true,
-                rgba: true,
-                input: true,
-                save: false
-              }
-            }
-          });
-
-
-          pickrInstance.on('change', (color) => {
-            const hex = color.toHEXA().toString(); // Get the hex value
-            currentPrimitiveColorDiv.style.backgroundColor = hex;  // Set colorDiv background color
-            currentPrimitiveColorTextview.innerText = hex;  // Update colorTextView with the color
-          });
-        }
+        
 
         // Move the Pickr container to the new location
         parentRow.querySelector("#temp-primitive-color-picker").appendChild(document.getElementById("color-picker-container"));
@@ -420,73 +376,10 @@
 
   addRowToPrimitiveButton.addEventListener("click", function () {
 
-    addNewRowToPrimitiveTable("white","#FFFFFF");
-    // Get the table body
-    // const tableBody = document.querySelector("#primitives-table tbody");
-
-    // // Create a new row
-    // const newRow = `
-    //               <tr id="primitive-row-${currentPrimitiveRowId}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-    //                 <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-    //                   <div class="flex items-center w-full">
-    //                     <img src="/assets/paintBoard.svg" alt="" class="w-5 h-5" />
-    //                     <input 
-    //                       id="primitive-name-input-${currentPrimitiveRowId}"
-    //                       type="text" 
-    //                       value="" 
-    //                       class="name-input text-sm text-gray-500 ml-2 w-full border-0 border-white rounded-md px-2 py-1 dark:bg-gray-800 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    //                       placeholder="Give primitive a name" 
-    //                     />
-    //                   </div>
-    //                 </td>
-    //                 <td class="px-6 py-4 w-2/4">
-    //                   <div class="color-box-parent w-full flex items-center">
-    //                     <div id="primitive-color-box-${currentPrimitiveRowId}" class="color-box h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-    //                     <p id="primitive-value-${currentPrimitiveRowId}" class="color-text mr-2">#------</p>
-    //                     <div id="temp-primitive-color-picker" class="flex-1" ></div> <!-- Takes remaining space -->
-    //                     <button id="primitive-delete-row-${currentPrimitiveRowId}" class="hidden delete-row text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-    //                       <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-    //                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z"/>
-    //                       </svg>
-    //                       <span class="sr-only">Icon description</span>
-    //                     </button>
-    //                      <button id="primitive-refresh-row-${currentPrimitiveRowId}" class="hidden refresh-row text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm p-1.5 text-center  items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-    //                       <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-    //                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
-    //                       </svg>
-    //                       <span class="sr-only">Icon description</span>
-    //                     </button>
-    //                   </div>
-    //                 </td>
-    //               </tr>
-    //               `;
-
-    // const newRow2 = `
-    //               <tr primitive-row-index = "${currentPrimitiveRowId}" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-    //                 <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
-    //                   <div class="flex items-center w-full">
-    //                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
-    //                       <path fill="#000000" fill-rule="evenodd"
-    //                           d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
-    //                           clip-rule="evenodd"></path>
-    //                     </svg>
-    //                     <p id="primitive-name" class="text-xs text-gray-500 ml-2 w-full">g50</p>
-                        
-    //                   </div>
-    //                 </td>
-    //                 <td class="px-6 py-4 w-2/4">
-    //                   <div id="color-box-parent" class="w-full flex items-center">
-    //                     <div id="color-box" class=" h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm bg-white"></div>
-    //                     <p id="color-text" class="text-xs mr-2">#FFFFFF</p>
-    //                   </div>
-    //                 </td>
-    //               </tr>
-    // `;
+    const primitiveName = addNewPrimitiveInput.value.trim();
+    const primitiveVaule = document.getElementById("primitive-modal-color-text").textContent.trim();
+    addNewRowToPrimitiveTable(primitiveName,primitiveVaule);
     
-    // // Insert the new row into the table body
-    // tableBody.insertAdjacentHTML("beforeend", newRow2);
-    // currentPrimitiveRowId++;
-    //addPrimitiveColor({id: document.getElementById("template-name-colors-screen").innerText.trim(), primitiveName: , primitiveValue: })
   });
 
   //Semantic Screen
