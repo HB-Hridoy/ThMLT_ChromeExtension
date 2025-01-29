@@ -15,3 +15,7 @@
     background-color: rgb(225 239 254);
     transition: opacity 0.2s ease;
   }
+
+  .styles{
+    color: #00ffdd;
+  }

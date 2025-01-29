@@ -20,6 +20,13 @@
   const addNewPrimitiveErrors = document.getElementById("add-new-primitive-errors");
 
   const primitiveRowEditButton = document.getElementById("primitive-row-edit-button");
+  const primitiveUpdateButton =  document.getElementById("update-primitive-button");
+  const primitiveDeleteButton = document.getElementById("delete-primitive-button");
+
+  //const renameSemanticRowButton = document.getElementById("rename-semantic-row-button");
+  const editPrimitiveRowInput = document.getElementById("edit-primitive-row-input");
+  const editPrimitiveRowErrors = document.getElementById("edit-primitive-row-errors");
+
 
   const addNewThemeButton = document.getElementById("add-new-theme-button");
   const newThemeInput = document.getElementById("add-new-theme-input");
@@ -40,7 +47,7 @@
     document.getElementById("colors-screen").classList.replace("visible", "hidden");
     document.getElementById("home-screen").classList.replace("hidden", "visible");
 
-    document.getElementById("bottom-nav-bar").classList.replace("visible", "hidden");
+    document.getElementById("bottom-nav-bar").classList.replace("hidden", "visible");
   });
 
   
@@ -277,35 +284,6 @@
     }
   });
   
-  // Monitor changes to <p class="color-text">
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (
-        mutation.type === "characterData" || 
-        mutation.target.nodeType === Node.ELEMENT_NODE
-      ) {
-        const target = mutation.target;
-
-        if (target.tagName === "P" && target.classList.contains("color-text")) {
-          const rowId  = target.id.split('-').pop();
-          // const parentRow = document.getElementById(`primitive-row-${rowId}`);
-          // if(!parentRow.classList.contains("bg-red-300")){
-          //   document.getElementById(`primitive-refresh-row-${rowId}`).classList.replace("hidden", "visible");
-          //   pickrInstance.setColorRepresentation("#f8b4b3");
-          // }else{
-          //   pickrInstance.setColorRepresentation("#ffffff");
-          // }
-          document.getElementById(`primitive-refresh-row-${rowId}`).classList.replace("hidden", "visible");
-        }
-      }
-    });
-  });
-
-  observer.observe(primitiveTableBody, {
-    subtree: true, // Observe all descendants
-    childList: true, // Observe added/removed nodes
-    characterData: true, // Observe text changes
-  });
 
   // Adding event listener for hover functionality to show the delete button
   document.querySelector("#primitives-table tbody").addEventListener("mouseover", function(event) {
@@ -317,7 +295,7 @@
       if(rowId){
         const editButtonContainer = parentRow.querySelector("#color-box-parent");
         primitiveRowEditButton.classList.replace("hidden", "flex");
-        primitiveRowEditButton.setAttribute("data-index", rowId);
+        primitiveRowEditButton.setAttribute("primitive-row-index", rowId);
         editButtonContainer.appendChild(primitiveRowEditButton);
 
       }
@@ -390,9 +368,103 @@
     
   });
 
+  primitiveRowEditButton.addEventListener("click", ()=> {
+
+    const tableBody = document.querySelector("#primitives-table tbody");
+
+    const rowId = primitiveRowEditButton.getAttribute("primitive-row-index");
+
+    const row = tableBody.querySelector(`[primitive-row-index = "${rowId}"]`);
+
+    const primitiveName = row.querySelector("#primitive-name").textContent.trim();
+    const primitiveValue = row.querySelector("#color-text").textContent.trim();
+    const orderIndex = row.getAttribute("order-index");
+
+    primitiveRowEditButton.setAttribute("primitiveName", primitiveName);
+    primitiveRowEditButton.setAttribute("primitiveValue", primitiveValue);
+    primitiveRowEditButton.setAttribute("order-index", orderIndex);
+
+    editPrimitiveRowErrors.classList.replace("visible", "hidden");
+    editPrimitiveRowInput.value = primitiveName;
+    pickrInstance.setColor(primitiveValue);
+    document.getElementById("edit-primitive-modal-color-text").textContent = primitiveValue;
+
+    document.querySelector(".pcr-last-color").style.setProperty("--pcr-color", primitiveValue);
+
+    document.getElementById("edit-primitive-modal-color-picker-container").appendChild(document.getElementById("color-picker-container"));
+
+  });
+
+  primitiveDeleteButton.addEventListener("click", async () => {
+
+    try {
+      const oldPrimitiveName = primitiveRowEditButton.getAttribute("primitiveName");
+
+      const result = await deletePrimitiveColor(cacheOperations.getTemplateName(), oldPrimitiveName);
+
+      const tableBody = document.querySelector("#primitives-table tbody");
+
+      const rowId = primitiveRowEditButton.getAttribute("primitive-row-index");
+      const row = tableBody.querySelector(`[primitive-row-index = "${rowId}"]`);
+
+      tableBody.removeChild(row);
+
+      ShowAlert("success", result, 2500);
+      
+    } catch (error) {
+      ShowAlert("danger", error, 3000);
+    }
+
+    
+
+  });
+
+  primitiveUpdateButton.addEventListener("click", async () => {
+
+    try {
+      const oldPrimitiveName = primitiveRowEditButton.getAttribute("primitiveName");
+      const oldPrimitiveValue = primitiveRowEditButton.getAttribute("primitiveValue");
+      const orderIndex = primitiveRowEditButton.getAttribute("order-index");
+
+      const newPrimitiveName = editPrimitiveRowInput.value.trim();
+      const newPrimitiveValue = document.getElementById("edit-primitive-modal-color-text").textContent.trim();
+
+      const tableBody = document.querySelector("#primitives-table tbody");
+      
+      const rowId = primitiveRowEditButton.getAttribute("primitive-row-index");
+      const row = tableBody.querySelector(`[primitive-row-index = "${rowId}"]`);
+
+      const primitiveNameElement = row.querySelector("#primitive-name");
+      const primiitveValueElement = row.querySelector("#color-text");
+      const primiitveColorBoxElement = row.querySelector("#color-box");
+
+      if (oldPrimitiveName !== newPrimitiveName) {
+        await deletePrimitiveColor(cacheOperations.getTemplateName(), oldPrimitiveName);
+        await addPrimitiveColor(cacheOperations.getTemplateName(), newPrimitiveName, newPrimitiveValue, orderIndex);
+
+        console.log(orderIndex);
+        
+
+        primitiveNameElement.textContent = newPrimitiveName;
+        primiitveValueElement.textContent = newPrimitiveValue;
+        primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
+        
+      } else if (oldPrimitiveValue !== newPrimitiveValue) {
+        await updatePrimitiveColor(cacheOperations.getTemplateName(), oldPrimitiveName, newPrimitiveValue);
+        primitiveNameElement.textContent = oldPrimitiveName;
+        primiitveValueElement.textContent = newPrimitiveValue;
+        primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
+        
+      }
+    } catch (error) {
+      
+    }
+
+    
+  });
+
   //Semantic Screen
   
-
   // New mode button on table clicked. empty modal input text and hide addNewThemeButton
   document.getElementById("open-new-theme-modal").addEventListener("click", function(){
 

@@ -13,19 +13,17 @@
 
     document.addEventListener('DOMContentLoaded', () => {
 
-      // const sessionScreen = sessionManager.getScreen();
-      // if (sessionScreen) {
-      //   console.log(sessionScreen);
-        
-      // }
 
       (async () => {
         const sessionScreen = await sessionManager.getScreen();
         const sessionColorTab = await sessionManager.getColorTab();
         const sessionTemplate = await sessionManager.getTemplate();
-        console.log("Screen:", sessionScreen);
-        console.log("Color Tab:", sessionColorTab);
-        console.log("Template:", sessionTemplate);
+        if(!sessionScreen){
+          console.log(...Logger.multiLog(
+            ["[SESSION FOUND]", Logger.Types.DEBUG, Logger.Formats.BOLD],
+            ["Restoring previous session."]
+          ));
+        }
       })();
 
       importJsonEditor = CodeMirror.fromTextArea(document.getElementById("import-json-code-editor"), {
@@ -61,7 +59,7 @@
                   validateJsonStructure(parsedJson);
               }
           } catch (e) {
-              console.error("Error parsing JSON:", e);  // Log the error for more detail
+              //console.error("Error parsing JSON:", e);  // Log the error for more detail
               console.log("JSON Value is invalid");
           }
         }
@@ -74,7 +72,7 @@
     document.getElementById("open-import-json").addEventListener("click", function(){
       document.getElementById("import-json-screen").classList.replace("hidden", "visible");
       document.getElementById("home-screen").classList.replace("visible", "hidden");
-      bottomNavBar.classList.replace("hidden","visible");
+      document.getElementById("bottom-nav-bar").classList.replace("visible","hidden");
     });
 
     document.getElementById("import-json-screen-back-button").addEventListener("click", function(){

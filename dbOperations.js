@@ -1,4 +1,10 @@
 const openDB = indexedDB.open("ThMLT DB", 1); // Name and version
+
+console.log(...Logger.multiLog(
+  ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+  ["Getting database ready"]
+));
+
 let db;
 let isDBOpenSuccess = false;
 
@@ -40,7 +46,12 @@ openDB.onupgradeneeded = function (event) {
 openDB.onsuccess = (event) => {
   db = openDB.result;
   isDBOpenSuccess = true;
-  console.log("Database opened successfully!");
+
+  console.log(...Logger.multiLog(
+    ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+    ["Database is ready"]
+  ));
+
   getAllTemplates();
   // addTemplate({id: "templateName", templateName: "templateName", author: "author", version: "version" });
 
@@ -153,7 +164,19 @@ function getAllTemplates() {
 
 function getAllPrimitiveColors(templateName) {
 
-  console.log(`Getting primitive colors of '${templateName}' template...`);
+  console.log(...Logger.multiLog(
+    ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+    ["Fetching primitive colors from"],
+    [templateName, Logger.Types.WARNING, Logger.Formats.BOLD],
+    ["template."]
+  ));
+  
+
+  // Logger.multiLog(
+  //       ["Getting primitive colors of '"],
+  //       [templateName, Logger.Types.INFO],
+  //       ["' template."]
+  //   );
   const transaction = db.transaction(["primitiveColors"], "readonly");
   const store = transaction.objectStore("primitiveColors");
   // Open the index on projectId
@@ -162,7 +185,19 @@ function getAllPrimitiveColors(templateName) {
   const request = index.getAll(templateName);
 
   request.onsuccess = () => {
-    console.log("Got All Primitive Colors!");
+
+    console.log(...Logger.multiLog(
+      ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+      ["Got all primitive colors from"],
+      [templateName, Logger.Types.INFO, Logger.Formats.BOLD],
+      ["template."]
+
+    ));
+    
+    // Logger.multiLog(
+    //   ["[SUCCESS] ", Logger.Types.SUCCESS],
+    //   ["Got all primitive colors"]
+    // );
     let result = request.result;
 
     const tableBody = document.querySelector("#primitives-table tbody");
@@ -178,12 +213,16 @@ function getAllPrimitiveColors(templateName) {
     // Sort the array by orderIndex
     const sortedData = result.sort((a, b) => a.orderIndex - b.orderIndex);
 
+    const logPrimitives = [];
+
     // Loop through the sorted array
     sortedData.forEach(primitive => {
       cacheOperations.addPrimitive(primitive.primitiveName, primitive.primitiveValue);
       addNewRowToPrimitiveTable(primitive.primitiveName, primitive.primitiveValue);
-      
+      logPrimitives.push(`${primitive.primitiveName} : ${primitive.primitiveValue}`);
     });
+
+    //console.table(logPrimitives);
 
     // If there's an open pickr, close it before opening the new one
     if (pickrInstance && pickrInstance.isOpen()) {
@@ -194,9 +233,8 @@ function getAllPrimitiveColors(templateName) {
     if (!pickrInstance) {
       pickrInstance = Pickr.create({
         el: '#color-picker', 
-        theme: 'nano',
+        theme: 'classic',
         default: "#FFFFFF",
-        swatches: ['#ff0000', '#00ff00', '#0000ff', '#000000', '#ffffff'],
         components: {
           preview: true,
           hue: true,
@@ -208,15 +246,21 @@ function getAllPrimitiveColors(templateName) {
           }
         }
       });
-        const pickrRoot = document.querySelector('.pickr'); // Root element of Pickr
-        pickrRoot.style.border = '1px solid #D1D5DB'; // Set border color
-        pickrRoot.style.borderRadius = '5px'; // Set border color
+      const pickrRoot = document.querySelector('.pickr'); // Root element of Pickr
+      pickrRoot.style.border = '1px solid #D1D5DB'; // Set border color
+      pickrRoot.style.borderRadius = '5px'; // Set border color
 
+      const primitiveModalColorText = document.getElementById("primitive-modal-color-text");
+      const editPrimitiveModalColorText = document.getElementById("edit-primitive-modal-color-text");
+      const button = document.querySelector(".pcr-button");
+
+      
       pickrInstance.on('change', (color) => {
-        const hex = color.toHEXA().toString(); // Get the hex value
-        pickrInstance.setColor(hex);
+        const hex = color.toHEXA().toString(); 
+        button.style.setProperty("--pcr-color", hex);
         
-        document.getElementById("primitive-modal-color-text").innerText = hex;  // Update colorTextView with the color
+        primitiveModalColorText.textContent = hex;
+        editPrimitiveModalColorText.textContent = hex;
       });
     }
 
@@ -246,12 +290,25 @@ function addPrimitiveColor(templateName, primitiveName, primitiveValue, orderInd
         primitiveColorStoreRequest.onsuccess = (e) => {
           cacheOperations.addPrimitive(primitiveName, primitiveValue);
           resolve("Primitive color added");
-          console.log(`Primitive color '${primitiveName}' added`);
+
+          console.log(...Logger.multiLog(
+            ["[SUCCESS]", Logger.Types.SUCCESS],
+            ["Primitive color"],
+            [primitiveName, Logger.Types.INFO, Logger.Formats.BOLD],
+            ["added"]
+          ));
+          
         }
 
         primitiveColorStoreRequest.onerror = (e) => {
           reject("Primitive Color adding failed");
-          console.log(`Primitive Color '${primitiveName}' adding failed`);
+
+          console.log(...Logger.multiLog(
+            ["[ERROR]", Logger.Types.ERROR],
+            ["Primitive color"],
+            [primitiveName, Logger.Types.INFO, Logger.Formats.BOLD],
+            ["adding failed"]
+          ));
         }
       
     } else {
@@ -310,12 +367,23 @@ function updatePrimitiveColor(templateName, primitiveName, newPrimitiveValue, ne
             if (!newOrderIndex) {
               cacheOperations.updatePrimitive(primitiveName, newPrimitiveValue);
             
-              console.log(`[Success]: Successfully updated ${updateCount} record(s) in the '${primitiveName}' field with the new primitive value: '${newPrimitiveValue}'.`);
+              console.log(...Logger.multiLog(
+                ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+                ["Updated"],
+                [updateCount, Logger.Types.INFO, Logger.Formats.BOLD],
+                ["record(s) in the"],
+                [primitiveName, Logger.Types.INFO, Logger.Formats.BOLD],
+                ["field with the new primitive value:"],
+                [newPrimitiveValue, Logger.Types.INFO, Logger.Formats.BOLD]
+              ));
               resolve(`Successfully updated ${updateCount} record(s) with the new primitive value '${newPrimitiveValue}' in '${primitiveName}'.`);
             }
             
           } else {
-            console.warn("[Warning]: No matching records found.");
+            console.log(...Logger.multiLog(
+              ["[WARNING]", Logger.Types.WARNING, Logger.Formats.BOLD],
+              ["No matching records found."]
+            ));
             reject("No matching records found.");
           }
         }
@@ -360,11 +428,21 @@ function deletePrimitiveColor(templateName, primitiveName) {
           
           cacheOperations.deletePrimitive(primitiveName);
           
-          
-          console.log(`Primitive color '${primitiveName}' deleted.`);
+          console.log(...Logger.multiLog(
+            ["[DELETED]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
+            ["Primitive color"],
+            [primitiveName, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+            ["deleted."]
+          ));
           resolve(`Primitive color '${primitiveName}' deleted.`);
         } else {
-          console.log(`Primitive color '${primitiveName}' not found.`);
+
+          console.log(...Logger.multiLog(
+            ["[NOT FOUND]", Logger.Types.WARNING, Logger.Formats.BOLD],
+            ["Primitive color"],
+            [primitiveName, Logger.Types.WARNING, Logger.Formats.BOLD],
+            ["not found."]
+          ));
           reject(`Primitive color '${primitiveName}' not found.`);
         }
       };
@@ -412,14 +490,30 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
 
         cacheOperations.addSemantic(semanticName, themeMode, linkedPrimitive);
         
-
         resolve("Semantic color added");
-        console.log(`Semantic color '${semanticName}' added to '${themeMode}' mode`);
+
+        console.log(...Logger.multiLog(
+          ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+          ["Semantic color"],
+          [semanticName, Logger.Types.INFO, Logger.Formats.BOLD],
+          ["added to"],
+          [themeMode, Logger.Types.INFO, Logger.Formats.BOLD],
+          ["mode."]
+        ));
+        
       }
 
       semanticColorStoreRequest.onerror = (e) => {
         reject("Error adding semantic color");
-        console.log(`Semantic color '${semanticName}' adding failed to '${themeMode}' mode`);
+        
+        console.log(...Logger.multiLog(
+          ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+          ["Semantic color"],
+          [semanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
+          ["adding failed to"],
+          [themeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
+          ["mode."]
+        ));
       }
 
     } else {
@@ -434,13 +528,25 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
 
 
 function getAllSemanticColors(templateName) {
+  console.log(...Logger.multiLog(
+    ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+    ["Fetching semantic colors from"],
+    [templateName, Logger.Types.WARNING, Logger.Formats.BOLD],
+    ["template."]
+  ));
   let transaction = db.transaction(["semanticColors"], "readonly");
   let semanticColorsStore = transaction.objectStore("semanticColors");
 
   let semanticRequest = semanticColorsStore.index("templateName").getAll(templateName);
 
   semanticRequest.onsuccess = () => {
-    console.log("Got All semantic Colors!");
+    
+    console.log(...Logger.multiLog(
+      ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+      ["Got all semantic colors from"],
+      [templateName, Logger.Types.INFO, Logger.Formats.BOLD],
+      ["template."]
+    ));
     let result = semanticRequest.result;
 
     result.forEach(item => {
@@ -572,18 +678,27 @@ function deleteSemanticColor(semanticName, templateName) {
         } else {
           // Cursor exhausted: all records have been processed
           if (deletionCount > 0) {
-            console.log(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
+            
+
+            console.log(...Logger.multiLog(
+              ["[DELETED]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              [deletionCount, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["record(s) named"]
+              [semanticName, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["deleted successfully."]
+            ));
             
             resolve(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
           } else {
-            console.warn(`No matching records found named '${semanticName}'.`);
+            console.log(...Logger.multiLog(
+              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["No matching records found named"]
+              [semanticName, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["."]
+            ));
             reject(`No matching records found named '${semanticName}'.`);
           }
         }
-      };
-
-      transaction.oncomplete = () => {
-        //console.log("Transaction completed.");
       };
 
       transaction.onerror = (event) => {
@@ -639,18 +754,27 @@ function renameSemantic(oldSemanticName, newSemanticName, templateName) {
         } else {
           // Cursor exhausted: all records have been processed
           if (updateCount > 0) {
-            console.log(`${updateCount} record(s) successfully renamed '${oldSemanticName}' to '${newSemanticName}'`);
+            console.log(...Logger.multiLog(
+              ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
+              ["Successfully renamed"],
+              [updateCount, Logger.Types.INFO, Logger.Formats.BOLD],
+              ["record(s)"]
+              [oldSemanticName, Logger.Types.ERROR, Logger.Formats.STRIKETHROUGH],
+              [" =>"],
+              [newSemanticName, Logger.Types.SUCCESS, Logger.Formats.BOLD]
+            ));
             resolve(`${updateCount} record(s) successfully renamed '${oldSemanticName}' to '${newSemanticName}'`);
           } else {
-            console.warn(`No matching records found for ${oldSemanticName}.`);
+            console.log(...Logger.multiLog(
+              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["No matching records found for"]
+              [oldSemanticName, Logger.Types.ERROR, Logger.Formats.BOLD]
+            ));
             reject(`No matching records found for ${oldSemanticName}.`);
           }
         }
       };
 
-      transaction.oncomplete = () => {
-        //console.log("Transaction completed.");
-      };
 
       transaction.onerror = (event) => {
         console.error("Transaction failed:", event.target.error);
@@ -711,17 +835,28 @@ function updateSemanticValue(templateName, semanticName, themeMode, newSemanticV
           // Cursor exhausted: all records have been processed
           if (updateCount > 0) {
             cacheOperations.updateSemantic(semanticName, themeMode, newSemanticValue);
-            console.log(`Successfully updated ${updateCount} record(s) with the new semantic value '${newSemanticValue}' in '${semanticName}' for '${themeMode}' mode.`);
+            
+            console.log(...Logger.multiLog(
+              ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+              ["Updated"],
+              [updateCount, Logger.Types.INFO, Logger.Formats.BOLD],
+              ["record(s) with the new semantic value"],
+              [newSemanticValue, Logger.Types.INFO, Logger.Formats.BOLD],
+              ["in"],
+              [semanticName, Logger.Types.INFO, Logger.Formats.BOLD],
+              ["for"],
+              [themeMode, Logger.Types.INFO, Logger.Formats.BOLD],
+              ["mode."]
+            ));
             resolve(`Successfully updated ${updateCount} record(s) with the new semantic value '${newSemanticValue}' in '${semanticName}' for '${themeMode}' mode.`);
           } else {
-            console.warn("No matching records found.");
+            console.log(...Logger.multiLog(
+              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["No matching records found."]
+            ));
             reject("No matching records found.");
           }
         }
-      };
-
-      transaction.oncomplete = () => {
-        //console.log("Transaction completed.");
       };
 
       transaction.onerror = (event) => {
@@ -772,17 +907,22 @@ function deleteTheme(templateName, themeMode) {
         } else {
           // Cursor exhausted: all records have been processed
           if (deletionCount > 0) {
-            console.log(`${deletionCount} record(s) from '${themeMode}' theme deleted successfully.`);
+            console.log(...Logger.multiLog(
+              ["[DELETED]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              [deletionCount, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["record(s) from"],
+              [themeMode, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["theme deleted successfully."]
+            ));
             resolve(`${deletionCount} record(s) from '${themeMode}' theme deleted successfully.`);
           } else {
-            console.warn("No matching records found.");
+            console.log(...Logger.multiLog(
+              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["No matching records found."]
+            ));
             reject("No matching records found.");
           }
         }
-      };
-
-      transaction.oncomplete = () => {
-        //console.log("Transaction completed.");
       };
 
       transaction.onerror = (event) => {
@@ -835,16 +975,22 @@ function updateTheme(templateName, oldThemeMode, newThemeMode) {
           // Cursor exhausted: all records have been processed
           if (updateCount > 0) {
             console.log(`${updateCount} record(s) theme mode changed successfully from '${oldThemeMode}' to '${newThemeMode}'.`);
+            console.log(...Logger.multiLog(
+              ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+              ["Theme mode"],
+              [oldThemeMode, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["renamed to"],
+              [newThemeMode, Logger.Types.INFO, Logger.Formats.BOLD]
+            ));
             resolve(`${updateCount} record(s) theme mode changed successfully from '${oldThemeMode}' to '${newThemeMode}'.`);
           } else {
-            console.warn("No matching records found.");
+            console.log(...Logger.multiLog(
+              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["No matching records found."]
+            ));
             reject("No matching records found.");
           }
         }
-      };
-
-      transaction.oncomplete = () => {
-        //console.log("Transaction completed.");
       };
 
       transaction.onerror = (event) => {

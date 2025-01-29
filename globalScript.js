@@ -249,7 +249,7 @@
 
     setSessionData(key, value) {
       chrome.storage.session.set({ [key]: value }, () => {
-          console.log(`${key} set to '${value}' in session.`);
+          //console.log(`[info] : ${key} set to '${value}' in current session.`);
       });
     }
     
@@ -283,6 +283,111 @@
     }
 
   }
+
+  class Logger {
+    static Types = {
+        DEFAULT: "default",
+        SUCCESS: "success",
+        INFO: "info",
+        WARNING: "warning",
+        ERROR: "error",
+        SUBTLE: "subtle",
+        DEBUG: "debug",
+        CRITICAL: "critical",
+    };
+
+    static Formats = {
+        REGULAR: "", 
+        BOLD: "font-weight: bold;",
+        ITALIC: "font-style: italic;",
+        UNDERLINE: "text-decoration: underline;",
+        STRIKETHROUGH: "text-decoration: line-through;",
+        MONOSPACE: "font-family: monospace;",
+        HIGHLIGHT: "background: rgba(255, 255, 0, 0.2); padding: 2px 4px; border-radius: 3px;",
+        SHADOW: "text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);",
+        UPPERCASE: "text-transform: uppercase;",
+    };
+
+    static styles = {
+        default: "color: #ccc;",
+        success: "color: #4CAF50;",
+        info: "color: #2196F3;",
+        warning: "color: #FFC107;",
+        error: "color: #F44336;",
+        subtle: "color: #888;",
+        debug: "color: #8e44ad;",
+        critical: "color: #ff5722; font-weight: bold; text-transform: uppercase;",
+    };
+
+    static log(...args) {
+        let message = args[0];
+        let type = args[1] || Logger.Types.DEFAULT;
+        let format = args[2] || Logger.Formats.REGULAR;
+
+        let style = Logger.styles[type] + format;
+        return [`%c${message}`, style];
+    }
+
+    static multiLog(...args) {
+        let msg = "", styles = [];
+        
+        args.forEach(([text, type = Logger.Types.DEFAULT, format = Logger.Formats.REGULAR]) => {
+            msg += `%c${text} `;
+            styles.push(Logger.styles[type] + format);
+        });
+
+        return [msg, ...styles];
+    }
+  }
+
+
+
+  // **Example Usage**
+
+/* 1. Single Log */
+// console.log(...Logger.log("✔ Operation successful!", Logger.Types.SUCCESS, Logger.Formats.BOLD));
+// Output: ✔ Operation successful! *(Green, Bold)*
+
+// console.log(...Logger.log("System initialized."));
+// Output: System initialized. *(Gray, Regular)*
+
+// console.log(...Logger.log("⚠ Low disk space.", Logger.Types.WARNING, Logger.Formats.UNDERLINE));
+// Output: ⚠ Low disk space. *(Yellow, Underlined)*
+
+// console.log(...Logger.log("❌ Connection lost!", Logger.Types.ERROR, Logger.Formats.STRIKETHROUGH));
+// Output: ❌ Connection lost! *(Red, Strikethrough)*
+
+// console.log(...Logger.log("ℹ Data fetching...", Logger.Types.INFO, Logger.Formats.ITALIC));
+// Output: ℹ Data fetching... *(Blue, Italic)*
+
+// console.log(...Logger.log("🚨 Critical failure!", Logger.Types.CRITICAL, Logger.Formats.UPPERCASE));
+// Output: 🚨 CRITICAL FAILURE! *(Red, Bold, Uppercase)*
+
+
+/* 2. Multi Log */
+// console.log(...Logger.multiLog(
+//     ["[INFO] ", Logger.Types.INFO, Logger.Formats.BOLD],
+//     ["Fetching data...", Logger.Types.DEFAULT],
+//     [" Done!", Logger.Types.SUCCESS, Logger.Formats.ITALIC]
+// ));
+// Output: **[INFO]** *(Blue, Bold)* **Fetching data...** *(Gray, Regular)* **Done!** *(Green, Italic)*
+
+// console.log(...Logger.multiLog(
+//     ["Old Price: $100", Logger.Types.WARNING],
+//     [" New Price: $50", Logger.Types.SUCCESS, Logger.Formats.BOLD]
+// ));
+// Output: Old Price: $100 *(Yellow, Regular)* **New Price: $50** *(Green, Bold)*
+
+// console.log(...Logger.multiLog(
+//     ["Initializing system... ", Logger.Types.INFO],
+//     ["⚠ Low memory! ", Logger.Types.WARNING, Logger.Formats.ITALIC],
+//     ["✔ Operation completed", Logger.Types.SUCCESS, Logger.Formats.HIGHLIGHT]
+// ));
+// Output: Initializing system... *(Blue, Regular)* ⚠ *Low memory!* *(Yellow, Italic)* ✔ **Operation completed** *(Green, Highlight)*
+
+
+
+console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Formats.HIGHLIGHT));
   
   let activeScreen = "home-screen";
 
