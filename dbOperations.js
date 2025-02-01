@@ -96,14 +96,20 @@ function addTemplate(template, update) {
 }
 
 function getAllTemplates() {
-  console.log("Getting templates...");
+  console.log(...Logger.multiLog(
+    ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+    ["Fetching all templates"]
+  ));
+  
   const transaction = db.transaction(["templates"], "readonly");
   const store = transaction.objectStore("templates");
   const request = store.getAll();
 
   request.onsuccess = () => {
-    console.log("Got All Templates!");
-    // Get the container element
+    console.log(...Logger.multiLog(
+      ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+      ["Got All Templates!"]
+    ));
     const templatesContainer = document.getElementById("templates-container");
     let result = request.result;
 
@@ -117,7 +123,7 @@ function getAllTemplates() {
     } else {
       // Iterate over the result array and inject HTML for each template
       result.forEach((template) => {
-        cacheOperations.addTemplate(template.templateName);
+        CacheOperations.addTemplate(template.templateName);
         const html = `
           <div template-id="${template.templateName}" class="template-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
             <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${template.templateName}</h5>
@@ -130,29 +136,8 @@ function getAllTemplates() {
     }
 
     // Retrive Previous session
-    (async () => {
-      const sessionScreen = await sessionManager.getScreen();
-      const sessionColorTab = await sessionManager.getColorTab();
-      const sessionTemplate = await sessionManager.getTemplate();
-      // console.log("Screen:", sessionScreen);
-      // console.log("Color Tab:", sessionColorTab);
-      // console.log("Template:", sessionTemplate);
-
-      if (sessionScreen === sessionManager.COLORS_SCREEN && cacheOperations.isTemplateExist(sessionTemplate)) {
-
-        currentPrimitiveRowId = 1;
-        currentSemanticRowId = 1;
-
-        cacheOperations.updateTemplateName(sessionTemplate);
-
-        getAllPrimitiveColors(sessionTemplate);
-        getAllSemanticColors(sessionTemplate);
-
-        homeScreen.classList.replace("visible", "hidden");
-        colorsScreen.classList.replace("hidden", "visible");
-        SwitchTabs(sessionColorTab);
-      }
-    })();
+    restoreSession();
+    
   };
 
   request.onerror = (event) => {
@@ -217,7 +202,7 @@ function getAllPrimitiveColors(templateName) {
 
     // Loop through the sorted array
     sortedData.forEach(primitive => {
-      cacheOperations.addPrimitive(primitive.primitiveName, primitive.primitiveValue);
+      CacheOperations.addPrimitive(primitive.primitiveName, primitive.primitiveValue);
       addNewRowToPrimitiveTable(primitive.primitiveName, primitive.primitiveValue);
       logPrimitives.push(`${primitive.primitiveName} : ${primitive.primitiveValue}`);
     });
@@ -288,7 +273,7 @@ function addPrimitiveColor(templateName, primitiveName, primitiveValue, orderInd
         };
         let primitiveColorStoreRequest = primitiveColorsStore.add(newColor);
         primitiveColorStoreRequest.onsuccess = (e) => {
-          cacheOperations.addPrimitive(primitiveName, primitiveValue);
+          CacheOperations.addPrimitive(primitiveName, primitiveValue);
           resolve("Primitive color added");
 
           console.log(...Logger.multiLog(
@@ -365,7 +350,7 @@ function updatePrimitiveColor(templateName, primitiveName, newPrimitiveValue, ne
           // Cursor exhausted: all records have been processed
           if (updateCount > 0) {
             if (!newOrderIndex) {
-              cacheOperations.updatePrimitive(primitiveName, newPrimitiveValue);
+              CacheOperations.updatePrimitive(primitiveName, newPrimitiveValue);
             
               console.log(...Logger.multiLog(
                 ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
@@ -417,16 +402,16 @@ function deletePrimitiveColor(templateName, primitiveName) {
           primitiveColorsStore.delete(colorToDelete.id);
 
           // Unlink primitive color in semantic values
-          cacheOperations.getAllSemantics().forEach((themeData, themeMode) => {
+          CacheOperations.getAllSemantics().forEach((themeData, themeMode) => {
             Object.entries(themeData).forEach(([semanticName, semanticValue]) => {
 
               if (semanticValue === primitiveName) {
-                updateSemanticValue(cacheOperations.getTemplateName(), semanticName, themeMode, "Click to link color");
+                updateSemanticValue(CacheOperations.getTemplateName(), semanticName, themeMode, "Click to link color");
               }
             });
           });
           
-          cacheOperations.deletePrimitive(primitiveName);
+          CacheOperations.deletePrimitive(primitiveName);
           
           console.log(...Logger.multiLog(
             ["[DELETED]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
@@ -488,7 +473,7 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
 
       semanticColorStoreRequest.onsuccess = (e) => {
 
-        cacheOperations.addSemantic(semanticName, themeMode, linkedPrimitive);
+        CacheOperations.addSemantic(semanticName, themeMode, linkedPrimitive);
         
         resolve("Semantic color added");
 
@@ -527,6 +512,13 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
 }
 
 
+/**
+ * Fetches all semantic colors associated with a given template name from the database,
+ * updates the cache with the retrieved semantic colors, and dynamically updates the 
+ * semantic colors table in the DOM.
+ *
+ * @param {string} templateName - The name of the template to fetch semantic colors for.
+ */
 function getAllSemanticColors(templateName) {
   console.log(...Logger.multiLog(
     ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
@@ -551,9 +543,9 @@ function getAllSemanticColors(templateName) {
 
     result.forEach(item => {
 
-      cacheOperations.addNewThemeMode(item.themeMode);
+      CacheOperations.addNewThemeMode(item.themeMode);
 
-      cacheOperations.addSemantic(item.semanticName, item.themeMode, item.linkedPrimitive)
+      CacheOperations.addSemantic(item.semanticName, item.themeMode, item.linkedPrimitive)
 
     });
 
@@ -586,17 +578,32 @@ function getAllSemanticColors(templateName) {
         }
       });
     }
+    const allThemeModes = CacheOperations.getAllThemeModes();
 
-    cacheOperations.getAllSemantics().forEach((semanticNames, themeMode) => {
+    if (allThemeModes.length === 0) {
+      console.log(...Logger.multiLog(
+        ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
+        ["No theme modes found."],
+        ["Adding"],
+        ["Light", Logger.Types.INFO, Logger.Formats.BOLD],
+        ["theme mode."]
+      ));
+      
+      theadRow.insertBefore(createElement.semanticThemeModeCell("Light", true), theadRow.lastElementChild);
+      semanticTableColumns++;
 
-      const newTh = document.createElement('td');
-      newTh.setAttribute("theme-mode", themeMode)
-      newTh.classList.add("semantic-table-cell");
-      newTh.classList.add("semantic-table-cell-has-padding");
-      newTh.innerHTML = themeMode;
-      theadRow.insertBefore(newTh, theadRow.lastElementChild);
+      table.style.gridTemplateColumns = "200px minmax(200px, 1fr) 40px";
 
-      semanticTableColumns += 1; // Increase the column count
+      
+    } else {
+      allThemeModes.forEach((themeMode, index) => {
+        if (index === 0) {
+          theadRow.insertBefore(createElement.semanticThemeModeCell(themeMode, true), theadRow.lastElementChild);
+        } else {
+          theadRow.insertBefore(createElement.semanticThemeModeCell(themeMode), theadRow.lastElementChild);
+        }
+
+        semanticTableColumns++; // Increase the column count
 
         let newGridTemplateColumns = '';
 
@@ -617,22 +624,42 @@ function getAllSemanticColors(templateName) {
         }
 
         table.style.gridTemplateColumns = newGridTemplateColumns;
-    });
-
-    
-    cacheOperations.getAllSemanticNames().forEach(semanticName => {
-
-      let semanticValues = [];
-      
-      cacheOperations.getAllThemeModes().forEach(themeMode => {
-        const semanticValue = cacheOperations.getSemanticValueForThemeMode(semanticName, themeMode);
-        semanticValues.push(semanticValue);
       });
+    }
+
+    const allSemanticNames = CacheOperations.getAllSemanticNames();
+
+    if (allSemanticNames.length === 0 && allThemeModes.length === 0) {
+
+      console.log(...Logger.multiLog(
+        ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
+        ["No semantic found."],
+        ["Adding"],
+        ["surface-primary", Logger.Types.INFO, Logger.Formats.BOLD],
+        ["semantic."]
+      ));
+
+      addSemanticColor(templateName, "surface-primary", "Light", "Click to link color");
+
+      addNewRowToSemanticTable("surface-primary", ["Click to link color"], ["Light"]);
+
+      CacheOperations.addNewThemeMode("Light");
+      CacheOperations.addSemantic("surface-primary", "Light", "Click to link color");
       
-      if (semanticValues.length === cacheOperations.getAllThemeModes().length) {
-        addNewRowToSemanticTable(semanticName, semanticValues, cacheOperations.getAllThemeModes());
-      }
-    });
+    } else{
+      allSemanticNames.forEach(semanticName => {
+        let semanticValues = [];
+        
+        allThemeModes.forEach(themeMode => {
+          const semanticValue = CacheOperations.getSemanticValueForThemeMode(semanticName, themeMode);
+          semanticValues.push(semanticValue);
+        });
+        
+        if (semanticValues.length === allThemeModes.length) {
+          addNewRowToSemanticTable(semanticName, semanticValues, allThemeModes);
+        }
+      });
+    }
   }
 
 }
@@ -669,7 +696,7 @@ function deleteSemanticColor(semanticName, templateName) {
             };
             deleteRequest.onsuccess = () => {
               
-              cacheOperations.deleteSemantic(semanticName);
+              CacheOperations.deleteSemantic(semanticName);
               deletionCount++;
             };
           }
@@ -758,8 +785,8 @@ function renameSemantic(oldSemanticName, newSemanticName, templateName) {
               ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
               ["Successfully renamed"],
               [updateCount, Logger.Types.INFO, Logger.Formats.BOLD],
-              ["record(s)"]
-              [oldSemanticName, Logger.Types.ERROR, Logger.Formats.STRIKETHROUGH],
+              ["record(s)"],
+              [oldSemanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
               [" =>"],
               [newSemanticName, Logger.Types.SUCCESS, Logger.Formats.BOLD]
             ));
@@ -834,19 +861,16 @@ function updateSemanticValue(templateName, semanticName, themeMode, newSemanticV
         } else {
           // Cursor exhausted: all records have been processed
           if (updateCount > 0) {
-            cacheOperations.updateSemantic(semanticName, themeMode, newSemanticValue);
+            CacheOperations.updateSemantic(semanticName, themeMode, newSemanticValue);
             
             console.log(...Logger.multiLog(
               ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
-              ["Updated"],
-              [updateCount, Logger.Types.INFO, Logger.Formats.BOLD],
-              ["record(s) with the new semantic value"],
-              [newSemanticValue, Logger.Types.INFO, Logger.Formats.BOLD],
-              ["in"],
+              ["Semantic color"],
               [semanticName, Logger.Types.INFO, Logger.Formats.BOLD],
-              ["for"],
-              [themeMode, Logger.Types.INFO, Logger.Formats.BOLD],
-              ["mode."]
+              ["in"],
+              [themeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["mode has been successfully linked to the new primitive value:"],
+              [newSemanticValue, Logger.Types.WARNING, Logger.Formats.BOLD]
             ));
             resolve(`Successfully updated ${updateCount} record(s) with the new semantic value '${newSemanticValue}' in '${semanticName}' for '${themeMode}' mode.`);
           } else {
@@ -877,8 +901,8 @@ function deleteTheme(templateName, themeMode) {
       const transaction = db.transaction("semanticColors", "readwrite");
       const store = transaction.objectStore("semanticColors");
 
-      const query = store.openCursor(); // Open a cursor to iterate over all records
-      let deletionCount = 0; // Track the number of deletions
+      const query = store.openCursor(); 
+      let deletionCount = 0;
 
       query.onerror = (event) => {
         console.error("Cursor query failed:", event.target.error);
@@ -908,11 +932,10 @@ function deleteTheme(templateName, themeMode) {
           // Cursor exhausted: all records have been processed
           if (deletionCount > 0) {
             console.log(...Logger.multiLog(
-              ["[DELETED]", Logger.Types.ERROR, Logger.Formats.BOLD],
-              [deletionCount, Logger.Types.CRITICAL, Logger.Formats.BOLD],
-              ["record(s) from"],
-              [themeMode, Logger.Types.CRITICAL, Logger.Formats.BOLD],
-              ["theme deleted successfully."]
+              ["[DELETED]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["Theme Mode"],
+              [themeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["deleted."]
             ));
             resolve(`${deletionCount} record(s) from '${themeMode}' theme deleted successfully.`);
           } else {
@@ -935,7 +958,7 @@ function deleteTheme(templateName, themeMode) {
   });
 }
 
-function updateTheme(templateName, oldThemeMode, newThemeMode) {
+function renameThemeMode(templateName, oldThemeMode, newThemeMode) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
 
@@ -974,12 +997,12 @@ function updateTheme(templateName, oldThemeMode, newThemeMode) {
         } else {
           // Cursor exhausted: all records have been processed
           if (updateCount > 0) {
-            console.log(`${updateCount} record(s) theme mode changed successfully from '${oldThemeMode}' to '${newThemeMode}'.`);
+            
             console.log(...Logger.multiLog(
               ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
-              ["Theme mode"],
-              [oldThemeMode, Logger.Types.CRITICAL, Logger.Formats.BOLD],
-              ["renamed to"],
+              ["Theme mode renamed from"],
+              [oldThemeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["=>"],
               [newThemeMode, Logger.Types.INFO, Logger.Formats.BOLD]
             ));
             resolve(`${updateCount} record(s) theme mode changed successfully from '${oldThemeMode}' to '${newThemeMode}'.`);

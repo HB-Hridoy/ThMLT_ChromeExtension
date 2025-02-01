@@ -15,13 +15,18 @@
 
 
       (async () => {
-        const sessionScreen = await sessionManager.getScreen();
-        const sessionColorTab = await sessionManager.getColorTab();
-        const sessionTemplate = await sessionManager.getTemplate();
-        if(!sessionScreen){
+        const sessionScreen = await SessionManager.getScreen();
+        const sessionColorTab = await SessionManager.getColorTab();
+        const sessionTemplate = await SessionManager.getTemplate();
+        if(sessionScreen){
           console.log(...Logger.multiLog(
             ["[SESSION FOUND]", Logger.Types.DEBUG, Logger.Formats.BOLD],
             ["Restoring previous session."]
+          ));
+        } else{
+          console.log(...Logger.multiLog(
+            ["[NO SESSION FOUND]", Logger.Types.DEBUG, Logger.Formats.BOLD],
+            ["Starting new session."]
           ));
         }
       })();
@@ -152,30 +157,24 @@
         // Check if the clicked element or any of its parents has the 'template-preview-parent' class
         if (event.target.closest('.template-preview-parent')) {
 
-          cacheOperations.clearCache();
+          CacheOperations.clearCache();
           
           const templateDiv = event.target.closest('.template-preview-parent');
       
-          cacheOperations.updateTemplateName(templateDiv.getAttribute('template-id'));
-      
-          homeScreen.classList.replace("visible", "hidden");
-          colorsScreen.classList.replace("hidden", "visible");
+          CacheOperations.updateTemplateName(templateDiv.getAttribute('template-id'));
 
-          document.getElementById("template-name-colors-screen").innerText = cacheOperations.getTemplateName();
+          document.getElementById("template-name-colors-screen").innerText = CacheOperations.getTemplateName();
 
           currentPrimitiveRowId = 1;
           currentSemanticRowId = 1;
 
-          getAllPrimitiveColors(cacheOperations.getTemplateName());
+          getAllPrimitiveColors(CacheOperations.getTemplateName());
           
-          getAllSemanticColors(cacheOperations.getTemplateName());
+          getAllSemanticColors(CacheOperations.getTemplateName());
 
-          sessionManager.setScreen(sessionManager.COLORS_SCREEN);
-          sessionManager.setColorTab(sessionManager.PRIMITIVES_COLOR_TAB);
-          sessionManager.setTemplate(cacheOperations.getTemplateName());
-
-          document.getElementById("bottom-nav-bar").classList.replace("visible", "hidden");
           
+
+          ScreenManager.showColorsScreen();
 
         }
       });

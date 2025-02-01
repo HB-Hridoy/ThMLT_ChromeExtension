@@ -32,6 +32,11 @@
   const newThemeInput = document.getElementById("add-new-theme-input");
   const newThemeInputErrors = document.getElementById("add-new-theme-errors");
 
+  const renameThemeModeButton = document.getElementById("rename-theme-mode-button");
+  const deleteThemeModeButton = document.getElementById("delete-theme-mode-button");
+  const editThemeModeInput = document.getElementById("edit-theme-mode-input");
+  const editThemeModeErrors = document.getElementById("edit-theme-mode-errors");
+
   const primitiveTable = document.getElementById('primitive-table');
   const primitiveTableBody = document.querySelector("#primitives-table tbody");
 
@@ -39,27 +44,25 @@
   const semanticTableBody = document.querySelector("#semantic-table tbody");
 
   const selectPrimitiveModal = document.getElementById("select-primitive-modal");
+  const editThemeModeModal = document.getElementById("edit-theme-mode-modal");
 
 
   
   //Open home screen
   document.getElementById("color-screen-back-button").addEventListener("click", () => {
-    document.getElementById("colors-screen").classList.replace("visible", "hidden");
-    document.getElementById("home-screen").classList.replace("hidden", "visible");
-
-    document.getElementById("bottom-nav-bar").classList.replace("hidden", "visible");
+    ScreenManager.showHomeScreen();
   });
 
   
   // open primitives tab
     primitivesTabButton.addEventListener('click', () => {
       SwitchTabs("primitives");
-      sessionManager.setColorTab(sessionManager.PRIMITIVES_COLOR_TAB);
+      SessionManager.setColorTab(SessionManager.PRIMITIVES_COLOR_TAB);
     });
     // Open semantic screen
     semanticTabButton.addEventListener('click', () => {
         SwitchTabs("semantic");
-        sessionManager.setColorTab(sessionManager.SEMANTIC_COLOR_TAB);
+        SessionManager.setColorTab(SessionManager.SEMANTIC_COLOR_TAB);
     });
 
     function SwitchTabs(tabName) {
@@ -76,213 +79,8 @@
 
 
   //Primitives Screen
-  let currentPrimitiveColorDiv = null; 
-  let currentPrimitiveColorTextview = null;
   let pickrInstance = null; 
 
-  
-
-  primitiveTableBody.addEventListener("click", async function (event) {
-    const target = event.target;
-    const parentRow = target.closest("tr");
-    const currentTemplateName = document.getElementById("template-name-colors-screen").innerText;
-      
-    currentPrimitiveColorTextview = parentRow.querySelector(".color-text");
-
-    if (target.classList.contains("color-box")) {
-
-      const rowId  = target.id.split('-').pop();
-      const parentRow = document.getElementById(`primitive-row-${rowId}`);
-
-      if(!parentRow.classList.contains("bg-red-300")){
-        
-        
-
-        // Move the Pickr container to the new location
-        parentRow.querySelector("#temp-primitive-color-picker").appendChild(document.getElementById("color-picker-container"));
-
-        pickrInstance.show();
-
-      }else{
-        document.getElementById(`primitive-refresh-row-${rowId}`).classList.replace("visible", "hidden");
-        ShowAlert("danger", "Diplicate primitive name", 2000);
-      }
-
-      
-
-    } else if (target.classList.contains("color-text")) {
-
-        currentPrimitiveColorTextview = target;
-        navigator.clipboard.writeText(currentPrimitiveColorTextview.innerText).then(() => {
-            alert('Color copied: ' + currentPrimitiveColorTextview.innerText);
-        }).catch(err => {
-            console.error('Error copying text: ', err);
-        });
-
-    } else if (target.closest('.delete-row')) {
-
-      const deleteButton = target.closest('.delete-row'); // Ensure we have the button element
-      const rowId = deleteButton.id.split('-').pop(); // Get the 'id' of the delete button and Get the last part of the 'id'
-
-
-        // Check if the color picker exist in to be deleted row it should moved to the #header-color-picker-container
-        const colorPickerContainer = document.getElementById("color-picker-container");
-
-        if (colorPickerContainer) {
-            const headerContainer = document.getElementById("header-color-picker-container");
-            if (headerContainer) {
-            headerContainer.appendChild(colorPickerContainer);
-            }
-        }
-        const currentPrimitiveName = document.getElementById(`primitive-name-input-${rowId}`).value.trim();
-
-        
-        deletePrimitiveColor(currentTemplateName, currentPrimitiveName)
-        .then((result) => {
-           ShowAlert("dark", result, 3000);
-        })
-        .catch((error) => {
-          ShowAlert("danger", error, 3000);
-          console.error("Error:", error);
-        });
-
-        parentRow.remove();
-    } else if (target.closest('.refresh-row')) {
-
-      const refreshButton = target.closest('.refresh-row'); // Ensure we have the button element
-      const rowId = refreshButton.id.split('-').pop(); // Get the 'id' of the refresh button
-
-      const primitiveName = document.getElementById(`primitive-name-input-${rowId}`).value.trim();
-      const primitiveValue = document.getElementById(`primitive-value-${rowId}`).textContent.trim();
-      const templateId = document.getElementById("template-name-colors-screen").textContent.trim();
-
-      
-
-      if (!primitiveName || !primitiveValue || !templateId) {
-        ShowAlert("danger","Missing required values", 2500);
-        return;
-      }
-
-      if (primitiveValue === "#------"){
-        ShowAlert("info","Choose color first", 2500);
-        return;
-      }
-
-      if (!nameRegex.test(primitiveName)) {
-        ShowAlert("warning","Only letters, numbers, hyphens (-), and underscores (_) are allowed.", 3500);
-        console.log(primitiveValue);
-        return;
-      }
-
-
-      
-      try {
-        console.log("Adding new primitive...");
-
-        const oldPrimitiveName = oldPrimitiveInputValues.get(rowId);
-        if(oldPrimitiveName !== primitiveName){
-          deletePrimitiveColor(templateId, oldPrimitiveName);
-        }
-        
-        const result = await addPrimitiveColor(templateId, primitiveName, primitiveValue);
-        if (result == "Primitive color added"){
-          ShowAlert("success", result, 2500);
-          oldPrimitiveInputValues.set(rowId, primitiveName); 
-
-        } else if (result == "Primitive color updated"){
-          ShowAlert("info", result, 2500);
-        }
-        refreshButton.classList.replace("visible", "hidden");
-    
-      } catch (error) {
-        ShowAlert("danger", 3000); // Display error to the user
-        console.error(error); // Log the error for debugging
-      }
-    }
-  });
-
-  function updatePrimitiveInputValues(){
-    primitiveTableBody.querySelectorAll('.name-input').forEach(input => {
-      const inputRowId = input.id.split('-').pop();
-      const inputValue = input.value.trim();
-      primitiveInputValues.set(inputRowId, inputValue); 
-    });
-  }
-
-  primitiveTableBody.addEventListener("input", (event) => {
-    const target = event.target;
-  
-    // If the target is an input field of type 'text'
-    if (target.classList.contains("name-input")) {
-      const rowId = target.id.split('-').pop();
-      const currentValue = target.value; // The current value of the input
-      const allInputs = primitiveTableBody.querySelectorAll('.name-input'); // All text inputs in tbody
-
-      const parentRow = document.getElementById(`primitive-row-${rowId}`);
-      const refreshButton = document.getElementById(`primitive-refresh-row-${rowId}`);
-      
-      let isDuplicate = false;
-  
-      // Loop through all the other inputs and check if any input has the same value
-      allInputs.forEach(input => {
-        const inputRowId = input.id.split('-').pop();
-        const inputValue = input.value.trim();
-        primitiveInputValues.set(inputRowId, inputValue); 
-
-        if (input !== target && inputValue === currentValue) {
-
-          isDuplicate = true;
-          document.getElementById(`primitive-row-${inputRowId}`).classList.replace("bg-white", "bg-red-300"); 
-          refreshButton.classList.replace("visible", "hidden");
-          ShowAlert("danger", "This primitive name already exists!", 2500);
-        } else {
-          document.getElementById(`primitive-row-${inputRowId}`).classList.replace("bg-red-300", "bg-white");
-          refreshButton.classList.replace("hidden", "visible");
-        }
-        if (!nameRegex.test(inputValue)) {
-          ShowAlert("warning","Only letters, numbers, hyphens (-), and underscores (_) are allowed.", 3500);
-        }
-       
-      });
-      // If duplicate is found, highlight the current input as well
-      if (isDuplicate) {
-        parentRow.classList.replace("bg-white", "bg-red-300");
-        refreshButton.classList.replace("visible", "hidden");
-      } else {
-        parentRow.classList.replace("bg-red-300", "bg-white"); // Remove red border when no duplicate
-        refreshButton.classList.replace("hidden", "visible");
-      }
-
-      // Create a Map to track how many times a value occurs and store keys in an array
-      const valueToKeysMap = new Map();
-
-      // Populate valueToKeysMap with values and their associated keys
-      primitiveInputValues.forEach((value, key) => {
-        // Skip if the value is empty, null, or undefined
-        if (!value || value.trim() === "") return;  // This checks for empty, null, or undefined values
-        if (!valueToKeysMap.has(value)) {
-          valueToKeysMap.set(value, []);
-        }
-        valueToKeysMap.get(value).push(key);
-      });
-
-      // Find duplicates and store the keys of those duplicates in an array
-      const duplicateInputRows = [];
-      valueToKeysMap.forEach((keys) => {
-        if (keys.length > 1) {
-          duplicateInputRows.push(...keys);
-        }
-      });
-
-      for (const duplicateInputRowId of duplicateInputRows) {
-        document.getElementById(`primitive-row-${duplicateInputRowId}`).classList.replace("bg-white", "bg-red-300");
-        document.getElementById(`primitive-refresh-row-${duplicateInputRowId}`).classList.replace("visible", "hidden");
-      }
-
-
-  
-    }
-  });
   
 
   // Adding event listener for hover functionality to show the delete button
@@ -326,7 +124,7 @@
       
 
       // Loop through the semantic names to check for duplicates
-      for (const primitiveName of cacheOperations.getAllPrimitiveNames()) {
+      for (const primitiveName of CacheOperations.getAllPrimitiveNames()) {
         if (primitiveName === inputValue) {
           isDuplicate = true;
           break; // Exit the loop early if a duplicate is found
@@ -357,11 +155,11 @@
     try {
       const primitiveName = addNewPrimitiveInput.value.trim();
       const primitiveVaule = document.getElementById("primitive-modal-color-text").textContent.trim();
-      const result = await addPrimitiveColor(cacheOperations.getTemplateName(), primitiveName, primitiveVaule, currentPrimitiveRowId);
-      ShowAlert("success", result, 2500);
+      const result = await addPrimitiveColor(CacheOperations.getTemplateName(), primitiveName, primitiveVaule, currentPrimitiveRowId);
+      AlertManager.success(result, 2500);
       addNewRowToPrimitiveTable(primitiveName,primitiveVaule);
     } catch (error) {
-      ShowAlert("danger", error, 2500);
+      AlertManager.error(error, 2500);
     }
 
     
@@ -400,7 +198,7 @@
     try {
       const oldPrimitiveName = primitiveRowEditButton.getAttribute("primitiveName");
 
-      const result = await deletePrimitiveColor(cacheOperations.getTemplateName(), oldPrimitiveName);
+      const result = await deletePrimitiveColor(CacheOperations.getTemplateName(), oldPrimitiveName);
 
       const tableBody = document.querySelector("#primitives-table tbody");
 
@@ -409,10 +207,10 @@
 
       tableBody.removeChild(row);
 
-      ShowAlert("success", result, 2500);
+      AlertManager.success(result, 2500);
       
     } catch (error) {
-      ShowAlert("danger", error, 3000);
+      AlertManager.error(error, 2500);
     }
 
     
@@ -439,8 +237,8 @@
       const primiitveColorBoxElement = row.querySelector("#color-box");
 
       if (oldPrimitiveName !== newPrimitiveName) {
-        await deletePrimitiveColor(cacheOperations.getTemplateName(), oldPrimitiveName);
-        await addPrimitiveColor(cacheOperations.getTemplateName(), newPrimitiveName, newPrimitiveValue, orderIndex);
+        await deletePrimitiveColor(CacheOperations.getTemplateName(), oldPrimitiveName);
+        await addPrimitiveColor(CacheOperations.getTemplateName(), newPrimitiveName, newPrimitiveValue, orderIndex);
 
         console.log(orderIndex);
         
@@ -450,7 +248,7 @@
         primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
         
       } else if (oldPrimitiveValue !== newPrimitiveValue) {
-        await updatePrimitiveColor(cacheOperations.getTemplateName(), oldPrimitiveName, newPrimitiveValue);
+        await updatePrimitiveColor(CacheOperations.getTemplateName(), oldPrimitiveName, newPrimitiveValue);
         primitiveNameElement.textContent = oldPrimitiveName;
         primiitveValueElement.textContent = newPrimitiveValue;
         primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
@@ -488,7 +286,7 @@
       const themeModeValues = Array.from(elements).map(el => el.getAttribute('theme-mode'));
       
 
-      let isDuplicate = cacheOperations.isThemeModeExist(inputValue);
+      let isDuplicate = CacheOperations.isThemeModeExist(inputValue);
       let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
 
       // Process each value with a for loop
@@ -525,6 +323,62 @@
     
   });
 
+  renameThemeModeButton.addEventListener("click", async function(){
+    const themeMode = editThemeModeModal.getAttribute("theme-mode");
+    const newThemeMode = editThemeModeInput.value.trim();
+
+    try {
+      await renameThemeMode(CacheOperations.getTemplateName(), themeMode, newThemeMode);
+      renameThemeInSemanticTable(themeMode, newThemeMode);
+      CacheOperations.renameThemeMode(themeMode, newThemeMode);
+      
+    } catch (error) {
+      console.log(...Logger.multiLog(
+        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+        [error, Logger.Types.ERROR]
+      ));
+    }
+  });
+
+  deleteThemeModeButton.addEventListener("click", async function(){
+    const themeMode = editThemeModeModal.getAttribute("theme-mode");
+
+    try {
+
+      await deleteTheme(CacheOperations.getTemplateName(), themeMode);
+      deleteThemeFromSemanticTable(themeMode);
+      CacheOperations.deleteThemeMode(themeMode);
+      
+    } catch (error) {
+      console.log(...Logger.multiLog(
+        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+        [error, Logger.Types.ERROR]
+      ));
+    }
+  });
+
+  editThemeModeInput.addEventListener("input", (event) => {
+    if (editThemeModeInput.value.trim() !== "") {
+      const inputValue = editThemeModeInput.value.trim();
+      const isDuplicate = CacheOperations.isThemeModeExist(inputValue);
+      const isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+
+      if (isDuplicate) {
+        editThemeModeErrors.textContent = "Theme mode already exists!";
+      } else if (isRegEx) {
+        editThemeModeErrors.textContent = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+      } else {
+        editThemeModeErrors.classList.add("hidden");
+        renameThemeModeButton.classList.remove("hidden");
+        return;
+      }
+      editThemeModeErrors.classList.remove("hidden");
+      renameThemeModeButton.classList.add("hidden");
+    } else {
+      renameThemeModeButton.classList.add("hidden");
+    }
+  });
+
 
   // Close primitives modal
   document.getElementById("close-primitive-modal").addEventListener("click", function(){
@@ -549,7 +403,7 @@
         const themeMode = selectPrimitiveModal.getAttribute("theme-mode");
         const semanticName = selectPrimitiveModal.getAttribute("semantic-name");
 
-        const result =  await updateSemanticValue(cacheOperations.getTemplateName(), semanticName, themeMode, primitiveName);
+        const result =  await updateSemanticValue(CacheOperations.getTemplateName(), semanticName, themeMode, primitiveName);
 
         const tableBody = document.querySelector("#semantic-table tbody");
         // Get the <td> element with the specific data-index and class
@@ -605,22 +459,31 @@
 
   semanticTableBody.addEventListener("click", async function (event) {
     const target = event.target;
-    
-    //console.log(target);
-
-    // if (target.tagName === "TD" && target.getAttribute("theme-mode")) {
-
-    // }
 
     if (target.closest(".semantic-value-cell")){
       //console.log(target.closest(".semantic-value-cell"));
 
       const parentTd = target.closest('td');
       const dataIndex = parentTd ? parentTd.getAttribute('data-index') : null;
-      const semanticName = cacheOperations.getAllSemanticNames()[dataIndex - 1];
+      const semanticName = CacheOperations.getAllSemanticNames()[dataIndex - 1];
       const themeMode = parentTd ? parentTd.getAttribute('theme-mode') : null;
 
       ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName);
+    } else if (target.tagName === "TD" && target.getAttribute("theme-mode") && target.getAttribute("default-theme-header") === "false") {
+
+      const themeMode = target.getAttribute("theme-mode")
+      editThemeModeModal.classList.replace("hidden", "flex");
+      editThemeModeModal.setAttribute("theme-mode", themeMode);
+      editThemeModeInput.value = themeMode;
+      
+    } else if (target.getAttribute("default-theme-header") === "true") {
+      AlertManager.warning("Default theme cannot be edited", 2500);
+      console.log(...Logger.multiLog(
+        ["[WARNING]", Logger.Types.WARNING, Logger.Formats.BOLD],
+        ["Default theme cannot be edited", Logger.Types.WARNING]
+      ));
+      
+      
     }
     
     
@@ -630,28 +493,25 @@
   addRowToSemanticButton.addEventListener("click", async function () {
 
   const semanticNameFromInput = addNewSemanticRowInput.value.trim();
-  // let normalValueCellsCount = 0; 
-  // let normalValueCells =""; 
-
   let semanticValues = [];
     try {
 
-      for (const themeMode of cacheOperations.getAllThemeModes()) {
-        const result = await addSemanticColor(cacheOperations.getTemplateName(), semanticNameFromInput, themeMode, "Click to link color");
+      for (const themeMode of CacheOperations.getAllThemeModes()) {
+        const result = await addSemanticColor(CacheOperations.getTemplateName(), semanticNameFromInput, themeMode, "Click to link color");
         semanticValues.push("Click to link color");
         
       }
       
       
     } catch (error) {
-      ShowAlert("danger", error, 2500);
+      AlertManager.error(error,2500);
     }
     
-    if (semanticValues.length === cacheOperations.getAllThemeModes().length) {
+    if (semanticValues.length === CacheOperations.getAllThemeModes().length) {
 
-      addNewRowToSemanticTable(semanticNameFromInput, semanticValues, cacheOperations.getAllThemeModes());
+      addNewRowToSemanticTable(semanticNameFromInput, semanticValues, CacheOperations.getAllThemeModes());
     } else {
-      ShowAlert("danger", "Error adding semantic", 2500);
+      AlertManager.error("Error adding semantic", 2500);
     }
 
     addNewSemanticRowInput.value = "";
@@ -660,35 +520,6 @@
 
   });
 
-  async function handlePrimitiveRowRefresh(rowId) {
-
-    const primitiveName = document.getElementById(`primitive-name-input-${rowId}`).value.trim();
-    const primitiveValue = document.getElementById(`primitive-value-${rowId}`).textContent.trim();
-    const templateId = idEldocument.getElementById("template-name-colors-screen").textContent.trim();
-
-    if (!primitiveName || !primitiveValue || !templateId) {
-      ShowAlert("error","Missing required values", 2500);
-      return "Missing required values";
-    }
-
-    try {
-      console.log("Adding new primitive...");
-      
-      const result = await addPrimitiveColor(templateId, primitiveName, primitiveValue);
-      console.log(result); // Log success message
-      if (result == "Primitive color added"){
-        ShowAlert("success", result, 2500);
-      } else if (result == "Primitive color updated"){
-        ShowAlert("info", result, 2500);
-      }
-      
-      return ("success");
-  
-    } catch (error) {
-      ShowAlert("danger", 3000); // Display error to the user
-      console.error(error); // Log the error for debugging
-    }
-  }
   // Add semantic Row input from add semantic row modal
   addNewSemanticRowInput.addEventListener("input", (event) => {
 
@@ -810,7 +641,7 @@
                                             <div class="semantic-pill" >
                                                 <div class="semantic-color-thumbnail-container">
                                                     <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                                                        style="background-color: ${semanticValue === "Click to link color" ? "#ffffff" : cacheOperations.getPrimitiveValue(semanticValue)}">
+                                                        style="background-color: ${semanticValue === "Click to link color" ? "#ffffff" : CacheOperations.getPrimitiveValue(semanticValue)}">
                                                     </div>
                                                 </div>
                                                 <div class="semantic-pill-text">
@@ -867,7 +698,7 @@
 
     try {
 
-      const result = deleteSemanticColor(selectedSemanticName, cacheOperations.getTemplateName());
+      const result = deleteSemanticColor(selectedSemanticName, CacheOperations.getTemplateName());
 
         // Check if the row exists
       if (row) {
@@ -891,7 +722,7 @@
 
     try {
 
-      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, cacheOperations.getTemplateName())
+      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, CacheOperations.getTemplateName())
 
       selectedSemanticCell.textContent = editSemanticRowInput.value;
     } catch (error) {
@@ -908,15 +739,9 @@
     const bodyRows = table.querySelectorAll('tbody tr');
     try {
 
-      for (const semanticName of cacheOperations.getAllSemanticNames()){
-       const result = await addSemanticColor(cacheOperations.getTemplateName(), semanticName, newThemeMode, "Click to link color");
+      for (const semanticName of CacheOperations.getAllSemanticNames()){
+        await addSemanticColor(CacheOperations.getTemplateName(), semanticName, newThemeMode, "Click to link color");
       }
-
-      const newThHTML = `
-                              <td theme-mode="${newThemeMode}" class="semantic-table-cell semantic-table-cell-has-padding">
-                                  ${newThemeMode}
-                              </td>
-                            `;
 
       const newTdHTML = `
                           <td class="semantic-table-cell semantic-value-cell" data-index = "${currentSemanticRowId}" theme-mode = ${newThemeMode}>
@@ -941,11 +766,7 @@
                             </td>
                         `;
 
-        const newTh = document.createElement('td');
-        newTh.classList.add("semantic-table-cell");
-        newTh.classList.add("semantic-table-cell-has-padding");
-        newTh.innerHTML = newThHTML;
-        theadRow.insertBefore(newTh, theadRow.lastElementChild);
+        theadRow.insertBefore(createElement.semanticThemeModeCell(newThemeMode), theadRow.lastElementChild);
 
         let tempRowId = 1;
 
@@ -988,14 +809,99 @@
           }
         }
 
-        cacheOperations.addNewThemeMode(newThemeMode)
+        CacheOperations.addNewThemeMode(newThemeMode)
         table.style.gridTemplateColumns = newGridTemplateColumns;
       
       
     } catch (error) {
-      ShowAlert("danger", error, 2500);
+      AlertManager.error(error, 2500);
       console.log(error);
       
+    }
+  }
+
+  function renameThemeInSemanticTable(themeMode, newThemeMode) {
+    const table = document.getElementById('semantic-table');
+    const theadRow = document.getElementById('semantic-table-header-row');
+    const bodyRows = table.querySelectorAll('tbody tr');
+
+    // Rename the header cell
+    const themeModeCell = theadRow.querySelector(`td[theme-mode="${themeMode}"]`);
+    if (themeModeCell) {
+      themeModeCell.setAttribute('theme-mode', newThemeMode);
+      themeModeCell.textContent = newThemeMode;
+    }
+
+    // Rename the body cells
+    bodyRows.forEach(row => {
+      const tdToRename = row.querySelector(`td[theme-mode="${themeMode}"]`);
+      if (tdToRename) {
+        tdToRename.setAttribute('theme-mode', newThemeMode);
+      }
+    });
+  }
+
+  function deleteThemeFromSemanticTable(themeMode) {
+    const table = document.getElementById('semantic-table');
+    const theadRow = document.getElementById('semantic-table-header-row');
+    const bodyRows = table.querySelectorAll('tbody tr');
+    
+    if (themeMode === "default") {
+      throw new Error("Default theme cannot be deleted");
+    }
+
+    try {
+      // for (const semanticName of CacheOperations.getAllSemanticNames()){
+      //   deleteSemanticColor(semanticName, CacheOperations.getTemplateName(), themeMode);
+      // }
+
+      const themeModeCell = theadRow.querySelector(`td[theme-mode="${themeMode}"]`);
+
+      if (themeModeCell) {
+        themeModeCell.remove();
+      }
+
+      let tempRowId = 1;
+
+      // Remove the <td> from each row in tbody
+      bodyRows.forEach(row => {
+        if(row.id !== "semantic-table-header-row"){
+
+          const tdToRemove = row.querySelector(`td[theme-mode="${themeMode}"]`);
+
+          if (tdToRemove) {
+            tdToRemove.remove();
+          }
+
+          tempRowId++;
+        }
+      });
+
+      semanticTableColumns -= 1; // Decrease the column count
+
+      let newGridTemplateColumns = '';
+
+      // Loop through the columns and create the column definitions
+      for (let i = 0; i < semanticTableColumns; i++) {
+        if (i === semanticTableColumns - 1) {
+          newGridTemplateColumns += '40px';  // Last column is 40px
+        } else if (i === semanticTableColumns - 2) {
+          newGridTemplateColumns += 'minmax(200px, 1fr)';  // Second last column is minmax(200px, 1fr)
+        } else {
+          newGridTemplateColumns += '200px ';  // Regular columns are 200px
+        }
+
+        // Add a space between columns if it's not the last column
+        if (i !== semanticTableColumns - 1) {
+          newGridTemplateColumns += ' ';
+        }
+      }
+
+      CacheOperations.deleteThemeMode(themeMode);
+      table.style.gridTemplateColumns = newGridTemplateColumns;
+    } catch (error) {
+      AlertManager.error(error, 2500);
+      console.log(error);
     }
   }
 
@@ -1040,7 +946,7 @@
     const primitivesContainer = document.getElementById('select-primitive-modal-primitives-container');
     primitivesContainer.innerHTML = "";
 
-    for (const [primitiveName, primitiveValue] of cacheOperations.getAllPrimitives()) {
+    for (const [primitiveName, primitiveValue] of CacheOperations.getAllPrimitives()) {
 
       const newPrimitiveItem = ` 
                           <li data-index = "${dataIndex}" data-primitive-name = "${primitiveName}" data-primitive-value = "${primitiveValue}">
@@ -1125,7 +1031,7 @@
           const primitivevalue = row.querySelector("#color-text").textContent.trim();
           const newOrderIndex = index + 1;
           //console.log(`Row ${newOrderIndex}: [ PrimitiveName: ${primitiveName}], [ PrimitiveValue: ${primitivevalue}]`, row);
-          updatePrimitiveColor(cacheOperations.getTemplateName(), primitiveName, primitivevalue, newOrderIndex);
+          updatePrimitiveColor(CacheOperations.getTemplateName(), primitiveName, primitivevalue, newOrderIndex);
       });
 
 

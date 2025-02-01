@@ -1,152 +1,133 @@
   class CacheOperations {
-    constructor() {
-      this.activeTemplateName = "";
+    static activeTemplateName = "";
+    static activeThemeModesInSemantic = [];
+    static activeSemanticNames = new Set();
+    static activeSemantics = new Map();
+    static activePrimitiveNames = [];
+    static activePrimitives = new Map();
+    static activeTemplateNames = [];
 
-      this.activeThemeModesInSemantic = [];
-      this.activeSemanticNames = new Set();
-      this.activeSemantics = new Map();
-    
-      this.activePrimitiveNames = [];
-      this.activePrimitives = new Map();
-
-      this.activeTemplateNames = [];
-    }
-
-    updateTemplateName(templateName){
+    static updateTemplateName(templateName) {
       this.activeTemplateName = templateName;
     }
-    getTemplateName(){
+
+    static getTemplateName() {
       return this.activeTemplateName;
     }
 
-    addTemplate(templateName) {
+    static addTemplate(templateName) {
       if (!this.activeTemplateNames.includes(templateName)) {
-          this.activeTemplateNames.push(templateName);
+        this.activeTemplateNames.push(templateName);
       }
     }
 
-    deleteTemplate(templateName) {
-        const index = this.activeTemplateNames.indexOf(templateName);
-        if (index !== -1) {
-            this.activeTemplateNames.splice(index, 1);
-        }
+    static deleteTemplate(templateName) {
+      const index = this.activeTemplateNames.indexOf(templateName);
+      if (index !== -1) {
+        this.activeTemplateNames.splice(index, 1);
+      }
     }
 
-    isTemplateExist(templateName) {
-        return this.activeTemplateNames.includes(templateName);
+    static isTemplateExist(templateName) {
+      return this.activeTemplateNames.includes(templateName);
     }
 
-    getAllTemplates() {
-        return [...this.activeTemplateNames];
+    static getAllTemplates() {
+      return [...this.activeTemplateNames];
     }
 
-    addNewThemeMode(themeMode) {
+    static addNewThemeMode(themeMode) {
       if (!this.activeThemeModesInSemantic.includes(themeMode)) {
         this.activeThemeModesInSemantic.push(themeMode);
       }
     }
 
-    getAllThemeModes() {
+    static getAllThemeModes() {
       return this.activeThemeModesInSemantic;
     }
 
-    updateThemeMode(oldThemeMode, newThemeMode) {
+    static renameThemeMode(oldThemeMode, newThemeMode) {
       this.deleteThemeMode(oldThemeMode);
       this.addNewThemeMode(newThemeMode);
     }
 
-    deleteThemeMode(themeMode) {
+    static deleteThemeMode(themeMode) {
       this.activeThemeModesInSemantic = this.activeThemeModesInSemantic.filter(item => item !== themeMode);
     }
 
-    isThemeModeExist(themeMode) {
+    static isThemeModeExist(themeMode) {
       return this.activeThemeModesInSemantic.includes(themeMode);
     }
 
-    addSemantic(semanticName, themeMode, semanticValue) {
-      // Check if the themeMode exists in the map, if not, create a new object for it
+    static addSemantic(semanticName, themeMode, semanticValue) {
       if (!this.activeSemantics.has(themeMode)) {
         this.activeSemantics.set(themeMode, {});
       }
-
-      // Add the semanticName and semanticValue to the themeMode
       this.activeSemantics.get(themeMode)[semanticName] = semanticValue;
       this.activeSemanticNames.add(semanticName);
     }
 
-    getAllSemanticNames() {
+    static getAllSemanticNames() {
       return Array.from(this.activeSemanticNames);
     }
 
-    getAllSemantics(){
+    static getAllSemantics() {
       return this.activeSemantics;
     }
 
-    getSemanticValueForThemeMode(semanticName, themeMode) {
+    static getSemanticValueForThemeMode(semanticName, themeMode) {
       if (this.activeSemantics.has(themeMode)) {
         const themeData = this.activeSemantics.get(themeMode);
-        return themeData[semanticName] || null; // Return the value or null if not found
+        return themeData[semanticName] || null;
       }
-      return null; // Theme mode doesn't exist
+      return null;
     }
 
-    updateSemantic(semanticName, themeMode, newSemanticValue) {
+    static updateSemantic(semanticName, themeMode, newSemanticValue) {
       if (this.activeSemantics.has(themeMode)) {
         const themeData = this.activeSemantics.get(themeMode);
         if (themeData.hasOwnProperty(semanticName)) {
-          themeData[semanticName] = newSemanticValue; // Update the value
-          return true; // Update successful
+          themeData[semanticName] = newSemanticValue;
+          return true;
         }
       }
-      return false; // Update failed
+      return false;
     }
 
-    renameSemantic(oldSemanticName, newSemanticName) {
-      // Check if the old semantic name exists
+    static renameSemantic(oldSemanticName, newSemanticName) {
       if (this.activeSemanticNames.has(oldSemanticName)) {
-        // Rename the semantic name for each theme mode
         for (const [themeMode, themeData] of this.activeSemantics.entries()) {
           if (themeData.hasOwnProperty(oldSemanticName)) {
-            const value = themeData[oldSemanticName]; // Get the value of the old semantic name
-            delete themeData[oldSemanticName]; // Delete the old semantic name
-            themeData[newSemanticName] = value; // Add the new semantic name with the same value
+            const value = themeData[oldSemanticName];
+            delete themeData[oldSemanticName];
+            themeData[newSemanticName] = value;
           }
         }
-    
-        // Remove the old semantic name from the activeSemanticNames set and add the new name
         this.activeSemanticNames.delete(oldSemanticName);
         this.activeSemanticNames.add(newSemanticName);
-    
-        return true; // Renaming successful
+        return true;
       }
-      return false; // Renaming failed, old semantic name not found
+      return false;
     }
-    
 
-    deleteSemantic(semanticName) {
-      // First check if the semantic name exists in the active semantic names
+    static deleteSemantic(semanticName) {
       if (this.activeSemanticNames.has(semanticName)) {
-        // If exists, delete the semantic name from all theme modes
         for (const [themeMode, themeData] of this.activeSemantics.entries()) {
           if (themeData.hasOwnProperty(semanticName)) {
-            delete themeData[semanticName]; // Delete the semantic from each theme
+            delete themeData[semanticName];
           }
         }
-    
-        // Remove the semantic name from the activeSemanticNames set
         this.activeSemanticNames.delete(semanticName);
-        return true; // Deletion successful
+        return true;
       }
-      return false; // Deletion failed, semantic name not found
+      return false;
     }
 
-    deleteSemanticForThemeMode(semanticName, themeMode) {
+    static deleteSemanticForThemeMode(semanticName, themeMode) {
       if (this.activeSemantics.has(themeMode)) {
         const themeData = this.activeSemantics.get(themeMode);
         if (themeData.hasOwnProperty(semanticName)) {
-          delete themeData[semanticName]; // Delete the semantic
-
-          // If the semantic name is no longer used across any theme modes, remove it from the set
+          delete themeData[semanticName];
           let isUsedElsewhere = false;
           for (const data of this.activeSemantics.values()) {
             if (data.hasOwnProperty(semanticName)) {
@@ -154,22 +135,20 @@
               break;
             }
           }
-
           if (!isUsedElsewhere) {
             this.activeSemanticNames.delete(semanticName);
           }
-
-          return true; // Deletion successful
+          return true;
         }
       }
-      return false; // Deletion failed
+      return false;
     }
 
-    isSemanticExist(semanticName) {
+    static isSemanticExist(semanticName) {
       return this.activeSemanticNames.has(semanticName);
     }
 
-    isSemanticExistInThemeMode(semanticName, themeMode) {
+    static isSemanticExistInThemeMode(semanticName, themeMode) {
       if (this.activeSemantics.has(themeMode)) {
         const themeData = this.activeSemantics.get(themeMode);
         return themeData.hasOwnProperty(semanticName);
@@ -177,28 +156,28 @@
       return false;
     }
 
-    addPrimitive(primitiveName, primitiveValue) {
+    static addPrimitive(primitiveName, primitiveValue) {
       if (!this.activePrimitives.has(primitiveName)) {
         this.activePrimitives.set(primitiveName, primitiveValue);
         this.activePrimitiveNames.push(primitiveName);
       }
     }
 
-    getPrimitiveValue(primitiveName) {
+    static getPrimitiveValue(primitiveName) {
       return this.activePrimitives.has(primitiveName) 
         ? this.activePrimitives.get(primitiveName) 
         : null;
     }
 
-    getAllPrimitives() {
+    static getAllPrimitives() {
       return Array.from(this.activePrimitives.entries());
     }
 
-    getAllPrimitiveNames() {
+    static getAllPrimitiveNames() {
       return [...this.activePrimitiveNames];
     }
 
-    renamePrimitive(oldPrimitiveName, newPrimitiveName) {
+    static renamePrimitive(oldPrimitiveName, newPrimitiveName) {
       if (this.activePrimitives.has(oldPrimitiveName)) {
         const value = this.activePrimitives.get(oldPrimitiveName);
         this.deletePrimitive(oldPrimitiveName);
@@ -206,24 +185,24 @@
       }
     }
 
-    updatePrimitive(primitiveName, newPrimitiveValue) {
+    static updatePrimitive(primitiveName, newPrimitiveValue) {
       if (this.activePrimitives.has(primitiveName)) {
         this.activePrimitives.set(primitiveName, newPrimitiveValue);
       }
     }
 
-    deletePrimitive(primitiveName) {
+    static deletePrimitive(primitiveName) {
       if (this.activePrimitives.has(primitiveName)) {
         this.activePrimitives.delete(primitiveName);
         this.activePrimitiveNames = this.activePrimitiveNames.filter(name => name !== primitiveName);
       }
     }
 
-    isPrimitiveExist(primitiveName) {
+    static isPrimitiveExist(primitiveName) {
       return this.activePrimitives.has(primitiveName);
     }
 
-    clearCache() {
+    static clearCache() {
       this.activeTemplateName = "";
       this.activeThemeModesInSemantic = [];
       this.activeSemanticNames.clear();
@@ -235,53 +214,52 @@
   }
 
   class SessionManager {
-    constructor() {
-      this.HOME_SCREEN = "home-screeen";
-      this.COLORS_SCREEN = "colors-screen";
-      this.TOOLS_SCREEN = "tools-screen";
-      this.INFO_SCREEN = "info-screen";
+    static HOME_SCREEN = "home-screeen";
+    static COLORS_SCREEN = "colors-screen";
+    static TOOLS_SCREEN = "tools-screen";
+    static INFO_SCREEN = "info-screen";
+    static IMPORT_JSON_SCREEN = "import-json-screen";
 
-      this.PRIMITIVES_COLOR_TAB = "primitives";
-      this.SEMANTIC_COLOR_TAB = "semantic";
+    static PRIMITIVES_COLOR_TAB = "primitives";
+    static SEMANTIC_COLOR_TAB = "semantic";
 
-
-    }
-
-    setSessionData(key, value) {
+    static setSessionData(key, value) {
       chrome.storage.session.set({ [key]: value }, () => {
-          //console.log(`[info] : ${key} set to '${value}' in current session.`);
+        //console.log(`[info] : ${key} set to '${value}' in current session.`);
       });
     }
     
-    getSessionData(key) {
-        return new Promise((resolve) => {
-            chrome.storage.session.get(key, (result) => {
-                resolve(result[key]);
-            });
+    static getSessionData(key) {
+      return new Promise((resolve) => {
+        chrome.storage.session.get(key, (result) => {
+          resolve(result[key]);
         });
+      });
     }
     
-    setScreen(screenName){
+    static setScreen(screenName){
       this.setSessionData("screen", screenName);
     }
-    async getScreen() {
+    
+    static async getScreen() {
       return await this.getSessionData("screen");
     }
-    setColorTab(colorTab){
+    
+    static setColorTab(colorTab){
       this.setSessionData("colorTab", colorTab);
-      
     }
-    async getColorTab() {
+    
+    static async getColorTab() {
       return await this.getSessionData("colorTab");
     }
-    setTemplate(template){
+    
+    static setTemplate(template){
       this.setSessionData("template", template);
-      
     }
-    async getTemplate() {
+    
+    static async getTemplate() {
       return await this.getSessionData("template");
     }
-
   }
 
   class Logger {
@@ -340,6 +318,129 @@
     }
   }
 
+  class createElement {
+    constructor() {
+      
+    }
+
+    static semanticThemeModeCell(themeMode, isDefault = false) {
+      const newTh = document.createElement('td');
+      newTh.setAttribute("data-modal-target", "edit-theme-mode-modal");
+      newTh.setAttribute("data-modal-toggle", "edit-theme-mode-modal");
+      newTh.setAttribute("theme-mode", themeMode);
+      newTh.setAttribute("default-theme-header", isDefault);  newTh.classList.add("semantic-table-cell");
+      newTh.classList.add("semantic-table-cell-has-padding");
+      newTh.innerHTML = themeMode;
+
+      return newTh;
+    }
+  }
+
+  class ScreenManager {
+    static mainNavScreens = ["home-screen", "tools-screen", "info-screen"]; 
+    static activeNavScreen = "home-screen";
+    static activeScreen = "home-screen";
+    
+
+    static switchScreen(screenName) {
+      const targetScreen = document.getElementById(screenName);
+
+      document.getElementById(this.activeScreen).classList.replace("visible", "hidden");
+      targetScreen.classList.replace("hidden", "visible");
+
+      if (this.mainNavScreens.includes(screenName)) {
+        this.mainNavScreens.forEach(screenId => {
+          document.getElementById(`${screenId}-icon`).classList.replace("text-blue-600", "text-gray-500");
+          
+        });
+        document.getElementById(`${screenName}-icon`).classList.replace("text-gray-500", "text-blue-600");
+        
+        // this.activeNavScreen = screenName;
+        // const activeIcon = document.getElementById(this.activeNavScreen + "-icon");
+        // const targetIcon = document.getElementById(screenName + "-icon");
+
+        // activeIcon.classList.replace("text-blue-600", "text-gray-500");
+        // targetIcon.classList.replace("text-gray-500", "text-blue-600");
+      }
+      this.activeScreen = screenName;
+    }
+
+    static showBottomNavBar() {
+      document.getElementById("bottom-nav-bar").classList.replace("hidden", "visible");
+    }
+
+    static hideBottomNavBar() {
+      document.getElementById("bottom-nav-bar").classList.replace("visible", "hidden");
+    }
+
+    static showHomeScreen() { 
+      this.switchScreen("home-screen"); 
+      this.showBottomNavBar();
+
+      SessionManager.setScreen(SessionManager.HOME_SCREEN);
+    }
+
+    static showColorsScreen() {
+      this.switchScreen("colors-screen");
+      this.hideBottomNavBar();
+
+      SessionManager.setScreen(SessionManager.COLORS_SCREEN);
+      SessionManager.setColorTab(SessionManager.PRIMITIVES_COLOR_TAB);
+      SessionManager.setTemplate(CacheOperations.getTemplateName());
+    }
+
+    static showImportJsonScreen() {
+    this.switchScreen("import-json-screen");
+    this.hideBottomNavBar();
+
+    SessionManager.setScreen(SessionManager.IMPORT_JSON_SCREEN);
+    }
+
+    static showToolsScreen() {
+      this.switchScreen("tools-screen");
+      this.showBottomNavBar();
+    }
+
+    static showInfoScreen() {
+      this.switchScreen("info-screen");
+      this.showBottomNavBar();
+    }
+  }
+
+  class AlertManager {
+    static showAlert(alertId, message = "", duration = 5000) {
+      const alert = document.getElementById(alertId + "-alert");
+      const alertText = document.getElementById(alertId + "-alert-text");
+      if (alert && alertText) {
+        alertText.innerHTML = message;
+        alert.classList.replace('hidden', 'flex'); // Show the alert
+        if (duration > 0) {
+          setTimeout(() => alert.classList.replace('flex', 'hidden'), duration); // Hide after duration
+        }
+      }
+    }
+
+    static success(message = "", duration = 5000) {
+      this.showAlert("success", message, duration);
+    }
+
+    static error(message = "", duration = 5000) {
+      this.showAlert("danger", message, duration);
+    }
+
+    static info(message = "", duration = 5000) {
+      this.showAlert("info", message, duration);
+    }
+
+    static warning(message = "", duration = 5000) {
+      this.showAlert("warning", message, duration);
+    }
+
+    static dark(message = "", duration = 5000) {
+      this.showAlert("dark", message, duration);
+    }
+  }
+
 
 
   // **Example Usage**
@@ -388,11 +489,7 @@
 
 
 console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Formats.HIGHLIGHT));
-  
-  let activeScreen = "home-screen";
 
-  const cacheOperations = new CacheOperations();
-  const sessionManager = new SessionManager();
 
   let currentPrimitiveRowId = 1;
   let currentSemanticRowId = 1;
@@ -402,52 +499,66 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
   let oldPrimitiveInputValues = new Map();
 
   let semanticTableColumns = 2;
+
+  const bottomNavBar = document.getElementById("bottom-nav-bar");
   
   document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('[data-nav-button-screen-target]');
-
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetScreenId = button.getAttribute("data-nav-button-screen-target");
-
-            console.log(targetScreenId);
-            
-
-            SwitchScreen(targetScreenId);
-        });
+    document.querySelectorAll('[data-nav-button-screen-target]').forEach(button => {
+      button.addEventListener('click', () => {
+        ScreenManager.switchScreen(button.getAttribute("data-nav-button-screen-target"));
+      });
     });
-
-    
-      
   });
 
-
-  function SwitchScreen(screenName){
-    const targetScreen = document.getElementById(screenName);
+  async function restoreSession() {
     
-    document.getElementById(activeScreen).classList.replace("visible", "hidden");
-    targetScreen.classList.replace("hidden", "visible");
+      const sessionScreen = await SessionManager.getScreen();
+      const sessionColorTab = await SessionManager.getColorTab();
+      const sessionTemplate = await SessionManager.getTemplate();
 
-    const activeIcon = document.getElementById(activeScreen + "-icon");
-    const targetIcon = document.getElementById(screenName + "-icon");
+      if (sessionScreen === SessionManager.COLORS_SCREEN && CacheOperations.isTemplateExist(sessionTemplate)) {
 
-    activeIcon.classList.replace("text-blue-600", "text-gray-500");
-    targetIcon.classList.replace("text-gray-500", "text-blue-600");
+        console.log(...Logger.multiLog(
+          ["[SESSION PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Opening Colors-Screen for the previous session"]
+        ));
+        
 
-    activeScreen = screenName;
-  }
+        currentPrimitiveRowId = 1;
+        currentSemanticRowId = 1;
 
-  function ShowAlert(alertId, meassage = "", duration = 5000) {
-    const alert = document.getElementById(alertId+"-alert");
-    const alertText = document.getElementById(alertId+"-alert-text");
-    if (alert && alertText) {
-      alertText.innerHTML = meassage;
-      alert.classList.replace('hidden', 'flex'); // Show the alert
-      if (duration > 0) {
-        setTimeout(() => alert.classList.replace('flex', 'hidden'), duration); // Hide after duration
+        CacheOperations.updateTemplateName(sessionTemplate);
+
+        getAllPrimitiveColors(sessionTemplate);
+        getAllSemanticColors(sessionTemplate);
+
+        ScreenManager.showColorsScreen();
+
+        // homeScreen.classList.replace("visible", "hidden");
+        // colorsScreen.classList.replace("hidden", "visible");
+        console.log(...Logger.multiLog(
+          ["[SESSION PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Switching Color tab for the previous session"]
+        ));
+        SwitchTabs(sessionColorTab);
+    
+      }else if (sessionScreen === SessionManager.HOME_SCREEN) {
+        console.log(...Logger.multiLog(
+          ["[SESSION PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Opening Home-Screen for the previous session"]
+        ));
+        ScreenManager.showHomeScreen();
+        
       }
-    }
+
+      console.log(...Logger.multiLog(
+        ["[SESSION RESTORE COMPLETE]", Logger.Types.DEBUG, Logger.Formats.BOLD],
+        ["Previous session restored successfully!"]
+      ));
   }
+
+
+
   
 
 
