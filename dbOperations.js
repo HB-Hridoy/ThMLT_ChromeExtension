@@ -14,18 +14,18 @@ let isDBOpenSuccess = false;
 openDB.onupgradeneeded = function (event) {
   db = event.target.result;
 
-  // Create 'templates' object store
-  if (!db.objectStoreNames.contains("templates")) {
-    let templatesStore = db.createObjectStore("templates", { keyPath: "templateName" });
-    templatesStore.createIndex("templateName", "templateName", { unique: true });
-    templatesStore.createIndex("author", "author", { unique: false });
-    templatesStore.createIndex("version", "version", { unique: false });
+  // Create 'projects' object store
+  if (!db.objectStoreNames.contains("projects")) {
+    let projectsStore = db.createObjectStore("projects", { keyPath: "projectName" });
+    projectsStore.createIndex("projectName", "projectName", { unique: true });
+    projectsStore.createIndex("author", "author", { unique: false });
+    projectsStore.createIndex("version", "version", { unique: false });
   }
 
   // Create 'primitiveColors' object store
   if (!db.objectStoreNames.contains("primitiveColors")) {
     let primitiveColorsStore = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true  });
-    primitiveColorsStore.createIndex("templateName", "templateName", { unique: false });
+    primitiveColorsStore.createIndex("projectName", "projectName", { unique: false });
     primitiveColorsStore.createIndex("primitiveName", "primitiveName", { unique: false });
     primitiveColorsStore.createIndex("primitiveValue", "primitiveValue", { unique: false });
     primitiveColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
@@ -34,7 +34,7 @@ openDB.onupgradeneeded = function (event) {
   // Create 'semanticColors' object store
   if (!db.objectStoreNames.contains("semanticColors")) {
     let semanticColorsStore = db.createObjectStore("semanticColors", { keyPath: "id", autoIncrement: true  });
-    semanticColorsStore.createIndex("templateName", "templateName", { unique: false });
+    semanticColorsStore.createIndex("projectName", "projectName", { unique: false });
     semanticColorsStore.createIndex("semanticName", "semanticName", { unique: false });
     semanticColorsStore.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
     semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
@@ -52,8 +52,9 @@ openDB.onsuccess = (event) => {
     ["Database is ready"]
   ));
 
-  getAllTemplates();
-  // addTemplate({id: "templateName", templateName: "templateName", author: "author", version: "version" });
+  getAllProjects();
+  exportProjectAsJson("My first project");
+  // addProject({id: "projectName", projectName: "projectName", author: "author", version: "version" });
 
 };
 
@@ -61,29 +62,29 @@ openDB.onerror = function (event) {
   console.error("Database error:", event.target.errorCode);
 };
 
-function addTemplate(template, update) {
+function addProject(project, update) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
-      console.log("Adding template...");
-      const transaction = db.transaction(["templates"], "readwrite");
-      const store = transaction.objectStore("templates");
+      console.log("Adding project...");
+      const transaction = db.transaction(["projects"], "readwrite");
+      const store = transaction.objectStore("projects");
 
       let request;
       if (update){
-        request = store.put(template);
+        request = store.put(project);
 
       }else{
-        request = store.add(template);
+        request = store.add(project);
 
       }
       
       request.onsuccess = () => {
-        console.log("Template added!");
-        resolve("Template added!");
+        console.log("Project added!");
+        resolve("Project added!");
       };
 
       request.onerror = (event) => {
-        const error = "Error adding template: " + event.target.error;
+        const error = "Error adding project: " + event.target.error;
         console.error(error);
         reject(error);
       };
@@ -95,43 +96,43 @@ function addTemplate(template, update) {
   });
 }
 
-function getAllTemplates() {
+function getAllProjects() {
   console.log(...Logger.multiLog(
     ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
-    ["Fetching all templates"]
+    ["Fetching all projects"]
   ));
   
-  const transaction = db.transaction(["templates"], "readonly");
-  const store = transaction.objectStore("templates");
+  const transaction = db.transaction(["projects"], "readonly");
+  const store = transaction.objectStore("projects");
   const request = store.getAll();
 
   request.onsuccess = () => {
     console.log(...Logger.multiLog(
       ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
-      ["Got All Templates!"]
+      ["Got All Projects!"]
     ));
-    const templatesContainer = document.getElementById("templates-container");
+    const projectsContainer = document.getElementById("projects-container");
     let result = request.result;
 
     // Clear any existing content in the container
-    templatesContainer.innerHTML = "";
+    projectsContainer.innerHTML = "";
 
     // Check if the result array is empty
     if (result.length === 0) {
-      // Inject a <p> if no templates are found
-      templatesContainer.innerHTML = `<p class="text-gray-500 text-sm">No templates found.</p>`;
+      // Inject a <p> if no projects are found
+      projectsContainer.innerHTML = `<p class="text-gray-500 text-sm">No projects found.</p>`;
     } else {
-      // Iterate over the result array and inject HTML for each template
-      result.forEach((template) => {
-        CacheOperations.addTemplate(template.templateName);
+      // Iterate over the result array and inject HTML for each project
+      result.forEach((project) => {
+        CacheOperations.addProject(project.projectName);
         const html = `
-          <div template-id="${template.templateName}" class="template-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${template.templateName}</h5>
-            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Author: ${template.author}</p>
-            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Version: ${template.version}</p>
+          <div project-id="${project.projectName}" class="project-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${project.projectName}</h5>
+            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Author: ${project.author}</p>
+            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Version: ${project.version}</p>
           </div>
         `;
-        templatesContainer.insertAdjacentHTML("beforeend", html);
+        projectsContainer.insertAdjacentHTML("beforeend", html);
       });
     }
 
@@ -141,41 +142,35 @@ function getAllTemplates() {
   };
 
   request.onerror = (event) => {
-    const error = "Error getting templates: " + event.target.error;
+    const error = "Error getting projects: " + event.target.error;
     console.error(error);
     reject(error);
   };
 }
 
-function getAllPrimitiveColors(templateName) {
+function getAllPrimitiveColors(projectName) {
 
   console.log(...Logger.multiLog(
     ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
     ["Fetching primitive colors from"],
-    [templateName, Logger.Types.WARNING, Logger.Formats.BOLD],
-    ["template."]
+    [projectName, Logger.Types.WARNING, Logger.Formats.BOLD],
+    ["project."]
   ));
   
-
-  // Logger.multiLog(
-  //       ["Getting primitive colors of '"],
-  //       [templateName, Logger.Types.INFO],
-  //       ["' template."]
-  //   );
   const transaction = db.transaction(["primitiveColors"], "readonly");
   const store = transaction.objectStore("primitiveColors");
   // Open the index on projectId
-  const index = store.index("templateName");
+  const index = store.index("projectName");
     
-  const request = index.getAll(templateName);
+  const request = index.getAll(projectName);
 
   request.onsuccess = () => {
 
     console.log(...Logger.multiLog(
       ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
       ["Got all primitive colors from"],
-      [templateName, Logger.Types.INFO, Logger.Formats.BOLD],
-      ["template."]
+      [projectName, Logger.Types.INFO, Logger.Formats.BOLD],
+      ["project."]
 
     ));
     
@@ -252,12 +247,12 @@ function getAllPrimitiveColors(templateName) {
   };
 
   request.onerror = (event) => {
-    const error = "Error getting templates: " + event.target.error;
+    const error = "Error getting projects: " + event.target.error;
     console.error(error);
   };
 }
 
-function addPrimitiveColor(templateName, primitiveName, primitiveValue, orderIndex) {
+function addPrimitiveColor(projectName, primitiveName, primitiveValue, orderIndex) {
 
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
@@ -266,7 +261,7 @@ function addPrimitiveColor(templateName, primitiveName, primitiveValue, orderInd
       let primitiveColorsStore = transaction.objectStore("primitiveColors");
 
         let newColor = {
-          templateName: templateName,
+          projectName: projectName,
           primitiveName: primitiveName,
           primitiveValue: primitiveValue,
           orderIndex: orderIndex
@@ -305,7 +300,7 @@ function addPrimitiveColor(templateName, primitiveName, primitiveValue, orderInd
 
 }
 
-function updatePrimitiveColor(templateName, primitiveName, newPrimitiveValue, newOrderIndex) {
+function updatePrimitiveColor(projectName, primitiveName, newPrimitiveValue, newOrderIndex) {
 
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
@@ -328,7 +323,7 @@ function updatePrimitiveColor(templateName, primitiveName, newPrimitiveValue, ne
           const record = cursor.value;
 
           if (
-            record.templateName === templateName &&
+            record.projectName === projectName &&
             record.primitiveName === primitiveName
           ) {
             record.primitiveValue = newPrimitiveValue;
@@ -382,14 +377,14 @@ function updatePrimitiveColor(templateName, primitiveName, newPrimitiveValue, ne
 
 }
 
-function deletePrimitiveColor(templateName, primitiveName) {
+function deletePrimitiveColor(projectName, primitiveName) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
       let transaction = db.transaction(["primitiveColors"], "readwrite");
       let primitiveColorsStore = transaction.objectStore("primitiveColors");
 
-      // Retrieve all records for the given templateName
-      let colorRequest = primitiveColorsStore.index("templateName").getAll(templateName);
+      // Retrieve all records for the given projectName
+      let colorRequest = primitiveColorsStore.index("projectName").getAll(projectName);
 
       colorRequest.onsuccess = function(event) {
         let colors = event.target.result;
@@ -406,7 +401,7 @@ function deletePrimitiveColor(templateName, primitiveName) {
             Object.entries(themeData).forEach(([semanticName, semanticValue]) => {
 
               if (semanticValue === primitiveName) {
-                updateSemanticValue(CacheOperations.getTemplateName(), semanticName, themeMode, "Click to link color");
+                updateSemanticValue(CacheOperations.getProjectName(), semanticName, themeMode, "Click to link color");
               }
             });
           });
@@ -456,7 +451,7 @@ function deletePrimitiveColor(templateName, primitiveName) {
 //     reject(error);
 //   }
 // });
-function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive){
+function addSemanticColor(projectName, semanticName, themeMode, linkedPrimitive){
 
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
@@ -464,7 +459,7 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
       let semanticColorsStore = transaction.objectStore("semanticColors");
 
       let newSemanticColor = {
-        templateName: templateName,
+        projectName: projectName,
         semanticName: semanticName,
         themeMode: themeMode,
         linkedPrimitive: linkedPrimitive
@@ -513,31 +508,31 @@ function addSemanticColor(templateName, semanticName, themeMode, linkedPrimitive
 
 
 /**
- * Fetches all semantic colors associated with a given template name from the database,
+ * Fetches all semantic colors associated with a given project name from the database,
  * updates the cache with the retrieved semantic colors, and dynamically updates the 
  * semantic colors table in the DOM.
  *
- * @param {string} templateName - The name of the template to fetch semantic colors for.
+ * @param {string} projectName - The name of the project to fetch semantic colors for.
  */
-function getAllSemanticColors(templateName) {
+function getAllSemanticColors(projectName) {
   console.log(...Logger.multiLog(
     ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
     ["Fetching semantic colors from"],
-    [templateName, Logger.Types.WARNING, Logger.Formats.BOLD],
-    ["template."]
+    [projectName, Logger.Types.WARNING, Logger.Formats.BOLD],
+    ["project."]
   ));
   let transaction = db.transaction(["semanticColors"], "readonly");
   let semanticColorsStore = transaction.objectStore("semanticColors");
 
-  let semanticRequest = semanticColorsStore.index("templateName").getAll(templateName);
+  let semanticRequest = semanticColorsStore.index("projectName").getAll(projectName);
 
   semanticRequest.onsuccess = () => {
     
     console.log(...Logger.multiLog(
       ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
       ["Got all semantic colors from"],
-      [templateName, Logger.Types.INFO, Logger.Formats.BOLD],
-      ["template."]
+      [projectName, Logger.Types.INFO, Logger.Formats.BOLD],
+      ["project."]
     ));
     let result = semanticRequest.result;
 
@@ -582,11 +577,15 @@ function getAllSemanticColors(templateName) {
 
     if (allThemeModes.length === 0) {
       console.log(...Logger.multiLog(
-        ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
-        ["No theme modes found."],
+        ["[WARNING]", Logger.Types.WARNING, Logger.Formats.BOLD],
+        ["No theme modes found.", Logger.Types.WARNING, Logger.Formats.ITALIC]
+      ));
+
+      console.log(...Logger.multiLog(
+        ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
         ["Adding"],
-        ["Light", Logger.Types.INFO, Logger.Formats.BOLD],
-        ["theme mode."]
+        ["Light", Logger.Types.WARNING, Logger.Formats.BOLD],
+        ["theme mode as default theme."]
       ));
       
       theadRow.insertBefore(createElement.semanticThemeModeCell("Light", true), theadRow.lastElementChild);
@@ -632,14 +631,19 @@ function getAllSemanticColors(templateName) {
     if (allSemanticNames.length === 0 && allThemeModes.length === 0) {
 
       console.log(...Logger.multiLog(
-        ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
-        ["No semantic found."],
+        ["[WARNING]", Logger.Types.WARNING, Logger.Formats.BOLD],
+        ["No semantic found.", Logger.Types.WARNING, Logger.Formats.ITALIC]
+      ));
+
+      console.log(...Logger.multiLog(
+        ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
         ["Adding"],
-        ["surface-primary", Logger.Types.INFO, Logger.Formats.BOLD],
+        ["surface-primary", Logger.Types.WARNING, Logger.Formats.BOLD],
         ["semantic."]
       ));
 
-      addSemanticColor(templateName, "surface-primary", "Light", "Click to link color");
+
+      addSemanticColor(projectName, "surface-primary", "Light", "Click to link color");
 
       addNewRowToSemanticTable("surface-primary", ["Click to link color"], ["Light"]);
 
@@ -664,7 +668,7 @@ function getAllSemanticColors(templateName) {
 
 }
 
-function deleteSemanticColor(semanticName, templateName) {
+function deleteSemanticColor(semanticName, projectName) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
 
@@ -687,7 +691,7 @@ function deleteSemanticColor(semanticName, templateName) {
 
           if (
             record.semanticName === semanticName &&
-            record.templateName === templateName
+            record.projectName === projectName
           ) {
             const deleteRequest = cursor.delete(); // Delete the matching record
             deleteRequest.onerror = (event) => {
@@ -739,7 +743,7 @@ function deleteSemanticColor(semanticName, templateName) {
 }
 
 
-function renameSemantic(oldSemanticName, newSemanticName, templateName) {
+function renameSemantic(oldSemanticName, newSemanticName, projectName) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
 
@@ -762,7 +766,7 @@ function renameSemantic(oldSemanticName, newSemanticName, templateName) {
 
           if (
             record.semanticName === oldSemanticName &&
-            record.templateName === templateName
+            record.projectName === projectName
           ) {
             record.semanticName = newSemanticName; // Update the semanticName
 
@@ -813,7 +817,7 @@ function renameSemantic(oldSemanticName, newSemanticName, templateName) {
   });
 }
 
-function updateSemanticValue(templateName, semanticName, themeMode, newSemanticValue) {
+function updateSemanticValue(projectName, semanticName, themeMode, newSemanticValue) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
       if (!db.objectStoreNames.contains("semanticColors")) {
@@ -838,9 +842,9 @@ function updateSemanticValue(templateName, semanticName, themeMode, newSemanticV
         if (cursor) {
           const record = cursor.value;
 
-          // Check for records matching templateName, semanticName, and themeMode
+          // Check for records matching projectName, semanticName, and themeMode
           if (
-            record.templateName === templateName &&
+            record.projectName === projectName &&
             record.semanticName === semanticName &&
             record.themeMode === themeMode
           ) {
@@ -894,7 +898,7 @@ function updateSemanticValue(templateName, semanticName, themeMode, newSemanticV
 }
 
 
-function deleteTheme(templateName, themeMode) {
+function deleteTheme(projectName, themeMode) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
 
@@ -915,7 +919,7 @@ function deleteTheme(templateName, themeMode) {
         if (cursor) {
           const record = cursor.value;
 
-          if (record.templateName === templateName && record.themeMode === themeMode) {
+          if (record.projectName === projectName && record.themeMode === themeMode) {
             const deleteRequest = cursor.delete(); // Delete the matching record
             deleteRequest.onerror = (event) => {
               console.error("Delete operation failed:", event.target.error);
@@ -958,7 +962,7 @@ function deleteTheme(templateName, themeMode) {
   });
 }
 
-function renameThemeMode(templateName, oldThemeMode, newThemeMode) {
+function renameThemeMode(projectName, oldThemeMode, newThemeMode) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
 
@@ -979,7 +983,7 @@ function renameThemeMode(templateName, oldThemeMode, newThemeMode) {
         if (cursor) {
           const record = cursor.value;
 
-          if (record.templateName === templateName && record.themeMode === oldThemeMode) {
+          if (record.projectName === projectName && record.themeMode === oldThemeMode) {
             record.themeMode = newThemeMode; // Update the themeMode
 
             const updateRequest = cursor.update(record); // Save the updated record
@@ -1025,6 +1029,185 @@ function renameThemeMode(templateName, oldThemeMode, newThemeMode) {
     }
   });
 }
+
+/**
+ * Exports a project’s data as a formatted JSON file.
+ * @param {string} projectName - The project key used in the 'projects' store.
+ */
+function exportProjectAsJson(projectName, shouldDownload = false) {
+
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+
+      // Open a read-only transaction covering all three object stores.
+      const transaction = db.transaction(["projects", "primitiveColors", "semanticColors"], "readonly");
+      const projectsStore = transaction.objectStore("projects");
+      const primitivesStore = transaction.objectStore("primitiveColors");
+      const semanticStore = transaction.objectStore("semanticColors");
+
+      // 1. Get the project data.
+      const projectRequest = projectsStore.get(projectName);
+      projectRequest.onerror = (e) =>
+        console.error("Error fetching project:", e.target.error);
+      projectRequest.onsuccess = (e) => {
+        const project = e.target.result;
+        if (!project) {
+          console.error("Project not found:", projectName);
+          return;
+        }
+
+        // 2. Get all primitive colors for the project.
+        const primitivesIndex = primitivesStore.index("projectName");
+        const primitivesRequest = primitivesIndex.getAll(projectName);
+        primitivesRequest.onerror = (e) =>
+          console.error("Error fetching primitives:", e.target.error);
+        primitivesRequest.onsuccess = (e) => {
+          const primitivesRecords = e.target.result;
+          // Build an object mapping each primitive's name to its value.
+          const primitivesObj = {};
+          primitivesRecords.forEach((record) => {
+            primitivesObj[record.primitiveName] = record.primitiveValue;
+          });
+
+          // 3. Get all semantic colors for the project.
+          const semanticIndex = semanticStore.index("projectName");
+          const semanticRequest = semanticIndex.getAll(projectName);
+          semanticRequest.onerror = (e) =>
+            console.error("Error fetching semantic colors:", e.target.error);
+          semanticRequest.onsuccess = (e) => {
+            const semanticRecords = e.target.result;
+            const semanticObj = {};
+            const modesSet = new Set();
+
+            // Organize semantic records by their theme mode.
+            semanticRecords.forEach((record) => {
+              const mode = record.themeMode;
+              modesSet.add(mode);
+              if (!semanticObj[mode]) {
+                semanticObj[mode] = {};
+              }
+              // Map the semantic name to the linked primitive.
+              semanticObj[mode][record.semanticName] = record.linkedPrimitive;
+            });
+
+            // Create an array of modes. You might sort these or choose a default order.
+            const modesArr = Array.from(modesSet);
+            // For the default mode, you could prefer "Light" if it exists or simply pick the first one.
+            const defaultMode = modesArr.includes("Light") ? "Light" : modesArr[0] || "";
+
+            // 4. Build the export object matching your desired JSON structure.
+            const exportData = {
+              ProjectName: project.projectName,
+              Version: project.version,
+              Author: project.author,
+              Modes: modesArr,
+              DefaultMode: defaultMode,
+              Primitives: primitivesObj,
+              Semantic: semanticObj,
+            };
+
+            // 5. Convert the export object to a JSON string.
+            const jsonString = JSON.stringify(exportData, null, 2);
+            //console.log("Exported JSON:", jsonString);
+
+            if (shouldDownload) {
+              // 6. Trigger a download of the JSON file.
+              const blob = new Blob([jsonString], { type: "application/json" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              // Use the project name as the filename.
+              a.download = `${project.projectName}.json`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+              
+            } else {
+              resolve(jsonString);
+            }
+          }; // semanticRequest.onsuccess
+        }; // primitivesRequest.onsuccess
+      }; // projectRequest.onsuccess
+      
+    } else {
+      const error = "Database is not initialized";
+      console.error(error);
+      reject(error);
+    }
+  });
+
+    
+}
+
+/**
+ * Deletes a project and all its associated primitive and semantic color records.
+ * @param {string} projectName - The name of the project to delete.
+ */
+function deleteProject(projectName) {
+
+    // Start a read-write transaction covering the three object stores.
+    const transaction = db.transaction(
+      ["projects", "primitiveColors", "semanticColors"],
+      "readwrite"
+    );
+
+    transaction.onerror = (event) => {
+      console.error("Transaction error:", event.target.error);
+    };
+
+    transaction.oncomplete = () => {
+      console.log(`Project '${projectName}' and all its related records have been deleted.`);
+    };
+
+    // 1. Delete the project record from the "projects" store.
+    const projectsStore = transaction.objectStore("projects");
+    const deleteProjectRequest = projectsStore.delete(projectName);
+    deleteProjectRequest.onerror = (event) => {
+      console.error("Error deleting project:", event.target.error);
+    };
+
+    // 2. Delete all primitive color records linked to this project.
+    const primitivesStore = transaction.objectStore("primitiveColors");
+    const primitiveIndex = primitivesStore.index("projectName");
+    // Open a cursor for all records with matching projectName.
+    const primitiveCursorRequest = primitiveIndex.openCursor(IDBKeyRange.only(projectName));
+
+    primitiveCursorRequest.onerror = (event) => {
+      console.error("Error iterating primitives:", event.target.error);
+    };
+
+    primitiveCursorRequest.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        // Delete the current record.
+        cursor.delete();
+        // Continue to the next record.
+        cursor.continue();
+      }
+    };
+
+    // 3. Delete all semantic color records linked to this project.
+    const semanticStore = transaction.objectStore("semanticColors");
+    const semanticIndex = semanticStore.index("projectName");
+    const semanticCursorRequest = semanticIndex.openCursor(IDBKeyRange.only(projectName));
+
+    semanticCursorRequest.onerror = (event) => {
+      console.error("Error iterating semantic colors:", event.target.error);
+    };
+
+    semanticCursorRequest.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        cursor.delete();
+        cursor.continue();
+      }
+    };
+}
+
+
+
+
 
 
 

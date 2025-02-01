@@ -1,5 +1,5 @@
     
-    const templatesContainer = document.getElementById("templates-container");
+    const projectsContainer = document.getElementById("projects-container");
     const homeScreen = document.getElementById("home-screen");
     const colorsScreen = document.getElementById("colors-screen");
     let importJsonEditor; 
@@ -12,24 +12,6 @@
     
 
     document.addEventListener('DOMContentLoaded', () => {
-
-
-      (async () => {
-        const sessionScreen = await SessionManager.getScreen();
-        const sessionColorTab = await SessionManager.getColorTab();
-        const sessionTemplate = await SessionManager.getTemplate();
-        if(sessionScreen){
-          console.log(...Logger.multiLog(
-            ["[SESSION FOUND]", Logger.Types.DEBUG, Logger.Formats.BOLD],
-            ["Restoring previous session."]
-          ));
-        } else{
-          console.log(...Logger.multiLog(
-            ["[NO SESSION FOUND]", Logger.Types.DEBUG, Logger.Formats.BOLD],
-            ["Starting new session."]
-          ));
-        }
-      })();
 
       importJsonEditor = CodeMirror.fromTextArea(document.getElementById("import-json-code-editor"), {
         mode: "application/json", 
@@ -111,27 +93,27 @@
     });
 
 
-    document.getElementById("add-new-template-toggle").addEventListener("click", function(){
-        bottomNavBar.classList.replace("visible","hidden");
+    document.getElementById("add-new-project-toggle").addEventListener("click", function(){
+        ScreenManager.hideBottomNavBar();
     });
 
-    document.getElementById("add-new-template").addEventListener("click", async function () {
+    document.getElementById("add-new-project").addEventListener("click", async function () {
         // Select the inputs
-        const templateName = document.getElementById("templateNameInput").value.trim();
+        const projectName = document.getElementById("projectNameInput").value.trim();
         const author = document.getElementById("authorNameInput").value.trim();
         const version = document.getElementById("versionNameInput").value.trim();
       
         // Check if any input is empty
-        if (!templateName || !author || !version) {
+        if (!projectName || !author || !version) {
           console.log("Inputs are empty");
         } else {
-          console.log("Adding template");
+          console.log("Adding project");
       
           try {
-            // Await the result of addTemplate
-            const result = await addTemplate({
-              id: templateName,
-              templateName: templateName,
+            // Await the result of addProject
+            const result = await addProject({
+              id: projectName,
+              projectName: projectName,
               author: author,
               version: version,
             }, true);
@@ -139,13 +121,13 @@
             console.log(result); // Log the success message
 
             const html = `
-                        <div template-id="${templateName}" class="template-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${templateName}</h5>
+                        <div project-id="${projectName}" class="project-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${projectName}</h5>
                             <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Author: ${author}</p>
                             <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Version: ${version}</p>
                         </div>
                         `;
-            templatesContainer.insertAdjacentHTML("beforeend", html);
+                        projectsContainer.insertAdjacentHTML("beforeend", html);
           } catch (error) {
             alert(error); // Error message
             console.error(error); // Log the error message
@@ -153,24 +135,24 @@
         }
     });
 
-    document.getElementById("templates-container").addEventListener("click", function(event) {
-        // Check if the clicked element or any of its parents has the 'template-preview-parent' class
-        if (event.target.closest('.template-preview-parent')) {
+    document.getElementById("projects-container").addEventListener("click", function(event) {
+        // Check if the clicked element or any of its parents has the 'project-preview-parent' class
+        if (event.target.closest('.project-preview-parent')) {
 
           CacheOperations.clearCache();
           
-          const templateDiv = event.target.closest('.template-preview-parent');
+          const projectDiv = event.target.closest('.project-preview-parent');
       
-          CacheOperations.updateTemplateName(templateDiv.getAttribute('template-id'));
+          CacheOperations.updateProjectName(projectDiv.getAttribute('project-id'));
 
-          document.getElementById("template-name-colors-screen").innerText = CacheOperations.getTemplateName();
+          document.getElementById("project-name-colors-screen").innerText = CacheOperations.getProjectName();
 
           currentPrimitiveRowId = 1;
           currentSemanticRowId = 1;
 
-          getAllPrimitiveColors(CacheOperations.getTemplateName());
+          getAllPrimitiveColors(CacheOperations.getProjectName());
           
-          getAllSemanticColors(CacheOperations.getTemplateName());
+          getAllSemanticColors(CacheOperations.getProjectName());
 
           
 
@@ -183,7 +165,7 @@
       const errors = [];
 
       // Check for required fields
-      const requiredFields = ["TemplateName", "Author", "Version", "Modes", "DefaultMode", "Primitives", "Semantic"];
+      const requiredFields = ["ProjectName", "Author", "Version", "Modes", "DefaultMode", "Primitives", "Semantic"];
       for (let field of requiredFields) {
           if (!data.hasOwnProperty(field)) {
               errors.push(`Missing required field: ${field}`);

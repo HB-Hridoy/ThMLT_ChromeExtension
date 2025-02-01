@@ -46,8 +46,25 @@
   const selectPrimitiveModal = document.getElementById("select-primitive-modal");
   const editThemeModeModal = document.getElementById("edit-theme-mode-modal");
 
-
+  const projectDataDownloadButton = document.getElementById("project-data-download-button");
+  const projectDataCopyButton = document.getElementById("project-data-copy-button");
   
+
+  projectDataDownloadButton.addEventListener("click", ()=>{
+    exportProjectAsJson(CacheOperations.getProjectName(), true);
+  });
+
+  projectDataCopyButton.addEventListener("click", async ()=>{
+
+    try {
+        const dataToCopy = await exportProjectAsJson(CacheOperations.getProjectName(), false);
+        await navigator.clipboard.writeText(dataToCopy);
+        AlertManager.success("Project data copied to clipboard", 2500);
+    } catch (err) {
+        AlertManager.error("Failed to copy project data to clipboard", 2500);
+        console.error("Clipboard copy failed", err);
+    }
+  });
   //Open home screen
   document.getElementById("color-screen-back-button").addEventListener("click", () => {
     ScreenManager.showHomeScreen();
@@ -155,7 +172,7 @@
     try {
       const primitiveName = addNewPrimitiveInput.value.trim();
       const primitiveVaule = document.getElementById("primitive-modal-color-text").textContent.trim();
-      const result = await addPrimitiveColor(CacheOperations.getTemplateName(), primitiveName, primitiveVaule, currentPrimitiveRowId);
+      const result = await addPrimitiveColor(CacheOperations.getProjectName(), primitiveName, primitiveVaule, currentPrimitiveRowId);
       AlertManager.success(result, 2500);
       addNewRowToPrimitiveTable(primitiveName,primitiveVaule);
     } catch (error) {
@@ -198,7 +215,7 @@
     try {
       const oldPrimitiveName = primitiveRowEditButton.getAttribute("primitiveName");
 
-      const result = await deletePrimitiveColor(CacheOperations.getTemplateName(), oldPrimitiveName);
+      const result = await deletePrimitiveColor(CacheOperations.getProjectName(), oldPrimitiveName);
 
       const tableBody = document.querySelector("#primitives-table tbody");
 
@@ -237,8 +254,8 @@
       const primiitveColorBoxElement = row.querySelector("#color-box");
 
       if (oldPrimitiveName !== newPrimitiveName) {
-        await deletePrimitiveColor(CacheOperations.getTemplateName(), oldPrimitiveName);
-        await addPrimitiveColor(CacheOperations.getTemplateName(), newPrimitiveName, newPrimitiveValue, orderIndex);
+        await deletePrimitiveColor(CacheOperations.getProjectName(), oldPrimitiveName);
+        await addPrimitiveColor(CacheOperations.getProjectName(), newPrimitiveName, newPrimitiveValue, orderIndex);
 
         console.log(orderIndex);
         
@@ -248,7 +265,7 @@
         primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
         
       } else if (oldPrimitiveValue !== newPrimitiveValue) {
-        await updatePrimitiveColor(CacheOperations.getTemplateName(), oldPrimitiveName, newPrimitiveValue);
+        await updatePrimitiveColor(CacheOperations.getProjectName(), oldPrimitiveName, newPrimitiveValue);
         primitiveNameElement.textContent = oldPrimitiveName;
         primiitveValueElement.textContent = newPrimitiveValue;
         primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
@@ -328,7 +345,7 @@
     const newThemeMode = editThemeModeInput.value.trim();
 
     try {
-      await renameThemeMode(CacheOperations.getTemplateName(), themeMode, newThemeMode);
+      await renameThemeMode(CacheOperations.getProjectName(), themeMode, newThemeMode);
       renameThemeInSemanticTable(themeMode, newThemeMode);
       CacheOperations.renameThemeMode(themeMode, newThemeMode);
       
@@ -345,7 +362,7 @@
 
     try {
 
-      await deleteTheme(CacheOperations.getTemplateName(), themeMode);
+      await deleteTheme(CacheOperations.getProjectName(), themeMode);
       deleteThemeFromSemanticTable(themeMode);
       CacheOperations.deleteThemeMode(themeMode);
       
@@ -403,7 +420,7 @@
         const themeMode = selectPrimitiveModal.getAttribute("theme-mode");
         const semanticName = selectPrimitiveModal.getAttribute("semantic-name");
 
-        const result =  await updateSemanticValue(CacheOperations.getTemplateName(), semanticName, themeMode, primitiveName);
+        const result =  await updateSemanticValue(CacheOperations.getProjectName(), semanticName, themeMode, primitiveName);
 
         const tableBody = document.querySelector("#semantic-table tbody");
         // Get the <td> element with the specific data-index and class
@@ -497,7 +514,7 @@
     try {
 
       for (const themeMode of CacheOperations.getAllThemeModes()) {
-        const result = await addSemanticColor(CacheOperations.getTemplateName(), semanticNameFromInput, themeMode, "Click to link color");
+        const result = await addSemanticColor(CacheOperations.getProjectName(), semanticNameFromInput, themeMode, "Click to link color");
         semanticValues.push("Click to link color");
         
       }
@@ -698,7 +715,7 @@
 
     try {
 
-      const result = deleteSemanticColor(selectedSemanticName, CacheOperations.getTemplateName());
+      const result = deleteSemanticColor(selectedSemanticName, CacheOperations.getProjectName());
 
         // Check if the row exists
       if (row) {
@@ -722,7 +739,7 @@
 
     try {
 
-      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, CacheOperations.getTemplateName())
+      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, CacheOperations.getProjectName())
 
       selectedSemanticCell.textContent = editSemanticRowInput.value;
     } catch (error) {
@@ -740,7 +757,7 @@
     try {
 
       for (const semanticName of CacheOperations.getAllSemanticNames()){
-        await addSemanticColor(CacheOperations.getTemplateName(), semanticName, newThemeMode, "Click to link color");
+        await addSemanticColor(CacheOperations.getProjectName(), semanticName, newThemeMode, "Click to link color");
       }
 
       const newTdHTML = `
@@ -852,7 +869,7 @@
 
     try {
       // for (const semanticName of CacheOperations.getAllSemanticNames()){
-      //   deleteSemanticColor(semanticName, CacheOperations.getTemplateName(), themeMode);
+      //   deleteSemanticColor(semanticName, CacheOperations.getProjectName(), themeMode);
       // }
 
       const themeModeCell = theadRow.querySelector(`td[theme-mode="${themeMode}"]`);
@@ -1031,7 +1048,7 @@
           const primitivevalue = row.querySelector("#color-text").textContent.trim();
           const newOrderIndex = index + 1;
           //console.log(`Row ${newOrderIndex}: [ PrimitiveName: ${primitiveName}], [ PrimitiveValue: ${primitivevalue}]`, row);
-          updatePrimitiveColor(CacheOperations.getTemplateName(), primitiveName, primitivevalue, newOrderIndex);
+          updatePrimitiveColor(CacheOperations.getProjectName(), primitiveName, primitivevalue, newOrderIndex);
       });
 
 

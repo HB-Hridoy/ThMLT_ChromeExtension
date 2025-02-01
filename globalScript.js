@@ -1,39 +1,39 @@
   class CacheOperations {
-    static activeTemplateName = "";
+    static activeProjectName = "";
     static activeThemeModesInSemantic = [];
     static activeSemanticNames = new Set();
     static activeSemantics = new Map();
     static activePrimitiveNames = [];
     static activePrimitives = new Map();
-    static activeTemplateNames = [];
+    static activeProjectNames = [];
 
-    static updateTemplateName(templateName) {
-      this.activeTemplateName = templateName;
+    static updateProjectName(projectName) {
+      this.activeProjectName = projectName;
     }
 
-    static getTemplateName() {
-      return this.activeTemplateName;
+    static getProjectName() {
+      return this.activeProjectName;
     }
 
-    static addTemplate(templateName) {
-      if (!this.activeTemplateNames.includes(templateName)) {
-        this.activeTemplateNames.push(templateName);
+    static addProject(projectName) {
+      if (!this.activeProjectNames.includes(projectName)) {
+        this.activeProjectNames.push(projectName);
       }
     }
 
-    static deleteTemplate(templateName) {
-      const index = this.activeTemplateNames.indexOf(templateName);
+    static deleteProject(projectName) {
+      const index = this.activeProjectNames.indexOf(projectName);
       if (index !== -1) {
-        this.activeTemplateNames.splice(index, 1);
+        this.activeProjectNames.splice(index, 1);
       }
     }
 
-    static isTemplateExist(templateName) {
-      return this.activeTemplateNames.includes(templateName);
+    static isProjectExist(projectName) {
+      return this.activeProjectNames.includes(projectName);
     }
 
-    static getAllTemplates() {
-      return [...this.activeTemplateNames];
+    static getAllProjects() {
+      return [...this.activeProjectNames];
     }
 
     static addNewThemeMode(themeMode) {
@@ -203,13 +203,13 @@
     }
 
     static clearCache() {
-      this.activeTemplateName = "";
+      this.activeProjectName = "";
       this.activeThemeModesInSemantic = [];
       this.activeSemanticNames.clear();
       this.activeSemantics.clear();
       this.activePrimitiveNames = [];
       this.activePrimitives.clear();
-      this.activeTemplateNames = [];
+      this.activeProjectNames = [];
     }
   }
 
@@ -253,12 +253,12 @@
       return await this.getSessionData("colorTab");
     }
     
-    static setTemplate(template){
-      this.setSessionData("template", template);
+    static setProject(project){
+      this.setSessionData("project", project);
     }
     
-    static async getTemplate() {
-      return await this.getSessionData("template");
+    static async getProject() {
+      return await this.getSessionData("project");
     }
   }
 
@@ -386,7 +386,7 @@
 
       SessionManager.setScreen(SessionManager.COLORS_SCREEN);
       SessionManager.setColorTab(SessionManager.PRIMITIVES_COLOR_TAB);
-      SessionManager.setTemplate(CacheOperations.getTemplateName());
+      SessionManager.setProject(CacheOperations.getProjectName());
     }
 
     static showImportJsonScreen() {
@@ -514,9 +514,18 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
     
       const sessionScreen = await SessionManager.getScreen();
       const sessionColorTab = await SessionManager.getColorTab();
-      const sessionTemplate = await SessionManager.getTemplate();
+      const sessionProject = await SessionManager.getProject();
 
-      if (sessionScreen === SessionManager.COLORS_SCREEN && CacheOperations.isTemplateExist(sessionTemplate)) {
+      if(sessionScreen){
+        console.log(...Logger.multiLog(
+          ["[SESSION FOUND]", Logger.Types.DEBUG, Logger.Formats.BOLD],
+          ["Restoring previous session."]
+        ));
+      }
+
+      let restoreComplete = false;
+
+      if (sessionScreen === SessionManager.COLORS_SCREEN && CacheOperations.isProjectExist(sessionProject)) {
 
         console.log(...Logger.multiLog(
           ["[SESSION PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
@@ -527,10 +536,10 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
         currentPrimitiveRowId = 1;
         currentSemanticRowId = 1;
 
-        CacheOperations.updateTemplateName(sessionTemplate);
+        CacheOperations.updateProjectName(sessionProject);
 
-        getAllPrimitiveColors(sessionTemplate);
-        getAllSemanticColors(sessionTemplate);
+        getAllPrimitiveColors(sessionProject);
+        getAllSemanticColors(sessionProject);
 
         ScreenManager.showColorsScreen();
 
@@ -541,6 +550,8 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
           ["Switching Color tab for the previous session"]
         ));
         SwitchTabs(sessionColorTab);
+
+        restoreComplete = true;
     
       }else if (sessionScreen === SessionManager.HOME_SCREEN) {
         console.log(...Logger.multiLog(
@@ -548,13 +559,25 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
           ["Opening Home-Screen for the previous session"]
         ));
         ScreenManager.showHomeScreen();
+
+        restoreComplete = true
         
       }
 
-      console.log(...Logger.multiLog(
-        ["[SESSION RESTORE COMPLETE]", Logger.Types.DEBUG, Logger.Formats.BOLD],
-        ["Previous session restored successfully!"]
-      ));
+      if (restoreComplete) {
+        console.log(...Logger.multiLog(
+          ["[SESSION RESTORE COMPLETE]", Logger.Types.DEBUG, Logger.Formats.BOLD],
+          ["Previous session restored successfully!"]
+        ));
+        
+      } else {
+        console.log(...Logger.multiLog(
+          ["[NO SESSION FOUND]", Logger.Types.DEBUG, Logger.Formats.BOLD],
+          ["Starting new session."]
+        ));
+      }
+
+
   }
 
 
