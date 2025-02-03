@@ -14,8 +14,7 @@
     document.addEventListener('DOMContentLoaded', () => {
 
       importJsonEditor = CodeMirror.fromTextArea(document.getElementById("import-json-code-editor"), {
-        mode: "application/json", 
-        lineNumbers: true,        
+        mode: "application/json",       
         theme: "dracula",
         lineWrapping: true,
         tabSize: 2,  
@@ -23,43 +22,18 @@
         indentWithTabs: true
       });
 
-      // Get the total number of lines in the document
-      var lineCount = importJsonEditor.lineCount();
-
-      // Insert a new line at the end of the document
-      importJsonEditor.replaceRange('\n   ', { line: lineCount - 1, ch: 0 });
-
       importJsonEditor.on("change", () => {
-        if (importJsonTitle.innerHTML !== "Error Logs"){
-          try {
-              // Get the editor's value, remove extra spaces, and try to parse as JSON
-              const editorValueInJson = importJsonEditor.getValue().trim();
-          
-              // Check if the editor value is empty
-              if (!editorValueInJson) {
-                  console.log("Editor content is empty.");
-              } else {
-                  // Parse the editor content as JSON
-                  const parsedJson = JSON.parse(editorValueInJson);
-                  
-                  // Call the validation function with the parsed JSON
-                  validateJsonStructure(parsedJson);
-              }
-          } catch (e) {
-              //console.error("Error parsing JSON:", e);  // Log the error for more detail
-              console.log("JSON Value is invalid");
+        if (importJsonTitle.innerHTML !== "Error Logs") {
+          const editorValueInJson = importJsonEditor.getValue().trim();
+          if (editorValueInJson) {
+            validateJsonStructure(editorValueInJson);
           }
         }
-        
-      
-        
       });
     });
 
     document.getElementById("open-import-json").addEventListener("click", function(){
-      document.getElementById("import-json-screen").classList.replace("hidden", "visible");
-      document.getElementById("home-screen").classList.replace("visible", "hidden");
-      document.getElementById("bottom-nav-bar").classList.replace("visible","hidden");
+      ScreenManager.showImportJsonScreen();
     });
 
     document.getElementById("import-json-screen-back-button").addEventListener("click", function(){
@@ -68,16 +42,30 @@
         importJsonEditor.setValue(importJsonEditorOldValue);
         importJsonErrorButton.classList.replace("hidden", "inline-flex");
       } else {
-        document.getElementById("import-json-screen").classList.replace("visible", "hidden");
-        document.getElementById("home-screen").classList.replace("hidden", "visible");
-        bottomNavBar.classList.replace("hidden","visible");
+        ScreenManager.showHomeScreen();
       }
       
     });
 
-    importJsonDoneButton.addEventListener("click", function(){
-      console.log(importJsonEditor.getValue());
-      console.log(validateJsonStructure(JSON.parse(importJsonEditor.getValue())));
+    importJsonDoneButton.addEventListener("click", async function(){
+      try {
+        console.log(...Logger.log("Import Started.", Logger.Types.SUCCESS, Logger.Formats.HIGHLIGHT));
+        const isJsonDataValid = validateJsonStructure(importJsonEditor.getValue().trim());
+        if (isJsonDataValid){
+          const parsedData = JSON.parse(importJsonEditor.getValue().trim());
+          await importProjectFromJson(parsedData);
+        
+          AlertManager.success("Project imported successfully");
+
+          projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(parsedData.ProjectName, parsedData.Author, parsedData.Version));
+
+          ScreenManager.showHomeScreen();
+        }
+
+      } catch (error) {
+        
+      }
+      
     });
 
     importJsonErrorButton.addEventListener("click", function(){
@@ -120,14 +108,8 @@
             
             console.log(result); // Log the success message
 
-            const html = `
-                        <div project-id="${projectName}" class="project-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${projectName}</h5>
-                            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Author: ${author}</p>
-                            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Version: ${version}</p>
-                        </div>
-                        `;
-                        projectsContainer.insertAdjacentHTML("beforeend", html);
+            
+            projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(projectName, author, version));
           } catch (error) {
             alert(error); // Error message
             console.error(error); // Log the error message
@@ -164,105 +146,93 @@
     function validateJsonStructure(data) {
       const errors = [];
 
-      // Check for required fields
-      const requiredFields = ["ProjectName", "Author", "Version", "Modes", "DefaultMode", "Primitives", "Semantic"];
-      for (let field of requiredFields) {
+      try {
+        data = JSON.parse(data);
+      } catch (error) {
+        errors.push("Invalid JSON format");
+      }
+
+      if (errors.length === 0) {
+
+        const requiredFields = ["ProjectName", "Author", "Version", "Modes", "DefaultMode", "Primitives", "Semantic"];
+        requiredFields.forEach(field => {
           if (!data.hasOwnProperty(field)) {
-              errors.push(`Missing required field: ${field}`);
-              //return `Missing required field: ${field}`;
+            errors.push(`Missing required field: ${field}`);
           }
-      }
-  
-      // Validate the structure of Modes and DefaultMode
-      if (!Array.isArray(data.Modes) || data.Modes.length === 0) {
+        });
+
+        if (!Array.isArray(data.Modes) || data.Modes.length === 0) {
           errors.push("Modes should be a non-empty array");
-      }
-      if (!data.Modes.includes(data.DefaultMode)) {
+        }
+        if (!data.Modes.includes(data.DefaultMode)) {
           errors.push(`DefaultMode should be one of the Modes: ${data.Modes.join(", ")}`);
-      }
-  
-      // Validate the Primitives color structure
-      if (typeof data.Primitives !== "object" || Array.isArray(data.Primitives)) {
-        errors.push("Primitives must be an object with key-value pairs.");
-      } else {
-        for (let key in data.Primitives) {
-            const value = data.Primitives[key];
+        }
+
+        if (typeof data.Primitives !== "object" || Array.isArray(data.Primitives)) {
+          errors.push("Primitives must be an object with key-value pairs.");
+        } else {
+          Object.entries(data.Primitives).forEach(([key, value]) => {
             if (!/^#[0-9A-F]{6}$/i.test(value)) {
-                errors.push(`Invalid color format for key '${key}' in Primitives: ${value}`);
+              errors.push(`Invalid color format for key '${key}' in Primitives: ${value}`);
             }
+          });
+        }
+
+        if (typeof data.Semantic !== "object" || Array.isArray(data.Semantic)) {
+          errors.push("Semantic must be an object.");
+        } else {
+          const modeKeys = data.Modes;
+          modeKeys.forEach(mode => {
+            if (!data.Semantic.hasOwnProperty(mode)) {
+              errors.push(`Semantic is missing the '${mode}' property.`);
+            }
+          });
+
+          const modeKeySets = modeKeys.map(mode => (data.Semantic[mode] ? Object.keys(data.Semantic[mode]) : []));
+          if (modeKeySets.length > 1) {
+            const referenceKeys = modeKeySets[0];
+            modeKeySets.forEach((keySet, index) => {
+              const modeName = modeKeys[index];
+              const extraKeys = keySet.filter(key => !referenceKeys.includes(key));
+              const missingKeys = referenceKeys.filter(key => !keySet.includes(key));
+              if (extraKeys.length > 0) {
+                errors.push(`Extra keys found in Semantic.${modeName}: ${extraKeys.join(", ")}`);
+              }
+              if (missingKeys.length > 0) {
+                errors.push(`Missing keys in Semantic.${modeName}: ${missingKeys.join(", ")}`);
+              }
+            });
+          }
+
+          modeKeys.forEach(mode => {
+            const modeSemantic = data.Semantic[mode];
+            if (typeof modeSemantic === "object" && !Array.isArray(modeSemantic)) {
+              Object.values(modeSemantic).forEach(value => {
+                if (!data.Primitives.hasOwnProperty(value)) {
+                  errors.push(`Value '${value}' in Semantic.${mode} does not reference a valid key in Primitives.`);
+                }
+              });
+            }
+          });
         }
       }
 
-      // Validate Semantic structure
-    if (typeof data.Semantic !== "object" || Array.isArray(data.Semantic)) {
-      errors.push("Semantic must be an object.");
-    } else {
-        const modeKeys = data.Modes;
-
-        // Ensure all modes exist in Semantic
-        modeKeys.forEach((mode) => {
-            if (!data.Semantic.hasOwnProperty(mode)) {
-                errors.push(`Semantic is missing the '${mode}' property.`);
-            }
-        });
-
-        // Ensure all modes have the same keys
-        const modeKeySets = modeKeys
-            .map((mode) => (data.Semantic[mode] ? Object.keys(data.Semantic[mode]) : []))
-            .filter((keys) => keys.length > 0);
-
-            if (modeKeySets.length > 1) {
-              const referenceKeys = modeKeySets[0]; // Use the first mode's keys as reference
-          
-              modeKeySets.forEach((keySet, index) => {
-                  const modeName = modeKeys[index];
-                  const extraKeys = keySet.filter((key) => !referenceKeys.includes(key));
-                  const missingKeys = referenceKeys.filter((key) => !keySet.includes(key));
-          
-                  if (extraKeys.length > 0) {
-                      errors.push(
-                          `Extra keys found in Semantic.${modeName}: ${extraKeys.join(", ")}`
-                      );
-                  }
-          
-                  if (missingKeys.length > 0) {
-                      errors.push(
-                          `Missing keys in Semantic.${modeName}: ${missingKeys.join(", ")}`
-                      );
-                  }
-              });
-          }
-          
-
-        // Validate that each Semantic value references a valid Primitive key
-        modeKeys.forEach((mode) => {
-            const modeSemantic = data.Semantic[mode];
-            if (typeof modeSemantic === "object" && !Array.isArray(modeSemantic)) {
-                for (let key in modeSemantic) {
-                    if (!data.Primitives.hasOwnProperty(modeSemantic[key])) {
-                        errors.push(
-                            `Value '${modeSemantic[key]}' in Semantic.${mode}.${key} does not reference a valid key in Primitives.`
-                        );
-                    }
-                }
-            }
-        });
-    }
-
       if (errors.length > 0) {
+        importJsonEditorErrors = errors;
+        importJsonErrorCount.innerHTML = errors.length;
+        importJsonErrorButton.classList.replace("hidden", "inline-flex");
+        importJsonDoneButton.classList.replace("inline-flex", "hidden");
 
-          importJsonEditorErrors = errors;
-          importJsonErrorCount.innerHTML = errors.length;
-          importJsonErrorButton.classList.replace("hidden", "inline-flex");
-          importJsonDoneButton.classList.replace("inline-flex", "hidden");
-          console.log(errors.length);
-
+        console.log(...Logger.multiLog(
+          ["[STRUCTURE ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+          ["Invalid JSON structure", Logger.Types.DEFAULT, Logger.Formats.ITALIC],
+          ["Errors:", Logger.Types.ERROR],
+          [errors.length, Logger.Types.ERROR, Logger.Formats.BOLD]
+        ));
       } else {
-          importJsonErrorButton.classList.replace("inline-flex", "hidden");
-          importJsonDoneButton.classList.replace("hidden", "inline-flex");
-          console.log("Structure is valid");
+        importJsonErrorButton.classList.replace("inline-flex", "hidden");
+        importJsonDoneButton.classList.replace("hidden", "inline-flex");
+
+        return true;
       }
     }
-  
-    
-    

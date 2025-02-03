@@ -318,9 +318,13 @@
     }
   }
 
-  class createElement {
-    constructor() {
-      
+  class CreateElement {
+    static projectTemplate(projectName, author, version) {
+      return `<div project-id="${projectName}" class="project-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${projectName}</h5>
+                            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Author: ${author}</p>
+                            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Version: ${version}</p>
+                        </div>`
     }
 
     static semanticThemeModeCell(themeMode, isDefault = false) {
@@ -334,12 +338,56 @@
 
       return newTh;
     }
+
+    static semanticTableNameCell(dataIndex, semanticName) {
+      return `<td data-index = "${dataIndex}" class="cursor-copy semantic-table-cell semantic-table-cell-has-padding">
+                  <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
+                      <div class="row-icon">
+                          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <path fill="var(--color-icon)" fill-rule="evenodd"
+                                  d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                  clip-rule="evenodd"></path>
+                          </svg>
+                      </div>
+                      <div class="semantic-name inline-flex min-w-0 ">
+                          ${semanticName}
+                      </div>
+                  </div>
+                </td>
+              `;
+    }
+
+    static semanticTableValueCell(dataIndex, semanticValue, themeMode) {
+      return `
+                <td class="semantic-table-cell semantic-value-cell" data-index = "${dataIndex}" theme-mode = ${themeMode}>
+                    <div class="semantic-mode-value semantic-mode-cell hide-border ${semanticValue === "Click to link color" ? 'bg-red-200' : 'bg-white'} bg-red-200">
+                        <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                            <div class="semantic-pill-cover "
+                                aria-disabled="false" 
+                                style="transform: translate(0px, 0px);">
+                                <div class="semantic-pill" >
+                                    <div class="semantic-color-thumbnail-container">
+                                        <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                            style="background-color: ${semanticValue === "Click to link color" ? "#ffffff" : CacheOperations.getPrimitiveValue(semanticValue)}">
+                                        </div>
+                                    </div>
+                                    <div class="semantic-pill-text">
+                                                ${semanticValue === "Click to link color" ? semanticValue : "/ " + semanticValue}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+              `;
+    }
+     
   }
 
   class ScreenManager {
     static mainNavScreens = ["home-screen", "tools-screen", "info-screen"]; 
     static activeNavScreen = "home-screen";
-    static activeScreen = "home-screen";
+    static activeScreen = "tools-screen";
     
 
     static switchScreen(screenName) {
@@ -378,6 +426,16 @@
       this.showBottomNavBar();
 
       SessionManager.setScreen(SessionManager.HOME_SCREEN);
+    }
+
+    static showNoProjectScreen() {
+      document.getElementById("projects-container").classList.replace("visible", "hidden");
+      document.getElementById("no-projects-container").classList.replace("hidden", "visible");
+    }
+
+    static showProjectsScreen() {
+      document.getElementById("no-projects-container").classList.replace("visible", "hidden");
+      document.getElementById("projects-container").classList.replace("hidden", "visible");
     }
 
     static showColorsScreen() {

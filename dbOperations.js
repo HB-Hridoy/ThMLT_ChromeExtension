@@ -53,7 +53,6 @@ openDB.onsuccess = (event) => {
   ));
 
   getAllProjects();
-  exportProjectAsJson("My first project");
   // addProject({id: "projectName", projectName: "projectName", author: "author", version: "version" });
 
 };
@@ -119,20 +118,13 @@ function getAllProjects() {
 
     // Check if the result array is empty
     if (result.length === 0) {
-      // Inject a <p> if no projects are found
-      projectsContainer.innerHTML = `<p class="text-gray-500 text-sm">No projects found.</p>`;
+      ScreenManager.showNoProjectScreen();
     } else {
       // Iterate over the result array and inject HTML for each project
       result.forEach((project) => {
         CacheOperations.addProject(project.projectName);
-        const html = `
-          <div project-id="${project.projectName}" class="project-preview-parent visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-            <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 dark:text-white">${project.projectName}</h5>
-            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Author: ${project.author}</p>
-            <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Version: ${project.version}</p>
-          </div>
-        `;
-        projectsContainer.insertAdjacentHTML("beforeend", html);
+       
+        projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(project.projectName, project.author, project.version));
       });
     }
 
@@ -588,7 +580,7 @@ function getAllSemanticColors(projectName) {
         ["theme mode as default theme."]
       ));
       
-      theadRow.insertBefore(createElement.semanticThemeModeCell("Light", true), theadRow.lastElementChild);
+      theadRow.insertBefore(CreateElement.semanticThemeModeCell("Light", true), theadRow.lastElementChild);
       semanticTableColumns++;
 
       table.style.gridTemplateColumns = "200px minmax(200px, 1fr) 40px";
@@ -597,9 +589,9 @@ function getAllSemanticColors(projectName) {
     } else {
       allThemeModes.forEach((themeMode, index) => {
         if (index === 0) {
-          theadRow.insertBefore(createElement.semanticThemeModeCell(themeMode, true), theadRow.lastElementChild);
+          theadRow.insertBefore(CreateElement.semanticThemeModeCell(themeMode, true), theadRow.lastElementChild);
         } else {
-          theadRow.insertBefore(createElement.semanticThemeModeCell(themeMode), theadRow.lastElementChild);
+          theadRow.insertBefore(CreateElement.semanticThemeModeCell(themeMode), theadRow.lastElementChild);
         }
 
         semanticTableColumns++; // Increase the column count
@@ -713,9 +705,8 @@ function deleteSemanticColor(semanticName, projectName) {
 
             console.log(...Logger.multiLog(
               ["[DELETED]", Logger.Types.ERROR, Logger.Formats.BOLD],
-              [deletionCount, Logger.Types.CRITICAL, Logger.Formats.BOLD],
-              ["record(s) named"]
-              [semanticName, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+              ["Sematic color"],
+              [semanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
               ["deleted successfully."]
             ));
             
@@ -1146,64 +1137,189 @@ function exportProjectAsJson(projectName, shouldDownload = false) {
  */
 function deleteProject(projectName) {
 
-    // Start a read-write transaction covering the three object stores.
-    const transaction = db.transaction(
-      ["projects", "primitiveColors", "semanticColors"],
-      "readwrite"
-    );
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+      // Start a read-write transaction covering the three object stores.
+      const transaction = db.transaction(
+        ["projects", "primitiveColors", "semanticColors"],
+        "readwrite"
+      );
 
-    transaction.onerror = (event) => {
-      console.error("Transaction error:", event.target.error);
-    };
+      transaction.onerror = (event) => {
+        console.error("Transaction error:", event.target.error);
+      };
 
-    transaction.oncomplete = () => {
-      console.log(`Project '${projectName}' and all its related records have been deleted.`);
-    };
+      transaction.oncomplete = () => {
+        console.log(...Logger.multiLog(
+          ["[DELETED]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
+          ["Project"],
+          [projectName, Logger.Types.ERROR, Logger.Formats.BOLD],
+          ["and all its related records have been deleted."]
+        ));
+        
+        resolve (`Project '${projectName}' and all its related records have been deleted.`);
+      };
 
-    // 1. Delete the project record from the "projects" store.
-    const projectsStore = transaction.objectStore("projects");
-    const deleteProjectRequest = projectsStore.delete(projectName);
-    deleteProjectRequest.onerror = (event) => {
-      console.error("Error deleting project:", event.target.error);
-    };
+      // 1. Delete the project record from the "projects" store.
+      const projectsStore = transaction.objectStore("projects");
+      const deleteProjectRequest = projectsStore.delete(projectName);
+      deleteProjectRequest.onerror = (event) => {
+        console.error("Error deleting project:", event.target.error);
+      };
 
-    // 2. Delete all primitive color records linked to this project.
-    const primitivesStore = transaction.objectStore("primitiveColors");
-    const primitiveIndex = primitivesStore.index("projectName");
-    // Open a cursor for all records with matching projectName.
-    const primitiveCursorRequest = primitiveIndex.openCursor(IDBKeyRange.only(projectName));
+      // 2. Delete all primitive color records linked to this project.
+      const primitivesStore = transaction.objectStore("primitiveColors");
+      const primitiveIndex = primitivesStore.index("projectName");
+      // Open a cursor for all records with matching projectName.
+      const primitiveCursorRequest = primitiveIndex.openCursor(IDBKeyRange.only(projectName));
 
-    primitiveCursorRequest.onerror = (event) => {
-      console.error("Error iterating primitives:", event.target.error);
-    };
+      primitiveCursorRequest.onerror = (event) => {
+        console.error("Error iterating primitives:", event.target.error);
+      };
 
-    primitiveCursorRequest.onsuccess = (event) => {
-      const cursor = event.target.result;
-      if (cursor) {
-        // Delete the current record.
-        cursor.delete();
-        // Continue to the next record.
-        cursor.continue();
-      }
-    };
+      primitiveCursorRequest.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          // Delete the current record.
+          cursor.delete();
+          // Continue to the next record.
+          cursor.continue();
+        }
+      };
 
-    // 3. Delete all semantic color records linked to this project.
-    const semanticStore = transaction.objectStore("semanticColors");
-    const semanticIndex = semanticStore.index("projectName");
-    const semanticCursorRequest = semanticIndex.openCursor(IDBKeyRange.only(projectName));
+      // 3. Delete all semantic color records linked to this project.
+      const semanticStore = transaction.objectStore("semanticColors");
+      const semanticIndex = semanticStore.index("projectName");
+      const semanticCursorRequest = semanticIndex.openCursor(IDBKeyRange.only(projectName));
 
-    semanticCursorRequest.onerror = (event) => {
-      console.error("Error iterating semantic colors:", event.target.error);
-    };
+      semanticCursorRequest.onerror = (event) => {
+        console.error("Error iterating semantic colors:", event.target.error);
+      };
 
-    semanticCursorRequest.onsuccess = (event) => {
-      const cursor = event.target.result;
-      if (cursor) {
-        cursor.delete();
-        cursor.continue();
-      }
-    };
+      semanticCursorRequest.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          cursor.delete();
+          cursor.continue();
+        }
+      };
+    } else {
+      const error = "Database is not initialized";
+      console.error(error);
+      reject(error);
+    }
+  });
+
+    
 }
+
+/**
+ * Imports a project from a JSON file and saves it in IndexedDB.
+ * @param {File} file - The JSON file to import.
+ */
+function importProjectFromJson(jsonData) {
+
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+      try {
+      
+        const transaction = db.transaction(
+          ["projects", "primitiveColors", "semanticColors"],
+          "readwrite"
+        );
+
+        transaction.onerror = (event) => {
+          console.error("Transaction error:", event.target.error);
+        };
+
+        transaction.oncomplete = () => {
+          console.log(...Logger.log("Import successful.", Logger.Types.SUCCESS, Logger.Formats.HIGHLIGHT));
+
+          resolve(`Project '${jsonData.ProjectName}' imported successfully.`);
+        };
+
+        // Get object stores
+        const projectsStore = transaction.objectStore("projects");
+        const primitivesStore = transaction.objectStore("primitiveColors");
+        const semanticStore = transaction.objectStore("semanticColors");
+
+        console.log(...Logger.multiLog(
+          ["[IMPORT PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Importing project"],
+          [jsonData.ProjectName, Logger.Types.WARNING, Logger.Formats.BOLD]
+        ));
+        
+        // Insert project details
+        const projectData = {
+          projectName: jsonData.ProjectName,
+          version: jsonData.Version,
+          author: jsonData.Author,
+        };
+
+        projectsStore.put(projectData);
+
+        console.log(...Logger.multiLog(
+          ["[PROCESS COMPLETE]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+          ["Project"],
+          [jsonData.ProjectName, Logger.Types.SUCCESS, Logger.Formats.BOLD],
+          ["has been successfully imported."]
+        ));
+        
+
+        // Insert primitives
+        console.log(...Logger.multiLog(
+          ["[IMPORT PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Importing primitives"]
+        ));
+        
+        for (const [primitiveName, primitiveValue] of Object.entries(jsonData.Primitives)) {
+          primitivesStore.add({
+            projectName: jsonData.ProjectName,
+            primitiveName,
+            primitiveValue,
+          });
+        }
+        console.log(...Logger.multiLog(
+          ["[PROCESS COMPLETE]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+          ["Primitives have been successfully imported."]
+        ));
+        
+
+        // Insert semantic colors
+        console.log(...Logger.multiLog(
+          ["[IMPORT PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Importing semantic colors"]
+        ));
+        for (const [themeMode, semanticMappings] of Object.entries(jsonData.Semantic)) {
+          for (const [semanticName, linkedPrimitive] of Object.entries(semanticMappings)) {
+            semanticStore.add({
+              projectName: jsonData.ProjectName,
+              semanticName,
+              linkedPrimitive,
+              themeMode,
+            });
+          }
+        }
+        console.log(...Logger.multiLog(
+          ["[PROCESS COMPLETE]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+          ["Semantic colors have been successfully imported."]
+        ));
+
+      } catch (error) {
+        console.error(error);
+        reject(error);
+      }
+    } else {
+      const error = "Database is not initialized";
+      console.error(error);
+      reject(error);
+    }
+  });
+  
+
+    
+}
+
 
 
 
