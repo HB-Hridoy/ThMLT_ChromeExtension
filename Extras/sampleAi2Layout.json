@@ -1,0 +1,62 @@
+{
+    "$components": [
+        {
+            "$Name": "VerticalArrangement3",
+            "$Type": "VerticalArrangement",
+            "$Version": "4",
+            "Width": "-2",
+            "Uuid": "332662554",
+            "$Components": [
+                {
+                    "$Name": "CheckBox1",
+                    "$Type": "CheckBox",
+                    "$Version": "2",
+                    "Text": "Text for CheckBox1",
+                    "Uuid": "1647717992"
+                },
+                {
+                    "$Name": "Image1",
+                    "$Type": "Image",
+                    "$Version": "6",
+                    "Uuid": "273633050"
+                },
+                {
+                    "$Name": "VerticalScrollArrangement1",
+                    "$Type": "VerticalScrollArrangement",
+                    "$Version": "2",
+                    "Uuid": "-784479849",
+                    "$Components": [
+                        {
+                            "$Name": "Label4",
+                            "$Type": "Label",
+                            "$Version": "5",
+                            "Text": "Text for Label4",
+                            "Uuid": "-1762397558"
+                        }
+                    ]
+                },
+                {
+                    "$Name": "VerticalArrangement4",
+                    "$Type": "VerticalArrangement",
+                    "$Version": "4",
+                    "Uuid": "-815267991"
+                },
+                {
+                    "$Name": "HorizontalArrangement2",
+                    "$Type": "HorizontalArrangement",
+                    "$Version": "4",
+                    "Uuid": "1797759683",
+                    "$Components": [
+                        {
+                            "$Name": "HorizontalScrollArrangement1",
+                            "$Type": "HorizontalScrollArrangement",
+                            "$Version": "2",
+                            "Uuid": "215754577"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "$blocks": []
+}

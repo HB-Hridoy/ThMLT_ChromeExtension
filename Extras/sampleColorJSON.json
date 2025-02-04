@@ -1,5 +1,5 @@
 {
-    "TemplateName": "My first project",
+    "ProjectName": "My first project",
     "Author": "Hridoy",
     "Version": "1.0",
     "Modes": ["Light","Dark"],

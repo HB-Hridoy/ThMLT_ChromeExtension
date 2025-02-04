@@ -387,7 +387,7 @@
   class ScreenManager {
     static mainNavScreens = ["home-screen", "tools-screen", "info-screen"]; 
     static activeNavScreen = "home-screen";
-    static activeScreen = "tools-screen";
+    static activeScreen = "home-screen";
     
 
     static switchScreen(screenName) {
@@ -561,11 +561,13 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
   const bottomNavBar = document.getElementById("bottom-nav-bar");
   
   document.addEventListener('DOMContentLoaded', () => {
+    
     document.querySelectorAll('[data-nav-button-screen-target]').forEach(button => {
       button.addEventListener('click', () => {
         ScreenManager.switchScreen(button.getAttribute("data-nav-button-screen-target"));
       });
     });
+    ScreenManager.showHomeScreen();
   });
 
   async function restoreSession() {

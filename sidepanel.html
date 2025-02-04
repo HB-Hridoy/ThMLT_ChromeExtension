@@ -14,7 +14,7 @@
   </head>
   <body class="h-full m-0 flex flex-col">
 
-    <div id="home-screen" class="hidden">
+    <div id="home-screen" class="visible">
 
       <div class="w-full p-3 flex justify-start items-center">
 
@@ -296,7 +296,7 @@
 
     </div>
 
-    <div id="tools-screen" class="visible h-full">
+    <div id="tools-screen" class="hidden h-full">
       <h3 class="text-lg font-extrabold dark:text-white">Arrangements filter</h3>
       <div class="max-w-md mx-auto">   
         <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Convert</label>
@@ -338,8 +338,44 @@
     </div>
 
     <div id="info-screen" class="hidden">
-      <h3 class="text-lg font-extrabold dark:text-white">Color Themes</h3>
-         
+
+      <div class="flex flex-col items-center">
+        <h1 class="mb-4 mt-4 w-full text-center text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">ThMLT Color Theme Editor</h1>
+        <p class="mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400 text-center">ThMLT is a Chrome extension that allows you to create and manage color themes for your projects. Easily import, export, and edit color themes with a user-friendly interface.</p>
+        <div class="flex items-center justify-center space-y-4 sm:flex sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
+          <a href="https://github.com/hridoy100/ThMLT_ChromeExtension" class="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
+          Learn more
+          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-8 mx-8">
+        <h2 class="text-xl font-bold dark:text-white">Sample JSON Structure</h2>
+        <pre class="bg-gray-100 text-xs p-4 rounded-lg ">
+          {
+            "projectName": "My Project",
+            "author": "Author Name",
+            "version": "1.0.0",
+            "colors": {
+              "primitives": {
+                "primary": "#FF5733",
+                "secondary": "#33FF57"
+              },
+              "semantic": {
+                "background": "primary",
+                "text": "secondary"
+              }
+            }
+          }
+        </pre>
+      </div>
+
+      <div class="h-24"></div>
+      
+
 
 
     </div>
@@ -825,9 +861,11 @@
               <div class="tooltip-arrow" data-popper-arrow></div>
           </div>
           <button data-tooltip-target="tooltip-info" data-nav-button-screen-target="info-screen" type="button" class="inline-flex flex-col items-center justify-center px-5 rounded-e-full hover:bg-gray-50 dark:hover:bg-gray-800 group">
-              <svg id="info-screen-icon" class="w-5 h-5 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm0 5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 13a8.949 8.949 0 0 1-4.951-1.488A3.987 3.987 0 0 1 9 13h2a3.987 3.987 0 0 1 3.951 3.512A8.949 8.949 0 0 1 10 18Z"/>
+              
+              <svg id="info-screen-icon" class="w-6 h-6 mb-1 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-500"  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.408-5.5a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2h-.01ZM10 10a1 1 0 1 0 0 2h1v3h-1a1 1 0 1 0 0 2h4a1 1 0 1 0 0-2h-1v-4a1 1 0 0 0-1-1h-2Z" clip-rule="evenodd"/>
               </svg>
+              
               <span class="sr-only">Info</span>
           </button>
           <div id="tooltip-info" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
