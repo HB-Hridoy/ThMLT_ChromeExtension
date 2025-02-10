@@ -49,6 +49,7 @@
 
   const projectDataDownloadButton = document.getElementById("project-data-download-button");
   const projectDataCopyButton = document.getElementById("project-data-copy-button");
+  const injectProjectDataToBlocky = document.getElementById("inject-project-data-to-blocky-button");
   const projectDeleteButton = document.getElementById("delete-project-button");
   const projectDeleteInput = document.getElementById("delete-project-input");
   
@@ -68,6 +69,11 @@
         console.error("Clipboard copy failed", err);
     }
   });
+
+  injectProjectDataToBlocky.addEventListener("click", async () => {
+    const projectData = await exportProjectAsJson(CacheOperations.getProjectName(), false);
+    BlockyInjector.updateColorThemes(projectData);
+  })
 
   projectDeleteButton.addEventListener("click", async ()=>{
     const projectName = CacheOperations.getProjectName();

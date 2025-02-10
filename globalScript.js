@@ -499,6 +499,47 @@
     }
   }
 
+  class BlockyInjector{
+    
+    static updateColorThemes(colorThemeData){
+      if (shouldUpdateBlocky) {
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            type: "UPDATE_COLOR_THEMES",
+            blockType: "component_method",
+            componentName: "ThMLT_CE",
+            methodName: "InitializeV3",
+            argPosition: 0,
+            newArgValue: colorThemeData
+          }, function(response) {
+            if(response && response.result) {
+              console.log(...Logger.multiLog(
+                ["[BLOCKLY INJECTION]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
+                ["For"],
+                [`ThMLT_CE.`, Logger.Types.INFO],
+                [`InitializeV3.`, Logger.Types.WARNING],
+                [`ARG0`, Logger.Types.SUCCESS],
+                ["changed to\n"],
+                [`${colorThemeData}`]
+              ));
+            } else {
+              console.log(...Logger.multiLog(
+                ["[BLOCKY UPDATE ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+                ["No response received from content script.", Logger.Types.ERROR]
+              ));
+            }
+          });
+        });
+      } else{
+        console.log(...Logger.multiLog(
+          ["[BLOCKY UPDATE]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Blocky update is disabled."]
+        ));
+        
+      }
+    }
+  }
+
 
 
   // **Example Usage**
@@ -551,6 +592,8 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
 
   let currentPrimitiveRowId = 1;
   let currentSemanticRowId = 1;
+
+  let shouldUpdateBlocky = true;
 
   const nameRegex = /^[A-Za-z0-9-_]+$/;
 
@@ -639,6 +682,16 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
 
 
   }
+
+  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {
+      type: "UPDATE_COLOR_THEMES2"
+    }, function(response) {
+      
+    });
+  });
+
+  
 
 
 
