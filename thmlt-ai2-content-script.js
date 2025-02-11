@@ -1,6 +1,8 @@
-// Inject injected.js into the page so it runs in the page context.
-
-(function() {
+  /**
+   * Creates a new script element named BlockyWorkspaceInjector.js
+   */
+  (function() {
+    
     let script = document.createElement("script");
     script.src = chrome.runtime.getURL("BlockyWorkspaceInjector.js");
     script.onload = function() {
@@ -43,7 +45,6 @@
 
       // Check if the table exists
       if (propertiesPanelTable) {
-        console.log('Trying to get Table with class "ode-PropertiesPanel"');
         
         // Find the specific row with the 'Text' label
         const targetRow = Array.from(propertiesPanelTable.querySelectorAll('tr')).find(row => {
@@ -51,22 +52,63 @@
           return propertyLabel && propertyLabel.textContent.trim() === 'Text';
         });
 
+        const textArea = targetRow.nextElementSibling.querySelector('.ode-PropertyEditor');
+        
+
         if (targetRow) {
-          console.log('Found the specific table row:', targetRow);
+          console.log('Found the specific table row');
 
           // Select the target <td> element that contains the <div> with class 'ode-PropertyLabel' and text 'Text'
-          const targetTd = targetRow.querySelector('td:has(div.ode-PropertyLabel)');
+          const targetTd = targetRow.querySelector('td:has(div.ode-PropertyLabel)').querySelector('td[align="left"][style*="vertical-align: top;"] img.ode-PropertyHelpWidget').parentElement;
 
           // Check if the target <td> element exists
           if (targetTd) {
-            // Create a new <button> element
-            const button = document.createElement('button');
-            button.textContent = 'Click Me';
-            button.id = 'my-button';
-            button.style.marginLeft = '10px'; // Optional: Add some margin for spacing
+            // Create a new <newTd> element with inline HTML
+            const newTd = document.createElement('td');
+            newTd.setAttribute('editTextWithThMLT', 'true');
+            newTd.setAttribute('align', 'left');
+            newTd.style.verticalAlign = 'top';
+            newTd.id = 'my-newTd';
+            newTd.innerHTML = `
+              <div class="EditTextWithThMLTButton" style="
+                                                          position: relative;
+                                                          display: flex;
+                                                          align-items: center;
+                                                          justify-content: center;
+                                                          gap: 5px;
+                                                          padding: 4px 10px;
+                                                          transition: background 0.2s, opacity 0.1s;
+                                                          color: #444;
+                                                          font-family: 'Poppins', Helvetica, Arial, sans-serif;
+                                                          font-weight: 500;
+                                                          font-size: 1.06em;
+                                                          white-space: nowrap;
+                                                          background-color: #a5cf47;
+                                                          border: 1px solid #444;
+                                                          border-radius: 4px;
+                                                          background-image: unset;
+                                                          text-shadow: unset;
+                                                          box-shadow: 1px 1px;
+                                                          cursor: pointer;
+              ">
+              <div style="font-size: 0.75rem">ThMLT</div>
+              </div>
+            `;
 
-            // Insert the button into the DOM next to the target <td> element
-            targetTd.insertAdjacentElement('afterend', button);
+            // Insert the newTd into the DOM next to the target <td> element
+            targetTd.insertAdjacentElement('afterend', newTd);
+
+            newTd.addEventListener('click', (e) => {
+              const clickedElement = e.target.closest('td[editTextWithThMLT="true"]');
+              if (clickedElement) {
+                  if (textArea) {
+                    textArea.value = "success i have done it";
+                    // Trigger input and change events
+                    textArea.dispatchEvent(new Event("input", { bubbles: true }));
+                    textArea.dispatchEvent(new Event("change", { bubbles: true }));
+                  }
+              }
+            });
           } else {
             console.log('Target <td> element not found.');
           }
@@ -80,9 +122,178 @@
         
   });
 
+//   const observer = new MutationObserver(() => {
+//     const tree = document.querySelector('.gwt-Tree');
+//     if (tree) {
+//         console.log("Tree found! Attaching event listener...");
+//         let lastClickedTreeItem = null;
 
-  document.getElementById("my-button").addEventListener("click", function() {
-    console.log("Button clicked!");
+//         document.addEventListener('mousedown', (e) => {
+//             const treeItem = e.target.closest('.gwt-TreeItem');
+//             if (treeItem && treeItem !== lastClickedTreeItem) {
+//                 lastClickedTreeItem = treeItem;
+//                 const img = treeItem.querySelector('.gwt-Image');
+
+//                 if (img && img.src.includes('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAQAAAD9CzEMAAABhUlEQVRYw+3XIYsCQRTA8T+yYDB4eDZthgMxHFj9AncGq9V0oFyxWy2C1WpZODBarXJhYaPVpAYtBjmDOFfeLoqunjuz3MH5tjjvDfMr85wZuMdfigw2c5TmN8cmc375lfbi3rc6R9jGllco7FNgZhSYnQJeSTcC1/kPQJotCsWWdDRA05/TjAaY+HMmUQClo21YMg/0j4C+aSDJBoXCwUGh2JA0C9Sl2qAhv+pmAVc2aIqUbFbXJFCU2gCAgYyK5oCe1MoAlGXUMwUkWKNQLLAAsFigUKxJmAFqUun4mY5kamaAsVQKfqYgmbEJIC955yjrSDavD3T9DjgMrxu6ukCcpd8Bh+F1w5K4HlC9evpW9YDRVWCkA+TYXwX25MID7R9dUdphAUsuknuezv4pPPuXRSscUJHMZ+Dh4sqMSjhgKJm3QOBdZgzDAFl2KBRfPAQCj9INO7K3Ay0Zf1y8ZnlnQ+tWIMZUxi8XgVeZNSV2v5tqA5E/QCJ/QkX+CIz8GXuP34pvqvUZW0tNCwIAAAAASUVORK5CYII=')) {
+//                     console.log('✅ Clicked on the label tree item: from mousedown');
+//                     createEditTextWithThMLT();
+//                 }
+//             }
+//         });
+
+//         document.addEventListener('click', (e) => {
+//             const treeItem = e.target.closest('.gwt-TreeItem');
+//             if (treeItem && treeItem !== lastClickedTreeItem) {
+//                 lastClickedTreeItem = treeItem;
+//                 const img = treeItem.querySelector('.gwt-Image');
+
+//                 if (img && img.src.includes('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAQAAAD9CzEMAAABhUlEQVRYw+3XIYsCQRTA8T+yYDB4eDZthgMxHFj9AncGq9V0oFyxWy2C1WpZODBarXJhYaPVpAYtBjmDOFfeLoqunjuz3MH5tjjvDfMr85wZuMdfigw2c5TmN8cmc375lfbi3rc6R9jGllco7FNgZhSYnQJeSTcC1/kPQJotCsWWdDRA05/TjAaY+HMmUQClo21YMg/0j4C+aSDJBoXCwUGh2JA0C9Sl2qAhv+pmAVc2aIqUbFbXJFCU2gCAgYyK5oCe1MoAlGXUMwUkWKNQLLAAsFigUKxJmAFqUun4mY5kamaAsVQKfqYgmbEJIC955yjrSDavD3T9DjgMrxu6ukCcpd8Bh+F1w5K4HlC9evpW9YDRVWCkA+TYXwX25MID7R9dUdphAUsuknuezv4pPPuXRSscUJHMZ+Dh4sqMSjhgKJm3QOBdZgzDAFl2KBRfPAQCj9INO7K3Ay0Zf1y8ZnlnQ+tWIMZUxi8XgVeZNSV2v5tqA5E/QCJ/QkX+CIz8GXuP34pvqvUZW0tNCwIAAAAASUVORK5CYII=')) {
+//                     console.log('✅ Clicked on the label tree item: from click');
+//                     createEditTextWithThMLT();
+//                 }
+//             }
+            
+//             // Reset flag after a short delay (prevents multiple rapid clicks from triggering both)
+//             setTimeout(() => {
+//                 lastClickedTreeItem = null;
+//             }, 100);
+//         });
+
+        
+      
+//         observer.disconnect(); // Stop observing once found
+//     }
+// });
+
+// // Start observing changes in the body until the .gwt-Tree appears
+// observer.observe(document.body, { childList: true, subtree: true });
+
+// // ode-PropertiesComponentName
+// // Start observing changes in the body until the .ode-PropertiesComponentName appears
+// componentNameObserver.observe(document.body, { childList: true, subtree: true });
+
+let lastComponentNameText = "";
+
+/**
+ * MutationObserver to watch for the presence of the element with class 'ode-PropertiesComponentName'.
+ * Once the element is found, it sets up another MutationObserver to watch for text (Properties Component Name) changes within the element.
+ * Creates Edit Text with ThMLT button when the Properties Component Name ends with "(Label)".
+ */
+const observer = new MutationObserver(() => {
+    const propertiesComponentNameElement = document.querySelector('.ode-PropertiesComponentName');
+
+    if (propertiesComponentNameElement) {
+        console.log("Properties Component Name found! Watching for text changes...");
+
+        // observer to watch for Properties Component Name changes
+        const textObserver = new MutationObserver(() => {
+            const newPropertiesComponentNameText = propertiesComponentNameElement.innerText.trim(); // Get the latest text
+
+            if (newPropertiesComponentNameText !== lastComponentNameText) { // Only log if it's different
+                lastComponentNameText = newPropertiesComponentNameText;
+                if (newPropertiesComponentNameText.endsWith("(Label)")) {
+                  createEditTextWithThMLT();
+                  console.log('Creating ThMLT button for the label');
+                }
+                
+            }
+        });
+
+        textObserver.observe(propertiesComponentNameElement, { childList: true, subtree: true, characterData: true });
+
+        // Stop looking for the element once found
+        observer.disconnect();
+    }
+});
+
+// Watch the entire document for new elements (since AI2 loads dynamically)
+observer.observe(document.body, { childList: true, subtree: true });
+
+
+
+
+
+function createEditTextWithThMLT() {
+  // Select the table with the class 'ode-PropertiesPanel'
+  const propertiesPanelTable = document.querySelector('table.ode-PropertiesPanel');
+
+  // Check if the table exists
+  if (propertiesPanelTable) {
     
-  });
+    // Find the specific row with the 'Text' label
+    const targetRow = Array.from(propertiesPanelTable.querySelectorAll('tr')).find(row => {
+      const propertyLabel = row.querySelector('div.ode-PropertyLabel');
+      return propertyLabel && propertyLabel.textContent.trim() === 'Text';
+    });
+
+    const textArea = targetRow.nextElementSibling.querySelector('.ode-PropertyEditor');
+    
+
+    if (targetRow) {
+      console.log('Found the specific table row');
+
+      // Select the target <td> element that contains the <div> with class 'ode-PropertyLabel' and text 'Text'
+      const targetTd = targetRow.querySelector('td:has(div.ode-PropertyLabel)').querySelector('td[align="left"][style*="vertical-align: top;"] img.ode-PropertyHelpWidget').parentElement;
+
+      // Check if the target <td> element exists
+      if (targetTd) {
+        // Create a new <newTd> element with inline HTML
+        const newTd = document.createElement('td');
+        newTd.setAttribute('editTextWithThMLT', 'true');
+        newTd.setAttribute('align', 'left');
+        newTd.style.verticalAlign = 'top';
+        newTd.id = 'my-newTd';
+        newTd.innerHTML = `
+          <div class="EditTextWithThMLTButton" style="
+                                                      position: relative;
+                                                      display: flex;
+                                                      align-items: center;
+                                                      justify-content: center;
+                                                      gap: 5px;
+                                                      padding: 4px 10px;
+                                                      transition: background 0.2s, opacity 0.1s;
+                                                      color: #444;
+                                                      font-family: 'Poppins', Helvetica, Arial, sans-serif;
+                                                      font-weight: 500;
+                                                      font-size: 1.06em;
+                                                      white-space: nowrap;
+                                                      background-color: #a5cf47;
+                                                      border: 1px solid #444;
+                                                      border-radius: 4px;
+                                                      background-image: unset;
+                                                      text-shadow: unset;
+                                                      box-shadow: 1px 1px;
+                                                      cursor: pointer;
+          ">
+          <div style="font-size: 0.75rem">ThMLT</div>
+          </div>
+        `;
+
+        // Insert the newTd into the DOM next to the target <td> element
+        targetTd.insertAdjacentElement('afterend', newTd);
+
+        newTd.addEventListener('click', (e) => {
+          const clickedElement = e.target.closest('td[editTextWithThMLT="true"]');
+          if (clickedElement) {
+              if (textArea) {
+                textArea.value = "success i have done it";
+                // Trigger input and change events
+                textArea.dispatchEvent(new Event("input", { bubbles: true }));
+                textArea.dispatchEvent(new Event("change", { bubbles: true }));
+              }
+          }
+        });
+      } else {
+        console.log('Target <td> element not found.');
+      }
+    } else {
+        console.log('Specific table row not found.');
+    }
+  } else {
+        console.log('Table with class "ode-PropertiesPanel" not found.');
+  }
+}
+
+  
+
   
