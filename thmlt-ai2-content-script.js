@@ -10,7 +10,33 @@
       this.remove();
     };
     (document.head || document.documentElement).appendChild(script);
+    
   })();
+
+  function injectCSS() {
+
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.css');
+
+    console.log("Attempting to load CSS file from:", link.href);  // Log the generated URL
+
+    link.onload = function() {
+      console.log('CSS file loaded successfully!');
+    };
+
+    link.onerror = function() {
+      console.log('Failed to load CSS file. Check the URL or path.');
+    };
+
+    document.head.appendChild(link);
+    
+  }
+  injectCSS();
+
+
+
 
  
 
@@ -274,8 +300,11 @@ function createEditTextWithThMLT() {
 
         newTd.addEventListener('click', (e) => {
           const clickedElement = e.target.closest('td[editTextWithThMLT="true"]');
+
+          
           if (clickedElement) {
               if (textArea) {
+                openTextFormatterPopup();
                 textArea.value = "success i have done it";
                 // Trigger input and change events
                 textArea.dispatchEvent(new Event("input", { bubbles: true }));
@@ -294,6 +323,103 @@ function createEditTextWithThMLT() {
   }
 }
 
+  let textFormatterPopup;
+
+  function createTextFormatterPopup() {
+    if (!textFormatterPopup) {
+      fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.html'))
+      .then(response => response.text())  // Get the HTML as text
+      .then(htmlContent => {
+          // Create a temporary DOM element to parse the HTML
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = htmlContent;
+
+          // Find the element with id 'textFormatterPopup'
+          const textFormatterDiv = tempDiv.querySelector('#textFormatterPopup');
+
+          if (textFormatterDiv) {
+            
+              textFormatterPopup = document.createElement('div');
+              textFormatterPopup.id = 'textFormatterPopup';
+              textFormatterPopup.classList.add('bg-white', 'border', 'border-gray-200', 'rounded-lg', 'shadow-sm');
+              
+              textFormatterPopup.innerHTML=textFormatterDiv.innerHTML;
+        
+              document.body.appendChild(textFormatterPopup);
+              document.getElementById('closeFormatterPopup').addEventListener('click', closeTextFormatterPopup);
+
+              // makePopupDraggable(textFormatterPopup);
+
+              console.log("text formatter popup created");
+              
+            }
+      })
+      .catch(err => {
+          console.error('Error loading the HTML file:', err);
+      });
+    }else {
+        console.log('No div with id "textFormatterPopup" found in the HTML');
+    }
+    
+    
+  }
+
   
+
+  // Function to make the popup draggable
+// function makePopupDraggable(popup) {
+//   const header = popup.querySelector('#popupHeader');
+//   let offsetX = 0, offsetY = 0, isDragging = false;
+
+//   header.addEventListener('mousedown', (e) => {
+//       isDragging = true;
+//       offsetX = e.clientX - popup.getBoundingClientRect().left;
+//       offsetY = e.clientY - popup.getBoundingClientRect().top;
+//       header.style.cursor = 'grabbing';
+//   });
+
+//   document.addEventListener('mousemove', (e) => {
+//       if (isDragging) {
+//           popup.style.left = `${e.clientX - offsetX}px`;
+//           popup.style.top = `${e.clientY - offsetY}px`;
+//           popup.style.transform = 'none'; // Disable centering effect during drag
+//       }
+//   });
+
+//   document.addEventListener('mouseup', () => {
+//       isDragging = false;
+//       header.style.cursor = 'grab';
+//   });
+// }
+
+
+
+
+  function openTextFormatterPopup() {
+
+    if (textFormatterPopup) {
+      textFormatterPopup.style.display = 'block';
+    } else {
+        createTextFormatterPopup();
+        const interval = setInterval(function() {
+
+          if (textFormatterPopup) {
+            clearInterval(interval);
+            textFormatterPopup.style.display = 'block';
+          } else {
+              console.log('Element not found, retrying...');
+          }
+        }, 500);
+    }
+
+    
+    
+  }
+
+  function closeTextFormatterPopup() {
+    if (textFormatterPopup) {
+      textFormatterPopup.style.display = 'none';
+    }
+  }
 
   

@@ -21,7 +21,11 @@
   "permissions": ["sidePanel","storage","scripting", "activeTab"],
   "web_accessible_resources": [
     {
-      "resources": ["BlockyWorkspaceInjector.js"],
+      "resources": [
+        "BlockyWorkspaceInjector.js",
+        "Extras/textFormatterPopup/textFormatterPopup.html",
+        "Extras/textFormatterPopup/textFormatterPopup.css"
+      ],
       "matches": ["https://ai2.appinventor.mit.edu/*"]
     }
   ],
