@@ -1,3 +1,4 @@
+let selectedTranslationTableRow = null;
   /**
    * Creates a new script element named BlockyWorkspaceInjector.js
    */
@@ -376,6 +377,61 @@ function createEditTextWithThMLT() {
 
                 // Close button event listener
                 shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', closeTextFormatterPopup);
+
+                // Just populates the table body
+                const tableBody = shadowRoot.querySelector('.translationTableBody');
+                function populateTable() {
+                  let count = 20;
+                  console.log(tableBody);
+                  
+                  let tableBodyRows = ``;
+
+                  for (let i = 0; i < count; i++) {
+                      tableBodyRows += `
+                        <tr rowId="${i}">
+                          <td>Some stuff</td>
+                          <td>Some more stuff</td>
+                        </tr>
+                      `; 
+                  }
+                  // Add two empty rows at the end
+                  tableBodyRows += `
+                  <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+                  `;
+                  
+                  // Use innerHTML without parentheses
+                  tableBody.innerHTML = tableBodyRows;
+                }
+
+                // Call the function to populate the table
+                populateTable();
+
+
+                
+                
+
+                tableBody.addEventListener('click', function(event) {
+                    const clickedRow = event.target.closest('tr'); // Get the closest row
+                    console.log(clickedRow);
+                    
+
+                    if (!clickedRow) return; // Ignore clicks outside of rows
+
+                    // If another row is already selected, revert its background
+                    if (selectedTranslationTableRow) {
+                        selectedTranslationTableRow.classList.remove('highlight');
+                    }
+
+                    // If the same row is clicked, deselect it
+                    if (selectedTranslationTableRow === clickedRow) {
+                        selectedTranslationTableRow = null; // Reset selection
+                        return;
+                    }
+
+                    // Highlight the clicked row
+                    clickedRow.classList.add('highlight');
+                    selectedTranslationTableRow = clickedRow; // Update the selected row
+                });
 
                 // Switch Tabs
                 const textFormatterNavTabs = shadowRoot.getElementById("textFormatterNavTabs");

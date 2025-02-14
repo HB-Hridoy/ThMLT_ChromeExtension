@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="textFormatterPopup.css">
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
     <title>Text Formatter popup</title>
 </head>
 <body>
@@ -13,16 +12,16 @@
     <div id="textFormatterPopup">
         
        
-        <div class="textFormatterNavTabs">
+        <div id="textFormatterNavTabs" class="textFormatterNavTabs">
             
-            <div id="translation-tab" aria-selected="true" class="textFormatterNavTab">Translation</div>
+            <div id="translation-tab" isTabSelected="true" class="textFormatterNavTabSelected">Translation</div>
         
-            <div id="font-tab" aria-selected="false" class="textFormatterNavTab">Font</div>
+            <div id="font-tab" isTabSelected="false" class="textFormatterNavTab">Font</div>
         
-            <div id="color-tab" aria-selected="false" class="textFormatterNavTab">Color</div>
+            <div id="color-tab" isTabSelected="false" class="textFormatterNavTab">Color</div>
         
         </div>
-        <div style="height: 440px; border-top: 1px solid var(--gray-200);">
+        <div class="screensContainer">
             <div id="translationScreen" style="display: block;">
 
                 <div class="searchTranslationParent">
@@ -35,29 +34,28 @@
                     </input>
                 </div>
 
-                <div id="tarnslationSections" style="margin: 0.5rem;">
-                    <span id="translation-All" class="translationSelectionChipInactive">
+                <div id="tarnslationScopeSections" style="margin: 0.5rem;">
+                    <span id="translation-scope-All" class="translationScopeSelectionInactive">
                         All
                     </span>
-                    <span class="translationSelectionChipInactive ">
+                    <span id="translation-scope-Global" class="translationScopeSelectionInactive ">
                         Global
                     </span>
-                    <span class="translationSelectionChipActive">
+                    <span id="translation-scope-Screen1" class="translationScopeSelectionActive">
                         Screen1
                     </span>
                 </div>
-                <table class="translationTable">
-                    <tbody>
-                        <tr>
-                            <td>Row 1, Cell 1</td>
-                            <td>Row 1, Cell 1</td>                        
-                        </tr>
-                        <tr>
-                            <td>Row 1, Cell 1</td>
-                            <td>Row 1, Cell 1</td>
-                        </tr>
+                <table class="translationTableWrapper">
+                    <thead>
+                      <tr>
+                        <th>Key</th>
+                        <th>Translation (en)</th>
+                      </tr>
+                    </thead>
+                    <tbody class="translationTableBody">    
                     </tbody>
-                </table>
+                  </table>
+
                 
                 
 
@@ -75,6 +73,7 @@
                 
         </div>
     </div>
-
+<script src="textFormatterPopup.js"></script>
 </body>
+
 </html>
