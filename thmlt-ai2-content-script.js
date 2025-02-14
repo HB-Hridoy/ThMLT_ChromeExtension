@@ -33,13 +33,8 @@
     document.head.appendChild(link);
     
   }
-  injectCSS();
-
-
-
-
- 
-
+  //injectCSS();
+  
   // Listen for messages from the popup.
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if(request.type === "UPDATE_COLOR_THEMES") {
@@ -325,45 +320,122 @@ function createEditTextWithThMLT() {
 
   let textFormatterPopup;
 
-  function createTextFormatterPopup() {
+  async function createTextFormatterPopup() {
     if (!textFormatterPopup) {
-      fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.html'))
-      .then(response => response.text())  // Get the HTML as text
-      .then(htmlContent => {
-          // Create a temporary DOM element to parse the HTML
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = htmlContent;
+        try {
+            const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.html'));
+            const htmlContent = await response.text();
 
-          // Find the element with id 'textFormatterPopup'
-          const textFormatterDiv = tempDiv.querySelector('#textFormatterPopup');
+            // Create a host element for the Shadow DOM
+            const shadowHost = document.createElement('div');
+            shadowHost.id = 'textFormatterShadowHost';
+            document.body.appendChild(shadowHost);
 
-          if (textFormatterDiv) {
-            
-              textFormatterPopup = document.createElement('div');
-              textFormatterPopup.id = 'textFormatterPopup';
-              textFormatterPopup.classList.add('bg-white', 'border', 'border-gray-200', 'rounded-lg', 'shadow-sm');
+            // Attach Shadow DOM
+            const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+
+            // Create a temporary DOM element to parse the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+
+            // Find the element with id 'textFormatterPopup'
+            const textFormatterDiv = tempDiv.querySelector('#textFormatterPopup');
+
+            if (textFormatterDiv) {
+                textFormatterPopup = document.createElement('div');
+                textFormatterPopup.id = 'textFormatterPopup';
+                textFormatterPopup.classList.add('bg-white', 'border', 'border-gray-200', 'rounded-lg', 'shadow-sm');
+                textFormatterPopup.innerHTML = textFormatterDiv.innerHTML;
+
+                shadowRoot.appendChild(textFormatterPopup);
+
+                // Load and inject styles inside Shadow DOM
+                
+
+                try {
+                  const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.css'));
+                  let cssText = await response.text();
               
-              textFormatterPopup.innerHTML=textFormatterDiv.innerHTML;
-        
-              document.body.appendChild(textFormatterPopup);
-              document.getElementById('closeFormatterPopup').addEventListener('click', closeTextFormatterPopup);
-
-              // makePopupDraggable(textFormatterPopup);
-
-              console.log("text formatter popup created");
+                  // Replace ":root" with ":host"
+                  cssText = cssText.replace(/:root/g, ':host');
               
+                  // Create a <style> element and inject the CSS
+                  const styleElement = document.createElement('style');
+                  styleElement.textContent = cssText;
+              
+                  // Append to the Shadow DOM
+                  shadowRoot.appendChild(styleElement);
+                  console.log("Text formatter popup styles created inside Shadow DOM");
+              
+                } catch (error) {
+                    console.error('Failed to fetch Text formatter popup styles CSS:', error);
+                }
+              
+
+                console.log("Text formatter popup created inside Shadow DOM");
+
+                // Close button event listener
+                shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', closeTextFormatterPopup);
+
+                // Switch Tabs
+                const textFormatterNavTabs = shadowRoot.getElementById("textFormatterNavTabs");
+
+                textFormatterNavTabs.addEventListener("click", (e) => {
+                    const targetId = e.target.id;
+                    const targetTab = e.target;
+                    const selectedTab = textFormatterNavTabs.querySelector('.textFormatterNavTab[isTabSelected="true"]');
+
+                    if (targetTab !== selectedTab) {
+                        const navIds = ["translation-tab", "font-tab", "color-tab"];
+
+                        navIds.forEach(id => {
+                            const tabScreen = shadowRoot.getElementById(id.replace('-tab', 'Screen'));
+                            if (id === targetId) {
+                                tabScreen.style.display = 'block';
+                                targetTab.setAttribute('isTabSelected', 'true');
+                                targetTab.classList.replace("textFormatterNavTab", "textFormatterNavTabSelected");
+                            } else {
+                                tabScreen.style.display = 'none';
+                                const tempTab = shadowRoot.getElementById(id);
+                                tempTab.setAttribute('isTabSelected', 'false');
+                                tempTab.className = ''; 
+                                tempTab.classList.add('textFormatterNavTab'); 
+                            }
+                        });
+                    }
+                });
+
+                // Translation Scopes
+                const tarnslationScopeSections = shadowRoot.getElementById("tarnslationScopeSections");
+
+                tarnslationScopeSections.addEventListener("click", (e) => {
+                    const targetScope = e.target;
+                    const activeScope = tarnslationScopeSections.querySelector('.translationScopeSelectionActive');
+
+                    if (targetScope !== activeScope) {
+                        const scopeElements = Array.from(tarnslationScopeSections.children);
+
+                        scopeElements.forEach(scopeElement => {
+                            scopeElement.className = ''; 
+                            if (scopeElement === targetScope) {
+                                scopeElement.classList.add('translationScopeSelectionActive'); 
+                            } else {
+                                scopeElement.classList.add('translationScopeSelectionInactive'); 
+                            }
+                        });
+                    }
+                });
+            } else {
+                console.log('No div with id "textFormatterPopup" found in the HTML');
             }
-      })
-      .catch(err => {
-          console.error('Error loading the HTML file:', err);
-      });
-    }else {
-        console.log('No div with id "textFormatterPopup" found in the HTML');
+        } catch (err) {
+            console.error('Error loading the HTML file:', err);
+        }
     }
-    
-    
   }
 
+
+  
   
 
   // Function to make the popup draggable
@@ -395,31 +467,40 @@ function createEditTextWithThMLT() {
 
 
 
-  function openTextFormatterPopup() {
+function openTextFormatterPopup() {
+  const shadowHost = document.getElementById('textFormatterShadowHost');
 
-    if (textFormatterPopup) {
-      textFormatterPopup.style.display = 'block';
-    } else {
-        createTextFormatterPopup();
-        const interval = setInterval(function() {
+  if (shadowHost && shadowHost.shadowRoot) {
+      const textFormatterPopup = shadowHost.shadowRoot.getElementById('textFormatterPopup');
+      if (textFormatterPopup) {
+          textFormatterPopup.style.display = 'block';
+          return;
+      }
+  }
 
+  // If not found, create the popup
+  createTextFormatterPopup().then(() => {
+      const shadowHost = document.getElementById('textFormatterShadowHost');
+      if (shadowHost && shadowHost.shadowRoot) {
+          const textFormatterPopup = shadowHost.shadowRoot.getElementById('textFormatterPopup');
           if (textFormatterPopup) {
-            clearInterval(interval);
-            textFormatterPopup.style.display = 'block';
-          } else {
-              console.log('Element not found, retrying...');
+              textFormatterPopup.style.display = 'block';
           }
-        }, 500);
-    }
+      }
+  }).catch(err => {
+      console.error('Failed to create text formatter popup:', err);
+  });
+}
 
-    
-    
+function closeTextFormatterPopup() {
+  const shadowHost = document.getElementById('textFormatterShadowHost');
+  if (shadowHost && shadowHost.shadowRoot) {
+      const textFormatterPopup = shadowHost.shadowRoot.getElementById('textFormatterPopup');
+      if (textFormatterPopup) {
+          textFormatterPopup.style.display = 'none';
+      }
   }
+}
 
-  function closeTextFormatterPopup() {
-    if (textFormatterPopup) {
-      textFormatterPopup.style.display = 'none';
-    }
-  }
 
   
