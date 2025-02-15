@@ -1,0 +1,62 @@
+{
+    "ProjectName": "exTest",
+    "Version": "1.0",
+    "Author": "Hridoy",
+    "Modes": [
+        "Light",
+        "Dark"
+    ],
+    "DefaultMode": "Light",
+    "Primitives": {
+        "purple0": "#11101A",
+        "white": "#FFFFFF",
+        "black": "#000000",
+        "gray0": "#4E4E4E",
+        "gray50": "#747474",
+        "gray100": "#9A9A9A",
+        "gray150": "#C2C2C2",
+        "gray200": "#E0E0E0",
+        "purple200": "#B194FF",
+        "purple150": "#9780DD",
+        "purple100": "#322B89",
+        "purple50": "#231F34"
+    },
+    "Semantic": {
+        "Light": {
+            "surface-primary": "white",
+            "accent": "purple150",
+            "text-title": "black",
+            "text-subtitle": "gray150",
+            "button-text": "white",
+            "button-bg": "purple150",
+            "button-border": "purple150",
+            "button-bg-active": "purple150",
+            "button-bg-inactive": "white",
+            "button-text-active": "white",
+            "button-text-inactive": "purple150",
+            "button-border-active": "purple150",
+            "button-border-inactive": "purple150",
+            "player1": "purple150",
+            "player2": "purple50",
+            "board-border": "gray100"
+        },
+        "Dark": {
+            "surface-primary": "purple0",
+            "accent": "purple150",
+            "text-title": "white",
+            "text-subtitle": "gray200",
+            "button-text": "white",
+            "button-bg": "purple50",
+            "button-border": "purple150",
+            "button-bg-active": "purple150",
+            "button-bg-inactive": "purple150",
+            "button-text-active": "purple150",
+            "button-text-inactive": "purple150",
+            "button-border-active": "purple150",
+            "button-border-inactive": "purple150",
+            "player1": "purple150",
+            "player2": "purple150",
+            "board-border": "purple150"
+        }
+    }
+}

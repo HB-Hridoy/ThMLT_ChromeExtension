@@ -44,6 +44,17 @@ div {
 .width-full{
     width:100%;
 }
+/* The overlay covering the whole page */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 999; /* Make sure overlay is above other content */
+    display: none; /* Initially hidden */
+}
 #textFormatterPopup {
     position: fixed;
     top: 50%;
@@ -56,13 +67,18 @@ div {
     height: 500px;
     border: 1px solid var(--gray-200);
     border-radius: 0.5rem;
-
+    display: flex; /* Make it a flex container */
+    flex-direction: column; /* Stack children vertically */
 }
-.screensContainer{
-    display:block;
-    height: 440px; 
-    min-height: 440px;
-    max-height: 440px;
+
+.screensContainerParent {
+    flex: 1; /* Takes full available space inside #textFormatterPopup */
+    display: flex;
+    flex-direction: column; /* Ensures children expand properly */
+}
+
+.screensContainer {
+    flex: 1; /* Fills the remaining space inside .screensContainerParent */
     border-top: 1px solid var(--gray-200);
     overflow: hidden;
 }
@@ -71,6 +87,7 @@ div {
     width: 100%;
     display: flex;
     justify-content: center;
+    margin-bottom: 10px;
 }
 
 .buttonRed{
@@ -82,7 +99,6 @@ div {
     margin-right: 0.5rem;
     padding: 0.625rem 1.25rem;
     text-align: center;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .buttonRed:hover {
@@ -98,7 +114,6 @@ div {
     margin-left: 0.5rem;
     padding: 0.625rem 1.25rem;
     text-align: center;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .buttonBlue:hover {
@@ -157,24 +172,25 @@ div {
 .textFormatterNavTab:hover {
     background-color: var(--gray-100);
 }
-
+.searchColorParent,
 .searchTranslationParent {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    padding: 0.5rem 1.25rem;
-    margin: 0.5rem;
-    font-size: 0.75rem;
+    padding: 8px 20px;
+    margin: 8px;
+    font-size: 12px;
     color: var(--gray-900);
     border: 1px solid var(--gray-300);
-    border-radius: 0.5rem;
+    border-radius: 8px;
     background-color: var(--gray-50);
 }
-
+.searchColorInput,
 .searchTranslationInput {
-    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-size: 12px;
     background-color: transparent;
-    padding-left: 0.5rem;
+    padding-left: 8px;
     border: 0;
     flex: 1;
     outline: none;
@@ -209,20 +225,21 @@ div {
 
 
 /*//////////////////////////////////////////////////////////////////
-[TranslationTable]*/
-.translationTableWrapper {
+[tableWrapper]*/
+.tableWrapper {
     table-layout: fixed;
     border-collapse: separate; /* Change from collapse to separate */
     border-spacing: 0; /* Remove extra spacing */
     width: 680px;
-    margin: 10px 10px 0 10px;
+    margin: 10px 10px 10px 10px;
     border-radius: 10px; /* Rounds the entire table */
     overflow: hidden; /* Ensures child elements don’t overflow */
     color: var(--white);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.translationTableWrapper thead {
+.tableWrapper thead {
+    font-size: 14px;
     background-color: var(--blue-500);
     position: sticky;
     top: 0;
@@ -230,43 +247,64 @@ div {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.translationTableWrapper th, .translationTableWrapper td {
+.tableWrapper th, .tableWrapper td {
     text-align: left;
     padding: 10px;
     border-bottom: 1px solid #ddd;
 }
 
 /* Round only the top corners of the table */
-.translationTableWrapper thead tr:first-child th:first-child {
+.tableWrapper thead tr:first-child th:first-child {
     border-top-left-radius: 10px;
 }
-.translationTableWrapper thead tr:first-child th:last-child {
+.tableWrapper thead tr:first-child th:last-child {
     border-top-right-radius: 10px;
 }
 
 /* Round only the bottom corners of the last row */
-.translationTableWrapper tbody tr:last-child td:first-child {
+.tableWrapper tbody tr:last-child td:first-child {
     border-bottom-left-radius: 10px;
 }
-.translationTableWrapper tbody tr:last-child td:last-child {
+.tableWrapper tbody tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
 }
 
-.translationTableWrapper td {
-    color: var(--gray-700);
+.tableWrapper td {
+    color: var(--gray-500);
     font-size: 12px;
     min-width: 300px;
     cursor: pointer;
 }
 
 .translationTableBody {
-    display: block;
-    max-height: 340px;
-    overflow-y: auto;
+    display: block ;
+    height: 277.5px;
+    min-height:277.5px;
+    max-height:277.5px;
+    overflow-y: scroll;
     width: 100%;
 }
 
-.translationTableWrapper thead, .translationTableWrapper tbody tr {
+.fontTableBody {
+    display: block;
+    height: 350px;
+    min-height:350px;
+    max-height:350px;
+    overflow-y: scroll;
+    width: 100%;
+}
+.colorTableBody {
+    display: block;
+    height: 308px;
+    min-height:308px;
+    max-height:308px;
+    overflow-y: scroll;
+    width: 100%;
+}
+
+
+
+.tableWrapper thead, .tableWrapper tbody tr {
     display: table;
     width: 100%;
     table-layout: fixed;
@@ -276,5 +314,7 @@ div {
     background-color: var(--blue-200); /* Change to any highlight color */
     transition: background-color 0.3s ease-in-out;
 }
+
+
 
 

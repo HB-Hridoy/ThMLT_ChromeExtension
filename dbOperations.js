@@ -8,6 +8,10 @@ console.log(...Logger.multiLog(
 let db;
 let isDBOpenSuccess = false;
 
+let isTranslationDataChanged = false;
+let isFontDataChanged = false;
+let isColorDataChanged = false;
+
 
 
 
@@ -20,7 +24,23 @@ openDB.onupgradeneeded = function (event) {
     projectsStore.createIndex("projectName", "projectName", { unique: true });
     projectsStore.createIndex("author", "author", { unique: false });
     projectsStore.createIndex("version", "version", { unique: false });
+    projectsStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
+    projectsStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
   }
+  // Create 'defaultThemeMode' object store
+  if (!db.objectStoreNames.contains("defaultThemeMode")) {
+    let defaultThemeModeStore = db.createObjectStore("defaultThemeMode", { keyPath: "projectName" });
+    defaultThemeModeStore.createIndex("projectName", "projectName", { unique: true });
+    defaultThemeModeStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
+  }
+
+  // Create 'defaultLanguage' object store
+  if (!db.objectStoreNames.contains("defaultLanguage")) {
+    let defaultLanguageStore = db.createObjectStore("defaultLanguage", { keyPath: "projectName" });
+    defaultLanguageStore.createIndex("projectName", "projectName", { unique: true });
+    defaultLanguageStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
+  }
+
 
   // Create 'primitiveColors' object store
   if (!db.objectStoreNames.contains("primitiveColors")) {
@@ -60,6 +80,12 @@ openDB.onsuccess = (event) => {
 openDB.onerror = function (event) {
   console.error("Database error:", event.target.errorCode);
 };
+
+function translationDataChanged() {
+  if (!isTranslationDataChanged) {
+    
+  }
+}
 
 function addProject(project, update) {
   return new Promise((resolve, reject) => {
@@ -125,6 +151,13 @@ function getAllProjects() {
         CacheOperations.addProject(project.projectName);
        
         projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(project.projectName, project.author, project.version));
+      });
+      
+      chrome.storage.local.set({ "ThMLT-Projects": CacheOperations.getAllProjects() }, () => {
+        console.log(`"ThMLT-Projects": ${CacheOperations.getAllProjects()}`);
+        console.log(CacheOperations.activeProjectNames);
+        
+
       });
     }
 
@@ -281,6 +314,10 @@ function addPrimitiveColor(projectName, primitiveName, primitiveValue, orderInde
             [primitiveName, Logger.Types.INFO, Logger.Formats.BOLD],
             ["adding failed"]
           ));
+        }
+
+        transaction.oncomplete = () =>{
+
         }
       
     } else {
@@ -639,6 +676,15 @@ function getAllSemanticColors(projectName) {
 
       addNewRowToSemanticTable("surface-primary", ["Click to link color"], ["Light"]);
 
+      updateDefaultThemeMode(projectName, "Light", (err, result) => {
+        if (err) {
+          console.error("Error storing default theme mode:", err);
+        } else {
+          console.log("Default theme mode 'Light' stored successfully");
+        }
+      });
+      
+
       CacheOperations.addNewThemeMode("Light");
       CacheOperations.addSemantic("surface-primary", "Light", "Click to link color");
       
@@ -887,6 +933,30 @@ function updateSemanticValue(projectName, semanticName, themeMode, newSemanticVa
     }
   });
 }
+
+function updateDefaultThemeMode(projectName, defaultThemeMode, callback) {
+  // Open a read-write transaction for the 'defaultThemeMode' object store
+  const transaction = db.transaction(["defaultThemeMode"], "readwrite");
+  const store = transaction.objectStore("defaultThemeMode");
+
+  // Prepare the record to be stored
+  const record = {
+    projectName,
+    defaultThemeMode
+  };
+
+  // Use 'put' to add or update the record in the store
+  const request = store.put(record);
+
+  request.onsuccess = function (event) {
+    callback(null, event.target.result);
+  };
+
+  request.onerror = function (event) {
+    callback(event.target.error);
+  };
+}
+
 
 
 function deleteTheme(projectName, themeMode) {
@@ -1304,6 +1374,15 @@ function importProjectFromJson(jsonData) {
           ["[PROCESS COMPLETE]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
           ["Semantic colors have been successfully imported."]
         ));
+
+        const defaultThemeMode = jsonData.DefaultMode;
+        updateDefaultThemeMode(jsonData.ProjectName, defaultThemeMode, (err, result) => {
+          if (err) {
+            console.error("Error storing default theme mode:", err);
+          } else {
+            console.log(`Default theme mode ${defaultThemeMode} stored successfully`);
+          }
+        });
 
       } catch (error) {
         console.error(error);

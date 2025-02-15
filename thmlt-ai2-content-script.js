@@ -1,4 +1,43 @@
 let selectedTranslationTableRow = null;
+let shadowRoot = null;
+let textFormatterPopup = null; 
+let tarnslationScopeSections = null;
+let textFormatterNavTabs = null;
+let isPopupOpen = false;
+let activeSearchInput = null;
+
+let activeProjectName = "";
+let projectName = "";
+let translationData = "";
+let fontData = "";
+let colorData = "";
+
+// Establish a persistent connection (you can name it for clarity)
+const port = chrome.runtime.connect({ name: 'persistentConnection' });
+
+// Listen for messages on this port
+port.onMessage.addListener((msg) => {
+  if (msg.action === "Project Availability") {
+    
+    if (msg.status === "success") {
+      console.log(`${msg.projectName} is available`);
+      console.log(msg.projectData);
+      
+      openTextFormatterPopup();
+    } else {
+      console.log(`${msg.projectName} is not available`);
+      alert(`${msg.projectName} is not available`);
+    }
+  
+  }
+});
+
+
+
+
+
+
+
   /**
    * Creates a new script element named BlockyWorkspaceInjector.js
    */
@@ -11,32 +50,122 @@ let selectedTranslationTableRow = null;
       this.remove();
     };
     (document.head || document.documentElement).appendChild(script);
+
+
     
   })();
 
-  function injectCSS() {
+  async function createShadowDOM(){
+    // Create a host element for the Shadow DOM
+    console.log("Creating ThMLT Shadow DOM");
+    
+    const shadowHost = document.createElement('div');
+    shadowHost.id = 'ThMLTShadowDOM';
+    document.body.appendChild(shadowHost);
+  
+    // Attach Shadow DOM
+    shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+  
+    // Load and inject styles inside Shadow DOM
+    try {
+      const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.css'));
+      let cssText = await response.text();
+  
+      // Replace ":root" with ":host"
+      cssText = cssText.replace(/:root/g, ':host');
+  
+      // Create a <style> element and inject the CSS
+      const styleElement = document.createElement('style');
+      styleElement.textContent = cssText;
+  
+      // Append to the Shadow DOM
+      shadowRoot.appendChild(styleElement);
+      console.log("CSS styles added inside ThMLT Shadow DOM");
+  
+    } catch (error) {
+        console.error('Failed to fetch CSS:', error);
+    }
 
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.css');
-
-    console.log("Attempting to load CSS file from:", link.href);  // Log the generated URL
-
-    link.onload = function() {
-      console.log('CSS file loaded successfully!');
-    };
-
-    link.onerror = function() {
-      console.log('Failed to load CSS file. Check the URL or path.');
-    };
-
-    document.head.appendChild(link);
+    console.log("ThMLT Shadow DOM Creation Successfull");
     
   }
-  //injectCSS();
+  createShadowDOM();
+
+  class getRefHTML {
+    static textFormatterPopup = ``;
+
+    static async getSourceHTML() {
+        try {
+            // Fetch the HTML content
+            
+            const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.html'));
+
+            // Check if the fetch was successful
+            if (!response.ok) {
+                throw new Error(`Failed to fetch source HTML: ${response.statusText}`);
+            }
+
+            // Get the HTML content as text
+            const htmlContent = await response.text();
+
+            // Create a temporary div element to parse the HTML content
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+
+            // Find the specific element by its ID and get its inner text
+            const textFormatterPopupElement = tempDiv.querySelector('#textFormatterPopup');
+
+            if (textFormatterPopupElement) {
+                // Store the inner text of the element
+                getRefHTML.textFormatterPopup = textFormatterPopupElement.innerHTML;
+
+                
+                console.log("Successfully stored innerText of #textFormatterPopup");
+            } else {
+                console.error("Element #textFormatterPopup not found in source HTML");
+            }
+
+            tempDiv.remove();
+
+
+        } catch (error) {
+            console.error('Error fetching source HTML:', error);
+        }
+    }
+}
+
+// Call the static method to fetch and process the HTML
+getRefHTML.getSourceHTML();
+
+
+function injectCSS() {
+
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  link.href = chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.css');
+
+  console.log("Attempting to load CSS file from:", link.href);  // Log the generated URL
+
+  link.onload = function() {
+    console.log('CSS file loaded successfully!');
+  };
+
+  link.onerror = function() {
+    console.log('Failed to load CSS file. Check the URL or path.');
+  };
+
+  document.head.appendChild(link);
   
-  // Listen for messages from the popup.
+}
+//injectCSS();
+
+port.postMessage({ 
+  action: "Project Availability", 
+  projectName: "exTest" 
+});
+  
+  // Listen for messages.
   chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if(request.type === "UPDATE_COLOR_THEMES") {
       console.log("Received UPDATE_COLOR_THEMES message:", request);
@@ -144,56 +273,6 @@ let selectedTranslationTableRow = null;
         
   });
 
-//   const observer = new MutationObserver(() => {
-//     const tree = document.querySelector('.gwt-Tree');
-//     if (tree) {
-//         console.log("Tree found! Attaching event listener...");
-//         let lastClickedTreeItem = null;
-
-//         document.addEventListener('mousedown', (e) => {
-//             const treeItem = e.target.closest('.gwt-TreeItem');
-//             if (treeItem && treeItem !== lastClickedTreeItem) {
-//                 lastClickedTreeItem = treeItem;
-//                 const img = treeItem.querySelector('.gwt-Image');
-
-//                 if (img && img.src.includes('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAQAAAD9CzEMAAABhUlEQVRYw+3XIYsCQRTA8T+yYDB4eDZthgMxHFj9AncGq9V0oFyxWy2C1WpZODBarXJhYaPVpAYtBjmDOFfeLoqunjuz3MH5tjjvDfMr85wZuMdfigw2c5TmN8cmc375lfbi3rc6R9jGllco7FNgZhSYnQJeSTcC1/kPQJotCsWWdDRA05/TjAaY+HMmUQClo21YMg/0j4C+aSDJBoXCwUGh2JA0C9Sl2qAhv+pmAVc2aIqUbFbXJFCU2gCAgYyK5oCe1MoAlGXUMwUkWKNQLLAAsFigUKxJmAFqUun4mY5kamaAsVQKfqYgmbEJIC955yjrSDavD3T9DjgMrxu6ukCcpd8Bh+F1w5K4HlC9evpW9YDRVWCkA+TYXwX25MID7R9dUdphAUsuknuezv4pPPuXRSscUJHMZ+Dh4sqMSjhgKJm3QOBdZgzDAFl2KBRfPAQCj9INO7K3Ay0Zf1y8ZnlnQ+tWIMZUxi8XgVeZNSV2v5tqA5E/QCJ/QkX+CIz8GXuP34pvqvUZW0tNCwIAAAAASUVORK5CYII=')) {
-//                     console.log('✅ Clicked on the label tree item: from mousedown');
-//                     createEditTextWithThMLT();
-//                 }
-//             }
-//         });
-
-//         document.addEventListener('click', (e) => {
-//             const treeItem = e.target.closest('.gwt-TreeItem');
-//             if (treeItem && treeItem !== lastClickedTreeItem) {
-//                 lastClickedTreeItem = treeItem;
-//                 const img = treeItem.querySelector('.gwt-Image');
-
-//                 if (img && img.src.includes('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAQAAAD9CzEMAAABhUlEQVRYw+3XIYsCQRTA8T+yYDB4eDZthgMxHFj9AncGq9V0oFyxWy2C1WpZODBarXJhYaPVpAYtBjmDOFfeLoqunjuz3MH5tjjvDfMr85wZuMdfigw2c5TmN8cmc375lfbi3rc6R9jGllco7FNgZhSYnQJeSTcC1/kPQJotCsWWdDRA05/TjAaY+HMmUQClo21YMg/0j4C+aSDJBoXCwUGh2JA0C9Sl2qAhv+pmAVc2aIqUbFbXJFCU2gCAgYyK5oCe1MoAlGXUMwUkWKNQLLAAsFigUKxJmAFqUun4mY5kamaAsVQKfqYgmbEJIC955yjrSDavD3T9DjgMrxu6ukCcpd8Bh+F1w5K4HlC9evpW9YDRVWCkA+TYXwX25MID7R9dUdphAUsuknuezv4pPPuXRSscUJHMZ+Dh4sqMSjhgKJm3QOBdZgzDAFl2KBRfPAQCj9INO7K3Ay0Zf1y8ZnlnQ+tWIMZUxi8XgVeZNSV2v5tqA5E/QCJ/QkX+CIz8GXuP34pvqvUZW0tNCwIAAAAASUVORK5CYII=')) {
-//                     console.log('✅ Clicked on the label tree item: from click');
-//                     createEditTextWithThMLT();
-//                 }
-//             }
-            
-//             // Reset flag after a short delay (prevents multiple rapid clicks from triggering both)
-//             setTimeout(() => {
-//                 lastClickedTreeItem = null;
-//             }, 100);
-//         });
-
-        
-      
-//         observer.disconnect(); // Stop observing once found
-//     }
-// });
-
-// // Start observing changes in the body until the .gwt-Tree appears
-// observer.observe(document.body, { childList: true, subtree: true });
-
-// // ode-PropertiesComponentName
-// // Start observing changes in the body until the .ode-PropertiesComponentName appears
-// componentNameObserver.observe(document.body, { childList: true, subtree: true });
-
 let lastComponentNameText = "";
 
 /**
@@ -203,6 +282,9 @@ let lastComponentNameText = "";
  */
 const observer = new MutationObserver(() => {
     const propertiesComponentNameElement = document.querySelector('.ode-PropertiesComponentName');
+    const projectEditorElement = document.querySelector(".ode-ProjectEditor");
+    
+    
 
     if (propertiesComponentNameElement) {
         console.log("Properties Component Name found! Watching for text changes...");
@@ -225,6 +307,29 @@ const observer = new MutationObserver(() => {
 
         // Stop looking for the element once found
         observer.disconnect();
+    } 
+    
+    if (projectEditorElement) {
+      const activeProjectNameElement = projectEditorElement.querySelector(".ya-ProjectName");
+      if (activeProjectNameElement) {
+        console.log("Active project name element found! Watching for text changes");
+
+        activeProjectName = activeProjectNameElement.innerText.trim(); 
+
+        // observer to watch for Project Name changes
+        const textObserver = new MutationObserver(() => {
+          const newProjectName = activeProjectNameElement.innerText.trim(); 
+
+          if (newProjectName !== activeProjectName) { 
+            activeProjectName = newProjectName;
+            console.log(`[Active Project] ${activeProjectName}`);
+          }
+        });
+
+        textObserver.observe(propertiesComponentNameElement, { childList: true, subtree: true, characterData: true });
+      }
+      
+      
     }
 });
 
@@ -252,7 +357,6 @@ function createEditTextWithThMLT() {
     
 
     if (targetRow) {
-      console.log('Found the specific table row');
 
       // Select the target <td> element that contains the <div> with class 'ode-PropertyLabel' and text 'Text'
       const targetTd = targetRow.querySelector('td:has(div.ode-PropertyLabel)').querySelector('td[align="left"][style*="vertical-align: top;"] img.ode-PropertyHelpWidget').parentElement;
@@ -300,11 +404,21 @@ function createEditTextWithThMLT() {
           
           if (clickedElement) {
               if (textArea) {
-                openTextFormatterPopup();
-                textArea.value = "success i have done it";
-                // Trigger input and change events
-                textArea.dispatchEvent(new Event("input", { bubbles: true }));
-                textArea.dispatchEvent(new Event("change", { bubbles: true }));
+
+                if (!projectName && projectName === activeProjectName) {
+                  //call isNeededUpdate
+                } else {
+                  port.postMessage({ 
+                    action: "Project Availability", 
+                    projectName: activeProjectName 
+                  });
+                }
+
+                
+                // textArea.value = "success i have done it";
+                // // Trigger input and change events
+                // textArea.dispatchEvent(new Event("input", { bubbles: true }));
+                // textArea.dispatchEvent(new Event("change", { bubbles: true }));
               }
           }
         });
@@ -318,245 +432,192 @@ function createEditTextWithThMLT() {
         console.log('Table with class "ode-PropertiesPanel" not found.');
   }
 }
+  
 
-  let textFormatterPopup;
+function createTextFormatterPopup() {
+  if (!textFormatterPopup) {
+    // Create the overlay div
+    const overlay = document.createElement('div');
+    overlay.id = 'overlay';
 
-  async function createTextFormatterPopup() {
-    if (!textFormatterPopup) {
-        try {
-            const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.html'));
-            const htmlContent = await response.text();
+    shadowRoot.appendChild(overlay);
 
-            // Create a host element for the Shadow DOM
-            const shadowHost = document.createElement('div');
-            shadowHost.id = 'textFormatterShadowHost';
-            document.body.appendChild(shadowHost);
+    textFormatterPopup = document.createElement('div');
+    textFormatterPopup.id = 'textFormatterPopup';
+    textFormatterPopup.innerHTML = getRefHTML.textFormatterPopup;
 
-            // Attach Shadow DOM
-            const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+    shadowRoot.appendChild(textFormatterPopup);
 
-            // Create a temporary DOM element to parse the HTML
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlContent;
+    console.log("Text formatter popup created inside Shadow DOM");
 
-            // Find the element with id 'textFormatterPopup'
-            const textFormatterDiv = tempDiv.querySelector('#textFormatterPopup');
+    // Close button event listener
+    shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', closeTextFormatterPopup);
 
-            if (textFormatterDiv) {
-                textFormatterPopup = document.createElement('div');
-                textFormatterPopup.id = 'textFormatterPopup';
-                textFormatterPopup.classList.add('bg-white', 'border', 'border-gray-200', 'rounded-lg', 'shadow-sm');
-                textFormatterPopup.innerHTML = textFormatterDiv.innerHTML;
+    // Just populates the table body
+    const tableBody = shadowRoot.querySelector('.translationTableBody');
+    refreshTranslationTable(tableBody);
+    
 
-                shadowRoot.appendChild(textFormatterPopup);
+    tableBody.addEventListener('click', function(event) {
+      selectTranslationTableRow(event.target.closest('tr'));
+        
+    });
 
-                // Load and inject styles inside Shadow DOM
-                
+    // Switch Tabs
+    textFormatterNavTabs = shadowRoot.getElementById("textFormatterNavTabs");
 
-                try {
-                  const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.css'));
-                  let cssText = await response.text();
-              
-                  // Replace ":root" with ":host"
-                  cssText = cssText.replace(/:root/g, ':host');
-              
-                  // Create a <style> element and inject the CSS
-                  const styleElement = document.createElement('style');
-                  styleElement.textContent = cssText;
-              
-                  // Append to the Shadow DOM
-                  shadowRoot.appendChild(styleElement);
-                  console.log("Text formatter popup styles created inside Shadow DOM");
-              
-                } catch (error) {
-                    console.error('Failed to fetch Text formatter popup styles CSS:', error);
-                }
-              
+    textFormatterNavTabs.addEventListener("click", (e) => {
+        switchTabs(e.target);
+    });
 
-                console.log("Text formatter popup created inside Shadow DOM");
+    // Translation Scopes
+    tarnslationScopeSections = shadowRoot.getElementById("tarnslationScopeSections");
 
-                // Close button event listener
-                shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', closeTextFormatterPopup);
+    tarnslationScopeSections.addEventListener("click", (e) => {
+        switchTranslationScope(e.target);
+    });
 
-                // Just populates the table body
-                const tableBody = shadowRoot.querySelector('.translationTableBody');
-                function populateTable() {
-                  let count = 20;
-                  console.log(tableBody);
-                  
-                  let tableBodyRows = ``;
+    const searchTranslationInput = shadowRoot.querySelector('.searchTranslationInput');
 
-                  for (let i = 0; i < count; i++) {
-                      tableBodyRows += `
-                        <tr rowId="${i}">
-                          <td>Some stuff</td>
-                          <td>Some more stuff</td>
-                        </tr>
-                      `; 
-                  }
-                  // Add two empty rows at the end
-                  tableBodyRows += `
-                  <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-                  `;
-                  
-                  // Use innerHTML without parentheses
-                  tableBody.innerHTML = tableBodyRows;
-                }
+    searchTranslationInput.addEventListener('focus', () => {
+      activeSearchInput = searchTranslationInput;
+    });
 
-                // Call the function to populate the table
-                populateTable();
+    const searchColorInput = shadowRoot.querySelector('.searchColorInput');
 
+    searchColorInput.addEventListener('focus', () => {
+      activeSearchInput = searchColorInput;
+    });
 
-                
-                
+    // Define the keys that should refocus on input
+    const refocusKeys = ['/', 't', 'v', 'p', 'm'];
 
-                tableBody.addEventListener('click', function(event) {
-                    const clickedRow = event.target.closest('tr'); // Get the closest row
-                    console.log(clickedRow);
-                    
-
-                    if (!clickedRow) return; // Ignore clicks outside of rows
-
-                    // If another row is already selected, revert its background
-                    if (selectedTranslationTableRow) {
-                        selectedTranslationTableRow.classList.remove('highlight');
-                    }
-
-                    // If the same row is clicked, deselect it
-                    if (selectedTranslationTableRow === clickedRow) {
-                        selectedTranslationTableRow = null; // Reset selection
-                        return;
-                    }
-
-                    // Highlight the clicked row
-                    clickedRow.classList.add('highlight');
-                    selectedTranslationTableRow = clickedRow; // Update the selected row
-                });
-
-                // Switch Tabs
-                const textFormatterNavTabs = shadowRoot.getElementById("textFormatterNavTabs");
-
-                textFormatterNavTabs.addEventListener("click", (e) => {
-                    const targetId = e.target.id;
-                    const targetTab = e.target;
-                    const selectedTab = textFormatterNavTabs.querySelector('.textFormatterNavTab[isTabSelected="true"]');
-
-                    if (targetTab !== selectedTab) {
-                        const navIds = ["translation-tab", "font-tab", "color-tab"];
-
-                        navIds.forEach(id => {
-                            const tabScreen = shadowRoot.getElementById(id.replace('-tab', 'Screen'));
-                            if (id === targetId) {
-                                tabScreen.style.display = 'block';
-                                targetTab.setAttribute('isTabSelected', 'true');
-                                targetTab.classList.replace("textFormatterNavTab", "textFormatterNavTabSelected");
-                            } else {
-                                tabScreen.style.display = 'none';
-                                const tempTab = shadowRoot.getElementById(id);
-                                tempTab.setAttribute('isTabSelected', 'false');
-                                tempTab.className = ''; 
-                                tempTab.classList.add('textFormatterNavTab'); 
-                            }
-                        });
-                    }
-                });
-
-                // Translation Scopes
-                const tarnslationScopeSections = shadowRoot.getElementById("tarnslationScopeSections");
-
-                tarnslationScopeSections.addEventListener("click", (e) => {
-                    const targetScope = e.target;
-                    const activeScope = tarnslationScopeSections.querySelector('.translationScopeSelectionActive');
-
-                    if (targetScope !== activeScope) {
-                        const scopeElements = Array.from(tarnslationScopeSections.children);
-
-                        scopeElements.forEach(scopeElement => {
-                            scopeElement.className = ''; 
-                            if (scopeElement === targetScope) {
-                                scopeElement.classList.add('translationScopeSelectionActive'); 
-                            } else {
-                                scopeElement.classList.add('translationScopeSelectionInactive'); 
-                            }
-                        });
-                    }
-                });
-            } else {
-                console.log('No div with id "textFormatterPopup" found in the HTML');
-            }
-        } catch (err) {
-            console.error('Error loading the HTML file:', err);
+    // Add a keydown event listener to refocus on the input if the specified keys are pressed
+    document.addEventListener('keydown', (event) => {
+      if (isPopupOpen) {
+        // Check if the pressed key is in the refocusKeys array
+        if (refocusKeys.includes(event.key.toLowerCase())) {
+          // Use setTimeout to refocus on the input
+          setTimeout(() => {
+            activeSearchInput.focus(); // Keep the focus on the input field
+          }, 0);
         }
-    }
+      }
+        
+    });
   }
-
-
-  
-  
-
-  // Function to make the popup draggable
-// function makePopupDraggable(popup) {
-//   const header = popup.querySelector('#popupHeader');
-//   let offsetX = 0, offsetY = 0, isDragging = false;
-
-//   header.addEventListener('mousedown', (e) => {
-//       isDragging = true;
-//       offsetX = e.clientX - popup.getBoundingClientRect().left;
-//       offsetY = e.clientY - popup.getBoundingClientRect().top;
-//       header.style.cursor = 'grabbing';
-//   });
-
-//   document.addEventListener('mousemove', (e) => {
-//       if (isDragging) {
-//           popup.style.left = `${e.clientX - offsetX}px`;
-//           popup.style.top = `${e.clientY - offsetY}px`;
-//           popup.style.transform = 'none'; // Disable centering effect during drag
-//       }
-//   });
-
-//   document.addEventListener('mouseup', () => {
-//       isDragging = false;
-//       header.style.cursor = 'grab';
-//   });
-// }
-
-
-
+}
 
 function openTextFormatterPopup() {
-  const shadowHost = document.getElementById('textFormatterShadowHost');
-
-  if (shadowHost && shadowHost.shadowRoot) {
-      const textFormatterPopup = shadowHost.shadowRoot.getElementById('textFormatterPopup');
-      if (textFormatterPopup) {
-          textFormatterPopup.style.display = 'block';
-          return;
-      }
-  }
-
-  // If not found, create the popup
-  createTextFormatterPopup().then(() => {
-      const shadowHost = document.getElementById('textFormatterShadowHost');
-      if (shadowHost && shadowHost.shadowRoot) {
-          const textFormatterPopup = shadowHost.shadowRoot.getElementById('textFormatterPopup');
-          if (textFormatterPopup) {
-              textFormatterPopup.style.display = 'block';
-          }
-      }
-  }).catch(err => {
-      console.error('Failed to create text formatter popup:', err);
-  });
+  createTextFormatterPopup();
+  isPopupOpen = true;
+  //document.addEventListener('keydown', disableKeyboard, true);  // Start blocking keyboard shortcuts
+  shadowRoot.getElementById('overlay').style.display = 'block';
+  textFormatterPopup.style.display = 'block';
 }
 
 function closeTextFormatterPopup() {
-  const shadowHost = document.getElementById('textFormatterShadowHost');
-  if (shadowHost && shadowHost.shadowRoot) {
-      const textFormatterPopup = shadowHost.shadowRoot.getElementById('textFormatterPopup');
-      if (textFormatterPopup) {
-          textFormatterPopup.style.display = 'none';
-      }
+  if (textFormatterPopup) {
+    isPopupOpen = false;
+    //document.removeEventListener('keydown', disableKeyboard, true);  // Re-enable keyboard shortcuts
+    shadowRoot.getElementById('overlay').style.display = 'none';
+    textFormatterPopup.style.display = 'none';
   }
 }
+
+function switchTabs(target) {
+  const targetId = target.id;
+  const targetTab = target;
+  const selectedTab = textFormatterNavTabs.querySelector('.textFormatterNavTab[isTabSelected="true"]');
+
+  if (targetTab !== selectedTab) {
+      const navIds = ["translation-tab", "font-tab", "color-tab"];
+
+      navIds.forEach(id => {
+          const tabScreen = shadowRoot.getElementById(id.replace('-tab', 'Screen'));
+          if (id === targetId) {
+              tabScreen.style.display = 'block';
+              targetTab.setAttribute('isTabSelected', 'true');
+              targetTab.classList.replace("textFormatterNavTab", "textFormatterNavTabSelected");
+          } else {
+              tabScreen.style.display = 'none';
+              const tempTab = shadowRoot.getElementById(id);
+              tempTab.setAttribute('isTabSelected', 'false');
+              tempTab.className = ''; 
+              tempTab.classList.add('textFormatterNavTab'); 
+          }
+      });
+  }
+}
+
+function switchTranslationScope(target) {
+  const targetScope = target;
+  const activeScope = tarnslationScopeSections.querySelector('.translationScopeSelectionActive');
+
+  if (targetScope !== activeScope) {
+      const scopeElements = Array.from(tarnslationScopeSections.children);
+
+      scopeElements.forEach(scopeElement => {
+          scopeElement.className = ''; 
+          if (scopeElement === targetScope) {
+              scopeElement.classList.add('translationScopeSelectionActive'); 
+          } else {
+              scopeElement.classList.add('translationScopeSelectionInactive'); 
+          }
+      });
+  }
+}
+
+function refreshTranslationTable(tableBody){
+  let count = 20;
+  const translationTableBody = shadowRoot.querySelector('.translationTableBody');
+  const fontTableBody = shadowRoot.querySelector('.fontTableBody');
+  const colorTableBody = shadowRoot.querySelector('.colorTableBody');
+  
+  
+  let tableBodyRows = ``;
+
+  for (let i = 1; i < count; i++) {
+      tableBodyRows += `
+      <tr rowId="${i}">
+          <td>Some stuff</td>
+          <td>Some more stuff</td>
+      </tr>
+      `; 
+  }
+  
+  // Use innerHTML without parentheses
+  translationTableBody.innerHTML = tableBodyRows;
+  //fontTableBody.innerHTML = tableBodyRows;
+  //colorTableBody.innerHTML = tableBodyRows;
+}
+
+function selectTranslationTableRow(clickedRow){
+  console.log(clickedRow);
+  
+
+  if (!clickedRow) return; // Ignore clicks outside of rows
+
+  // If another row is already selected, revert its background
+  if (selectedTranslationTableRow) {
+      selectedTranslationTableRow.classList.remove('highlight');
+  }
+
+  // If the same row is clicked, deselect it
+  if (selectedTranslationTableRow === clickedRow) {
+      selectedTranslationTableRow = null; // Reset selection
+      return;
+  }
+
+  // Highlight the clicked row
+  clickedRow.classList.add('highlight');
+  selectedTranslationTableRow = clickedRow; // Update the selected row
+}
+
+
+
+
+
 
 
   
