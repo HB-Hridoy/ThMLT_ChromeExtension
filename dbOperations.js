@@ -25,21 +25,20 @@ openDB.onupgradeneeded = function (event) {
     projectsStore.createIndex("author", "author", { unique: false });
     projectsStore.createIndex("version", "version", { unique: false });
     projectsStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
-    projectsStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
   }
-  // Create 'defaultThemeMode' object store
-  if (!db.objectStoreNames.contains("defaultThemeMode")) {
-    let defaultThemeModeStore = db.createObjectStore("defaultThemeMode", { keyPath: "projectName" });
-    defaultThemeModeStore.createIndex("projectName", "projectName", { unique: true });
-    defaultThemeModeStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
-  }
+  // // Create 'defaultThemeMode' object store
+  // if (!db.objectStoreNames.contains("defaultThemeMode")) {
+  //   let defaultThemeModeStore = db.createObjectStore("defaultThemeMode", { keyPath: "projectName" });
+  //   defaultThemeModeStore.createIndex("projectName", "projectName", { unique: true });
+  //   defaultThemeModeStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
+  // }
 
-  // Create 'defaultLanguage' object store
-  if (!db.objectStoreNames.contains("defaultLanguage")) {
-    let defaultLanguageStore = db.createObjectStore("defaultLanguage", { keyPath: "projectName" });
-    defaultLanguageStore.createIndex("projectName", "projectName", { unique: true });
-    defaultLanguageStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
-  }
+  // // Create 'defaultLanguage' object store
+  // if (!db.objectStoreNames.contains("defaultLanguage")) {
+  //   let defaultLanguageStore = db.createObjectStore("defaultLanguage", { keyPath: "projectName" });
+  //   defaultLanguageStore.createIndex("projectName", "projectName", { unique: true });
+  //   defaultLanguageStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
+  // }
 
 
   // Create 'primitiveColors' object store
@@ -60,6 +59,8 @@ openDB.onupgradeneeded = function (event) {
     semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
     semanticColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
   }
+
+  
 
 };
 
@@ -154,8 +155,11 @@ function getAllProjects() {
       });
       
       chrome.storage.local.set({ "ThMLT-Projects": CacheOperations.getAllProjects() }, () => {
-        console.log(`"ThMLT-Projects": ${CacheOperations.getAllProjects()}`);
-        console.log(CacheOperations.activeProjectNames);
+        console.log(...Logger.multiLog(
+          ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
+          ["All project names stored to"],
+          ["chrome.storage.local", Logger.Types.INFO]
+        ));
         
 
       });
@@ -676,13 +680,7 @@ function getAllSemanticColors(projectName) {
 
       addNewRowToSemanticTable("surface-primary", ["Click to link color"], ["Light"]);
 
-      updateDefaultThemeMode(projectName, "Light", (err, result) => {
-        if (err) {
-          console.error("Error storing default theme mode:", err);
-        } else {
-          console.log("Default theme mode 'Light' stored successfully");
-        }
-      });
+      updateDefaultThemeMode(projectName, "Light");
       
 
       CacheOperations.addNewThemeMode("Light");
@@ -934,28 +932,57 @@ function updateSemanticValue(projectName, semanticName, themeMode, newSemanticVa
   });
 }
 
-function updateDefaultThemeMode(projectName, defaultThemeMode, callback) {
-  // Open a read-write transaction for the 'defaultThemeMode' object store
-  const transaction = db.transaction(["defaultThemeMode"], "readwrite");
-  const store = transaction.objectStore("defaultThemeMode");
+function updateDefaultThemeMode(projectName, newDefaultThemeMode) {
+  return new Promise((resolve, reject) => {
+    if (isDBOpenSuccess && db) {
+      const transaction = db.transaction(["projects"], "readwrite");
+      const store = transaction.objectStore("projects");
 
-  // Prepare the record to be stored
-  const record = {
-    projectName,
-    defaultThemeMode
-  };
+      // Get the existing project data
+      const getRequest = store.get(projectName);
 
-  // Use 'put' to add or update the record in the store
-  const request = store.put(record);
+      getRequest.onsuccess = function(event) {
+        const project = event.target.result;
+        
+        if (project) {
+          // Update only the defaultThemeMode
+          project.defaultThemeMode = newDefaultThemeMode;
 
-  request.onsuccess = function (event) {
-    callback(null, event.target.result);
-  };
+          // Put the updated object back into the store
+          const updateRequest = store.put(project);
 
-  request.onerror = function (event) {
-    callback(event.target.error);
-  };
+          updateRequest.onsuccess = function() {
+            console.log(...Logger.multiLog(
+              ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+              ["Default theme mode updated to"],
+              [newDefaultThemeMode, Logger.Types.SUCCESS, Logger.Formats.BOLD]
+            ));
+            resolve("Default theme mode updated successfully.");
+          };
+
+          updateRequest.onerror = function(event) {
+            console.log(...Logger.multiLog(
+              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["Default theme mode update FAILED", Logger.Types.ERROR]
+            ));
+            reject(event.target.error);
+          };
+        } else {
+          reject("Project not found.");
+        }
+      };
+
+      getRequest.onerror = function(event) {
+        reject(event.target.error);
+      };
+    } else {
+      const error = "Database is not initialized";
+      console.error(error);
+      reject(error);
+    }
+  });
 }
+
 
 
 
@@ -1375,14 +1402,7 @@ function importProjectFromJson(jsonData) {
           ["Semantic colors have been successfully imported."]
         ));
 
-        const defaultThemeMode = jsonData.DefaultMode;
-        updateDefaultThemeMode(jsonData.ProjectName, defaultThemeMode, (err, result) => {
-          if (err) {
-            console.error("Error storing default theme mode:", err);
-          } else {
-            console.log(`Default theme mode ${defaultThemeMode} stored successfully`);
-          }
-        });
+        updateDefaultThemeMode(jsonData.ProjectName, jsonData.DefaultMode);
 
       } catch (error) {
         console.error(error);
