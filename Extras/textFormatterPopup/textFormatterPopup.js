@@ -23,11 +23,33 @@ function populateTable() {
         </tr>
         `; 
     }
+
+    let colorTableBodyRows = ``;
+    for (let i = 1; i < count; i++) {
+        colorTableBodyRows += `
+        <tr>
+            <td rowId="${i}">
+                Semantic Name
+            </td>
+            <td>
+                <div class="semanticValueCell">
+                    <div class="colorThumbnail"></div>
+                    <div>
+                        <span class="">color/brand/900</span>
+                    </div>
+                
+                </div>
+            </td>    
+        </tr>
+        `; 
+    }
+
+    
     
     // Use innerHTML without parentheses
     translationTableBody.innerHTML = tableBodyRows;
     //fontTableBody.innerHTML = tableBodyRows;
-    colorTableBody.innerHTML = tableBodyRows;
+    colorTableBody.innerHTML = colorTableBodyRows;
 }
 
 // Call the function to populate the table

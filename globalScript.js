@@ -214,8 +214,10 @@
   }
 
   class SessionManager {
-    static HOME_SCREEN = "home-screeen";
+    static HOME_SCREEN = "home-screen";
+    static PROJECT_MANAGEMENT_SCREEN = "project-management-screen";
     static COLORS_SCREEN = "colors-screen";
+    static FONTS_SCREEN = "fonts-screen";
     static TOOLS_SCREEN = "tools-screen";
     static INFO_SCREEN = "info-screen";
     static IMPORT_JSON_SCREEN = "import-json-screen";
@@ -225,7 +227,7 @@
 
     static setSessionData(key, value) {
       chrome.storage.session.set({ [key]: value }, () => {
-        //console.log(`[info] : ${key} set to '${value}' in current session.`);
+        console.log(`[info] : ${key} set to '${value}' in current session.`);
       });
     }
     
@@ -422,7 +424,7 @@
     }
 
     static showHomeScreen() { 
-      this.switchScreen("home-screen"); 
+      this.switchScreen(SessionManager.HOME_SCREEN); 
       this.showBottomNavBar();
 
       SessionManager.setScreen(SessionManager.HOME_SCREEN);
@@ -438,8 +440,15 @@
       document.getElementById("projects-container").classList.replace("hidden", "visible");
     }
 
+    static showProjectManagementScreen() {
+      this.switchScreen(SessionManager.PROJECT_MANAGEMENT_SCREEN); 
+      this.hideBottomNavBar();
+
+      SessionManager.setScreen(SessionManager.PROJECT_MANAGEMENT_SCREEN);
+    }
+
     static showColorsScreen() {
-      this.switchScreen("colors-screen");
+      this.switchScreen(SessionManager.COLORS_SCREEN);
       this.hideBottomNavBar();
 
       SessionManager.setScreen(SessionManager.COLORS_SCREEN);
@@ -447,8 +456,15 @@
       SessionManager.setProject(CacheOperations.getProjectName());
     }
 
+    static showFontsScreen() {
+      this.switchScreen(SessionManager.FONTS_SCREEN);
+      this.hideBottomNavBar();
+
+      SessionManager.setScreen(SessionManager.FONTS_SCREEN);
+    }
+
     static showImportJsonScreen() {
-    this.switchScreen("import-json-screen");
+    this.switchScreen(SessionManager.IMPORT_JSON_SCREEN);
     this.hideBottomNavBar();
 
     SessionManager.setScreen(SessionManager.IMPORT_JSON_SCREEN);
