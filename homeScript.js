@@ -9,6 +9,9 @@
     const importJsonDoneButton = document.getElementById("import-json-screen-done-button");
     const importJsonErrorCount = document.getElementById("import-json-error-count");
     const importJsonTitle = document.getElementById("import-json-screen-title");
+
+    const projectManagementBackButton = document.getElementById("pm-back-button");
+    const projectManagementOptionsContainer = document.getElementById("pm-options-container");
     
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -34,6 +37,36 @@
 
     document.getElementById("open-import-json").addEventListener("click", function(){
       ScreenManager.showImportJsonScreen();
+    });
+
+    projectManagementBackButton.addEventListener("click", (e)=>{
+      ScreenManager.showHomeScreen();
+    });
+
+    projectManagementOptionsContainer.addEventListener("click", (e)=>{
+      const target = e.target;
+
+      if (target.closest("#pm-color-themes")) {
+        document.getElementById("project-name-colors-screen").innerText = CacheOperations.getProjectName();
+
+        currentPrimitiveRowId = 1;
+        currentSemanticRowId = 1;
+
+        getAllPrimitiveColors(CacheOperations.getProjectName());
+        
+        getAllSemanticColors(CacheOperations.getProjectName());
+
+        ScreenManager.showColorsScreen();
+        
+        
+      }else if (target.closest("#pm-fonts")) {
+        ScreenManager.showFontsScreen();
+        
+        
+      }else if (target.closest("#pm-translations")) {
+        console.log("translations clicked");
+        
+      }
     });
 
     document.getElementById("import-json-screen-back-button").addEventListener("click", function(){
@@ -127,18 +160,9 @@
       
           CacheOperations.updateProjectName(projectDiv.getAttribute('project-id'));
 
-          document.getElementById("project-name-colors-screen").innerText = CacheOperations.getProjectName();
+          document.getElementById("pm-project-name").innerText = CacheOperations.getProjectName();
 
-          currentPrimitiveRowId = 1;
-          currentSemanticRowId = 1;
-
-          getAllPrimitiveColors(CacheOperations.getProjectName());
-          
-          getAllSemanticColors(CacheOperations.getProjectName());
-
-          
-
-          ScreenManager.showColorsScreen();
+          ScreenManager.showProjectManagementScreen();
 
         }
       });

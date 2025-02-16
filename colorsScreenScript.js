@@ -114,7 +114,7 @@
   });
   //Open home screen
   document.getElementById("color-screen-back-button").addEventListener("click", () => {
-    ScreenManager.showHomeScreen();
+    ScreenManager.showProjectManagementScreen();
   });
 
 
