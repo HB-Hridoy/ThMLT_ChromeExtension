@@ -112,14 +112,13 @@
     }
     
   });
-  //Open home screen
+  
+  
   document.getElementById("color-screen-back-button").addEventListener("click", () => {
     ScreenManager.showProjectManagementScreen();
   });
 
 
-
-  
   // open primitives tab
     primitivesTabButton.addEventListener('click', () => {
       SwitchTabs("primitives");
@@ -997,8 +996,8 @@
     const tableBody = document.querySelector("#primitives-table tbody");
 
     const newRow = `
-                  <tr primitive-row-index = "${currentPrimitiveRowId}" order-index="${currentPrimitiveRowId}" draggable="true" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white w-2/4">
+                  <tr primitive-row-index = "${currentPrimitiveRowId}" order-index="${currentPrimitiveRowId}" draggable="true" class="bg-white border-b cursor-grab active:cursor-grabbing">
+                    <td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap w-2/4">
                       <div class="flex items-center w-full">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
                           <path fill="#000000" fill-rule="evenodd"
