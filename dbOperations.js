@@ -1,4 +1,4 @@
-const openDB = indexedDB.open("ThMLT DB", 1); // Name and version
+const openDB = indexedDB.open("ThMLT DB", 1);
 
 console.log(...Logger.multiLog(
   ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
@@ -26,20 +26,6 @@ openDB.onupgradeneeded = function (event) {
     projectsStore.createIndex("version", "version", { unique: false });
     projectsStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
   }
-  // // Create 'defaultThemeMode' object store
-  // if (!db.objectStoreNames.contains("defaultThemeMode")) {
-  //   let defaultThemeModeStore = db.createObjectStore("defaultThemeMode", { keyPath: "projectName" });
-  //   defaultThemeModeStore.createIndex("projectName", "projectName", { unique: true });
-  //   defaultThemeModeStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
-  // }
-
-  // // Create 'defaultLanguage' object store
-  // if (!db.objectStoreNames.contains("defaultLanguage")) {
-  //   let defaultLanguageStore = db.createObjectStore("defaultLanguage", { keyPath: "projectName" });
-  //   defaultLanguageStore.createIndex("projectName", "projectName", { unique: true });
-  //   defaultLanguageStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
-  // }
-
 
   // Create 'primitiveColors' object store
   if (!db.objectStoreNames.contains("primitiveColors")) {
@@ -60,7 +46,15 @@ openDB.onupgradeneeded = function (event) {
     semanticColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
   }
 
-  
+  // Create 'fonts' object store
+  if (!db.objectStoreNames.contains("fonts")) {
+    let fontsStore = db.createObjectStore("fonts", { keyPath: "id", autoIncrement: true  });
+    fontsStore.createIndex("projectName", "projectName", { unique: false });
+    fontsStore.createIndex("fontTag", "fontTag", { unique: false });
+    fontsStore.createIndex("shortFontTag", "shortFontTag", { unique: false });
+    fontsStore.createIndex("fontName", "fontName", { unique: false });
+    fontsStore.createIndex("orderIndex", "orderIndex", { unique: false });
+  }
 
 };
 
@@ -121,6 +115,17 @@ function addProject(project, update) {
     }
   });
 }
+
+// function functionName(params) {
+//   return new Promise((resolve, reject) => {
+//     if (!isDBOpenSuccess || !db) {
+//       const error = "Database is not initialized";
+      // console.error(error);
+      // return reject(error);
+//     }
+//     ...and code goes here
+//   });
+// }
 
 function getAllProjects() {
   console.log(...Logger.multiLog(
@@ -1419,25 +1424,141 @@ function importProjectFromJson(jsonData) {
     
 }
 
+function addFont(projectName, fontTag, shortFontTag, fontName, orderIndex) {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["fonts"], "readwrite");
+    let store = transaction.objectStore("fonts");
+    let request = store.add({ projectName, fontTag, shortFontTag, fontName, orderIndex });
+    
+    request.onsuccess = () =>{
+      resolve("Font added successfully");
+    } 
+    request.onerror = () => {
+      reject("Error adding font");
+    }
+  });
+}
 
+function deleteFont(projectName, fontTag) {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["fonts"], "readwrite");
+    let store = transaction.objectStore("fonts");
+    let index = store.index("projectName");
+    let request = index.openCursor(IDBKeyRange.only(projectName));
+    
+    request.onsuccess = function (event) {
+      let cursor = event.target.result;
+      if (cursor) {
+        if (cursor.value.fontTag === fontTag) {
+          store.delete(cursor.primaryKey);
+          resolve("Font deleted successfully");
+        }
+        cursor.continue();
+      } else {
+        reject("Font not found");
+      }
+    };
+  });
+}
 
+function updateShortFontTag(projectName, fontTag, newShortFontTag) {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["fonts"], "readwrite");
+    let store = transaction.objectStore("fonts");
+    let index = store.index("projectName");
+    let request = index.openCursor(IDBKeyRange.only(projectName));
+    
+    request.onsuccess = function (event) {
+      let cursor = event.target.result;
+      if (cursor) {
+        if (cursor.value.fontTag === fontTag) {
+          let updateData = cursor.value;
+          updateData.shortFontTag = newShortFontTag;
+          store.put(updateData);
+          resolve("Short font tag updated successfully");
+        }
+        cursor.continue();
+      } else {
+        reject("Font not found");
+      }
+    };
+  });
+}
 
+function updateOrderIndex(projectName, fontTag, newOrderIndex) {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["fonts"], "readwrite");
+    let store = transaction.objectStore("fonts");
+    let index = store.index("projectName");
+    let request = index.openCursor(IDBKeyRange.only(projectName));
+    
+    request.onsuccess = function (event) {
+      let cursor = event.target.result;
+      if (cursor) {
+        if (cursor.value.fontTag === fontTag) {
+          let updateData = cursor.value;
+          updateData.orderIndex = newOrderIndex;
+          store.put(updateData);
+          resolve("Order index updated successfully");
+        }
+        cursor.continue();
+      } else {
+        reject("Font not found");
+      }
+    };
+  });
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function exportFonts(author, version) {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["fonts"], "readonly");
+    let store = transaction.objectStore("fonts");
+    let request = store.getAll();
+    
+    request.onsuccess = function () {
+      let fonts = request.result;
+      let fontExport = {};
+      
+      fonts.forEach((font) => {
+        if (!fontExport[font.projectName]) {
+          fontExport[font.projectName] = {
+            ProjectName: font.projectName,
+            Author: author,
+            Version: version,
+            Fonts: {}
+          };
+        }
+        let fontKey = `${font.fontTag}{${font.shortFontTag}}`;
+        fontExport[font.projectName].Fonts[fontKey] = font.fontName;
+      });
+      
+      resolve(fontExport);
+    };
+    request.onerror = () => reject("Error exporting font store");
+  });
+}

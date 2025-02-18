@@ -1,0 +1,8 @@
+{
+  "ProjectName": "here put project name",
+  "Author": "here put author name",
+  "Version": "here put version name",
+  "Fonts":{
+    "fontTag{shortFontTag}":"fontName"
+  }
+}

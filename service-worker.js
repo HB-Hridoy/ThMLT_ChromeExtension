@@ -20,7 +20,6 @@ openDB.onupgradeneeded = function (event) {
     projectsStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
   }
 
-
   // Create 'primitiveColors' object store
   if (!db.objectStoreNames.contains("primitiveColors")) {
     let primitiveColorsStore = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true  });
@@ -39,6 +38,18 @@ openDB.onupgradeneeded = function (event) {
     semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
     semanticColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
   }
+
+  // Create 'fonts' object store
+  if (!db.objectStoreNames.contains("fonts")) {
+    let fontsStore = db.createObjectStore("fonts", { keyPath: "id", autoIncrement: true  });
+    fontsStore.createIndex("projectName", "projectName", { unique: false });
+    fontsStore.createIndex("fontTag", "fontTag", { unique: false });
+    fontsStore.createIndex("shortFontTag", "shortFontTag", { unique: false });
+    fontsStore.createIndex("fontName", "fontName", { unique: false });
+    fontsStore.createIndex("orderIndex", "orderIndex", { unique: false });
+  }
+
+
 
   
 
