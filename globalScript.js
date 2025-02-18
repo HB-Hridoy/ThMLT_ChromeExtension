@@ -1,11 +1,19 @@
   class CacheOperations {
     static activeProjectName = "";
+    static activeProjectNames = [];
+
     static activeThemeModesInSemantic = [];
     static activeSemanticNames = new Set();
     static activeSemantics = new Map();
+
     static activePrimitiveNames = [];
     static activePrimitives = new Map();
-    static activeProjectNames = [];
+
+    static activeFontTags = [];
+    static activeFontTagsShort = [];
+    static activeFonts = new Map();
+
+    
 
     static updateProjectName(projectName) {
       this.activeProjectName = projectName;
@@ -210,6 +218,7 @@
       this.activePrimitiveNames = [];
       this.activePrimitives.clear();
       this.activeProjectNames = [];
+
     }
   }
 
@@ -608,6 +617,8 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
 
   let currentPrimitiveRowId = 1;
   let currentSemanticRowId = 1;
+
+  let currentFontsRowId = 1;
 
   let shouldUpdateBlocky = true;
 
