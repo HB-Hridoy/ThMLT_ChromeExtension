@@ -681,13 +681,23 @@ function getAllSemanticColors(projectName) {
     ));
     let result = semanticRequest.result;
 
-    result.forEach(item => {
+    // Sort the array by orderIndex
+    const sortedData = result.sort((a, b) => a.orderIndex - b.orderIndex);
 
-      CacheOperations.addNewThemeMode(item.themeMode);
+    // Loop through the sorted array
+    sortedData.forEach(semantic => {
+      CacheOperations.addNewThemeMode(semantic.themeMode);
 
-      CacheOperations.addSemantic(item.semanticName, item.themeMode, item.linkedPrimitive)
-
+      CacheOperations.addSemantic(semantic.semanticName, semantic.themeMode, semantic.linkedPrimitive);
     });
+
+    // result.forEach(item => {
+
+    //   CacheOperations.addNewThemeMode(item.themeMode);
+
+    //   CacheOperations.addSemantic(item.semanticName, item.themeMode, item.linkedPrimitive)
+
+    // });
 
 
     const table = document.getElementById('semantic-table');

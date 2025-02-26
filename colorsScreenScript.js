@@ -579,6 +579,8 @@
 
     } else {
       sm_nameInputError.classList.add("hidden");
+      sm_nameInput.style.borderColor = "";
+
       replaceClass(sm_actionButton, "bg-", "bg-blue-700");
       replaceClass(sm_actionButton, "hover:bg-", "hover:bg-blue-800");
       sm_actionButton.disabled = false;
@@ -1331,11 +1333,8 @@
           ["Updated primitive table order index"]
         ));
       } catch (error) {
-        
+        console.error(error); 
       }
-      
-
-
     });
   }
 
@@ -1394,6 +1393,31 @@
       row.classList.remove('dragging');
       row.querySelector('td:first-child').style.removeProperty('background-color');
 
+      // Update Order Indexes in DB
+      const rows = semanticTableBody.querySelectorAll('tr');
+
+      try {
+        const themeModes = CacheOperations.getAllThemeModes();
+        rows.forEach(async (row, index) => {
+          const semanticElement = row.querySelector(".semantic-name");
+          if (semanticElement) {
+            const semanticName = semanticElement.innerText.trim();
+            const newOrderIndex = index + 1;
+
+            await Promise.all(themeModes.map(themeMode => 
+              updateSemantic(CacheOperations.activeProject, semanticName, "@default", themeMode, "@default", newOrderIndex, false)
+            ));
+          }
+          
+        });
+
+        console.log(...Logger.multiLog(
+          ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
+          ["Updated semantic table order index"]
+        ));
+      } catch (error) {
+        console.error(error);
+      }
 
     });
   }
