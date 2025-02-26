@@ -1,10 +1,8 @@
 const openDB = indexedDB.open("ThMLT DB", 1);
-
 console.log(...Logger.multiLog(
   ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
   ["Getting database ready"]
 ));
-
 let db;
 let isDBOpenSuccess = false;
 
@@ -68,8 +66,7 @@ openDB.onsuccess = (event) => {
   ));
 
   getAllProjects();
-  // addProject({id: "projectName", projectName: "projectName", author: "author", version: "version" });
-
+  
 };
 
 openDB.onerror = function (event) {
@@ -81,6 +78,18 @@ function translationDataChanged() {
     
   }
 }
+
+/**
+ * Adds a new project or updates an existing one in the IndexedDB.
+ *
+ * This function either inserts a new project entry or updates an existing one 
+ * based on the `update` flag.
+ *
+ * @param {Object} project - The project object to be added or updated.
+ * @param {boolean} update - If `true`, the function updates an existing project; otherwise, it adds a new one.
+ * @returns {Promise<string>} - A promise that resolves when the project is successfully added or updated, 
+ *                              or rejects with an error message if the operation fails.
+ */
 
 function addProject(project, update) {
   return new Promise((resolve, reject) => {
@@ -116,16 +125,18 @@ function addProject(project, update) {
   });
 }
 
-// function functionName(params) {
-//   return new Promise((resolve, reject) => {
-//     if (!isDBOpenSuccess || !db) {
-//       const error = "Database is not initialized";
-      // console.error(error);
-      // return reject(error);
-//     }
-//     ...and code goes here
-//   });
-// }
+/**
+ * Retrieves all projects from the IndexedDB and updates the UI accordingly.
+ *
+ * This function fetches all stored projects, clears the existing project container, 
+ * and dynamically injects the project data into the UI. If no projects are found, 
+ * it displays a "no projects" screen.
+ *
+ * Additionally, it updates the local Chrome storage with the retrieved project names 
+ * and attempts to restore the previous session.
+ *
+ * @returns {void}
+ */
 
 function getAllProjects() {
   console.log(...Logger.multiLog(
@@ -182,6 +193,17 @@ function getAllProjects() {
   };
 }
 
+/**
+ * Retrieves all primitive colors for a given project from the IndexedDB.
+ *
+ * This function fetches all primitive colors associated with the specified project, 
+ * sorts them by `orderIndex`, and updates the UI by injecting the retrieved data 
+ * into the primitives table. It also caches the primitive colors.
+ *
+ * @param {string} projectName - The name of the project whose primitive colors are to be retrieved.
+ * @returns {void}
+ */
+
 function getAllPrimitiveColors(projectName) {
 
   console.log(...Logger.multiLog(
@@ -208,10 +230,6 @@ function getAllPrimitiveColors(projectName) {
 
     ));
     
-    // Logger.multiLog(
-    //   ["[SUCCESS] ", Logger.Types.SUCCESS],
-    //   ["Got all primitive colors"]
-    // );
     let result = request.result;
 
     const tableBody = document.querySelector("#primitives-table tbody");
@@ -219,64 +237,17 @@ function getAllPrimitiveColors(projectName) {
     const rows = Array.from(tableBody.children);
   
     rows.forEach(row => {
-      
         tableBody.removeChild(row);
-      
     });
 
     // Sort the array by orderIndex
     const sortedData = result.sort((a, b) => a.orderIndex - b.orderIndex);
 
-    const logPrimitives = [];
-
     // Loop through the sorted array
     sortedData.forEach(primitive => {
       CacheOperations.addPrimitive(primitive.primitiveName, primitive.primitiveValue);
       addNewRowToPrimitiveTable(primitive.primitiveName, primitive.primitiveValue);
-      logPrimitives.push(`${primitive.primitiveName} : ${primitive.primitiveValue}`);
     });
-
-    //console.table(logPrimitives);
-
-    // If there's an open pickr, close it before opening the new one
-    if (pickrInstance && pickrInstance.isOpen()) {
-      pickrInstance.hide();
-    }
-
-    // If Pickr instance doesn't exist, create it
-    if (!pickrInstance) {
-      pickrInstance = Pickr.create({
-        el: '#color-picker', 
-        theme: 'classic',
-        default: "#FFFFFF",
-        components: {
-          preview: true,
-          hue: true,
-          interaction: {
-            hex: true,
-            rgba: true,
-            input: true,
-            save: false
-          }
-        }
-      });
-      const pickrRoot = document.querySelector('.pickr'); // Root element of Pickr
-      pickrRoot.style.border = '1px solid #D1D5DB'; // Set border color
-      pickrRoot.style.borderRadius = '5px'; // Set border color
-
-      const primitiveModalColorText = document.getElementById("primitive-modal-color-text");
-      const editPrimitiveModalColorText = document.getElementById("edit-primitive-modal-color-text");
-      const button = document.querySelector(".pcr-button");
-
-      
-      pickrInstance.on('change', (color) => {
-        const hex = color.toHEXA().toString(); 
-        button.style.setProperty("--pcr-color", hex);
-        
-        primitiveModalColorText.textContent = hex;
-        editPrimitiveModalColorText.textContent = hex;
-      });
-    }
 
   };
 
@@ -285,6 +256,22 @@ function getAllPrimitiveColors(projectName) {
     console.error(error);
   };
 }
+
+/**
+ * Adds a new primitive color to the IndexedDB for a specified project.
+ *
+ * This function creates a new entry in the `primitiveColors` object store, including 
+ * the project name, primitive name, primitive value, and order index. If the addition 
+ * is successful, it resolves with a success message and caches the primitive color. 
+ * If it fails, it rejects with an error message.
+ *
+ * @param {string} projectName - The name of the project associated with the primitive color.
+ * @param {string} primitiveName - The name of the primitive color to be added.
+ * @param {string} primitiveValue - The value of the primitive color (e.g., hex code).
+ * @param {number} orderIndex - The order index for the primitive color.
+ * @returns {Promise<string>} - A promise that resolves when the primitive color is successfully added, 
+ *                              or rejects with an error message if the operation fails.
+ */
 
 function addPrimitiveColor(projectName, primitiveName, primitiveValue, orderIndex) {
 
@@ -338,82 +325,115 @@ function addPrimitiveColor(projectName, primitiveName, primitiveValue, orderInde
 
 }
 
-function updatePrimitiveColor(projectName, primitiveName, newPrimitiveValue, newOrderIndex) {
+/**
+ * Updates an existing primitive color in the IndexedDB for a specified project.
+ *
+ * This function retrieves all primitive colors associated with the given project, 
+ * finds the specific primitive color to update, and modifies its name, value, 
+ * and order index based on the provided parameters. It only updates the fields 
+ * if the new values are not set to "@default". The function resolves with a success 
+ * message if the update is successful or rejects with an error message if the 
+ * primitive color is not found or if the update fails.
+ *
+ * @param {string} projectName - The name of the project associated with the primitive color.
+ * @param {string} primitiveName - The name of the primitive color to be updated.
+ * @param {string} [newPrimitiveName="@default"] - The new name for the primitive color.
+ * @param {string} [newPrimitiveValue="@default"] - The new value for the primitive color.
+ * @param {number} [newOrderIndex="@default"] - The new order index for the primitive color.
+ * @param {boolean} [log=true] - Whether to log the update process.
+ * @returns {Promise<string>} - A promise that resolves when the primitive color is successfully updated, 
+ *                              or rejects with an error message if the update fails or the primitive color is not found.
+ */
 
+function updatePrimitive(projectName, primitiveName, newPrimitiveName = "@default", newPrimitiveValue = "@default", newOrderIndex = "@default", log = true) {
   return new Promise((resolve, reject) => {
-    if (isDBOpenSuccess && db) {
-          
-      let transaction = db.transaction(["primitiveColors"], "readwrite");
-      let primitiveColorsStore = transaction.objectStore("primitiveColors");
-
-      const query = primitiveColorsStore.openCursor(); // Open a cursor to iterate over all records
-      let updateCount = 0; // Track the number of updates
-
-      query.onerror = (event) => {
-        console.error("Cursor query failed:", event.target.error);
-        reject("Failed to query records.");
-      };
-
-      query.onsuccess = (event) => {
-        const cursor = event.target.result;
-
-        if (cursor) {
-          const record = cursor.value;
-
-          if (
-            record.projectName === projectName &&
-            record.primitiveName === primitiveName
-          ) {
-            record.primitiveValue = newPrimitiveValue;
-            newOrderIndex && (record.orderIndex = newOrderIndex);
-
-            const updateRequest = cursor.update(record); // Save the updated record
-            updateRequest.onerror = (event) => {
-              console.error("[Error]: Update operation failed:", event.target.error);
-              reject("Failed to update a record.");
-            };
-
-            updateRequest.onsuccess = () => {
-              updateCount++;
-            };
-          }
-
-          cursor.continue(); // Continue to the next record, regardless of a match
-        } else {
-          // Cursor exhausted: all records have been processed
-          if (updateCount > 0) {
-            if (!newOrderIndex) {
-              CacheOperations.updatePrimitive(primitiveName, newPrimitiveValue);
-            
-              console.log(...Logger.multiLog(
-                ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
-                ["Updated"],
-                [updateCount, Logger.Types.INFO, Logger.Formats.BOLD],
-                ["record(s) in the"],
-                [primitiveName, Logger.Types.INFO, Logger.Formats.BOLD],
-                ["field with the new primitive value:"],
-                [newPrimitiveValue, Logger.Types.INFO, Logger.Formats.BOLD]
-              ));
-              resolve(`Successfully updated ${updateCount} record(s) with the new primitive value '${newPrimitiveValue}' in '${primitiveName}'.`);
-            }
-            
-          } else {
-            console.log(...Logger.multiLog(
-              ["[WARNING]", Logger.Types.WARNING, Logger.Formats.BOLD],
-              ["No matching records found."]
-            ));
-            reject("No matching records found.");
-          }
-        }
-      };
-    } else {
+    if (!isDBOpenSuccess || !db) {
       const error = "Database is not initialized";
       console.error(error);
-      reject(error);
+      return reject(error);
     }
-  });
 
+    const transaction = db.transaction(["primitiveColors"], "readwrite");
+    const store = transaction.objectStore("primitiveColors");
+    const index = store.index("projectName");
+    const request = index.getAll(projectName);
+
+    request.onsuccess = function(event) {
+      const primitives = event.target.result;
+      const primitiveToUpdate = primitives.find(p => p.primitiveName === primitiveName);
+
+      if (!primitiveToUpdate) {
+        if (log) {
+          console.log(...Logger.multiLog(
+            ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+            ["Primitive color"],
+            [primitiveName, Logger.Types.ERROR, Logger.Formats.BOLD],
+            ["not found for project"],
+            [projectName, Logger.Types.ERROR, Logger.Formats.BOLD]
+          ));
+        }
+        
+        return reject(`Primitive color '${primitiveName}' not found for project '${projectName}'.`);
+      }
+
+      // Only update fields that are not "@default"
+      if (newPrimitiveName !== "@default") primitiveToUpdate.primitiveName = newPrimitiveName;
+      if (newPrimitiveValue !== "@default") primitiveToUpdate.primitiveValue = newPrimitiveValue;
+      if (newOrderIndex !== "@default") primitiveToUpdate.orderIndex = newOrderIndex;
+
+      const updateRequest = store.put(primitiveToUpdate);
+
+      updateRequest.onsuccess = function() {
+        if (log) {
+          console.log(...Logger.multiLog(
+            ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+            ["Updated primitive color"],
+            [primitiveName, Logger.Types.INFO, Logger.Formats.BOLD],
+            ["successfully."]
+          ));
+        }
+      
+        resolve(`Updated primitive color '${primitiveName}' successfully.`);
+      };
+
+      updateRequest.onerror = function() {
+        reject("Failed to update primitive color.");
+        if (log) {
+          console.log(...Logger.multiLog(
+            ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+            ["Failed to update primitive color"],
+            [primitiveName, Logger.Types.ERROR, Logger.Formats.BOLD]
+          ));
+        }
+        
+      };
+    };
+
+    request.onerror = function() {
+      reject("Failed to fetch primitive colors.");
+      console.log(...Logger.multiLog(
+        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+        ["Failed to fetch primitive colors."]
+      ));
+    };
+  });
 }
+
+/**
+ * Deletes a primitive color from the IndexedDB for a specified project.
+ *
+ * This function retrieves all primitive colors associated with the given project, 
+ * finds the specific primitive color to delete based on the provided name, and removes 
+ * it from the database. It also updates any linked semantic values that reference the 
+ * deleted primitive color. The function resolves with a success message if the deletion 
+ * is successful or rejects with an error message if the primitive color is not found 
+ * or if an error occurs during the retrieval process.
+ *
+ * @param {string} projectName - The name of the project associated with the primitive color.
+ * @param {string} primitiveName - The name of the primitive color to be deleted.
+ * @returns {Promise<string>} - A promise that resolves when the primitive color is successfully deleted, 
+ *                              or rejects with an error message if the deletion fails or the primitive color is not found.
+ */
 
 function deletePrimitiveColor(projectName, primitiveName) {
   return new Promise((resolve, reject) => {
@@ -439,7 +459,7 @@ function deletePrimitiveColor(projectName, primitiveName) {
             Object.entries(themeData).forEach(([semanticName, semanticValue]) => {
 
               if (semanticValue === primitiveName) {
-                updateSemanticValue(CacheOperations.getProjectName(), semanticName, themeMode, "Click to link color");
+                updateSemanticValue(CacheOperations.activeProject, semanticName, themeMode, "Click to link color");
               }
             });
           });
@@ -449,7 +469,7 @@ function deletePrimitiveColor(projectName, primitiveName) {
           console.log(...Logger.multiLog(
             ["[DELETED]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
             ["Primitive color"],
-            [primitiveName, Logger.Types.CRITICAL, Logger.Formats.BOLD],
+            [primitiveName, Logger.Types.ERROR, Logger.Formats.BOLD],
             ["deleted."]
           ));
           resolve(`Primitive color '${primitiveName}' deleted.`);
@@ -479,71 +499,158 @@ function deletePrimitiveColor(projectName, primitiveName) {
 }
 
 
-
-// return new Promise((resolve, reject) => {
-//   if (isDBOpenSuccess && db) {
-    
-//   } else {
-//     const error = "Database is not initialized";
-//     console.error(error);
-//     reject(error);
-//   }
-// });
-function addSemanticColor(projectName, semanticName, themeMode, linkedPrimitive){
-
+/**
+ * Adds a new semantic color entry to the IndexedDB.
+ *
+ * This function ensures the IndexedDB database is properly initialized 
+ * before attempting to add a new entry. It logs success or failure messages accordingly.
+ *
+ * @param {string} projectName - The name of the project associated with the semantic color.
+ * @param {string} semanticName - The name of the semantic color to be added.
+ * @param {string} linkedPrimitive - Primitive name that is linked to semantic.
+ * @param {string} themeMode - The name of the theme that semantic color to be added.
+ * @param {int} orderIndex - The order of that specific semantic color.
+ * 
+ * @returns {Promise<void>} - A promise that resolves when the color is successfully added.
+ */
+function addSemantic(projectName, semanticName, linkedPrimitive, themeMode, orderIndex) {
   return new Promise((resolve, reject) => {
-    if (isDBOpenSuccess && db) {
-      let transaction = db.transaction(["semanticColors"], "readwrite");
-      let semanticColorsStore = transaction.objectStore("semanticColors");
+      if (!isDBOpenSuccess || !db) {
+        const error = "Database is not initialized";
+        console.error(error);
+        return reject(error);
+      }
 
-      let newSemanticColor = {
-        projectName: projectName,
-        semanticName: semanticName,
-        themeMode: themeMode,
-        linkedPrimitive: linkedPrimitive
+      const transaction = db.transaction(["semanticColors"], "readwrite");
+      const store = transaction.objectStore("semanticColors");
+
+      // Add new semantic color
+      const addRequest = store.add({
+          projectName,
+          semanticName,
+          linkedPrimitive,
+          themeMode,
+          orderIndex: orderIndex ?? 0  // Default to 0 if not provided
+      });
+
+      addRequest.onsuccess = function () {
+            console.log(...Logger.multiLog(
+            ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+            ["Added semantic color:"],
+            [semanticName, Logger.Types.INFO, Logger.Formats.BOLD]
+            ));
+          resolve(`Added semantic color: ${semanticName}`);
       };
-      let semanticColorStoreRequest = semanticColorsStore.put(newSemanticColor);
 
-      semanticColorStoreRequest.onsuccess = (e) => {
-
-        CacheOperations.addSemantic(semanticName, themeMode, linkedPrimitive);
-        
-        resolve("Semantic color added");
-
-        console.log(...Logger.multiLog(
-          ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
-          ["Semantic color"],
-          [semanticName, Logger.Types.INFO, Logger.Formats.BOLD],
-          ["added to"],
-          [themeMode, Logger.Types.INFO, Logger.Formats.BOLD],
-          ["mode."]
-        ));
-        
-      }
-
-      semanticColorStoreRequest.onerror = (e) => {
-        reject("Error adding semantic color");
-        
-        console.log(...Logger.multiLog(
-          ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
-          ["Semantic color"],
-          [semanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
-          ["adding failed to"],
-          [themeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
-          ["mode."]
-        ));
-      }
-
-    } else {
-      const error = "Database is not initialized";
-      console.error(error);
-      reject(error);
-    }
+      addRequest.onerror = function (event) {
+          reject(`Failed to add semantic color: ${event.target.error}`);
+      };
   });
-
-  
 }
 
+/**
+ * Updates an existing semantic color entry in the IndexedDB.
+ *
+ * This function retrieves a specific semantic color for a given project and theme mode, 
+ * updates its values if provided, and saves the changes back to the database.
+ *
+ * @param {string} projectName - The name of the project associated with the semantic color.
+ * @param {string} semanticName - The current name of the semantic color to be updated.
+ * @param {string} [newSemanticName="@default"] - The new name for the semantic color (if not "@default").
+ * @param {string} themeMode - The theme mode associated with the semantic color.
+ * @param {string} [newLinkedPrimitive="@default"] - The new linked primitive name (if not "@default").
+ * @param {number} [newOrderIndex="@default"] - The new order index (if not "@default").
+ * @param {boolean} [log=true] - Whether to log the update process.
+ * @returns {Promise<string>} - A promise that resolves with a success message if the update is successful, or rejects with an error message.
+ */
+
+function updateSemantic(projectName, semanticName, newSemanticName = "@default", themeMode, newLinkedPrimitive = "@default", newOrderIndex = "@default", log = true) {
+  return new Promise((resolve, reject) => {
+      if (!isDBOpenSuccess || !db) {
+        const error = "Database is not initialized";
+        console.error(error);
+        return reject(error);
+      }
+
+      const transaction = db.transaction(["semanticColors"], "readwrite");
+      const store = transaction.objectStore("semanticColors");
+      const index = store.index("projectName");
+
+      // Get all semantic colors for the project
+      const request = index.getAll(projectName);
+
+      request.onsuccess = function () {
+          const records = request.result;
+
+          // Find the specific semantic color entry
+          const entry = records.find(color => 
+              color.semanticName === semanticName && color.themeMode === themeMode
+          );
+
+          if (!entry) {
+            if (log) {
+              console.log(...Logger.multiLog(
+                ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+                ["Semantic color"],
+                [semanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
+                ["for theme"],
+                [themeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
+                ["not found."]
+              ));
+            }
+            reject(`Semantic color '${semanticName}' for theme '${themeMode}' not found.`);
+            return;
+          }
+
+          // Update values only if not "@default"
+          if (newSemanticName !== "@default") {
+              entry.semanticName = newSemanticName;
+          }
+          if (newLinkedPrimitive !== "@default") {
+              entry.linkedPrimitive = newLinkedPrimitive;
+          }
+          if (newOrderIndex !== "@default") {
+              entry.orderIndex = newOrderIndex;
+          }
+
+          const updateRequest = store.put(entry);
+
+          updateRequest.onsuccess = function () {
+            if (log) {
+              console.log(...Logger.multiLog(
+                ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+                ["Updated semantic color:"],
+                [semanticName, Logger.Types.INFO, Logger.Formats.BOLD]
+              ));
+            }
+            CacheOperations.updateSemantic(semanticName, newSemanticName, themeMode, newLinkedPrimitive);
+            resolve(`Updated semantic color: ${entry.semanticName}`);
+
+          };
+
+          updateRequest.onerror = function (event) {
+            if (log) {
+              console.log(...Logger.multiLog(
+              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+              ["Failed to update semantic color"],
+              [semanticName, Logger.Types.ERROR, Logger.Formats.BOLD]
+              ));
+            }
+            reject(`Failed to update semantic color: ${event.target.error}`);
+          };
+      };
+
+      request.onerror = function (event) {
+        if (log) {
+          console.log(...Logger.multiLog(
+            ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+            ["Error retrieving semantic colors."]
+          ));
+        }
+          reject(`Error retrieving semantic colors: ${event.target.error}`);
+      };
+  });
+}
 
 /**
  * Fetches all semantic colors associated with a given project name from the database,
@@ -709,7 +816,18 @@ function getAllSemanticColors(projectName) {
 
 }
 
-function deleteSemanticColor(semanticName, projectName) {
+/**
+ * Deletes a semantic color entry from the IndexedDB.
+ *
+ * This function iterates over all records in the `semanticColors` object store 
+ * and deletes entries that match the given project name and semantic name.
+ *
+ * @param {string} projectName - The name of the project associated with the semantic color.
+ * @param {string} semanticName - The name of the semantic color to be deleted.
+ * @returns {Promise<string>} - A promise that resolves when the semantic color is successfully deleted, 
+ *                              or rejects if an error occurs or no matching records are found.
+ */
+function deleteSemantic( projectName, semanticName) {
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
 
@@ -751,7 +869,6 @@ function deleteSemanticColor(semanticName, projectName) {
           // Cursor exhausted: all records have been processed
           if (deletionCount > 0) {
             
-
             console.log(...Logger.multiLog(
               ["[DELETED]", Logger.Types.ERROR, Logger.Formats.BOLD],
               ["Sematic color"],
@@ -759,7 +876,7 @@ function deleteSemanticColor(semanticName, projectName) {
               ["deleted successfully."]
             ));
             
-            resolve(`${deletionCount} record(s) named '${semanticName}' deleted successfully.`);
+            resolve(`Semantic color '${semanticName}' deleted successfully.`);
           } else {
             console.log(...Logger.multiLog(
               ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
@@ -782,160 +899,17 @@ function deleteSemanticColor(semanticName, projectName) {
   });
 }
 
-
-function renameSemantic(oldSemanticName, newSemanticName, projectName) {
-  return new Promise((resolve, reject) => {
-    if (isDBOpenSuccess && db) {
-
-      const transaction = db.transaction("semanticColors", "readwrite");
-      const store = transaction.objectStore("semanticColors");
-
-      const query = store.openCursor(); // Open a cursor to iterate over all records
-      let updateCount = 0; // Track the number of updates
-
-      query.onerror = (event) => {
-        console.error("Cursor query failed:", event.target.error);
-        reject("Failed to query records.");
-      };
-
-      query.onsuccess = (event) => {
-        const cursor = event.target.result;
-
-        if (cursor) {
-          const record = cursor.value;
-
-          if (
-            record.semanticName === oldSemanticName &&
-            record.projectName === projectName
-          ) {
-            record.semanticName = newSemanticName; // Update the semanticName
-
-            const updateRequest = cursor.update(record); // Save the updated record
-            updateRequest.onerror = (event) => {
-              console.error("Update operation failed:", event.target.error);
-              reject("Failed to update a record.");
-            };
-
-            updateRequest.onsuccess = () => {
-              updateCount++;
-            };
-          }
-
-          cursor.continue(); // Move to the next record, regardless of a match
-        } else {
-          // Cursor exhausted: all records have been processed
-          if (updateCount > 0) {
-            console.log(...Logger.multiLog(
-              ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
-              ["Successfully renamed"],
-              [updateCount, Logger.Types.INFO, Logger.Formats.BOLD],
-              ["record(s)"],
-              [oldSemanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
-              [" =>"],
-              [newSemanticName, Logger.Types.SUCCESS, Logger.Formats.BOLD]
-            ));
-            resolve(`${updateCount} record(s) successfully renamed '${oldSemanticName}' to '${newSemanticName}'`);
-          } else {
-            console.log(...Logger.multiLog(
-              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
-              ["No matching records found for"]
-              [oldSemanticName, Logger.Types.ERROR, Logger.Formats.BOLD]
-            ));
-            reject(`No matching records found for ${oldSemanticName}.`);
-          }
-        }
-      };
-
-
-      transaction.onerror = (event) => {
-        console.error("Transaction failed:", event.target.error);
-        reject("Transaction failed.");
-      };
-    } else {
-      reject("Database is not open or not available.");
-    }
-  });
-}
-
-function updateSemanticValue(projectName, semanticName, themeMode, newSemanticValue) {
-  return new Promise((resolve, reject) => {
-    if (isDBOpenSuccess && db) {
-      if (!db.objectStoreNames.contains("semanticColors")) {
-        reject("Object store 'semanticColors' does not exist.");
-        return;
-      }
-
-      const transaction = db.transaction("semanticColors", "readwrite");
-      const store = transaction.objectStore("semanticColors");
-
-      const query = store.openCursor(); // Open a cursor to iterate over all records
-      let updateCount = 0; // Track the number of updates
-
-      query.onerror = (event) => {
-        console.error("Cursor query failed:", event.target.error);
-        reject("Failed to query records.");
-      };
-
-      query.onsuccess = (event) => {
-        const cursor = event.target.result;
-
-        if (cursor) {
-          const record = cursor.value;
-
-          // Check for records matching projectName, semanticName, and themeMode
-          if (
-            record.projectName === projectName &&
-            record.semanticName === semanticName &&
-            record.themeMode === themeMode
-          ) {
-            record.linkedPrimitive = newSemanticValue; // Update the linkedPrimitive
-
-            const updateRequest = cursor.update(record); // Save the updated record
-            updateRequest.onerror = (event) => {
-              console.error("Update operation failed:", event.target.error);
-              reject("Failed to update a record.");
-            };
-
-            updateRequest.onsuccess = () => {
-              updateCount++;
-            };
-          }
-
-          cursor.continue(); // Continue to the next record, regardless of a match
-        } else {
-          // Cursor exhausted: all records have been processed
-          if (updateCount > 0) {
-            CacheOperations.updateSemantic(semanticName, themeMode, newSemanticValue);
-            
-            console.log(...Logger.multiLog(
-              ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
-              ["Semantic color"],
-              [semanticName, Logger.Types.INFO, Logger.Formats.BOLD],
-              ["in"],
-              [themeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
-              ["mode has been successfully linked to the new primitive value:"],
-              [newSemanticValue, Logger.Types.WARNING, Logger.Formats.BOLD]
-            ));
-            resolve(`Successfully updated ${updateCount} record(s) with the new semantic value '${newSemanticValue}' in '${semanticName}' for '${themeMode}' mode.`);
-          } else {
-            console.log(...Logger.multiLog(
-              ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
-              ["No matching records found."]
-            ));
-            reject("No matching records found.");
-          }
-        }
-      };
-
-      transaction.onerror = (event) => {
-        console.error("Transaction failed:", event.target.error);
-        reject("Transaction failed.");
-      };
-    } else {
-      reject("Database is not open or not available.");
-    }
-  });
-}
+/**
+ * Updates the default theme mode for a given project in the IndexedDB.
+ *
+ * This function retrieves the project data, updates the `defaultThemeMode` property, 
+ * and saves the changes back to the database.
+ *
+ * @param {string} projectName - The name of the project whose default theme mode needs to be updated.
+ * @param {string} newDefaultThemeMode - The new default theme mode to be set.
+ * @returns {Promise<string>} - A promise that resolves when the update is successful, 
+ *                              or rejects with an error message if the update fails.
+ */
 
 function updateDefaultThemeMode(projectName, newDefaultThemeMode) {
   return new Promise((resolve, reject) => {
@@ -987,9 +961,6 @@ function updateDefaultThemeMode(projectName, newDefaultThemeMode) {
     }
   });
 }
-
-
-
 
 function deleteTheme(projectName, themeMode) {
   return new Promise((resolve, reject) => {
@@ -1424,6 +1395,90 @@ function importProjectFromJson(jsonData) {
     
 }
 
+/**
+ * Retrieves all fonts associated with a specified project from the IndexedDB.
+ *
+ * This function fetches all font records that belong to the given project name. 
+ * It resolves with a success message and updates the UI with the fetched fonts. 
+ * If an error occurs during the database operation, it rejects with an error message.
+ *
+ * @param {string} projectName - The name of the project for which to fetch fonts.
+ * @returns {Promise<string>} - A promise that resolves with a message indicating success 
+ *                              or rejects with an error message if the operation fails.
+ */
+
+function getAllFonts(projectName) {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["fonts"], "readonly");
+    let store = transaction.objectStore("fonts");
+    let index = store.index("projectName");
+    let request = index.getAll(IDBKeyRange.only(projectName));
+    
+    request.onsuccess = () => {
+      resolve(`Fonts fetched from ${projectName}`);
+
+      let result = request.result;
+
+      console.log(...Logger.multiLog(
+        ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+        ["Fetched fonts from"],
+        [projectName, Logger.Types.SUCCESS, Logger.Formats.BOLD],
+        ["project."]
+      ));
+
+
+      const fontsTableBody = document.querySelector("#fonts-table tbody");
+      
+      const rows = Array.from(fontsTableBody.children);
+    
+      rows.forEach(row => {
+        
+        fontsTableBody.removeChild(row);
+        
+      });
+
+      // Sort the array by orderIndex
+      const sortedData = result.sort((a, b) => a.orderIndex - b.orderIndex);
+
+      // Loop through the sorted array
+      sortedData.forEach(fontData => {
+        CacheOperations.addFont(fontData.fontTag, fontData.shortFontTag, fontData.fontName);
+        addNewRowToFontsTable(fontData.fontTag, fontData.shortFontTag, fontData.fontName);
+      });
+    };
+
+    request.onerror = () =>  {
+      reject("Error retrieving fonts");
+      console.log(...Logger.multiLog(
+        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+        ["Error retrieving fonts"]
+      ));
+    };
+
+  });
+}
+
+/**
+ * Adds a new font entry to the IndexedDB for a specified project.
+ *
+ * This function creates a new font record in the "fonts" object store. 
+ * It resolves with a success message if the font is added successfully or 
+ * rejects with an error message if the operation fails.
+ *
+ * @param {string} projectName - The name of the project associated with the font.
+ * @param {string} fontTag - The font tag for the font.
+ * @param {string} shortFontTag - The shortened version of the font tag.
+ * @param {string} fontName - The full name of the font.
+ * @param {number} orderIndex - The order index for the font in the list.
+ * @returns {Promise<string>} - A promise that resolves with a success message or 
+ *                              rejects with an error message if the operation fails.
+ */
+
 function addFont(projectName, fontTag, shortFontTag, fontName, orderIndex) {
   return new Promise((resolve, reject) => {
     if (!isDBOpenSuccess || !db) {
@@ -1436,13 +1491,87 @@ function addFont(projectName, fontTag, shortFontTag, fontName, orderIndex) {
     let request = store.add({ projectName, fontTag, shortFontTag, fontName, orderIndex });
     
     request.onsuccess = () =>{
+      CacheOperations.addFont(fontTag, shortFontTag, fontName);
       resolve("Font added successfully");
+      console.log(...Logger.multiLog(
+        ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+        ["Font added successfully"]
+      ));
     } 
     request.onerror = () => {
       reject("Error adding font");
+      console.log(...Logger.multiLog(
+        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+        ["Error adding font", Logger.Types.ERROR]
+      ));
     }
   });
 }
+
+/**
+ * Updates an existing font entry in the IndexedDB for a specified project.
+ *
+ * @param {string} projectName - The name of the project associated with the font.
+ * @param {string} fontTag - The current font tag to identify which font to update.
+ * @param {string} [newFontTag='@default'] - The new font tag to set. If '@default', retains the current value.
+ * @param {string} [newShortFontTag='@default'] - The new short font tag to set. If '@default', retains the current value.
+ * @param {string} [newFontName='@default'] - The new font name to set. If '@default', retains the current value.
+ * @param {number} [newOrderIndex='@default'] - The new order index to set. If '@default', retains the current value.
+ * @returns {Promise<string>} A promise that resolves to a success message if the update is successful, or rejects with an error message if the font is not found or if there is a database error.
+ */
+
+function updateFont(projectName, fontTag, newFontTag = "@default", newShortFontTag = "@default", newFontName = "@default", newOrderIndex = "@default") {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["fonts"], "readwrite");
+    let store = transaction.objectStore("fonts");
+    let index = store.index("projectName");
+    let request = index.openCursor(IDBKeyRange.only(projectName));
+
+    transaction.oncomplete = () => {
+      console.log(...Logger.multiLog(
+        ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+        ["Font updated successfully"]
+      ));
+    };
+    
+    request.onsuccess = function (event) {
+      let cursor = event.target.result;
+      if (cursor) {
+        if (cursor.value.fontTag === fontTag) {
+          let updateData = { ...cursor.value }; // Create a copy of the current value
+
+          // Update properties only if new value is not '@default'
+          if (newFontTag !== '@default') updateData.fontTag = newFontTag;
+          if (newShortFontTag !== '@default') updateData.shortFontTag = newShortFontTag;
+          if (newFontName !== '@default') updateData.fontName = newFontName;
+          if (newOrderIndex !== '@default') updateData.orderIndex = newOrderIndex;
+
+          store.put(updateData);
+          resolve("Font updated successfully");
+
+          CacheOperations.updateFont(fontTag, newFontTag, newShortFontTag, newFontName);
+
+        }
+        cursor.continue();
+      } else {
+        reject("Font not found");
+      }
+    };
+  });
+}
+
+/**
+ * Deletes a font entry from the IndexedDB for a specified project.
+ *
+ * @param {string} projectName - The name of the project associated with the font.
+ * @param {string} fontTag - The font tag of the font to be deleted.
+ * @returns {Promise<string>} A promise that resolves to a success message if the deletion is successful, or rejects with an error message if the font is not found or if there is a database error.
+ */
 
 function deleteFont(projectName, fontTag) {
   return new Promise((resolve, reject) => {
@@ -1462,68 +1591,24 @@ function deleteFont(projectName, fontTag) {
         if (cursor.value.fontTag === fontTag) {
           store.delete(cursor.primaryKey);
           resolve("Font deleted successfully");
-        }
-        cursor.continue();
-      } else {
-        reject("Font not found");
-      }
-    };
-  });
-}
+          CacheOperations.deleteFont(fontTag);
 
-function updateShortFontTag(projectName, fontTag, newShortFontTag) {
-  return new Promise((resolve, reject) => {
-    if (!isDBOpenSuccess || !db) {
-      const error = "Database is not initialized";
-      console.error(error);
-      return reject(error);
-    }
-    let transaction = db.transaction(["fonts"], "readwrite");
-    let store = transaction.objectStore("fonts");
-    let index = store.index("projectName");
-    let request = index.openCursor(IDBKeyRange.only(projectName));
-    
-    request.onsuccess = function (event) {
-      let cursor = event.target.result;
-      if (cursor) {
-        if (cursor.value.fontTag === fontTag) {
-          let updateData = cursor.value;
-          updateData.shortFontTag = newShortFontTag;
-          store.put(updateData);
-          resolve("Short font tag updated successfully");
+          console.log(...Logger.multiLog(
+            ["[DELETED]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
+            ["Font"],
+            [fontTag, Logger.Types.ERROR, Logger.Formats.BOLD],
+            ["deleted successfully."]
+          ));
         }
         cursor.continue();
       } else {
         reject("Font not found");
-      }
-    };
-  });
-}
-
-function updateOrderIndex(projectName, fontTag, newOrderIndex) {
-  return new Promise((resolve, reject) => {
-    if (!isDBOpenSuccess || !db) {
-      const error = "Database is not initialized";
-      console.error(error);
-      return reject(error);
-    }
-    let transaction = db.transaction(["fonts"], "readwrite");
-    let store = transaction.objectStore("fonts");
-    let index = store.index("projectName");
-    let request = index.openCursor(IDBKeyRange.only(projectName));
-    
-    request.onsuccess = function (event) {
-      let cursor = event.target.result;
-      if (cursor) {
-        if (cursor.value.fontTag === fontTag) {
-          let updateData = cursor.value;
-          updateData.orderIndex = newOrderIndex;
-          store.put(updateData);
-          resolve("Order index updated successfully");
-        }
-        cursor.continue();
-      } else {
-        reject("Font not found");
+        console.log(...Logger.multiLog(
+          ["[Error]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
+          ["Font"],
+          [fontTag, Logger.Types.ERROR, Logger.Formats.BOLD],
+          ["not found."]
+        ));
       }
     };
   });
