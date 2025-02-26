@@ -15,19 +15,51 @@
   const editSemanticRowInput = document.getElementById("edit-semantic-row-input");
   const editSemanticRowErrors = document.getElementById("edit-semantic-row-errors");
 
-  const openAddNewPrimitiveModal = document.getElementById("open-add-primitive-modal");
-  const addRowToPrimitiveButton = document.getElementById("add-row-to-primitives");
-  const addNewPrimitiveInput = document.getElementById("add-new-primitive-input");
-  const addNewPrimitiveErrors = document.getElementById("add-new-primitive-errors");
+  const primitiveModalElement = document.getElementById("primitive-modal");
+  const primitiveModal = new Modal(primitiveModalElement, {
+    onHide: () => {
+        document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
+            backdrop.remove();
+        });
+    }
+  });
 
-  const primitiveRowEditButton = document.getElementById("primitive-row-edit-button");
-  const primitiveUpdateButton =  document.getElementById("update-primitive-button");
-  const primitiveDeleteButton = document.getElementById("delete-primitive-button");
+  const primitiveModalMode = document.querySelector('h3[primitiveModalMode]');
 
-  //const renameSemanticRowButton = document.getElementById("rename-semantic-row-button");
-  const editPrimitiveRowInput = document.getElementById("edit-primitive-row-input");
-  const editPrimitiveRowErrors = document.getElementById("edit-primitive-row-errors");
+  const showAddPrimitiveModal = document.getElementById("show-add-primitive-modal");
+  const showEditPrimitiveModal = document.getElementById("primitive-edit-button");
 
+  const pm_nameInput = document.getElementById("primitive-modal-name-input");
+  const pm_nameInputError = document.getElementById("primitive-modal-name-input-error");
+
+  const pm_colorText = document.getElementById("primitive-modal-color-text");
+
+  const pm_deleteButton = document.getElementById("primitive-modal-delete-button");
+  const pm_actionButton = document.getElementById("primitive-modal-action-button");
+
+  //-------------------------
+
+  const semanticModalElement = document.getElementById("semantic-modal");
+  const semanticModal = new Modal(semanticModalElement, {
+    onHide: () => {
+        document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
+            backdrop.remove();
+        });
+    }
+  });
+
+  const semanticModalMode = document.querySelector('h3[semanticModalMode]');
+
+  const showAddSemanticModal = document.getElementById("show-add-semantic-modal");
+  const showEditSemanticModal = document.getElementById("semantic-edit-button");
+
+  const sm_nameInput = document.getElementById("semantic-modal-name-input");
+  const sm_nameInputError = document.getElementById("semantic-modal-name-input-error");
+
+  const sm_deleteButton = document.getElementById("semantic-modal-delete-button");
+  const sm_actionButton = document.getElementById("semantic-modal-action-button");
+
+  //-----------------
 
   const addNewThemeButton = document.getElementById("add-new-theme-button");
   const newThemeInput = document.getElementById("add-new-theme-input");
@@ -52,16 +84,15 @@
   const injectProjectDataToBlocky = document.getElementById("inject-project-data-to-blocky-button");
   const projectDeleteButton = document.getElementById("delete-project-button");
   const projectDeleteInput = document.getElementById("delete-project-input");
-  
 
   projectDataDownloadButton.addEventListener("click", ()=>{
-    exportProjectAsJson(CacheOperations.getProjectName(), true);
+    exportProjectAsJson(CacheOperations.activeProject, true);
   });
 
   projectDataCopyButton.addEventListener("click", async ()=>{
 
     try {
-        const dataToCopy = await exportProjectAsJson(CacheOperations.getProjectName(), false);
+        const dataToCopy = await exportProjectAsJson(CacheOperations.activeProject, false);
         await navigator.clipboard.writeText(dataToCopy);
         AlertManager.success("Project data copied to clipboard", 2500);
     } catch (err) {
@@ -71,12 +102,12 @@
   });
 
   injectProjectDataToBlocky.addEventListener("click", async () => {
-    const projectData = await exportProjectAsJson(CacheOperations.getProjectName(), false);
+    const projectData = await exportProjectAsJson(CacheOperations.activeProject, false);
     BlockyInjector.updateColorThemes(projectData);
   })
 
   projectDeleteButton.addEventListener("click", async ()=>{
-    const projectName = CacheOperations.getProjectName();
+    const projectName = CacheOperations.activeProject;
     if (projectDeleteInput.value.trim() === projectName) {
       try {
         await deleteProject(projectName);
@@ -103,7 +134,7 @@
   projectDeleteInput.addEventListener("input", (e)=>{
     const inputValue = e.target.value.trim();
 
-    if (inputValue !== CacheOperations.getProjectName()) {
+    if (inputValue !== CacheOperations.activeProject) {
     projectDeleteButton.classList.replace("bg-red-700", "bg-gray-700");
     projectDeleteButton.classList.replace("hover:bg-red-800", "hover:bg-gray-800");
     }else{
@@ -120,36 +151,33 @@
 
 
   // open primitives tab
-    primitivesTabButton.addEventListener('click', () => {
-      SwitchTabs("primitives");
-      SessionManager.setColorTab(SessionManager.PRIMITIVES_COLOR_TAB);
-    });
-    // Open semantic screen
-    semanticTabButton.addEventListener('click', () => {
-        SwitchTabs("semantic");
-        SessionManager.setColorTab(SessionManager.SEMANTIC_COLOR_TAB);
-    });
+  primitivesTabButton.addEventListener('click', () => {
+    SwitchTabs("primitives");
+    SessionManager.setColorTab(SessionManager.PRIMITIVES_COLOR_TAB);
+  });
+  // Open semantic screen
+  semanticTabButton.addEventListener('click', () => {
+      SwitchTabs("semantic");
+      SessionManager.setColorTab(SessionManager.SEMANTIC_COLOR_TAB);
+  });
 
-    function SwitchTabs(tabName) {
+  function SwitchTabs(tabName) {
 
-      const availableTabs = ["primitives", "semantic"];
-      availableTabs.forEach(tab => {
-        document.getElementById(`${tab}-screen`).classList.replace("visible", "hidden");
-        document.getElementById(`${tab}-tab`).className = "inline-block p-2 hover:text-blue-600";
-      });
-      
-      document.getElementById(`${tabName}-screen`).classList.replace("hidden", "visible");
-      document.getElementById(`${tabName}-tab`).className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
-    }
+    const availableTabs = ["primitives", "semantic"];
+    availableTabs.forEach(tab => {
+      document.getElementById(`${tab}-screen`).classList.replace("visible", "hidden");
+      document.getElementById(`${tab}-tab`).className = "inline-block p-2 hover:text-blue-600";
+    });
+    
+    document.getElementById(`${tabName}-screen`).classList.replace("hidden", "visible");
+    document.getElementById(`${tabName}-tab`).className = "inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white";
+  }
 
 
   //Primitives Screen
-  let pickrInstance = null; 
-
-  
 
   // Adding event listener for hover functionality to show the delete button
-  document.querySelector("#primitives-table tbody").addEventListener("mouseover", function(event) {
+  primitiveTableBody.addEventListener("mouseover", function(event) {
     const target = event.target;
     const parentRow = target.closest("tr");
 
@@ -157,184 +185,412 @@
       const rowId = parentRow.getAttribute("primitive-row-index");
       if(rowId){
         const editButtonContainer = parentRow.querySelector("#color-box-parent");
-        primitiveRowEditButton.classList.replace("hidden", "flex");
-        primitiveRowEditButton.setAttribute("primitive-row-index", rowId);
-        editButtonContainer.appendChild(primitiveRowEditButton);
+        showEditPrimitiveModal.classList.replace("hidden", "flex");
+        showEditPrimitiveModal.setAttribute("primitive-row-index", rowId);
+        editButtonContainer.appendChild(showEditPrimitiveModal);
 
       }
       
     }
   }, true); // Use capture phase for this to run first
 
-  document.querySelector("#primitives-table tbody").addEventListener("mouseout", function(event) {
+  primitiveTableBody.addEventListener("mouseout", function(event) {
     const target = event.target;
     const parentRow = target.closest("tr");
 
     if (parentRow) {
-      primitiveRowEditButton.classList.replace("felx", "hidden");
+      showEditPrimitiveModal.classList.replace("felx", "hidden");
     }
   }, true); // Use capture phase for this to run first
 
-  addNewPrimitiveInput.addEventListener("input", () =>{
+  pm_nameInput.addEventListener("input", () => {
+    checkErrorsInPrimitiveModal();
+  });
+  
+  showAddPrimitiveModal.addEventListener("click", () =>{
 
+    // Reset action button to default
+    replaceClass(pm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(pm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    pm_actionButton.disabled = true;
+    pm_actionButton.innerHTML = "Add new primitive";
 
-    if (addNewPrimitiveInput.value.trim() !== "") {
-      
-      const inputValue = addNewPrimitiveInput.value.trim();
+    pm_deleteButton.classList.add("hidden");
 
-
-      let isDuplicate = false;
-      let isRegEx = !nameRegex.test(inputValue);
-
-      
-
-      // Loop through the semantic names to check for duplicates
-      for (const primitiveName of CacheOperations.getAllPrimitiveNames()) {
-        if (primitiveName === inputValue) {
-          isDuplicate = true;
-          break; // Exit the loop early if a duplicate is found
-        }
-      }
-      
-      if(isDuplicate){
-        addNewPrimitiveErrors.innerHTML = "Semantic name already exist!";
-        addNewPrimitiveErrors.classList.replace("hidden", "visible");
-        addRowToPrimitiveButton.classList.replace("visible","hidden");
-      } else if (isRegEx){
-        addNewPrimitiveErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-        addNewPrimitiveErrors.classList.replace("hidden", "visible");
-        addRowToPrimitiveButton.classList.replace("visible","hidden");
-      } else {
-        addNewPrimitiveErrors.classList.replace("visible", "hidden");
-        addRowToPrimitiveButton.classList.replace("hidden","visible");
-      }
-
-    } else {
-      addRowToPrimitiveButton.classList.replace("visible","hidden");
+    // If there's an open pickr, close it before opening the new one
+    if (pickrInstance && pickrInstance.isOpen()) {
+      pickrInstance.hide();
     }
 
+    pm_nameInputError.classList.toggle("hidden", true);
+    pm_nameInput.style.borderColor = "";
+
+    primitiveModalMode.setAttribute("primitiveModalMode", "add");
+    primitiveModalMode.innerHTML = "Add New Primitive";
+
+    pm_nameInput.value = "";
+
   });
 
-  addRowToPrimitiveButton.addEventListener("click", async () =>  {
+  showEditPrimitiveModal.addEventListener("click", ()=> {
 
-    try {
-      const primitiveName = addNewPrimitiveInput.value.trim();
-      const primitiveVaule = document.getElementById("primitive-modal-color-text").textContent.trim();
-      const result = await addPrimitiveColor(CacheOperations.getProjectName(), primitiveName, primitiveVaule, currentPrimitiveRowId);
-      AlertManager.success(result, 2500);
-      addNewRowToPrimitiveTable(primitiveName,primitiveVaule);
-    } catch (error) {
-      AlertManager.error(error, 2500);
+    // Reset action button to default
+    replaceClass(pm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(pm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    pm_actionButton.disabled = true;
+    pm_actionButton.innerHTML = "Update Primitive";
+
+    pm_deleteButton.classList.remove("hidden");
+    // If there's an open pickr, close it before opening the new one
+    if (pickrInstance && pickrInstance.isOpen()) {
+      pickrInstance.hide();
     }
 
-    
-    
-  });
+    pm_nameInputError.classList.toggle("hidden", true);
+    pm_nameInput.style.borderColor = "";
 
-  openAddNewPrimitiveModal.addEventListener("click", () => {
-    addNewPrimitiveInput.value = "";
-    addRowToPrimitiveButton.classList.replace("visible","hidden");
+    primitiveModalMode.setAttribute("primitiveModalMode", "edit");
+    primitiveModalMode.innerHTML = "Edit Primitive";
 
-    document.getElementById("primitive-modal-color-picker-container").appendChild(document.getElementById("color-picker-container"));
-
-  });
-
-  primitiveRowEditButton.addEventListener("click", ()=> {
-
-    const tableBody = document.querySelector("#primitives-table tbody");
-
-    const rowId = primitiveRowEditButton.getAttribute("primitive-row-index");
-
-    const row = tableBody.querySelector(`[primitive-row-index = "${rowId}"]`);
+    const rowId = showEditPrimitiveModal.getAttribute("primitive-row-index");
+    const row = primitiveTableBody.querySelector(`tr[primitive-row-index = "${rowId}"]`);
 
     const primitiveName = row.querySelector("#primitive-name").textContent.trim();
     const primitiveValue = row.querySelector("#color-text").textContent.trim();
-    const orderIndex = row.getAttribute("order-index");
 
-    primitiveRowEditButton.setAttribute("primitiveName", primitiveName);
-    primitiveRowEditButton.setAttribute("primitiveValue", primitiveValue);
-    primitiveRowEditButton.setAttribute("order-index", orderIndex);
+    primitiveModalElement.setAttribute("primitiveName", primitiveName);
+    primitiveModalElement.setAttribute("primitiveValue", primitiveValue);
 
-    editPrimitiveRowErrors.classList.replace("visible", "hidden");
-    editPrimitiveRowInput.value = primitiveName;
+    pm_nameInput.value = primitiveName;
     pickrInstance.setColor(primitiveValue);
-    document.getElementById("edit-primitive-modal-color-text").textContent = primitiveValue;
+    pm_colorText.textContent = primitiveValue;
 
     document.querySelector(".pcr-last-color").style.setProperty("--pcr-color", primitiveValue);
 
-    document.getElementById("edit-primitive-modal-color-picker-container").appendChild(document.getElementById("color-picker-container"));
-
   });
 
-  primitiveDeleteButton.addEventListener("click", async () => {
+  pm_actionButton.addEventListener("click", async () => {
+    const modalMode = primitiveModalMode.getAttribute("primitiveModalMode");
 
-    try {
-      const oldPrimitiveName = primitiveRowEditButton.getAttribute("primitiveName");
-
-      const result = await deletePrimitiveColor(CacheOperations.getProjectName(), oldPrimitiveName);
-
-      const tableBody = document.querySelector("#primitives-table tbody");
-
-      const rowId = primitiveRowEditButton.getAttribute("primitive-row-index");
-      const row = tableBody.querySelector(`[primitive-row-index = "${rowId}"]`);
-
-      tableBody.removeChild(row);
-
-      AlertManager.success(result, 2500);
-      
-    } catch (error) {
-      AlertManager.error(error, 2500);
-    }
-
-    
-
-  });
-
-  primitiveUpdateButton.addEventListener("click", async () => {
-
-    try {
-      const oldPrimitiveName = primitiveRowEditButton.getAttribute("primitiveName");
-      const oldPrimitiveValue = primitiveRowEditButton.getAttribute("primitiveValue");
-      const orderIndex = primitiveRowEditButton.getAttribute("order-index");
-
-      const newPrimitiveName = editPrimitiveRowInput.value.trim();
-      const newPrimitiveValue = document.getElementById("edit-primitive-modal-color-text").textContent.trim();
-
-      const tableBody = document.querySelector("#primitives-table tbody");
-      
-      const rowId = primitiveRowEditButton.getAttribute("primitive-row-index");
-      const row = tableBody.querySelector(`[primitive-row-index = "${rowId}"]`);
+    if (modalMode === "add") {
+      try {
+        const primitiveName = pm_nameInput.value.trim();
+        const primitiveVaule = pm_colorText.textContent.trim();
+        const result = await addPrimitiveColor(CacheOperations.activeProject, primitiveName, primitiveVaule, currentPrimitiveRowId);
+        AlertManager.success(result, 2500);
+        addNewRowToPrimitiveTable(primitiveName, primitiveVaule);
+  
+        primitiveModal.hide();
+      } catch (error) {
+        AlertManager.error(error, 2500);
+      }
+    } else if (modalMode === "edit") {
+      const rowId = showEditPrimitiveModal.getAttribute("primitive-row-index");
+      const row = primitiveTableBody.querySelector(`tr[primitive-row-index = "${rowId}"]`);
 
       const primitiveNameElement = row.querySelector("#primitive-name");
       const primiitveValueElement = row.querySelector("#color-text");
       const primiitveColorBoxElement = row.querySelector("#color-box");
 
-      if (oldPrimitiveName !== newPrimitiveName) {
-        await deletePrimitiveColor(CacheOperations.getProjectName(), oldPrimitiveName);
-        await addPrimitiveColor(CacheOperations.getProjectName(), newPrimitiveName, newPrimitiveValue, orderIndex);
+      const primitiveName = primitiveNameElement.textContent.trim();
+      const primitiveValue = primiitveValueElement.textContent.trim();
 
-        console.log(orderIndex);
-        
+      const newPrimitiveName = pm_nameInput.value.trim();
+      const newPrimitiveValue = pm_colorText.innerText.trim();
 
-        primitiveNameElement.textContent = newPrimitiveName;
-        primiitveValueElement.textContent = newPrimitiveValue;
-        primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
-        
-      } else if (oldPrimitiveValue !== newPrimitiveValue) {
-        await updatePrimitiveColor(CacheOperations.getProjectName(), oldPrimitiveName, newPrimitiveValue);
-        primitiveNameElement.textContent = oldPrimitiveName;
-        primiitveValueElement.textContent = newPrimitiveValue;
-        primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
+      if (primitiveName !== newPrimitiveName || primitiveValue !== newPrimitiveValue) {
+        try {
+          const result = await updatePrimitive(CacheOperations.activeProject, primitiveName, newPrimitiveName, newPrimitiveValue, "@default");
+          primitiveModal.hide();
+          AlertManager.success(result, 2500);
+
+          primitiveNameElement.innerHTML = newPrimitiveName;
+          primiitveValueElement.innerHTML = newPrimitiveValue;
+          primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
+
+        } catch (error) {
+          console.error(error);
+          AlertManager.error(error);
+        }
+      }
+    }
+  });
+
+  pm_deleteButton.addEventListener("click", async () => {
+    const rowId = showEditPrimitiveModal.getAttribute("primitive-row-index");
+    const row = primitiveTableBody.querySelector(`tr[primitive-row-index = "${rowId}"]`);
+    const primitiveName = row.querySelector("#primitive-name").textContent.trim();
+    const message = `Are sure to delete primitive <p class="text-red-600 font-bold">${primitiveName}</p> permanently?`
+
+    openConfirmation(message, async () => {
+      try {
+        const result = await deletePrimitiveColor(CacheOperations.activeProject, primitiveName);
+
+        primitiveTableBody.removeChild(row);
+        AlertManager.success(result, 2500); 
+      } catch (error) {
+        AlertManager.error(error, 2500);
+      }
+    });
+
+  });
+
+  const colorTextObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'childList') {
+        if (pm_colorText.innerText.trim() !== primitiveModalElement.getAttribute("primitiveName") && primitiveModalElement.classList.contains("flex")) {
+          replaceClass(pm_actionButton, "bg-", "bg-blue-700");
+          replaceClass(pm_actionButton, "hover:bg-", "hover:bg-blue-800");
+          pm_actionButton.disabled = false;
+        }
         
       }
-    } catch (error) {
-      
+    });
+  });
+
+  colorTextObserver.observe(pm_colorText, { childList: true });
+
+  function checkErrorsInPrimitiveModal() {
+    // Reset action button to default
+    replaceClass(pm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(pm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    pm_actionButton.disabled = true;
+
+    const primitiveName = primitiveModalElement.getAttribute("primitiveName");
+    const inputValue = pm_nameInput.value.trim();
+    let errorMessage = "";
+
+    if (!inputValue) {
+      errorMessage = "Primitive name is required";
+    } else if (CacheOperations.getAllPrimitiveNames().includes(inputValue) && primitiveName !== inputValue) {
+      errorMessage = "Primitive name already exist!";
+    } else if (!nameRegex.test(inputValue)) {
+      errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+    }
+    
+    if (errorMessage) {
+      pm_nameInputError.innerHTML = errorMessage;
+      pm_nameInputError.classList.remove("hidden");
+
+      pm_nameInput.style.borderColor = "red";
+
+      replaceClass(pm_actionButton, "bg-", "bg-gray-500");
+      replaceClass(pm_actionButton, "hover:bg-", "hover:bg-gray-600");
+      pm_actionButton.disabled = true;
+
+    } else {
+      pm_nameInputError.classList.add("hidden");
+      replaceClass(pm_actionButton, "bg-", "bg-blue-700");
+      replaceClass(pm_actionButton, "hover:bg-", "hover:bg-blue-800");
+      pm_actionButton.disabled = false;
     }
 
+    if (primitiveName === inputValue) {
+      replaceClass(pm_actionButton, "bg-", "bg-gray-500");
+      replaceClass(pm_actionButton, "hover:bg-", "hover:bg-gray-600");
+      pm_actionButton.disabled = true;
+    }
+  }
+
+
+  //Semantic Screen
+
+  // Show row edit button on semantic table row hover
+  document.querySelector("#semantic-table tbody").addEventListener("mouseover", function(event) {
+    const target = event.target;
+    const parentRow = target.closest("tr");
+
+    if (parentRow) {
+      const rowId = parentRow.getAttribute("data-index");
+      if(rowId){
+        const editButtonContainer = document.getElementById("semantic-row-edit-button-container-"+rowId);
+        showEditSemanticModal.classList.replace("hidden", "flex");
+        showEditSemanticModal.setAttribute("data-index", rowId);
+        showEditSemanticModal.setAttribute("semantic-row-index", rowId);
+        editButtonContainer.appendChild(showEditSemanticModal);
+      }
+      
+    }
+  }, true); 
+
+  // hide row edit button on semantic table row hover
+  document.querySelector("#semantic-table tbody").addEventListener("mouseout", function(event) {
+    const target = event.target;
+    const parentRow = target.closest("tr");
+
+    if (parentRow) {
+      showEditSemanticModal.classList.replace("felx", "hidden");
+    }
+  }, true); 
+
+  sm_nameInput.addEventListener("input", () => {
+    checkErrorsInSemanticModal();
+  });
+  
+  showAddSemanticModal.addEventListener("click", () =>{
+
+    // Reset action button to default
+    replaceClass(sm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(sm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    sm_actionButton.disabled = true;
+    sm_actionButton.innerHTML = "Add Semantic";
+
+    sm_deleteButton.classList.add("hidden");
+
+    sm_nameInputError.classList.toggle("hidden", true);
+    sm_nameInput.style.borderColor = "";
+
+    semanticModalMode.setAttribute("semanticModalMode", "add");
+    semanticModalMode.innerHTML = "Add New Semantic";
+
+    sm_nameInput.value = "";
+
+  });
+
+  showEditSemanticModal.addEventListener("click", ()=> {
+
+    // Reset action button to default
+    replaceClass(sm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(sm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    sm_actionButton.disabled = true;
+    sm_actionButton.innerHTML = "Update Semantic";
+
+    sm_deleteButton.classList.remove("hidden");
+
+    sm_nameInputError.classList.toggle("hidden", true);
+    sm_nameInput.style.borderColor = "";
+
+    semanticModalMode.setAttribute("semanticModalMode", "edit");
+    semanticModalMode.innerHTML = "Edit Semantic";
+
+    const rowId = showEditSemanticModal.getAttribute("semantic-row-index");
+    
+    const row = semanticTableBody.querySelector(`tr[semantic-row-index = "${rowId}"]`);
+
+    const semanticName = row.querySelector(".semantic-name").textContent.trim();
+    semanticModalElement.setAttribute("semanticName", semanticName);
+
+    sm_nameInput.value = semanticName;
+
+  });
+
+  sm_actionButton.addEventListener("click", async () => {
+    const modalMode = semanticModalMode.getAttribute("semanticModalMode");
+
+    if (modalMode === "add") {
+      try {
+        const semanticName = sm_nameInput.value.trim();
+        let semanticValues = [];
+
+        for (const themeMode of CacheOperations.getAllThemeModes()) {
+          await addSemantic(CacheOperations.activeProject, semanticName,"Click to link color", themeMode, currentSemanticRowId);
+          semanticValues.push("Click to link color");
+        }
+
+        if (semanticValues.length === CacheOperations.getAllThemeModes().length) {
+          addNewRowToSemanticTable(semanticName, semanticValues, CacheOperations.getAllThemeModes());
+        }
+      } catch (error) {
+        AlertManager.error(error, 2500);
+        console.error(error);
+        
+      }
+    } else if (modalMode === "edit") {
+      const rowId = showEditSemanticModal.getAttribute("semantic-row-index");
+      const row = semanticTableBody.querySelector(`tr[semantic-row-index="${rowId}"]`);
+
+      const selectedSemanticCell = row.querySelector(".semantic-name");
+
+      const oldSemanticName = selectedSemanticCell.textContent.trim();
+      const newSemanticName = sm_nameInput.value.trim()
+      
+
+      try {
+        for (const themeMode of CacheOperations.getAllThemeModes()) {
+          await updateSemantic(CacheOperations.activeProject, oldSemanticName, newSemanticName, themeMode, "@default", "@default", false);
+        }
+        selectedSemanticCell.textContent = newSemanticName;
+        console.log(...Logger.multiLog(
+          ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
+          ["Renamed semantic"],
+          [oldSemanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
+          ["=>"],
+          [newSemanticName, Logger.Types.SUCCESS, Logger.Formats.BOLD]
+        ));
+        
+        AlertManager.success("Semantic updated successfully", 2500);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    semanticModal.hide();
     
   });
 
-  //Semantic Screen
+  sm_deleteButton.addEventListener("click", async () => {
+
+    const rowId = showEditSemanticModal.getAttribute("semantic-row-index");
+    const row = semanticTableBody.querySelector(`tr[semantic-row-index = "${rowId}"]`);
+
+    const semanticName = semanticModalElement.getAttribute("semanticname");
+    const message = `Are sure to delete semantic <p class="text-red-600 font-bold">${semanticName}</p> permanently?`
+
+    openConfirmation(message, async () => {
+      try {
+        const result = await deleteSemantic(CacheOperations.activeProject, semanticName);
+
+        semanticTableBody.removeChild(row);
+        AlertManager.success(result, 2500); 
+      } catch (error) {
+        AlertManager.error(error, 2500);
+      }
+    });
+
+  });
+
+  function checkErrorsInSemanticModal() {
+    // Reset action button to default
+    replaceClass(sm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(sm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    sm_actionButton.disabled = true;
+
+    const semanticName = semanticModalElement.getAttribute("semanticName");
+    const inputValue = sm_nameInput.value.trim();
+    let errorMessage = "";
+
+    if (!inputValue) {
+      errorMessage = "Semantic name is required";
+    } else if (CacheOperations.getAllSemanticNames().includes(inputValue) && semanticName !== inputValue) {
+      errorMessage = "Semantic name already exist!";
+    } else if (!nameRegex.test(inputValue)) {
+      errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+    }
+    
+    if (errorMessage) {
+      sm_nameInputError.innerHTML = errorMessage;
+      sm_nameInputError.classList.remove("hidden");
+
+      sm_nameInput.style.borderColor = "red";
+
+      replaceClass(sm_actionButton, "bg-", "bg-gray-500");
+      replaceClass(sm_actionButton, "hover:bg-", "hover:bg-gray-600");
+      sm_actionButton.disabled = true;
+
+    } else {
+      sm_nameInputError.classList.add("hidden");
+      replaceClass(sm_actionButton, "bg-", "bg-blue-700");
+      replaceClass(sm_actionButton, "hover:bg-", "hover:bg-blue-800");
+      sm_actionButton.disabled = false;
+    }
+
+    if (semanticName === inputValue) {
+      replaceClass(sm_actionButton, "bg-", "bg-gray-500");
+      replaceClass(sm_actionButton, "hover:bg-", "hover:bg-gray-600");
+      sm_actionButton.disabled = true;
+    }
+    
+  }
   
   // New mode button on table clicked. empty modal input text and hide addNewThemeButton
   document.getElementById("open-new-theme-modal").addEventListener("click", function(){
@@ -401,7 +657,7 @@
     const newThemeMode = editThemeModeInput.value.trim();
 
     try {
-      await renameThemeMode(CacheOperations.getProjectName(), themeMode, newThemeMode);
+      await renameThemeMode(CacheOperations.activeProject, themeMode, newThemeMode);
       renameThemeInSemanticTable(themeMode, newThemeMode);
       CacheOperations.renameThemeMode(themeMode, newThemeMode);
       
@@ -418,7 +674,7 @@
 
     try {
 
-      await deleteTheme(CacheOperations.getProjectName(), themeMode);
+      await deleteTheme(CacheOperations.activeProject, themeMode);
       deleteThemeFromSemanticTable(themeMode);
       CacheOperations.deleteThemeMode(themeMode);
       
@@ -461,9 +717,6 @@
 
   document.getElementById("select-primitive-modal-primitives-container").addEventListener("click", async (e) =>{
     const target = e.target;
-
-    
-
     if (target.closest("li[data-index][data-primitive-name][data-primitive-value]")){
 
       try {
@@ -476,7 +729,7 @@
         const themeMode = selectPrimitiveModal.getAttribute("theme-mode");
         const semanticName = selectPrimitiveModal.getAttribute("semantic-name");
 
-        const result =  await updateSemanticValue(CacheOperations.getProjectName(), semanticName, themeMode, primitiveName);
+        const result =  await updateSemanticValue(CacheOperations.activeProject, semanticName, themeMode, primitiveName);
 
         const tableBody = document.querySelector("#semantic-table tbody");
         // Get the <td> element with the specific data-index and class
@@ -502,33 +755,7 @@
     
   });
   
-  // Show row edit button on semantic table row hover
-  document.querySelector("#semantic-table tbody").addEventListener("mouseover", function(event) {
-    const target = event.target;
-    const parentRow = target.closest("tr");
 
-    if (parentRow) {
-      const rowId = parentRow.getAttribute("data-index");
-      if(rowId){
-        const editButtonContainer = document.getElementById("semantic-row-edit-button-container-"+rowId);
-        semanticRowEditButton.classList.replace("hidden", "flex");
-        semanticRowEditButton.setAttribute("data-index", rowId);
-        editButtonContainer.appendChild(semanticRowEditButton);
-
-      }
-      
-    }
-  }, true); 
-
-  // hide row edit button on semantic table row hover
-  document.querySelector("#semantic-table tbody").addEventListener("mouseout", function(event) {
-    const target = event.target;
-    const parentRow = target.closest("tr");
-
-    if (parentRow) {
-      semanticRowEditButton.classList.replace("felx", "hidden");
-    }
-  }, true); 
 
   semanticTableBody.addEventListener("click", async function (event) {
     const target = event.target;
@@ -563,137 +790,137 @@
   });
 
   // add semantic row modal button
-  addRowToSemanticButton.addEventListener("click", async function () {
+  // addRowToSemanticButton.addEventListener("click", async function () {
 
-  const semanticNameFromInput = addNewSemanticRowInput.value.trim();
-  let semanticValues = [];
-    try {
+  // const semanticNameFromInput = addNewSemanticRowInput.value.trim();
+  // let semanticValues = [];
+  //   try {
 
-      for (const themeMode of CacheOperations.getAllThemeModes()) {
-        const result = await addSemanticColor(CacheOperations.getProjectName(), semanticNameFromInput, themeMode, "Click to link color");
-        semanticValues.push("Click to link color");
+  //     for (const themeMode of CacheOperations.getAllThemeModes()) {
+  //       const result = await addSemanticColor(CacheOperations.activeProject, semanticNameFromInput, themeMode, "Click to link color");
+  //       semanticValues.push("Click to link color");
         
-      }
+  //     }
       
       
-    } catch (error) {
-      AlertManager.error(error,2500);
-    }
+  //   } catch (error) {
+  //     AlertManager.error(error,2500);
+  //   }
     
-    if (semanticValues.length === CacheOperations.getAllThemeModes().length) {
+  //   if (semanticValues.length === CacheOperations.getAllThemeModes().length) {
 
-      addNewRowToSemanticTable(semanticNameFromInput, semanticValues, CacheOperations.getAllThemeModes());
-    } else {
-      AlertManager.error("Error adding semantic", 2500);
-    }
+  //     addNewRowToSemanticTable(semanticNameFromInput, semanticValues, CacheOperations.getAllThemeModes());
+  //   } else {
+  //     AlertManager.error("Error adding semantic", 2500);
+  //   }
 
-    addNewSemanticRowInput.value = "";
-    addRowToSemanticButton.classList.replace("visible","hidden");
-
-
-  });
-
-  // Add semantic Row input from add semantic row modal
-  addNewSemanticRowInput.addEventListener("input", (event) => {
+  //   addNewSemanticRowInput.value = "";
+  //   addRowToSemanticButton.classList.replace("visible","hidden");
 
 
-    if (addNewSemanticRowInput.value.trim() !== "") {
+  // });
+
+  // // Add semantic Row input from add semantic row modal
+  // addNewSemanticRowInput.addEventListener("input", (event) => {
+
+
+  //   if (addNewSemanticRowInput.value.trim() !== "") {
       
-      const inputValue = addNewSemanticRowInput.value.trim();
+  //     const inputValue = addNewSemanticRowInput.value.trim();
 
-      const allSemanticNames = document.querySelectorAll(".semantic-name");
+  //     const allSemanticNames = document.querySelectorAll(".semantic-name");
 
-      let isDuplicate = false;
-      let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+  //     let isDuplicate = false;
+  //     let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
 
-      // Loop through the semantic names to check for duplicates
-      for (const item of allSemanticNames) {
-        if (item.textContent.trim() === inputValue) {
-          isDuplicate = true;
-          break; // Exit the loop early if a duplicate is found
-        }
-      }
+  //     // Loop through the semantic names to check for duplicates
+  //     for (const item of allSemanticNames) {
+  //       if (item.textContent.trim() === inputValue) {
+  //         isDuplicate = true;
+  //         break; // Exit the loop early if a duplicate is found
+  //       }
+  //     }
       
-      if(isDuplicate){
-        addNewSemanticRowErrors.innerHTML = "Semantic name already exist!";
-        addNewSemanticRowErrors.classList.replace("hidden", "visible");
-        addRowToSemanticButton.classList.replace("visible","hidden");
-      } else if (isRegEx){
-        addNewSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-        addNewSemanticRowErrors.classList.replace("hidden", "visible");
-        addRowToSemanticButton.classList.replace("visible","hidden");
-      } else {
-        addNewSemanticRowErrors.classList.replace("visible", "hidden");
-        addRowToSemanticButton.classList.replace("hidden","visible");
-      }
+  //     if(isDuplicate){
+  //       addNewSemanticRowErrors.innerHTML = "Semantic name already exist!";
+  //       addNewSemanticRowErrors.classList.replace("hidden", "visible");
+  //       addRowToSemanticButton.classList.replace("visible","hidden");
+  //     } else if (isRegEx){
+  //       addNewSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+  //       addNewSemanticRowErrors.classList.replace("hidden", "visible");
+  //       addRowToSemanticButton.classList.replace("visible","hidden");
+  //     } else {
+  //       addNewSemanticRowErrors.classList.replace("visible", "hidden");
+  //       addRowToSemanticButton.classList.replace("hidden","visible");
+  //     }
 
-    } else {
-      addRowToSemanticButton.classList.replace("visible","hidden");
-    }
+  //   } else {
+  //     addRowToSemanticButton.classList.replace("visible","hidden");
+  //   }
 
-  });
+  // });
 
   // Open edit semantic modal
-  semanticRowEditButton.addEventListener("click", (e) =>{
-    const rowId = semanticRowEditButton.getAttribute("data-index");
+  // semanticRowEditButton.addEventListener("click", (e) =>{
+  //   const rowId = semanticRowEditButton.getAttribute("data-index");
 
-    semanticRowDeleteButton.setAttribute("data-index", rowId);
+  //   semanticRowDeleteButton.setAttribute("data-index", rowId);
 
-    const parentRow = document.querySelector(`tr[data-index="${rowId}"]`);
-    editSemanticRowInput.value = parentRow?.querySelector(".semantic-name")?.textContent.trim() || null;
+  //   const parentRow = document.querySelector(`tr[data-index="${rowId}"]`);
+  //   editSemanticRowInput.value = parentRow?.querySelector(".semantic-name")?.textContent.trim() || null;
 
-    renameSemanticRowButton.classList.replace("visible", "hidden");
+  //   renameSemanticRowButton.classList.replace("visible", "hidden");
 
-  });
+  // });
 
   // Delete button form edit semantic row modal
-  semanticRowDeleteButton.addEventListener("click", (e) =>{
-    deleteRowFromSemanticTable();
-  });
+  // semanticRowDeleteButton.addEventListener("click", (e) =>{
+  //   deleteRowFromSemanticTable();
+  // });
 
-  renameSemanticRowButton.addEventListener("click", (e) => {
-    renameSemanticRow();
-  });
+  // renameSemanticRowButton.addEventListener("click", (e) => {
+  //   renameSemanticRow();
+  // });
 
   // Edit semantic Row input from edit semantic row modal
-  editSemanticRowInput.addEventListener("input", (event) => {
+  // editSemanticRowInput.addEventListener("input", (event) => {
 
 
-    if (editSemanticRowInput.value.trim() !== "") {
+  //   if (editSemanticRowInput.value.trim() !== "") {
       
-      const inputValue = editSemanticRowInput.value.trim();
+  //     const inputValue = editSemanticRowInput.value.trim();
 
-      const allSemanticNames = document.querySelectorAll(".semantic-name");
+  //     const allSemanticNames = document.querySelectorAll(".semantic-name");
 
-      let isDuplicate = false;
-      let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+  //     let isDuplicate = false;
+  //     let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
 
-      // Loop through the semantic names to check for duplicates
-      for (const item of allSemanticNames) {
-        if (item.textContent.trim() === inputValue) {
-          isDuplicate = true;
-          break; // Exit the loop early if a duplicate is found
-        }
-      }
+  //     // Loop through the semantic names to check for duplicates
+  //     for (const item of allSemanticNames) {
+  //       if (item.textContent.trim() === inputValue) {
+  //         isDuplicate = true;
+  //         break; // Exit the loop early if a duplicate is found
+  //       }
+  //     }
       
-      if(isDuplicate){
-        editSemanticRowErrors.innerHTML = "Semantic name already exist!";
-        editSemanticRowErrors.classList.replace("hidden", "visible");
-        renameSemanticRowButton.classList.replace("visible","hidden");
-      } else if (isRegEx){
-        editSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-        editSemanticRowErrors.classList.replace("hidden", "visible");
-        renameSemanticRowButton.classList.replace("visible","hidden");
-      } else {
-        editSemanticRowErrors.classList.replace("visible", "hidden");
-        renameSemanticRowButton.classList.replace("hidden","visible");
-      }
+  //     if(isDuplicate){
+  //       editSemanticRowErrors.innerHTML = "Semantic name already exist!";
+  //       editSemanticRowErrors.classList.replace("hidden", "visible");
+  //       renameSemanticRowButton.classList.replace("visible","hidden");
+  //     } else if (isRegEx){
+  //       editSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+  //       editSemanticRowErrors.classList.replace("hidden", "visible");
+  //       renameSemanticRowButton.classList.replace("visible","hidden");
+  //     } else {
+  //       editSemanticRowErrors.classList.replace("visible", "hidden");
+  //       renameSemanticRowButton.classList.replace("hidden","visible");
+  //     }
 
-    } else {
-      renameSemanticRowButton.classList.replace("visible","hidden");
-    }
+  //   } else {
+  //     renameSemanticRowButton.classList.replace("visible","hidden");
+  //   }
 
-  });
+  // });
 
 
   function addNewRowToSemanticTable(semanticName, semanticValues, themeModes){
@@ -755,7 +982,7 @@
     //                 `;
 
     const newRow = `
-                      <tr data-index="${currentSemanticRowId}" class=" seamntic-name-cell semantic-table-row  semantic-table-item-row">
+                      <tr data-index="${currentSemanticRowId}" semantic-row-index = "${currentSemanticRowId}" order-index="${currentSemanticRowId}" draggable="true" class=" seamntic-name-cell semantic-table-row  semantic-table-item-row">
                             ${CreateElement.semanticTableNameCell(currentSemanticRowId, semanticName)}
                             ${semanticValueCells}
                             <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
@@ -765,36 +992,15 @@
                         </tr>
                     `;
       
-      // Insert the new row into the table body
-      tableBody.insertAdjacentHTML("beforeend", newRow);
-      //tableBody.insertAdjacentHTML("beforeend", CreateElement.semanticTableNameCell(currentSemanticRowId, semanticName));
-      currentSemanticRowId++;
+    // Insert the new row into the table body
+    tableBody.insertAdjacentHTML("beforeend", newRow);
+
+    // Make the new row draggable
+    const addedRow = tableBody.lastElementChild;
+    makeSemanticRowDraggable(addedRow);
+    currentSemanticRowId++;
 
 
-  }
-
-  async function deleteRowFromSemanticTable(){
-    const rowId = semanticRowDeleteButton.getAttribute("data-index");
-    const tableBody = document.querySelector("#semantic-table tbody");
-    const row = tableBody.querySelector(`tr[data-index="${rowId}"]`);
-
-    const selectedSemanticName = row.querySelector(".semantic-name").textContent.trim();
-
-    
-
-    try {
-
-      const result = deleteSemanticColor(selectedSemanticName, CacheOperations.getProjectName());
-
-        // Check if the row exists
-      if (row) {
-          row.remove(); // Remove the row from the DOM
-      }
-    } catch (error) {
-      console.error(error);
-    }
-    
-    
   }
 
   async function renameSemanticRow() {
@@ -808,7 +1014,7 @@
 
     try {
 
-      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, CacheOperations.getProjectName())
+      const result = renameSemantic(selectedSemanticCell.textContent.trim(), editSemanticRowInput.value, CacheOperations.activeProject)
 
       selectedSemanticCell.textContent = editSemanticRowInput.value;
     } catch (error) {
@@ -826,7 +1032,7 @@
     try {
 
       for (const semanticName of CacheOperations.getAllSemanticNames()){
-        await addSemanticColor(CacheOperations.getProjectName(), semanticName, newThemeMode, "Click to link color");
+        await addSemanticColor(CacheOperations.activeProject, semanticName, newThemeMode, "Click to link color");
       }
 
       const newTdHTML = `
@@ -938,7 +1144,7 @@
 
     try {
       // for (const semanticName of CacheOperations.getAllSemanticNames()){
-      //   deleteSemanticColor(semanticName, CacheOperations.getProjectName(), themeMode);
+      //   deleteSemanticColor(semanticName, CacheOperations.activeProject, themeMode);
       // }
 
       const themeModeCell = theadRow.querySelector(`td[theme-mode="${themeMode}"]`);
@@ -1112,13 +1318,81 @@
 
       const rows = tableBody.querySelectorAll('tr');
 
-      rows.forEach((row, index) => {
+      try {
+        rows.forEach(async (row, index) => {
           const primitiveName = row.querySelector("#primitive-name").textContent.trim();
-          const primitivevalue = row.querySelector("#color-text").textContent.trim();
           const newOrderIndex = index + 1;
-          //console.log(`Row ${newOrderIndex}: [ PrimitiveName: ${primitiveName}], [ PrimitiveValue: ${primitivevalue}]`, row);
-          updatePrimitiveColor(CacheOperations.getProjectName(), primitiveName, primitivevalue, newOrderIndex);
+          
+          await updatePrimitive(CacheOperations.activeProject, primitiveName, "@default", "@default", newOrderIndex, false);
+        });
+
+        console.log(...Logger.multiLog(
+          ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
+          ["Updated primitive table order index"]
+        ));
+      } catch (error) {
+        
+      }
+      
+
+
+    });
+  }
+
+  function makeSemanticRowDraggable(row) {
+    row.setAttribute('draggable', true);
+  
+    // Drag Start
+    row.addEventListener('dragstart', function (e) {
+      e.dataTransfer.setData('text/plain', row.getAttribute('semantic-row-index'));
+      row.classList.add('dragging');
+      row.querySelector('td:first-child').style.backgroundColor = 'rgb(225, 239, 254)';
+    });
+  
+    // Drag Over
+    row.addEventListener('dragover', function (e) {
+      e.preventDefault(); // Allow dropping
+  
+      const draggingRow = document.querySelector('.dragging'); // Get the row being dragged
+      const currentRow = e.target.closest('tr'); // Get the row being hovered over
+  
+      if (draggingRow && currentRow && draggingRow !== currentRow) {
+        const rows = Array.from(row.parentElement.querySelectorAll('tr'));
+        const currentIndex = rows.indexOf(currentRow);
+        const draggingIndex = rows.indexOf(draggingRow);
+
+        if (draggingIndex < currentIndex) {
+          // Insert the dragging row after the current row
+          row.parentElement.insertBefore(draggingRow, currentRow.nextSibling);
+        } else {
+          // Insert the dragging row before the current row
+          row.parentElement.insertBefore(draggingRow, currentRow);
+        }
+
+      }
+
+    });
+  
+    // Drop
+    row.addEventListener('drop', function (e) {
+      e.preventDefault();
+
+      const rows = Array.from(row.parentElement.querySelectorAll('tr'));
+  
+      // Update the order-index for all rows
+      rows.forEach((row, index) => {
+        row.setAttribute('order-index', index + 1); // Start from 1
       });
+  
+      row.classList.remove('dragging'); 
+      row.querySelector('td:first-child').style.removeProperty('background-color');
+    });
+  
+    // Drag End
+    row.addEventListener('dragend', function () {
+      
+      row.classList.remove('dragging');
+      row.querySelector('td:first-child').style.removeProperty('background-color');
 
 
     });

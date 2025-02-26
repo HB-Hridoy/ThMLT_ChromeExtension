@@ -16,4 +16,13 @@
     background-color: rgb(225 239 254);
     transition: opacity 0.2s ease;
   }
+
+  .semantic-table-cell-dragging {
+    background-color: rgb(225 239 254);
+    min-height: 40px;
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #e5e6e7;
+    border-collapse: collapse;
+}
   

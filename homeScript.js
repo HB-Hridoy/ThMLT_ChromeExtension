@@ -47,19 +47,23 @@
       const target = e.target;
 
       if (target.closest("#pm-color-themes")) {
-        document.getElementById("project-name-colors-screen").innerText = CacheOperations.getProjectName();
+        document.getElementById("project-name-colors-screen").innerText = CacheOperations.activeProject;
 
         currentPrimitiveRowId = 1;
         currentSemanticRowId = 1;
 
-        getAllPrimitiveColors(CacheOperations.getProjectName());
+        getAllPrimitiveColors(CacheOperations.activeProject);
         
-        getAllSemanticColors(CacheOperations.getProjectName());
+        getAllSemanticColors(CacheOperations.activeProject);
 
         ScreenManager.showColorsScreen();
         
         
       }else if (target.closest("#pm-fonts")) {
+        document.getElementById("project-name-fonts-screen").innerText = CacheOperations.activeProject;
+
+        currentFontsRowId = 1;
+        getAllFonts(CacheOperations.activeProject);
         ScreenManager.showFontsScreen();
         
         
@@ -158,9 +162,9 @@
           
           const projectDiv = event.target.closest('.project-preview-parent');
       
-          CacheOperations.updateProjectName(projectDiv.getAttribute('project-id'));
+          CacheOperations.activeProject = projectDiv.getAttribute('project-id')
 
-          document.getElementById("pm-project-name").innerText = CacheOperations.getProjectName();
+          document.getElementById("pm-project-name").innerText = CacheOperations.activeProject;
 
           ScreenManager.showProjectManagementScreen();
 
