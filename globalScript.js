@@ -1,6 +1,7 @@
   class CacheOperations {
 
     static #activeThemeModesInSemantic = [];
+    static #defaultThemeMode = "";
     static #activeSemanticNames = new Set();
     static #activeSemantics = new Map();
 
@@ -65,6 +66,14 @@
 
     static isThemeModeExist(themeMode) {
       return this.#activeThemeModesInSemantic.includes(themeMode);
+    }
+
+    static get defaultThemeMode() { 
+      return this.#defaultThemeMode;
+    }
+
+    static set defaultThemeMode(themeMode) {
+      this.#defaultThemeMode = themeMode;
     }
 
     static addSemantic(semanticName, themeMode, semanticValue) {
@@ -287,9 +296,8 @@
           this.#activeFontTags.splice(index, 1);
           this.#activeShortFontTags.splice(index, 1);
           this.#activeFonts.delete(fontTag);
-          console.log(`Font with tag ${fontTag} deleted.`);
       } else {
-          console.log(`Font with tag ${fontTag} not found.`);
+          console.log(`Font with tag ${fontTag} not found in cache.`);
       }
   }
 
@@ -423,8 +431,8 @@
 
     static semanticThemeModeCell(themeMode, isDefault = false) {
       const newTh = document.createElement('td');
-      newTh.setAttribute("data-modal-target", "edit-theme-mode-modal");
-      newTh.setAttribute("data-modal-toggle", "edit-theme-mode-modal");
+      newTh.setAttribute("data-modal-target", "theme-modal");
+      newTh.setAttribute("data-modal-toggle", "theme-modal");
       newTh.setAttribute("theme-mode", themeMode);
       newTh.setAttribute("default-theme-header", isDefault);  newTh.classList.add("semantic-table-cell");
       newTh.classList.add("semantic-table-cell-has-padding");

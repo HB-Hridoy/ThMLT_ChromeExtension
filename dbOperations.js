@@ -10,9 +10,6 @@ let isTranslationDataChanged = false;
 let isFontDataChanged = false;
 let isColorDataChanged = false;
 
-
-
-
 openDB.onupgradeneeded = function (event) {
   db = event.target.result;
 
@@ -659,16 +656,31 @@ function updateSemantic(projectName, semanticName, newSemanticName = "@default",
  *
  * @param {string} projectName - The name of the project to fetch semantic colors for.
  */
-function getAllSemanticColors(projectName) {
+async function getAllSemanticColors(projectName) {
+
+  const semanticTable = document.getElementById('semantic-table');
+  const semanticTableBody = document.querySelector("#semantic-table tbody");
+
   console.log(...Logger.multiLog(
     ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
     ["Fetching semantic colors from"],
     [projectName, Logger.Types.WARNING, Logger.Formats.BOLD],
     ["project."]
   ));
+
+  let defaultTheme = null;
+
+  // Before getting semantic colors fetch default theme mode
+  try {
+    defaultTheme = await getDefaultThemeMode(projectName);
+    CacheOperations.defaultThemeMode = defaultTheme;
+  } catch (error) {
+    console.error("Error getting default theme mode:", error);
+    
+  }
+
   let transaction = db.transaction(["semanticColors"], "readonly");
   let semanticColorsStore = transaction.objectStore("semanticColors");
-
   let semanticRequest = semanticColorsStore.index("projectName").getAll(projectName);
 
   semanticRequest.onsuccess = () => {
@@ -691,45 +703,59 @@ function getAllSemanticColors(projectName) {
       CacheOperations.addSemantic(semantic.semanticName, semantic.themeMode, semantic.linkedPrimitive);
     });
 
-    // result.forEach(item => {
+    
+    // This script modifies the structure of a semantic table by:
+    // 1. Defining it to have two columns with specific widths.
+    // 2. Removing all rows from the table body except the header row.
+    // 3. Keeping only specific header columns while removing others.
 
-    //   CacheOperations.addNewThemeMode(item.themeMode);
-
-    //   CacheOperations.addSemantic(item.semanticName, item.themeMode, item.linkedPrimitive)
-
-    // });
-
-
-    const table = document.getElementById('semantic-table');
-    const tableBody = document.querySelector("#semantic-table tbody");
+    // Set the number of columns in the semantic table
     semanticTableColumns = 2;
-    table.style.gridTemplateColumns = "200px 40px";
+
+    // Define the column widths (first column: 200px, second column: 40px)
+    semanticTable.style.gridTemplateColumns = "200px 40px";
+
+    // Get the header row of the table
     const theadRow = document.getElementById('semantic-table-header-row');
 
-    const rows = Array.from(tableBody.children);
-  
+    // Convert the table body's child elements (rows) into an array
+    const rows = Array.from(semanticTableBody.children);
+
+    // Remove all rows from the table body except the header row
     rows.forEach(row => {
       if (row !== theadRow) {
-        tableBody.removeChild(row);
+        semanticTableBody.removeChild(row);
       }
     });
 
+    // If the header row exists, proceed with filtering its columns
     if (theadRow) {
-      // Get all the <td> elements in the header row
+      // Get all <td> elements inside the header row
       const allCells = Array.from(theadRow.children);
-    
-      // IDs of the <td> elements to keep
-      const keepIds = ["semantic-name-column", "open-new-theme-modal"];
-    
-      // Iterate through all cells and remove the ones that don't match the criteria
+
+      // List of column IDs that should be kept
+      const keepIds = ["semantic-name-column", "show-add-theme-modal"];
+
+      // Iterate through all header cells and remove those not in the keepIds list
       allCells.forEach(td => {
         if (!keepIds.includes(td.id)) {
           theadRow.removeChild(td);
         }
       });
     }
+
+    // This script dynamically manages theme modes in a semantic table.
+    // 1. It retrieves all available theme modes from the cache.
+    // 2. If no theme modes exist, it logs a warning and adds "Light" as the default theme.
+    // 3. If theme modes are found, it iterates through them and inserts them into the table.
+    // 4. The script adjusts the table's column structure dynamically based on the number of theme modes.
+    // 5. The last column is always set to 40px, the second-last column is flexible (minmax 200px, 1fr), and all other columns have a fixed width of 200px.
+
+
+    // Retrieve all available theme modes from cache
     const allThemeModes = CacheOperations.getAllThemeModes();
 
+    // Check if there are no theme modes available
     if (allThemeModes.length === 0) {
       console.log(...Logger.multiLog(
         ["[WARNING]", Logger.Types.WARNING, Logger.Formats.BOLD],
@@ -742,44 +768,61 @@ function getAllSemanticColors(projectName) {
         ["Light", Logger.Types.WARNING, Logger.Formats.BOLD],
         ["theme mode as default theme."]
       ));
-      
+
+      // Insert a new table cell for the "Light" theme mode as the default theme
       theadRow.insertBefore(CreateElement.semanticThemeModeCell("Light", true), theadRow.lastElementChild);
+
+      // Increment the column count to reflect the newly added theme mode
       semanticTableColumns++;
 
-      table.style.gridTemplateColumns = "200px minmax(200px, 1fr) 40px";
+      // Update the grid column structure of the table:
+      // - First column: 200px
+      // - Theme mode column: minmax(200px, 1fr) (adjustable width)
+      // - Last column: 40px
+      semanticTable.style.gridTemplateColumns = "200px minmax(200px, 1fr) 40px";
 
-      
     } else {
+      // If theme modes exist, iterate through them
       allThemeModes.forEach((themeMode, index) => {
-        if (index === 0) {
+        if (themeMode === defaultTheme) {
           theadRow.insertBefore(CreateElement.semanticThemeModeCell(themeMode, true), theadRow.lastElementChild);
         } else {
           theadRow.insertBefore(CreateElement.semanticThemeModeCell(themeMode), theadRow.lastElementChild);
         }
 
-        semanticTableColumns++; // Increase the column count
+        semanticTableColumns++;
 
         let newGridTemplateColumns = '';
 
-        // Loop through the columns and create the column definitions
+        // Loop through all columns to define their widths
         for (let i = 0; i < semanticTableColumns; i++) {
           if (i === semanticTableColumns - 1) {
-            newGridTemplateColumns += '40px';  // Last column is 40px
+            newGridTemplateColumns += '40px';  // Set the last column width to 40px
           } else if (i === semanticTableColumns - 2) {
-            newGridTemplateColumns += 'minmax(200px, 1fr)';  // Second last column is minmax(200px, 1fr)
+            newGridTemplateColumns += 'minmax(200px, 1fr)';  // The second last column is flexible
           } else {
-            newGridTemplateColumns += '200px ';  // Regular columns are 200px
+            newGridTemplateColumns += '200px ';  // Other columns have a fixed width of 200px
           }
 
-          // Add a space between columns if it's not the last column
+          // Add spacing between columns if it's not the last column
           if (i !== semanticTableColumns - 1) {
             newGridTemplateColumns += ' ';
           }
         }
 
-        table.style.gridTemplateColumns = newGridTemplateColumns;
+        // Apply the dynamically generated grid template to the table
+        semanticTable.style.gridTemplateColumns = newGridTemplateColumns;
       });
     }
+
+    // This script initializes and manages semantic names in a table based on available theme modes.
+    // 1. It retrieves all semantic names from the cache.
+    // 2. If no semantic names and theme modes exist, it logs a warning and:
+    //    - Adds "surface-primary" as a default semantic name linked to the "Light" theme mode.
+    //    - Updates the default theme mode and caches the new semantic entry.
+    // 3. If semantic names exist, it iterates through them:
+    //    - Retrieves semantic values for each theme mode from the cache.
+    //    - If all expected semantic values are found, it adds them as a new row to the semantic table.
 
     const allSemanticNames = CacheOperations.getAllSemanticNames();
 
@@ -946,6 +989,7 @@ function updateDefaultThemeMode(projectName, newDefaultThemeMode) {
               ["Default theme mode updated to"],
               [newDefaultThemeMode, Logger.Types.SUCCESS, Logger.Formats.BOLD]
             ));
+            CacheOperations.defaultThemeMode = newDefaultThemeMode;
             resolve("Default theme mode updated successfully.");
           };
 
@@ -971,6 +1015,45 @@ function updateDefaultThemeMode(projectName, newDefaultThemeMode) {
     }
   });
 }
+
+function getDefaultThemeMode(projectName) {
+  return new Promise((resolve, reject) => {
+      if (!isDBOpenSuccess || !db) {
+          reject("Database is not initialized.");
+          return;
+      }
+
+      const transaction = db.transaction(["projects"], "readonly");
+      const store = transaction.objectStore("projects");
+      const request = store.get(projectName);
+
+      request.onsuccess = function () {
+          if (request.result) {
+              resolve(request.result.defaultThemeMode || null);
+              console.log(...Logger.multiLog(
+                ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
+                ["Default theme mode for project"],
+                [projectName, Logger.Types.INFO, Logger.Formats.BOLD],
+                ["is"],
+                [request.result.defaultThemeMode || "not set", Logger.Types.INFO, Logger.Formats.BOLD]
+              ));
+          } else {
+              reject(`Project '${projectName}' not found.`);
+              console.log(...Logger.multiLog(
+                ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+                ["Project"],
+                [projectName, Logger.Types.ERROR, Logger.Formats.BOLD],
+                ["not found."]
+              ));
+          }
+      };
+
+      request.onerror = function (event) {
+          reject(`Failed to retrieve defaultThemeMode: ${event.target.error}`);
+      };
+  });
+}
+
 
 function deleteTheme(projectName, themeMode) {
   return new Promise((resolve, reject) => {

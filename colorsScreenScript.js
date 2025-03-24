@@ -61,6 +61,28 @@
 
   //-----------------
 
+  const themeModalElement = document.getElementById("theme-modal");
+  const themeModal = new Modal(themeModalElement, {
+    onHide: () => {
+        document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
+            backdrop.remove();
+        });
+    }
+  });
+
+  const themeModalMode = document.querySelector('h3[themeModalMode]');
+
+  const showAddThemeModal = document.getElementById("show-add-theme-modal");
+
+  const tm_nameInput = document.getElementById("theme-modal-theme-name-input");
+  const tm_nameInputError = document.getElementById("theme-modal-theme-name-input-error");
+
+  const tm_defaultCheckbox = document.getElementById("default-theme-checkbox");
+
+  const tm_deleteButton = document.getElementById("theme-modal-delete-button");
+  const tm_actionButton = document.getElementById("theme-modal-action-button");
+  //------------------
+
   const addNewThemeButton = document.getElementById("add-new-theme-button");
   const newThemeInput = document.getElementById("add-new-theme-input");
   const newThemeInputErrors = document.getElementById("add-new-theme-errors");
@@ -594,120 +616,289 @@
     
   }
   
-  // New mode button on table clicked. empty modal input text and hide addNewThemeButton
-  document.getElementById("open-new-theme-modal").addEventListener("click", function(){
+  // // New mode button on table clicked. empty modal input text and hide addNewThemeButton
+  // document.getElementById("open-new-theme-modal").addEventListener("click", function(){
 
-  newThemeInput.value = "";
-  addNewThemeButton.classList.replace("visible","hidden");
+  // newThemeInput.value = "";
+  // addNewThemeButton.classList.replace("visible","hidden");
 
-  });
+  // });
 
-  // New theme name input from add new theme modal
-  newThemeInput.addEventListener("input", (event) => {
+  // // New theme name input from add new theme modal
+  // newThemeInput.addEventListener("input", (event) => {
 
 
-    if (newThemeInput.value.trim() !== "") {
+  //   if (newThemeInput.value.trim() !== "") {
       
-      const inputValue = newThemeInput.value.trim();
+  //     const inputValue = newThemeInput.value.trim();
 
-      // Select all elements with the theme-mode attribute
-      const elements = document.querySelectorAll('[theme-mode]');
+  //     // Select all elements with the theme-mode attribute
+  //     const elements = document.querySelectorAll('[theme-mode]');
       
-      // Map to get all attribute values
-      const themeModeValues = Array.from(elements).map(el => el.getAttribute('theme-mode'));
+  //     // Map to get all attribute values
+  //     const themeModeValues = Array.from(elements).map(el => el.getAttribute('theme-mode'));
       
 
-      let isDuplicate = CacheOperations.isThemeModeExist(inputValue);
-      let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+  //     let isDuplicate = CacheOperations.isThemeModeExist(inputValue);
+  //     let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
 
-      // Process each value with a for loop
-      // for (let i = 0; i < themeModeValues.length; i++) {
-      //   const value = themeModeValues[i];
-      //   if (value === inputValue) {
-      //     isDuplicate = true;
-      //     break;
-      //   }
-      // }
+  //     // Process each value with a for loop
+  //     // for (let i = 0; i < themeModeValues.length; i++) {
+  //     //   const value = themeModeValues[i];
+  //     //   if (value === inputValue) {
+  //     //     isDuplicate = true;
+  //     //     break;
+  //     //   }
+  //     // }
 
-      if(isDuplicate){
-        newThemeInputErrors.innerHTML = "Theme mode already exist!";
-        newThemeInputErrors.classList.replace("hidden", "visible");
-        addNewThemeButton.classList.replace("visible","hidden");
-      } else if (isRegEx){
-        newThemeInputErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-        newThemeInputErrors.classList.replace("hidden", "visible");
-        addNewThemeButton.classList.replace("visible","hidden");
-      } else {
-        newThemeInputErrors.classList.replace("visible", "hidden");
-        addNewThemeButton.classList.replace("hidden","visible");
-      }
+  //     if(isDuplicate){
+  //       newThemeInputErrors.innerHTML = "Theme mode already exist!";
+  //       newThemeInputErrors.classList.replace("hidden", "visible");
+  //       addNewThemeButton.classList.replace("visible","hidden");
+  //     } else if (isRegEx){
+  //       newThemeInputErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+  //       newThemeInputErrors.classList.replace("hidden", "visible");
+  //       addNewThemeButton.classList.replace("visible","hidden");
+  //     } else {
+  //       newThemeInputErrors.classList.replace("visible", "hidden");
+  //       addNewThemeButton.classList.replace("hidden","visible");
+  //     }
 
-    } else {
-      addNewThemeButton.classList.replace("visible","hidden");
-    }
+  //   } else {
+  //     addNewThemeButton.classList.replace("visible","hidden");
+  //   }
 
-  });
+  // });
 
-  // Adds new theme. (Modal Button)
-  addNewThemeButton.addEventListener("click", async function(){
-    addNewTheme();
+  // // Adds new theme. (Modal Button)
+  // addNewThemeButton.addEventListener("click", async function(){
+  //   addNewTheme();
     
+  // });
+
+  // renameThemeModeButton.addEventListener("click", async function(){
+  //   const themeMode = editThemeModeModal.getAttribute("theme-mode");
+  //   const newThemeMode = editThemeModeInput.value.trim();
+
+  //   try {
+  //     await renameThemeMode(CacheOperations.activeProject, themeMode, newThemeMode);
+  //     renameThemeInSemanticTable(themeMode, newThemeMode);
+  //     CacheOperations.renameThemeMode(themeMode, newThemeMode);
+      
+  //   } catch (error) {
+  //     console.log(...Logger.multiLog(
+  //       ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+  //       [error, Logger.Types.ERROR]
+  //     ));
+  //   }
+  // });
+
+  // deleteThemeModeButton.addEventListener("click", async function(){
+  //   const themeMode = editThemeModeModal.getAttribute("theme-mode");
+
+  //   try {
+
+  //     await deleteTheme(CacheOperations.activeProject, themeMode);
+  //     deleteThemeFromSemanticTable(themeMode);
+  //     CacheOperations.deleteThemeMode(themeMode);
+      
+  //   } catch (error) {
+  //     console.log(...Logger.multiLog(
+  //       ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+  //       [error, Logger.Types.ERROR]
+  //     ));
+  //   }
+  // });
+
+  // editThemeModeInput.addEventListener("input", (event) => {
+  //   if (editThemeModeInput.value.trim() !== "") {
+  //     const inputValue = editThemeModeInput.value.trim();
+  //     const isDuplicate = CacheOperations.isThemeModeExist(inputValue);
+  //     const isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+
+  //     if (isDuplicate) {
+  //       editThemeModeErrors.textContent = "Theme mode already exists!";
+  //     } else if (isRegEx) {
+  //       editThemeModeErrors.textContent = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+  //     } else {
+  //       editThemeModeErrors.classList.add("hidden");
+  //       renameThemeModeButton.classList.remove("hidden");
+  //       return;
+  //     }
+  //     editThemeModeErrors.classList.remove("hidden");
+  //     renameThemeModeButton.classList.add("hidden");
+  //   } else {
+  //     renameThemeModeButton.classList.add("hidden");
+  //   }
+  // });
+
+  showAddThemeModal.addEventListener("click", () => { 
+    themeModalElement.setAttribute("themeName", "");
+    tm_nameInput.value = "";
+    tm_nameInputError.classList.toggle("hidden", true);
+    tm_nameInput.style.borderColor = "";
+    document.getElementById("default-theme-checkbox-container").classList.toggle("hidden", true);
+
+    // Reset action button to default
+    replaceClass(tm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(tm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    tm_actionButton.disabled = true;
+
+    tm_deleteButton.classList.toggle("hidden", true);
+
+    tm_actionButton.innerHTML = "Add Theme";
+    themeModalMode.setAttribute("themeModalMode", "add");
+    themeModalMode.innerHTML = "Add New Theme";
+
+    // themeModal.show();
   });
 
-  renameThemeModeButton.addEventListener("click", async function(){
-    const themeMode = editThemeModeModal.getAttribute("theme-mode");
-    const newThemeMode = editThemeModeInput.value.trim();
+  tm_nameInput.addEventListener("input", () => {
+    checkErrorsInThemeModal();
+  });
 
-    try {
-      await renameThemeMode(CacheOperations.activeProject, themeMode, newThemeMode);
-      renameThemeInSemanticTable(themeMode, newThemeMode);
-      CacheOperations.renameThemeMode(themeMode, newThemeMode);
-      
-    } catch (error) {
-      console.log(...Logger.multiLog(
-        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
-        [error, Logger.Types.ERROR]
-      ));
+  tm_defaultCheckbox.addEventListener("change", () => {
+    if (themeModalMode.getAttribute("themeModalMode") === "edit") {
+      replaceClass(tm_actionButton, "bg-", tm_defaultCheckbox.checked ? "bg-blue-700" : "bg-gray-500");
+      replaceClass(tm_actionButton, "hover:bg-", tm_defaultCheckbox.checked ? "hover:bg-blue-800" : "hover:bg-gray-600");
+      tm_actionButton.disabled = !tm_defaultCheckbox.checked;
     }
   });
+  function checkErrorsInThemeModal() {
 
-  deleteThemeModeButton.addEventListener("click", async function(){
-    const themeMode = editThemeModeModal.getAttribute("theme-mode");
+    // Reset action button to default
+    replaceClass(tm_actionButton, "bg-", "bg-gray-500");
+    replaceClass(tm_actionButton, "hover:bg-", "hover:bg-gray-600");
+    tm_actionButton.disabled = true;
 
-    try {
+    const themeName = themeModalElement.getAttribute("themeName").toLowerCase() || "";
+    
+    const inputValue = tm_nameInput.value.trim().toLowerCase();
+    let errorMessage = "";
 
-      await deleteTheme(CacheOperations.activeProject, themeMode);
-      deleteThemeFromSemanticTable(themeMode);
-      CacheOperations.deleteThemeMode(themeMode);
-      
-    } catch (error) {
-      console.log(...Logger.multiLog(
-        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
-        [error, Logger.Types.ERROR]
-      ));
+    if (!inputValue) {
+      errorMessage = "Theme name is required";
+    } else if (
+      CacheOperations.getAllThemeModes()
+      .map(mode => mode.toLowerCase())
+      .includes(inputValue) &&
+      themeName !== inputValue
+    ) {
+      errorMessage = "Theme already exist!";
+    } else if (!nameRegex.test(inputValue)) {
+      errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
     }
-  });
+    
+    if (errorMessage) {
+      tm_nameInputError.innerHTML = errorMessage;
+      tm_nameInputError.classList.remove("hidden");
 
-  editThemeModeInput.addEventListener("input", (event) => {
-    if (editThemeModeInput.value.trim() !== "") {
-      const inputValue = editThemeModeInput.value.trim();
-      const isDuplicate = CacheOperations.isThemeModeExist(inputValue);
-      const isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
+      tm_nameInput.style.borderColor = "red";
 
-      if (isDuplicate) {
-        editThemeModeErrors.textContent = "Theme mode already exists!";
-      } else if (isRegEx) {
-        editThemeModeErrors.textContent = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-      } else {
-        editThemeModeErrors.classList.add("hidden");
-        renameThemeModeButton.classList.remove("hidden");
-        return;
-      }
-      editThemeModeErrors.classList.remove("hidden");
-      renameThemeModeButton.classList.add("hidden");
+      replaceClass(tm_actionButton, "bg-", "bg-gray-500");
+      replaceClass(tm_actionButton, "hover:bg-", "hover:bg-gray-600");
+      tm_actionButton.disabled = true;
+
     } else {
-      renameThemeModeButton.classList.add("hidden");
+      tm_nameInputError.classList.add("hidden");
+      tm_nameInput.style.borderColor = "";
+
+      replaceClass(tm_actionButton, "bg-", "bg-blue-700");
+      replaceClass(tm_actionButton, "hover:bg-", "hover:bg-blue-800");
+      tm_actionButton.disabled = false;
     }
+
+    if (themeName === inputValue) {
+      replaceClass(tm_actionButton, "bg-", "bg-gray-500");
+      replaceClass(tm_actionButton, "hover:bg-", "hover:bg-gray-600");
+      tm_actionButton.disabled = true;
+    }
+
+    if (themeModalMode.getAttribute("themeModalMode") === "edit" && tm_defaultCheckbox.checked) {
+      replaceClass(tm_actionButton, "bg-", "bg-blue-700");
+      replaceClass(tm_actionButton, "hover:bg-", "hover:bg-blue-800");
+      tm_actionButton.disabled = false;
+    }
+    
+  }
+
+  tm_actionButton.addEventListener("click", async () => {
+    const modalMode = themeModalMode.getAttribute("themeModalMode");
+    if (modalMode === "add") {
+      addNewTheme(tm_nameInput.value.trim());
+    } else if (modalMode === "edit") {
+      const themeMode = themeModalElement.getAttribute("themeName");
+      const newThemeMode = tm_nameInput.value.trim();
+
+      try {
+        if (themeMode !== newThemeMode) {
+          await renameThemeMode(CacheOperations.activeProject, themeMode, newThemeMode);
+          renameThemeInSemanticTable(themeMode, newThemeMode);
+          CacheOperations.renameThemeMode(themeMode, newThemeMode);
+        }
+      
+        if (tm_defaultCheckbox.checked) {
+          await updateDefaultThemeMode(CacheOperations.activeProject, newThemeMode);
+          CacheOperations.defaultThemeMode = newThemeMode;
+
+          // Update default-theme-header attribute for semantic table header row
+          const headerCells = document.querySelectorAll('#semantic-table-header-row td[theme-mode]');
+          headerCells.forEach(cell => {
+            const themeMode = cell.getAttribute('theme-mode');
+            if (themeMode === CacheOperations.defaultThemeMode) {
+              cell.setAttribute('default-theme-header', 'true');
+            } else {
+              cell.setAttribute('default-theme-header', 'false');
+            }
+          });
+        }
+      
+        themeModal.hide();
+        AlertManager.success("Theme updated successfully", 1500);
+      } catch (error) {
+        console.log(...Logger.multiLog(
+          ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+          [error, Logger.Types.ERROR]
+        ));
+      }
+      
+    }
+  });
+
+  tm_deleteButton.addEventListener("click", () => {
+
+    const themeMode = themeModalElement.getAttribute("themeName");
+
+    if (CacheOperations.defaultThemeMode === themeMode) {
+      console.log(...Logger.multiLog(
+        ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+        ["Cannot delete default theme mode", Logger.Types.ERROR]
+      ));
+      AlertManager.error("Cannot delete default theme mode", 2000);
+      themeModal.hide();
+      return;
+    }
+    
+    const message = `Are sure to delete theme mode <p class="text-red-600 font-bold">${themeMode}</p> permanently?`
+
+    openConfirmation(message, async () => {
+      try {
+        await deleteTheme(CacheOperations.activeProject, themeMode);
+        deleteThemeFromSemanticTable(themeMode);
+        CacheOperations.deleteThemeMode(themeMode);
+        
+      } catch (error) {
+        console.log(...Logger.multiLog(
+          ["[ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+          [error, Logger.Types.ERROR]
+        ));
+      }
+    });
+
+  });
+
+  document.getElementById("theme-modal-close-button").addEventListener("click", () =>{
+    themeModal.hide();
   });
 
 
@@ -771,158 +962,41 @@
       const themeMode = parentTd ? parentTd.getAttribute('theme-mode') : null;
 
       ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName);
-    } else if (target.tagName === "TD" && target.getAttribute("theme-mode") && target.getAttribute("default-theme-header") === "false") {
+    } else if (target.tagName === "TD" && target.getAttribute("theme-mode")) {
+
+      const isDefaultTheme = target.getAttribute("default-theme-header");
 
       const themeMode = target.getAttribute("theme-mode")
-      editThemeModeModal.classList.replace("hidden", "flex");
-      editThemeModeModal.setAttribute("theme-mode", themeMode);
-      editThemeModeInput.value = themeMode;
-      
-    } else if (target.getAttribute("default-theme-header") === "true") {
-      AlertManager.warning("Default theme cannot be edited", 2500);
-      console.log(...Logger.multiLog(
-        ["[WARNING]", Logger.Types.WARNING, Logger.Formats.BOLD],
-        ["Default theme cannot be edited", Logger.Types.WARNING]
-      ));
-      
-      
+      themeModalElement.setAttribute("themeName", themeMode);
+      tm_nameInput.value = themeMode;
+      tm_nameInputError.classList.toggle("hidden", true);
+      tm_nameInput.style.borderColor = "";
+      document.getElementById("default-theme-checkbox-container").classList.toggle("hidden", false);
+
+      if (isDefaultTheme === "true") {
+        tm_defaultCheckbox.checked = true;
+        tm_defaultCheckbox.disabled = true;
+      } else {
+        tm_defaultCheckbox.checked = false;
+        tm_defaultCheckbox.disabled = false;
+      }
+
+      // Reset action button to default
+      replaceClass(tm_actionButton, "bg-", "bg-gray-500");
+      replaceClass(tm_actionButton, "hover:bg-", "hover:bg-gray-600");
+      tm_actionButton.disabled = true;
+
+      tm_deleteButton.classList.toggle("hidden", false);
+
+      tm_actionButton.innerHTML = "Update Theme";
+      themeModalMode.setAttribute("themeModalMode", "edit");
+      themeModalMode.innerHTML = "Edit Theme";
+
+      themeModal.show();
     }
     
     
   });
-
-  // add semantic row modal button
-  // addRowToSemanticButton.addEventListener("click", async function () {
-
-  // const semanticNameFromInput = addNewSemanticRowInput.value.trim();
-  // let semanticValues = [];
-  //   try {
-
-  //     for (const themeMode of CacheOperations.getAllThemeModes()) {
-  //       const result = await addSemanticColor(CacheOperations.activeProject, semanticNameFromInput, themeMode, "Click to link color");
-  //       semanticValues.push("Click to link color");
-        
-  //     }
-      
-      
-  //   } catch (error) {
-  //     AlertManager.error(error,2500);
-  //   }
-    
-  //   if (semanticValues.length === CacheOperations.getAllThemeModes().length) {
-
-  //     addNewRowToSemanticTable(semanticNameFromInput, semanticValues, CacheOperations.getAllThemeModes());
-  //   } else {
-  //     AlertManager.error("Error adding semantic", 2500);
-  //   }
-
-  //   addNewSemanticRowInput.value = "";
-  //   addRowToSemanticButton.classList.replace("visible","hidden");
-
-
-  // });
-
-  // // Add semantic Row input from add semantic row modal
-  // addNewSemanticRowInput.addEventListener("input", (event) => {
-
-
-  //   if (addNewSemanticRowInput.value.trim() !== "") {
-      
-  //     const inputValue = addNewSemanticRowInput.value.trim();
-
-  //     const allSemanticNames = document.querySelectorAll(".semantic-name");
-
-  //     let isDuplicate = false;
-  //     let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
-
-  //     // Loop through the semantic names to check for duplicates
-  //     for (const item of allSemanticNames) {
-  //       if (item.textContent.trim() === inputValue) {
-  //         isDuplicate = true;
-  //         break; // Exit the loop early if a duplicate is found
-  //       }
-  //     }
-      
-  //     if(isDuplicate){
-  //       addNewSemanticRowErrors.innerHTML = "Semantic name already exist!";
-  //       addNewSemanticRowErrors.classList.replace("hidden", "visible");
-  //       addRowToSemanticButton.classList.replace("visible","hidden");
-  //     } else if (isRegEx){
-  //       addNewSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-  //       addNewSemanticRowErrors.classList.replace("hidden", "visible");
-  //       addRowToSemanticButton.classList.replace("visible","hidden");
-  //     } else {
-  //       addNewSemanticRowErrors.classList.replace("visible", "hidden");
-  //       addRowToSemanticButton.classList.replace("hidden","visible");
-  //     }
-
-  //   } else {
-  //     addRowToSemanticButton.classList.replace("visible","hidden");
-  //   }
-
-  // });
-
-  // Open edit semantic modal
-  // semanticRowEditButton.addEventListener("click", (e) =>{
-  //   const rowId = semanticRowEditButton.getAttribute("data-index");
-
-  //   semanticRowDeleteButton.setAttribute("data-index", rowId);
-
-  //   const parentRow = document.querySelector(`tr[data-index="${rowId}"]`);
-  //   editSemanticRowInput.value = parentRow?.querySelector(".semantic-name")?.textContent.trim() || null;
-
-  //   renameSemanticRowButton.classList.replace("visible", "hidden");
-
-  // });
-
-  // Delete button form edit semantic row modal
-  // semanticRowDeleteButton.addEventListener("click", (e) =>{
-  //   deleteRowFromSemanticTable();
-  // });
-
-  // renameSemanticRowButton.addEventListener("click", (e) => {
-  //   renameSemanticRow();
-  // });
-
-  // Edit semantic Row input from edit semantic row modal
-  // editSemanticRowInput.addEventListener("input", (event) => {
-
-
-  //   if (editSemanticRowInput.value.trim() !== "") {
-      
-  //     const inputValue = editSemanticRowInput.value.trim();
-
-  //     const allSemanticNames = document.querySelectorAll(".semantic-name");
-
-  //     let isDuplicate = false;
-  //     let isRegEx = !/^[A-Za-z0-9-_]+$/.test(inputValue);
-
-  //     // Loop through the semantic names to check for duplicates
-  //     for (const item of allSemanticNames) {
-  //       if (item.textContent.trim() === inputValue) {
-  //         isDuplicate = true;
-  //         break; // Exit the loop early if a duplicate is found
-  //       }
-  //     }
-      
-  //     if(isDuplicate){
-  //       editSemanticRowErrors.innerHTML = "Semantic name already exist!";
-  //       editSemanticRowErrors.classList.replace("hidden", "visible");
-  //       renameSemanticRowButton.classList.replace("visible","hidden");
-  //     } else if (isRegEx){
-  //       editSemanticRowErrors.innerHTML = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-  //       editSemanticRowErrors.classList.replace("hidden", "visible");
-  //       renameSemanticRowButton.classList.replace("visible","hidden");
-  //     } else {
-  //       editSemanticRowErrors.classList.replace("visible", "hidden");
-  //       renameSemanticRowButton.classList.replace("hidden","visible");
-  //     }
-
-  //   } else {
-  //     renameSemanticRowButton.classList.replace("visible","hidden");
-  //   }
-
-  // });
 
 
   function addNewRowToSemanticTable(semanticName, semanticValues, themeModes){
@@ -1025,16 +1099,15 @@
     
   }
 
-  async function addNewTheme() {
+  async function addNewTheme(newThemeMode) {
     
-    const newThemeMode = newThemeInput.value;
     const table = document.getElementById('semantic-table');
     const theadRow = document.getElementById('semantic-table-header-row');
     const bodyRows = table.querySelectorAll('tbody tr');
     try {
 
       for (const semanticName of CacheOperations.getAllSemanticNames()){
-        await addSemanticColor(CacheOperations.activeProject, semanticName, newThemeMode, "Click to link color");
+        await addSemantic(CacheOperations.activeProject, semanticName, "Click to link color", newThemeMode, currentSemanticRowId);
       }
 
       const newTdHTML = `
@@ -1105,12 +1178,13 @@
 
         CacheOperations.addNewThemeMode(newThemeMode)
         table.style.gridTemplateColumns = newGridTemplateColumns;
+
+        themeModal.hide();
       
       
     } catch (error) {
       AlertManager.error(error, 2500);
       console.log(error);
-      
     }
   }
 

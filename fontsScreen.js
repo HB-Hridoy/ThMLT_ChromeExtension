@@ -6,15 +6,15 @@
  const showEditFontModalButton = document.getElementById("font-edit-button");
  const showAddFontModalButton = document.getElementById("add-font-modal");
 
-  const fontDetailsModal = new Modal(document.getElementById("font-details-modal"), {
+ const fontModalElement = document.getElementById("font-modal");
+  const fontModal = new Modal(fontModalElement, {
     onHide: () => {
         document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
             backdrop.remove();
         });
     }
   });
-  const addFontButton = document.getElementById("add-font-button");
-  const updateFontButton = document.getElementById("update-font-button");
+  const fontModalActionButton = document.getElementById("font-modal-action-button");
   const deleteFontButton = document.getElementById("delete-font-button");
 
   const fontModalMode = document.querySelector('h3[fontModalMode]');
@@ -49,7 +49,6 @@
         showEditFontModalButton.classList.replace("hidden", "flex");
         showEditFontModalButton.setAttribute("font-row-index", rowId);
         editButtonContainer.appendChild(showEditFontModalButton);
-
       }
       
     }
@@ -65,11 +64,13 @@
   }, true); // Use capture phase for this to run first
 
   showEditFontModalButton.addEventListener("click", ()=>{
-    if (fontModalMode.getAttribute("fontModalMode") === "add") {
-      updateFontButton.classList.replace("hidden", "visible");
-      deleteFontButton.classList.replace("hidden", "visible");
-      addFontButton.classList.replace("visible", "hidden");
-    }
+    
+    replaceClass(fontModalActionButton, "bg-", "bg-gray-500");
+    replaceClass(fontModalActionButton, "hover:bg-", "hover:bg-gray-600");
+    fontModalActionButton.disabled = true;
+    fontModalActionButton.innerHTML = "Update Font";
+    deleteFontButton.classList.toggle("hidden", false);;
+
     fontModalMode.setAttribute("fontModalMode", "edit");
     fontModalMode.innerHTML = "Edit Font";
 
@@ -83,6 +84,10 @@
     fontModalShortTagInput.value = fontTagShort;
     fontModalNameInput.value = fontName;
 
+    fontModalElement.setAttribute("fontTag", fontTag);
+    fontModalElement.setAttribute("fontTagShort", fontTagShort);
+    fontModalElement.setAttribute("fontName", fontName);
+
     fontModalNameInput.style.borderColor = "";
     fontModalShortTagInput.style.borderColor = "";
     fontModalTagInput.style.borderColor = "";
@@ -95,11 +100,12 @@
   });
 
   showAddFontModalButton.addEventListener("click", ()=>{
-    if (fontModalMode.getAttribute("fontModalMode") === "edit") {
-      updateFontButton.classList.replace("visible", "hidden");
-      deleteFontButton.classList.replace("visible", "hidden");
-      addFontButton.classList.replace("hidden", "visible");
-    }
+    replaceClass(fontModalActionButton, "bg-", "bg-gray-500");
+    replaceClass(fontModalActionButton, "hover:bg-", "hover:bg-gray-600");
+    fontModalActionButton.disabled = true;
+    fontModalActionButton.innerHTML = "Add Font";
+    deleteFontButton.classList.toggle("hidden", true);
+
     fontModalMode.setAttribute("fontModalMode", "add");
     fontModalMode.innerHTML = "Add Font";
 
@@ -113,107 +119,70 @@
     fontModalTagInputError.classList.toggle("hidden", true);
   });
 
-  [fontModalTagInput, fontModalShortTagInput]
+  [fontModalTagInput, fontModalShortTagInput, fontModalNameInput]
   .forEach(input => input.addEventListener("input", ({ target }) => {
-
-    const inputError = document.getElementById(input.id.replace("-input", "-error"));
-
-    const isInvalid = !nameRegex.test(input.value.trim());
-
-    
-    input.style.borderColor = isInvalid ? "red" : "";
-    inputError.classList.toggle("hidden", !isInvalid);
-
-    if (isInvalid) {
-      inputError.innerText = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-    }
-
-    if (input === fontModalTagInput && CacheOperations.isFontTagExist(input.value.trim())) {
-      inputError.classList.remove("hidden");
-      inputError.innerText = "Font tag already exists!";
-      input.style.borderColor = "red";
-    } else if (input === fontModalShortTagInput && CacheOperations.isShortFontTagExist(input.value.trim())) {
-      inputError.classList.remove("hidden");
-      inputError.innerText = "Short font tag already exists!";
-      input.style.borderColor = "red";
-    }
-    checkFontDeatilsModalErrors();
-
+    checkFontDetailsModalErrors(input);
   }));
 
-  
-  fontModalNameInput.addEventListener("input", ({ target }) => {
-    const nameRegex = /^[a-zA-Z0-9-_\.]+$/;
-    const isInvalid = !nameRegex.test(target.value.trim());
+  function checkFontDetailsModalErrors(input) {
+    const inputValue = input.value.trim();
+    const inputError = document.getElementById(input.id.replace("-input", "-error"));
+    let errorMessage = "";
 
-    target.style.borderColor = isInvalid ? "red" : "";
-    fontModalNameInputError.classList.toggle("hidden", !isInvalid);
+    const fontTag = fontModalElement.getAttribute("fontTag");
+    const shortFontTag = fontModalElement.getAttribute("fontTagShort");
+    const fontName = fontModalElement.getAttribute("fontName");
     
-
-    if (isInvalid) {
-      fontModalNameInputError.innerText = "Only letters, numbers, hyphens (-), underscores (_), and full stops (.) are allowed.";
-    } else{
-      const isInvalidFormat = !(/\.(ttf|otf)$/i.test(fontModalNameInput.value.trim()));
-      fontModalNameInput.style.borderColor = isInvalidFormat ? "red" : "";
-      fontModalNameInputError.classList.toggle("hidden", !isInvalidFormat);
-
-      if (isInvalidFormat) {
-      fontModalNameInputError.innerText = "Font name must end with .ttf or .otf.";
-      }
-    }
-
-    checkFontDeatilsModalErrors();
-
-  });
-
-  function checkFontDeatilsModalErrors(checkEmpty) {
-    const hasErrors = [fontModalNameInputError, fontModalShortTagInputError, fontModalTagInputError].some(errorElement => !errorElement.classList.contains("hidden"));
-
-    fontDeatilsModalHasErrors = hasErrors;
-
-    const buttonStates = hasErrors
-      ? ["bg-blue-700", "bg-gray-500", "hover:bg-blue-800", "hover:bg-gray-600"]
-      : ["bg-gray-500", "bg-blue-700", "hover:bg-gray-600", "hover:bg-blue-800"];
-
-    [addFontButton, updateFontButton, deleteFontButton].forEach((button, index) => {
-      button.classList.replace(buttonStates[0], buttonStates[1]);
-      button.classList.replace(buttonStates[2], buttonStates[3]);
-    });
-
-    if (!hasErrors) {
-      deleteFontButton.classList.replace("bg-gray-500", "bg-red-700");
-      deleteFontButton.classList.replace("hover:bg-gray-600", "hover:bg-red-800");
-    }
-
-    if (checkEmpty) {
-      const inputs = [fontModalTagInput, fontModalShortTagInput, fontModalNameInput];
-      inputs.forEach(input => {
-        const inputError = document.getElementById(input.id.replace("-input", "-error"));
-        const isEmpty = input.value.trim() === "";
-
-        input.style.borderColor = isEmpty ? "red" : "";
-        inputError.classList.toggle("hidden", !isEmpty);
-
-        if (isEmpty) {
-        inputError.innerText = "This field cannot be empty.";
-        fontDeatilsModalHasErrors = true;
+    // Validate font name
+    if (input === fontModalNameInput) {
+        if (!/^[a-zA-Z0-9-_.]+$/.test(inputValue)) {
+            errorMessage = "Only letters, numbers, hyphens (-), underscores (_), and full stops (.) are allowed.";
+        } else if (!/\.(ttf|otf)$/i.test(inputValue)) {
+            errorMessage = "Font name must end with .ttf or .otf.";
         }
-      });
+    } 
+    // Validate general name format
+    else if (!nameRegex.test(inputValue)) {
+        errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
     }
 
-    if (!fontDeatilsModalHasErrors) {
-      [fontModalTagInput, fontModalShortTagInput, fontModalNameInput].forEach((input) =>{
-        input.style.borderColor = "";
-      })
-      
+    // Check for existing tags
+    if (input === fontModalTagInput && CacheOperations.isFontTagExist(inputValue) && inputValue !== fontTag) {
+      errorMessage = "Font tag already exists!";
+    } else if (input === fontModalShortTagInput && CacheOperations.isShortFontTagExist(inputValue) && inputValue !== shortFontTag) {
+      errorMessage = "Short font tag already exists!";
     }
-    
+
+    // Check for empty field
+    if (!inputValue) {
+        errorMessage = "This field cannot be empty.";
+    }
+
+    // Display error message
+    input.style.borderColor = errorMessage ? "red" : "";
+    inputError.classList.toggle("hidden", !errorMessage);
+    inputError.innerText = errorMessage;
+
+    // Check if any errors exist in the modal
+    let hasErrors = [fontModalNameInputError, fontModalShortTagInputError, fontModalTagInputError].some(
+      (errorElement) => !errorElement.classList.contains("hidden")
+    ) || [fontModalTagInput, fontModalShortTagInput, fontModalNameInput].some(field => !field.value.trim());
+
+    // Check if the input values are unchanged
+    if (!hasErrors && fontModalTagInput.value.trim() === fontTag && fontModalShortTagInput.value.trim() === shortFontTag && fontModalNameInput.value.trim() === fontName) {
+      hasErrors = true;
+    }
+    // Toggle button state
+    const actionBg = hasErrors ? "bg-gray-500" : "bg-blue-700";
+    const actionHoverBg = hasErrors ? "hover:bg-gray-600" : "hover:bg-blue-800";
+
+    replaceClass(fontModalActionButton, "bg-", actionBg);
+    replaceClass(fontModalActionButton, "hover:bg-", actionHoverBg);
+    fontModalActionButton.disabled = hasErrors;
   }
 
-  addFontButton.addEventListener("click", async ()=>{
-
-    checkFontDeatilsModalErrors(true);
-    if (!fontDeatilsModalHasErrors) {
+  fontModalActionButton.addEventListener("click", async () => {
+    if (fontModalMode.getAttribute("fontModalMode") === "add") {
       try {
         const fontTag = fontModalTagInput.value.trim();
         const shortFontTag = fontModalShortTagInput.value.trim();
@@ -227,15 +196,8 @@
         ));
         
       }
-      fontDetailsModal.hide();
-    }
-
-  });
-
-  updateFontButton.addEventListener("click", async ()=>{
-
-    checkFontDeatilsModalErrors();
-    if (!fontDeatilsModalHasErrors) {
+      fontModal.hide();
+    } else {
       try {
         const activeRowIndex = showEditFontModalButton.getAttribute("font-row-index");
 
@@ -256,13 +218,13 @@
         row.querySelector("#font-name").innerText = newFontName;
 
 
-        fontDetailsModal.hide();
+        fontModal.hide();
       } catch (error) {
         console.error(error);  
       }
     }
-
-  });
+  }
+  );
 
   deleteFontButton.addEventListener("click", async ()=>{
     const activeRowIndex = showEditFontModalButton.getAttribute("font-row-index");
