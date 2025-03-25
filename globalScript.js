@@ -1,49 +1,58 @@
   class CacheOperations {
-    static activeProjectName = "";
-    static activeThemeModesInSemantic = [];
-    static activeSemanticNames = new Set();
-    static activeSemantics = new Map();
-    static activePrimitiveNames = [];
-    static activePrimitives = new Map();
-    static activeProjectNames = [];
 
-    static updateProjectName(projectName) {
-      this.activeProjectName = projectName;
+    static #activeThemeModesInSemantic = [];
+    static #defaultThemeMode = "";
+    static #activeSemanticNames = new Set();
+    static #activeSemantics = new Map();
+
+    static #activePrimitiveNames = [];
+    static #activePrimitives = new Map();
+
+    static #activeFontTags = [];
+    static #activeShortFontTags = [];
+    static #activeFonts = new Map();
+
+    static #activeProject = "";
+    static #activeProjects = [];
+
+
+    
+    static get activeProject(){
+      return this.#activeProject;
     }
-
-    static getProjectName() {
-      return this.activeProjectName;
+    static set activeProject (projectName) {
+      this.#activeProject = projectName;
     }
 
     static addProject(projectName) {
-      if (!this.activeProjectNames.includes(projectName)) {
-        this.activeProjectNames.push(projectName);
+      if (!this.#activeProjects.includes(projectName)) {
+        this.#activeProjects.push(projectName);
       }
     }
 
     static deleteProject(projectName) {
-      const index = this.activeProjectNames.indexOf(projectName);
+      const index = this.#activeProjects.indexOf(projectName);
       if (index !== -1) {
-        this.activeProjectNames.splice(index, 1);
+        this.#activeProjects.splice(index, 1);
       }
     }
 
     static isProjectExist(projectName) {
-      return this.activeProjectNames.includes(projectName);
+      return this.#activeProjects.includes(projectName);
     }
 
     static getAllProjects() {
-      return [...this.activeProjectNames];
+      return [...this.#activeProjects];
     }
 
     static addNewThemeMode(themeMode) {
-      if (!this.activeThemeModesInSemantic.includes(themeMode)) {
-        this.activeThemeModesInSemantic.push(themeMode);
+      if (!this.#activeThemeModesInSemantic.includes(themeMode)) {
+        this.#activeThemeModesInSemantic.push(themeMode);
       }
     }
 
     static getAllThemeModes() {
-      return this.activeThemeModesInSemantic;
+      return this.#activeThemeModesInSemantic;
     }
 
     static renameThemeMode(oldThemeMode, newThemeMode) {
@@ -52,91 +61,98 @@
     }
 
     static deleteThemeMode(themeMode) {
-      this.activeThemeModesInSemantic = this.activeThemeModesInSemantic.filter(item => item !== themeMode);
+      this.#activeThemeModesInSemantic = this.#activeThemeModesInSemantic.filter(item => item !== themeMode);
     }
 
     static isThemeModeExist(themeMode) {
-      return this.activeThemeModesInSemantic.includes(themeMode);
+      return this.#activeThemeModesInSemantic.includes(themeMode);
+    }
+
+    static get defaultThemeMode() { 
+      return this.#defaultThemeMode;
+    }
+
+    static set defaultThemeMode(themeMode) {
+      this.#defaultThemeMode = themeMode;
     }
 
     static addSemantic(semanticName, themeMode, semanticValue) {
-      if (!this.activeSemantics.has(themeMode)) {
-        this.activeSemantics.set(themeMode, {});
+      if (!this.#activeSemantics.has(themeMode)) {
+        this.#activeSemantics.set(themeMode, {});
       }
-      this.activeSemantics.get(themeMode)[semanticName] = semanticValue;
-      this.activeSemanticNames.add(semanticName);
+      this.#activeSemantics.get(themeMode)[semanticName] = semanticValue;
+      this.#activeSemanticNames.add(semanticName);
     }
 
     static getAllSemanticNames() {
-      return Array.from(this.activeSemanticNames);
+      return Array.from(this.#activeSemanticNames);
     }
 
     static getAllSemantics() {
-      return this.activeSemantics;
+      return this.#activeSemantics;
     }
 
     static getSemanticValueForThemeMode(semanticName, themeMode) {
-      if (this.activeSemantics.has(themeMode)) {
-        const themeData = this.activeSemantics.get(themeMode);
+      if (this.#activeSemantics.has(themeMode)) {
+        const themeData = this.#activeSemantics.get(themeMode);
         return themeData[semanticName] || null;
       }
       return null;
     }
 
-    static updateSemantic(semanticName, themeMode, newSemanticValue) {
-      if (this.activeSemantics.has(themeMode)) {
-        const themeData = this.activeSemantics.get(themeMode);
+    static updateSemantic(semanticName, newSemanticName = "@default", themeMode, newLinkedPrimitive = "@default") {
+      if (!this.#activeSemanticNames.has(semanticName)) {
+          return;
+      }
+
+      if (newLinkedPrimitive !== "@default" && this.#activeSemantics.has(themeMode)) {
+        const themeData = this.#activeSemantics.get(themeMode);
         if (themeData.hasOwnProperty(semanticName)) {
-          themeData[semanticName] = newSemanticValue;
-          return true;
+          themeData[semanticName] = newLinkedPrimitive;
         }
       }
-      return false;
-    }
 
-    static renameSemantic(oldSemanticName, newSemanticName) {
-      if (this.activeSemanticNames.has(oldSemanticName)) {
-        for (const [themeMode, themeData] of this.activeSemantics.entries()) {
-          if (themeData.hasOwnProperty(oldSemanticName)) {
-            const value = themeData[oldSemanticName];
-            delete themeData[oldSemanticName];
+      if (newSemanticName !== "@default") {
+        for (const [themeMode, themeData] of this.#activeSemantics.entries()) {
+          if (themeData.hasOwnProperty(semanticName)) {
+            const value = themeData[semanticName];
+            delete themeData[semanticName];
             themeData[newSemanticName] = value;
           }
         }
-        this.activeSemanticNames.delete(oldSemanticName);
-        this.activeSemanticNames.add(newSemanticName);
-        return true;
+        this.#activeSemanticNames.delete(semanticName);
+        this.#activeSemanticNames.add(newSemanticName);
       }
-      return false;
+  
     }
 
     static deleteSemantic(semanticName) {
-      if (this.activeSemanticNames.has(semanticName)) {
-        for (const [themeMode, themeData] of this.activeSemantics.entries()) {
+      if (this.#activeSemanticNames.has(semanticName)) {
+        for (const [themeMode, themeData] of this.#activeSemantics.entries()) {
           if (themeData.hasOwnProperty(semanticName)) {
             delete themeData[semanticName];
           }
         }
-        this.activeSemanticNames.delete(semanticName);
+        this.#activeSemanticNames.delete(semanticName);
         return true;
       }
       return false;
     }
 
     static deleteSemanticForThemeMode(semanticName, themeMode) {
-      if (this.activeSemantics.has(themeMode)) {
-        const themeData = this.activeSemantics.get(themeMode);
+      if (this.#activeSemantics.has(themeMode)) {
+        const themeData = this.#activeSemantics.get(themeMode);
         if (themeData.hasOwnProperty(semanticName)) {
           delete themeData[semanticName];
           let isUsedElsewhere = false;
-          for (const data of this.activeSemantics.values()) {
+          for (const data of this.#activeSemantics.values()) {
             if (data.hasOwnProperty(semanticName)) {
               isUsedElsewhere = true;
               break;
             }
           }
           if (!isUsedElsewhere) {
-            this.activeSemanticNames.delete(semanticName);
+            this.#activeSemanticNames.delete(semanticName);
           }
           return true;
         }
@@ -145,77 +161,163 @@
     }
 
     static isSemanticExist(semanticName) {
-      return this.activeSemanticNames.has(semanticName);
+      return this.#activeSemanticNames.has(semanticName);
     }
 
     static isSemanticExistInThemeMode(semanticName, themeMode) {
-      if (this.activeSemantics.has(themeMode)) {
-        const themeData = this.activeSemantics.get(themeMode);
+      if (this.#activeSemantics.has(themeMode)) {
+        const themeData = this.#activeSemantics.get(themeMode);
         return themeData.hasOwnProperty(semanticName);
       }
       return false;
     }
 
     static addPrimitive(primitiveName, primitiveValue) {
-      if (!this.activePrimitives.has(primitiveName)) {
-        this.activePrimitives.set(primitiveName, primitiveValue);
-        this.activePrimitiveNames.push(primitiveName);
+      if (!this.#activePrimitives.has(primitiveName)) {
+        this.#activePrimitives.set(primitiveName, primitiveValue);
+        this.#activePrimitiveNames.push(primitiveName);
       }
     }
 
     static getPrimitiveValue(primitiveName) {
-      return this.activePrimitives.has(primitiveName) 
-        ? this.activePrimitives.get(primitiveName) 
+      return this.#activePrimitives.has(primitiveName) 
+        ? this.#activePrimitives.get(primitiveName) 
         : null;
     }
 
     static getAllPrimitives() {
-      return Array.from(this.activePrimitives.entries());
+      return Array.from(this.#activePrimitives.entries());
     }
 
     static getAllPrimitiveNames() {
-      return [...this.activePrimitiveNames];
+      return [...this.#activePrimitiveNames];
     }
 
     static renamePrimitive(oldPrimitiveName, newPrimitiveName) {
-      if (this.activePrimitives.has(oldPrimitiveName)) {
-        const value = this.activePrimitives.get(oldPrimitiveName);
+      if (this.#activePrimitives.has(oldPrimitiveName)) {
+        const value = this.#activePrimitives.get(oldPrimitiveName);
         this.deletePrimitive(oldPrimitiveName);
         this.addPrimitive(newPrimitiveName, value);
       }
     }
 
     static updatePrimitive(primitiveName, newPrimitiveValue) {
-      if (this.activePrimitives.has(primitiveName)) {
-        this.activePrimitives.set(primitiveName, newPrimitiveValue);
+      if (this.#activePrimitives.has(primitiveName)) {
+        this.#activePrimitives.set(primitiveName, newPrimitiveValue);
       }
     }
 
     static deletePrimitive(primitiveName) {
-      if (this.activePrimitives.has(primitiveName)) {
-        this.activePrimitives.delete(primitiveName);
-        this.activePrimitiveNames = this.activePrimitiveNames.filter(name => name !== primitiveName);
+      if (this.#activePrimitives.has(primitiveName)) {
+        this.#activePrimitives.delete(primitiveName);
+        this.#activePrimitiveNames = this.#activePrimitiveNames.filter(name => name !== primitiveName);
       }
     }
 
     static isPrimitiveExist(primitiveName) {
-      return this.activePrimitives.has(primitiveName);
+      return this.#activePrimitives.has(primitiveName);
     }
 
+  // 🔹 Add a font with its tag and short tag
+  static addFont(fontTag, shortFontTag, fontName) {
+    if (!this.#activeFonts.has(fontTag)) {
+        this.#activeFonts.set(fontTag, fontName);
+        this.#activeFontTags.push(fontTag);
+        this.#activeShortFontTags.push(shortFontTag);
+    }
+  }
+
+  static updateFont(fontTag, newFontTag = '@default', newShortFontTag = '@default', newFontName = '@default') {
+    if (!this.#activeFonts.has(fontTag)) {
+        console.log(`Font with tag ${fontTag} not found.`);
+        return;
+    }
+
+    let index = this.#activeFontTags.indexOf(fontTag);
+    let updatedFontTag = newFontTag !== '@default' ? newFontTag : fontTag;
+    let updatedShortFontTag = newShortFontTag !== '@default' ? newShortFontTag : this.#activeShortFontTags[index];
+    let updatedFontName = newFontName !== '@default' ? newFontName : this.#activeFonts.get(fontTag);
+
+    // Update data
+    this.#activeFonts.delete(fontTag);
+    this.#activeFonts.set(updatedFontTag, updatedFontName);
+    this.#activeFontTags[index] = updatedFontTag;
+    this.#activeShortFontTags[index] = updatedShortFontTag;
+
+}
+
+  static isFontTagExist(fontTag) {
+    return this.#activeFontTags.includes(fontTag);
+  }
+
+  static isShortFontTagExist(shortFontTag) {
+      return this.#activeShortFontTags.includes(shortFontTag);
+  }
+
+  // 🔹 Get all stored fonts as an array of objects
+  static getAllFonts() {
+      return this.#activeFontTags.map(tag => ({
+          fontTag: tag,
+          shortFontTag: this.getshortFontTag(tag),
+          fontName: this.getFontName(tag),
+      }));
+  }
+
+  // 🔹 Get short font tag from font tag
+  static getshortFontTag(fontTag) {
+      const index = this.#activeFontTags.indexOf(fontTag);
+      return index !== -1 ? this.#activeShortFontTags[index] : null;
+  }
+
+  // 🔹 Get font name from font tag
+  static getFontName(fontTag) {
+      return this.#activeFonts.get(fontTag) || null;
+  }
+
+  // 🔹 Get all font tags
+  static getFontTags() {
+      return [...this.#activeFontTags];
+  }
+
+  // 🔹 Get all short font tags
+  static getShortFontTags() {
+      return [...this.#activeShortFontTags];
+  }
+
+  // 🔹 Get all font names
+  static getFontNames() {
+      return Array.from(this.#activeFonts.values());
+  }
+
+  // 🔹 Delete a font by font tag
+  static deleteFont(fontTag) {
+      const index = this.#activeFontTags.indexOf(fontTag);
+      if (index !== -1) {
+          this.#activeFontTags.splice(index, 1);
+          this.#activeShortFontTags.splice(index, 1);
+          this.#activeFonts.delete(fontTag);
+      } else {
+          console.log(`Font with tag ${fontTag} not found in cache.`);
+      }
+  }
+
     static clearCache() {
-      this.activeProjectName = "";
-      this.activeThemeModesInSemantic = [];
-      this.activeSemanticNames.clear();
-      this.activeSemantics.clear();
-      this.activePrimitiveNames = [];
-      this.activePrimitives.clear();
-      this.activeProjectNames = [];
+      this.#activeProject = "";
+      this.#activeThemeModesInSemantic = [];
+      this.#activeSemanticNames.clear();
+      this.#activeSemantics.clear();
+      this.#activePrimitiveNames = [];
+      this.#activePrimitives.clear();
+      this.#activeProjects = [];
+
     }
   }
 
   class SessionManager {
-    static HOME_SCREEN = "home-screeen";
+    static HOME_SCREEN = "home-screen";
+    static PROJECT_MANAGEMENT_SCREEN = "project-management-screen";
     static COLORS_SCREEN = "colors-screen";
+    static FONTS_SCREEN = "fonts-screen";
     static TOOLS_SCREEN = "tools-screen";
     static INFO_SCREEN = "info-screen";
     static IMPORT_JSON_SCREEN = "import-json-screen";
@@ -225,7 +327,7 @@
 
     static setSessionData(key, value) {
       chrome.storage.session.set({ [key]: value }, () => {
-        //console.log(`[info] : ${key} set to '${value}' in current session.`);
+        console.log(`[info] : ${key} set to '${value}' in current session.`);
       });
     }
     
@@ -329,8 +431,8 @@
 
     static semanticThemeModeCell(themeMode, isDefault = false) {
       const newTh = document.createElement('td');
-      newTh.setAttribute("data-modal-target", "edit-theme-mode-modal");
-      newTh.setAttribute("data-modal-toggle", "edit-theme-mode-modal");
+      newTh.setAttribute("data-modal-target", "theme-modal");
+      newTh.setAttribute("data-modal-toggle", "theme-modal");
       newTh.setAttribute("theme-mode", themeMode);
       newTh.setAttribute("default-theme-header", isDefault);  newTh.classList.add("semantic-table-cell");
       newTh.classList.add("semantic-table-cell-has-padding");
@@ -422,7 +524,7 @@
     }
 
     static showHomeScreen() { 
-      this.switchScreen("home-screen"); 
+      this.switchScreen(SessionManager.HOME_SCREEN); 
       this.showBottomNavBar();
 
       SessionManager.setScreen(SessionManager.HOME_SCREEN);
@@ -438,17 +540,31 @@
       document.getElementById("projects-container").classList.replace("hidden", "visible");
     }
 
+    static showProjectManagementScreen() {
+      this.switchScreen(SessionManager.PROJECT_MANAGEMENT_SCREEN); 
+      this.hideBottomNavBar();
+
+      SessionManager.setScreen(SessionManager.PROJECT_MANAGEMENT_SCREEN);
+    }
+
     static showColorsScreen() {
-      this.switchScreen("colors-screen");
+      this.switchScreen(SessionManager.COLORS_SCREEN);
       this.hideBottomNavBar();
 
       SessionManager.setScreen(SessionManager.COLORS_SCREEN);
       SessionManager.setColorTab(SessionManager.PRIMITIVES_COLOR_TAB);
-      SessionManager.setProject(CacheOperations.getProjectName());
+      SessionManager.setProject(CacheOperations.activeProject);
+    }
+
+    static showFontsScreen() {
+      this.switchScreen(SessionManager.FONTS_SCREEN);
+      this.hideBottomNavBar();
+
+      SessionManager.setScreen(SessionManager.FONTS_SCREEN);
     }
 
     static showImportJsonScreen() {
-    this.switchScreen("import-json-screen");
+    this.switchScreen(SessionManager.IMPORT_JSON_SCREEN);
     this.hideBottomNavBar();
 
     SessionManager.setScreen(SessionManager.IMPORT_JSON_SCREEN);
@@ -499,8 +615,46 @@
     }
   }
 
-
-
+  class BlockyInjector{
+    
+    static updateColorThemes(colorThemeData){
+      if (shouldUpdateBlocky) {
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            type: "UPDATE_COLOR_THEMES",
+            blockType: "component_method",
+            componentName: "ThMLT_CE",
+            methodName: "InitializeV3",
+            argPosition: 0,
+            newArgValue: colorThemeData
+          }, function(response) {
+            if(response && response.result) {
+              console.log(...Logger.multiLog(
+                ["[BLOCKLY INJECTION]", Logger.Types.CRITICAL, Logger.Formats.BOLD],
+                ["For"],
+                [`ThMLT_CE.`, Logger.Types.INFO],
+                [`InitializeV3.`, Logger.Types.WARNING],
+                [`ARG0`, Logger.Types.SUCCESS],
+                ["changed to\n"],
+                [`${colorThemeData}`]
+              ));
+            } else {
+              console.log(...Logger.multiLog(
+                ["[BLOCKY UPDATE ERROR]", Logger.Types.ERROR, Logger.Formats.BOLD],
+                ["No response received from content script.", Logger.Types.ERROR]
+              ));
+            }
+          });
+        });
+      } else{
+        console.log(...Logger.multiLog(
+          ["[BLOCKY UPDATE]", Logger.Types.WARNING, Logger.Formats.BOLD],
+          ["Blocky update is disabled."]
+        ));
+        
+      }
+    }
+  }
   // **Example Usage**
 
 /* 1. Single Log */
@@ -552,15 +706,45 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
   let currentPrimitiveRowId = 1;
   let currentSemanticRowId = 1;
 
+  let currentFontsRowId = 1;
+
+  let shouldUpdateBlocky = true;
+
   const nameRegex = /^[A-Za-z0-9-_]+$/;
 
   let oldPrimitiveInputValues = new Map();
 
   let semanticTableColumns = 2;
 
-  const bottomNavBar = document.getElementById("bottom-nav-bar");
+  let confirmationCallback = null;
+  let confirmationModal = null;
+
+  let pickrInstance = null;
   
   document.addEventListener('DOMContentLoaded', () => {
+
+    messageModal = new Modal(document.getElementById("message-modal"), {
+      onHide: () => {
+          document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
+              backdrop.remove();
+          });
+      }
+    });
+    // Gets the Confirmation Modal
+    confirmationModal = new Modal(document.getElementById("confirmation-modal"), {
+      onHide: () => {
+          document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
+              backdrop.remove();
+          });
+      }
+    });
+
+    // Excecutes callback passed by openConfirmation function
+    document.getElementById("confirmation-modal-confirm-button").addEventListener("click", function() {
+      if (confirmationCallback) {
+          confirmationCallback();
+      }
+    });
     
     document.querySelectorAll('[data-nav-button-screen-target]').forEach(button => {
       button.addEventListener('click', () => {
@@ -568,6 +752,40 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
       });
     });
     ScreenManager.showHomeScreen();
+
+    // If Pickr instance doesn't exist, create it
+    if (!pickrInstance) {
+      pickrInstance = Pickr.create({
+        el: '#primitive-modal-color-picker-container', 
+        theme: 'classic',
+        default: "#FFFFFF",
+        components: {
+          preview: true,
+          hue: true,
+          interaction: {
+            hex: true,
+            rgba: true,
+            input: true,
+            save: false
+          }
+        }
+      });
+      const pickrRoot = document.querySelector('.pickr'); // Root element of Pickr
+      pickrRoot.style.border = '1px solid #D1D5DB'; // Set border color
+      pickrRoot.style.borderRadius = '5px'; // Set border color
+
+      const primitiveModalColorText = document.getElementById("primitive-modal-color-text");
+      //const editPrimitiveModalColorText = document.getElementById("edit-primitive-modal-color-text");
+      const button = document.querySelector(".pcr-button");
+
+      
+      pickrInstance.on('change', (color) => {
+        const hex = color.toHEXA().toString(); 
+        button.style.setProperty("--pcr-color", hex);
+        
+        primitiveModalColorText.textContent = hex;
+      });
+    }
   });
 
   async function restoreSession() {
@@ -596,7 +814,7 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
         currentPrimitiveRowId = 1;
         currentSemanticRowId = 1;
 
-        CacheOperations.updateProjectName(sessionProject);
+        CacheOperations.activeProject = sessionProject;
 
         getAllPrimitiveColors(sessionProject);
         getAllSemanticColors(sessionProject);
@@ -640,11 +858,31 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
 
   }
 
+  function openConfirmation(message, callback, confirmButtonText = '@default', cancelButtonText = '@default') {
+    document.getElementById("confirmation-modal-message").innerHTML = message;
 
+    document.getElementById("confirmation-modal-confirm-button").innerText = confirmButtonText !== "@default" ? confirmButtonText : "Yes, I'm sure";
 
-  
+    document.getElementById("confirmation-modal-cancel-button").innerText = cancelButtonText !== "@default" ? cancelButtonText : "No, cancel";
 
+    confirmationModal.show();
 
+    // Store the callback function
+    confirmationCallback = callback;
+  }
 
+  function showMessage(title, message, buttonText = "OK") {
+    document.getElementById("message-modal-title").innerText = title;
+    document.getElementById("message-modal-text").innerText = message;
+    document.getElementById("message-modal-button").innerText = buttonText
+    messageModal.show();
+  }
 
-
+  function replaceClass(element, prefix, newClass) {
+    element.className = element.className
+        .split(" ") // Split into array
+        .filter(cls => !cls.startsWith(prefix)) // Remove old class with prefix
+        .join(" "); // Convert back to string
+    
+    element.classList.add(newClass); // Add new class
+  }

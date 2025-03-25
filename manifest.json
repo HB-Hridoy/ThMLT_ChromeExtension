@@ -3,6 +3,7 @@
   "name": "ThMLT Color Theme Editor",
   "version": "1.0",
   "description": "",
+  "host_permissions": ["https://ai2.appinventor.mit.edu/*"],
   "icons": {
     "16": "assets/images/icon-16.png",
     "48": "assets/images/icon-48.png",
@@ -17,6 +18,23 @@
   "side_panel": {
     "default_path": "sidepanel.html"
   },
-  "permissions": ["sidePanel","storage"]
+  "permissions": ["sidePanel","storage","scripting", "activeTab"],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "BlockyWorkspaceInjector.js",
+        "Extras/textFormatterPopup/textFormatterPopup.html",
+        "Extras/textFormatterPopup/textFormatterPopup.css"
+      ],
+      "matches": ["https://ai2.appinventor.mit.edu/*"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://ai2.appinventor.mit.edu/*"],
+      "js": ["thmlt-ai2-content-script.js"],
+      "run_at": "document_end"
+    }
+  ]
   
 }

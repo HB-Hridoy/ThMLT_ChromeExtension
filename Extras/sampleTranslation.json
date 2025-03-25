@@ -1,0 +1,15 @@
+{
+  "SupportedLanguages": ["en", "bn"],
+  "DefaultLanguage": "en",
+  "Translations": {
+      "LandingScreen":"thmltSection",
+      "home":{
+          "en":"Home",
+          "bn":""
+      },
+      "discover":{
+          "en":"Discover",
+          "bn":""
+      }
+  }
+}

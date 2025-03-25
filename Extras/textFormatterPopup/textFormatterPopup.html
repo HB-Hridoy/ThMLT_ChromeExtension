@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="textFormatterPopup.css">
+    <title>Text Formatter popup</title>
+</head>
+<body>
+    
+
+    <div id="textFormatterPopup">
+        
+         <div id="textFormatterNavTabs" class="textFormatterNavTabs">
+                
+                <div id="translation-tab" isTabSelected="true" class="textFormatterNavTabSelected">Translation</div>
+            
+                <div id="font-tab" isTabSelected="false" class="textFormatterNavTab">Font</div>
+            
+                <div id="color-tab" isTabSelected="false" class="textFormatterNavTab">Color</div>
+            
+            </div>
+            <div class="screensContainerParent">
+                <div class="screensContainer" style="display: block;">
+                    <div id="translationScreen" >
+
+                        <div class="searchTranslationParent">
+                            <svg width="1rem" height="1rem" style="color:var(--gray-500) ;"  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                            </svg>
+                            <input 
+                                class="searchTranslationInput"
+                                placeholder="Search Translation...">
+                            </input>
+                        </div>
+
+                        <div id="tarnslationScopeSections" style="margin: 0.5rem;">
+                            <span id="translation-scope-All" class="translationScopeSelectionInactive">
+                                All
+                            </span>
+                            <span id="translation-scope-Global" class="translationScopeSelectionInactive ">
+                                Global
+                            </span>
+                            <span id="translation-scope-Screen1" class="translationScopeSelectionActive">
+                                Screen1
+                            </span>
+                        </div>
+                        <table id="translationTable" class="tableWrapper">
+                            <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Translation (en)</th>
+                            </tr>
+                            </thead>
+                            <tbody class="translationTableBody">    
+                            </tbody>
+                        </table>
+
+                        
+                        
+
+                    </div>
+                    <div id="fontScreen" style="display: none;">
+                        <table id="fontTable" class="tableWrapper">
+                            <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Font Name</th>
+                            </tr>
+                            </thead>
+                            <tbody class="fontTableBody">    
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="colorScreen" style="display: none;">
+                        <div class="searchColorParent">
+                            <svg width="1rem" height="1rem" style="color:var(--gray-500) ;"  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                            </svg>
+                            <input 
+                                class="searchColorInput"
+                                placeholder="Search Color...">
+                            </input>
+                        </div>
+
+                        <table id="colorTable" class="tableWrapper">
+                            <thead>
+                            <tr>
+                                <th>Semantic Name</th>
+                                <th class="themeModeText">Light Theme</th>
+                            </tr>
+                            </thead>
+                            <tbody class="colorTableBody">    
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        
+        <div class="popupButtonsParent">
+            <div id="closeFormatterPopup" class="buttonRed" style="width: 40%;">
+                Close
+            </div>
+            <div class="buttonBlue"style="width: 40%;">
+                Apply
+            </div>
+        </div>
+    </div>
+<script src="textFormatterPopup.js"></script>
+</body>
+
+</html>
