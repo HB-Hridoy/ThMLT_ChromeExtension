@@ -43,7 +43,7 @@
       ScreenManager.showHomeScreen();
     });
 
-    projectManagementOptionsContainer.addEventListener("click", (e)=>{
+    projectManagementOptionsContainer.addEventListener("click", async (e)=>{
       const target = e.target;
 
       if (target.closest("#pm-color-themes")) {
@@ -68,8 +68,37 @@
         
         
       }else if (target.closest("#pm-translations")) {
-        console.log("translations clicked");
-        
+        const statusError = document.getElementById("translation-status-error");
+        const statusImported = document.getElementById("translation-status-imported");
+
+        if (statusImported.classList.contains("hidden")) {
+          importTranslations();
+        } else {
+          const message = "Importing translations will overwrite the existing translations. Are you sure you want to continue?";
+          openConfirmation(message, async () => {
+            importTranslations();
+          }, "Yes, Update");
+        }
+
+        async function importTranslations() {
+          try {
+            const translationJson = await getTranslationFile();
+
+            try {
+              addTranslations(CacheOperations.activeProject, translationJson);
+              AlertManager.success("Translations imported successfully.");
+              statusImported.classList.toggle("hidden", false);
+              statusError.classList.toggle("hidden", true);
+            } catch (error) {
+              AlertManager.error("Error importing translations. Please check the logs.");
+              console.error("Error importing translations:", error);
+            }
+            
+          } catch (error) {
+            //console.error("Translation JSON contains errors:", error);
+            showMessage("Translation JSON contains errors", error);
+          }
+        };
       }
     });
 
@@ -154,7 +183,7 @@
         }
     });
 
-    document.getElementById("projects-container").addEventListener("click", function(event) {
+    document.getElementById("projects-container").addEventListener("click", async function(event) {
         // Check if the clicked element or any of its parents has the 'project-preview-parent' class
         if (event.target.closest('.project-preview-parent')) {
 
@@ -167,6 +196,17 @@
           document.getElementById("pm-project-name").innerText = CacheOperations.activeProject;
 
           ScreenManager.showProjectManagementScreen();
+
+          try {
+            const statusError = document.getElementById("translation-status-error");
+            const statusImported = document.getElementById("translation-status-imported");
+
+            const isTranslationsAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
+            statusError.classList.toggle("hidden", isTranslationsAvailable);
+            statusImported.classList.toggle("hidden", !isTranslationsAvailable);
+          } catch (error) {
+            console.error("Error checking translation data availability:", error);
+          }
 
         }
       });
@@ -264,3 +304,79 @@
         return true;
       }
     }
+
+    function getTranslationFile() {
+      return new Promise((resolve, reject) => {
+
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json"; // Only allow JSON files
+    
+        input.onchange = function(event) {
+            const file = event.target.files[0]; // Get selected file
+            if (!file) return;
+    
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let jsonData = JSON.parse(e.target.result); // Parse JSON
+                    let errors = [];
+    
+                    // Validate SupportedLanguages and DefaultLanguage
+                    if (!jsonData.SupportedLanguages || !Array.isArray(jsonData.SupportedLanguages)) {
+                        errors.push("SupportedLanguages must be an array.");
+                        jsonData.SupportedLanguages = []; // Fix issue
+                    }
+    
+                    if (!jsonData.DefaultLanguage || !jsonData.SupportedLanguages.includes(jsonData.DefaultLanguage)) {
+                        errors.push("DefaultLanguage must be one of the SupportedLanguages.");
+                        jsonData.DefaultLanguage = jsonData.SupportedLanguages[0] || "en"; // Auto-fix
+                    }
+    
+                    if (!jsonData.Translations || typeof jsonData.Translations !== "object") {
+                        errors.push("Translations must be an object.");
+                        jsonData.Translations = {}; // Fix issue
+                    }
+    
+                    // Validate each translation entry
+                    for (const key in jsonData.Translations) {
+                        const value = jsonData.Translations[key];
+    
+                        if (typeof value === "string") {
+                            // Section Object (Valid)
+                        } else if (typeof value === "object") {
+                            // Translation Object - Check if all SupportedLanguages exist
+                            jsonData.SupportedLanguages.forEach(lang => {
+                                if (!(lang in value)) {
+                                    errors.push(`Missing translation for '${key}' in language '${lang}'.`);
+                                    value[lang] = ""; // Auto-fix
+                                }
+                            });
+                        } else {
+                            errors.push(`Invalid translation entry for '${key}'. Must be a string (section) or object (translation).`);
+                            delete jsonData.Translations[key]; // Remove invalid entry
+                        }
+                    }
+
+                    // Log errors as text
+                    let logText = "";
+                    if (errors.length === 0) {
+                      resolve(jsonData);
+                    } else {
+                      reject(errors.join("\n"));        
+                    }
+                } catch (err) {
+                    console.error("Invalid JSON file:", err);
+                    reject("Invalid JSON file.");
+                }
+            };
+    
+            reader.readAsText(file);
+        };
+    
+        input.click(); // Open file dialog
+      });
+      
+  }
+  
+  

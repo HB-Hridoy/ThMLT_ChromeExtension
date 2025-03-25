@@ -723,6 +723,13 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
   
   document.addEventListener('DOMContentLoaded', () => {
 
+    messageModal = new Modal(document.getElementById("message-modal"), {
+      onHide: () => {
+          document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
+              backdrop.remove();
+          });
+      }
+    });
     // Gets the Confirmation Modal
     confirmationModal = new Modal(document.getElementById("confirmation-modal"), {
       onHide: () => {
@@ -864,6 +871,13 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
     confirmationCallback = callback;
   }
 
+  function showMessage(title, message, buttonText = "OK") {
+    document.getElementById("message-modal-title").innerText = title;
+    document.getElementById("message-modal-text").innerText = message;
+    document.getElementById("message-modal-button").innerText = buttonText
+    messageModal.show();
+  }
+
   function replaceClass(element, prefix, newClass) {
     element.className = element.className
         .split(" ") // Split into array
@@ -872,19 +886,3 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
     
     element.classList.add(newClass); // Add new class
   }
-
-
-
-
-
-
-  
-
-
-
-  
-
-
-
-
-

@@ -51,6 +51,14 @@ openDB.onupgradeneeded = function (event) {
     fontsStore.createIndex("orderIndex", "orderIndex", { unique: false });
   }
 
+  // Create 'translations' object store
+  if (!db.objectStoreNames.contains("translations")) {
+    let translationStore = db.createObjectStore("translations", { keyPath: "id", autoIncrement: true  });
+    translationStore.createIndex("projectName", "projectName", { unique: false });
+    translationStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
+    translationStore.createIndex("translationData", "translationData", { unique: false });
+  }
+
 };
 
 openDB.onsuccess = (event) => {
@@ -841,7 +849,7 @@ async function getAllSemanticColors(projectName) {
       ));
 
 
-      addSemanticColor(projectName, "surface-primary", "Light", "Click to link color");
+      addSemantic(projectName, "surface-primary", "Click to link color", "Light", currentSemanticRowId);
 
       addNewRowToSemanticTable("surface-primary", ["Click to link color"], ["Light"]);
 
@@ -1740,3 +1748,114 @@ function exportFonts(author, version) {
     request.onerror = () => reject("Error exporting font store");
   });
 }
+
+function addTranslations(projectName, translationJson) {
+
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+
+    let transaction = db.transaction(["translations"], "readwrite");
+    let store = transaction.objectStore("translations");
+    let index = store.index("projectName");
+    let getRequest = index.get(projectName);
+    
+    getRequest.onsuccess = function() {
+      let existingData = getRequest.result;
+      if (existingData) {
+          // Update existing record
+          existingData.defaultLanguage = translationJson.DefaultLanguage;
+          existingData.translationData = translationJson;
+          let updateRequest = store.put(existingData);
+          
+          updateRequest.onsuccess = function() {
+              console.log("Translation updated successfully");
+              resolve("Translation updated successfully");
+          };
+          
+          updateRequest.onerror = function() {
+              console.error("Error updating translation", updateRequest.error);
+              reject("Error updating translation");
+          };
+      } else {
+          // Add new record
+          let data = {
+              projectName: projectName,
+              defaultLanguage: translationJson.DefaultLanguage,
+              translationData: translationJson
+          };
+          
+          let addRequest = store.add(data);
+          
+          addRequest.onsuccess = function() {
+              console.log("Translation added successfully");
+              resolve("Translation added successfully");
+          };
+          
+          addRequest.onerror = function() {
+              console.error("Error adding translation", addRequest.error);
+              reject("Error adding translation");
+          };
+      }
+    }
+  });    
+}
+
+function getTranslationData(projectName) {
+
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["translations"], "readonly");
+    let store = transaction.objectStore("translations");
+    let index = store.index("projectName");
+    let getRequest = index.get(projectName);
+    
+    getRequest.onsuccess = function() {
+        if (getRequest.result) {
+          const translationData = getRequest.result.translationData;
+            resolve(translationData);
+            console.log(JSON.stringify(translationData, null, 2));
+        } else {
+            console.log("No translation found for project", projectName);
+            reject("No translation found for project");
+        }
+    };
+    
+    getRequest.onerror = function() {
+        console.error("Error retrieving translation", getRequest.error);
+        reject("Error retrieving translation");
+    };
+  });  
+}
+
+function isTranslationDataAvailable(projectName) {
+  return new Promise((resolve, reject) => {
+    if (!isDBOpenSuccess || !db) {
+      const error = "Database is not initialized";
+      console.error(error);
+      return reject(error);
+    }
+    let transaction = db.transaction(["translations"], "readonly");
+    let store = transaction.objectStore("translations");
+    let index = store.index("projectName");
+    let getRequest = index.get(projectName);
+    
+    getRequest.onsuccess = function() {
+        resolve(!!getRequest.result);
+    };
+    
+    getRequest.onerror = function() {
+        console.error("Error checking translation data", getRequest.error);
+        reject(false);
+    };
+  });
+}
+
+

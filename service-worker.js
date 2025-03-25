@@ -49,9 +49,13 @@ openDB.onupgradeneeded = function (event) {
     fontsStore.createIndex("orderIndex", "orderIndex", { unique: false });
   }
 
-
-
-  
+  // Create 'translations' object store
+  if (!db.objectStoreNames.contains("translations")) {
+    let translationStore = db.createObjectStore("translations", { keyPath: "id", autoIncrement: true  });
+    translationStore.createIndex("projectName", "projectName", { unique: false });
+    translationStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
+    translationStore.createIndex("translationData", "translationData", { unique: false });
+  }
 
 };
 
