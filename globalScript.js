@@ -201,10 +201,19 @@
       }
     }
 
-    static updatePrimitive(primitiveName, newPrimitiveValue) {
-      if (this.#activePrimitives.has(primitiveName)) {
-        this.#activePrimitives.set(primitiveName, newPrimitiveValue);
+    static updatePrimitive(primitiveName, newPrimitiveName, newPrimitiveValue) {
+
+      if (!this.#activePrimitives.has(primitiveName)) {
+        return;
       }
+
+      if (newPrimitiveName !== "@default" || newPrimitiveValue !== "@default") {
+        const updatedName = newPrimitiveName !== "@default" ? newPrimitiveName : primitiveName;
+        const updatedValue = newPrimitiveValue !== "@default" ? newPrimitiveValue : this.#activePrimitives.get(primitiveName);
+
+        this.deletePrimitive(primitiveName);
+        this.addPrimitive(updatedName, updatedValue);
+      }  
     }
 
     static deletePrimitive(primitiveName) {

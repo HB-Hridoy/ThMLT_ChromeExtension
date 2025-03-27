@@ -326,6 +326,16 @@
           primitiveModal.hide();
           AlertManager.success(result, 2500);
 
+          //Sync Primitive Data to Semantic Table
+          semanticTableBody.querySelectorAll(`td.semantic-table-cell.semantic-value-cell`).forEach(cell => {
+            const thumbnailElement = cell.querySelector(`.semantic-color-thumbnail`);
+            const semanticNameElement = cell.querySelector(`.semantic-pill-text`);
+
+            semanticNameElement.innerHTML = newPrimitiveName;
+            thumbnailElement.style.backgroundColor = newPrimitiveValue;    
+          
+          });
+
           primitiveNameElement.innerHTML = newPrimitiveName;
           primiitveValueElement.innerHTML = newPrimitiveValue;
           primiitveColorBoxElement.style.backgroundColor = newPrimitiveValue;
@@ -793,12 +803,13 @@
   });
 
   document.getElementById("select-primitive-modal-primitives-container").addEventListener("click", async (e) =>{
+    
     const target = e.target;
     if (target.closest("li[data-index][data-primitive-name][data-primitive-value]")){
 
       try {
         const liElement = target.closest("li[data-index][data-primitive-name][data-primitive-value]");
-
+        
         const dataIndex = liElement.getAttribute("data-index");
         const primitiveName = liElement.getAttribute("data-primitive-name");
         const primitiveValue = liElement.getAttribute("data-primitive-value");
@@ -806,7 +817,7 @@
         const themeMode = selectPrimitiveModal.getAttribute("theme-mode");
         const semanticName = selectPrimitiveModal.getAttribute("semantic-name");
 
-        const result =  await updateSemanticValue(CacheOperations.activeProject, semanticName, themeMode, primitiveName);
+        await updateSemantic(CacheOperations.activeProject, semanticName, "@default", themeMode, primitiveName, "@default", true);
 
         const tableBody = document.querySelector("#semantic-table tbody");
         // Get the <td> element with the specific data-index and class
@@ -824,6 +835,7 @@
         CloseSelectPrimitiveModal();
         
       } catch (error) {
+        console.error(error);
         
       }
       
