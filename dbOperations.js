@@ -397,6 +397,7 @@ function updatePrimitive(projectName, primitiveName, newPrimitiveName = "@defaul
             ["successfully."]
           ));
         }
+        CacheOperations.updatePrimitive(primitiveName, newPrimitiveName, newPrimitiveValue);
       
         resolve(`Updated primitive color '${primitiveName}' successfully.`);
       };
