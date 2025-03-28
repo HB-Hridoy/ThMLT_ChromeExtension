@@ -872,10 +872,13 @@
 
       const parentTd = target.closest('td');
       const dataIndex = parentTd ? parentTd.getAttribute('data-index') : null;
-      const semanticName = CacheOperations.getAllSemanticNames()[dataIndex - 1];
+      const semanticName = parentTd ? parentTd.closest('tr').querySelector('.semantic-name').textContent.trim() : null;
       const themeMode = parentTd ? parentTd.getAttribute('theme-mode') : null;
-
-      ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName);
+      if (dataIndex && semanticName && themeMode) {
+        ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName);
+      } else {
+        AlertManager.error("Internal error", 1000);
+      }
     } else if (target.tagName === "TD" && target.getAttribute("theme-mode")) {
 
       const isDefaultTheme = target.getAttribute("default-theme-header");
