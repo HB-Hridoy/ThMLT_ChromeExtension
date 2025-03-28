@@ -1,4 +1,4 @@
-# ThMLT Chrome Extension
+# ThMLT Chrome Extension (v1.0.1)
 
 This project is a Chrome extension designed to manage and manipulate themes, colors, and filter specific layouts for [ThMLT AI2 Extension](https://github.com/hridoy/ThMLT_ChromeExtension). The chrome extension provides various functionalities including importing/exporting JSON data, managing projects, and filtering layout components.
 
@@ -99,4 +99,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
+
+
+
 

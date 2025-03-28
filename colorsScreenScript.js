@@ -324,16 +324,18 @@
         try {
           const result = await updatePrimitive(CacheOperations.activeProject, primitiveName, newPrimitiveName, newPrimitiveValue, "@default");
           primitiveModal.hide();
-          AlertManager.success(result, 2500);
+          AlertManager.success(result, 1500);
 
           //Sync Primitive Data to Semantic Table
           semanticTableBody.querySelectorAll(`td.semantic-table-cell.semantic-value-cell`).forEach(cell => {
-            const thumbnailElement = cell.querySelector(`.semantic-color-thumbnail`);
-            const semanticNameElement = cell.querySelector(`.semantic-pill-text`);
 
-            semanticNameElement.innerHTML = newPrimitiveName;
-            thumbnailElement.style.backgroundColor = newPrimitiveValue;    
-          
+            const thumbnailElement = cell.querySelector(`.semantic-color-thumbnail`);
+            const semanticValueElement = cell.querySelector(`.semantic-pill-text`);
+
+            if (semanticValueElement.innerText.trim() === primitiveName) {
+              semanticValueElement.innerHTML = newPrimitiveName;
+              thumbnailElement.style.backgroundColor = newPrimitiveValue; 
+            }
           });
 
           primitiveNameElement.innerHTML = newPrimitiveName;
@@ -359,7 +361,20 @@
         const result = await deletePrimitiveColor(CacheOperations.activeProject, primitiveName);
 
         primitiveTableBody.removeChild(row);
-        AlertManager.success(result, 2500); 
+        AlertManager.success(result, 2500);
+
+        //Sync Primitive Data to Semantic Table
+        semanticTableBody.querySelectorAll(`td.semantic-table-cell.semantic-value-cell`).forEach(cell => {
+
+          const thumbnailElement = cell.querySelector(`.semantic-color-thumbnail`);
+          const semanticValueElement = cell.querySelector(`.semantic-pill-text`);
+
+          if (semanticValueElement.innerText.trim() === primitiveName) {
+            semanticValueElement.innerHTML = "Click to link color";
+            thumbnailElement.style.backgroundColor = "#fff"; 
+          }
+        });
+
       } catch (error) {
         AlertManager.error(error, 2500);
       }
@@ -824,7 +839,7 @@
         const targetTd = tableBody.querySelector(`td.semantic-value-cell[data-index="${dataIndex}"][theme-mode="${themeMode}"]`);
 
         targetTd.querySelector(".semantic-color-thumbnail").style.backgroundColor = primitiveValue;
-        targetTd.querySelector(".semantic-pill-text").textContent = `/ ${primitiveName}`;
+        targetTd.querySelector(".semantic-pill-text").textContent = primitiveName
 
         const div = targetTd.querySelector(".semantic-mode-value");
 
