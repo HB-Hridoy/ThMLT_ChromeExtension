@@ -443,7 +443,11 @@
       newTh.setAttribute("data-modal-target", "theme-modal");
       newTh.setAttribute("data-modal-toggle", "theme-modal");
       newTh.setAttribute("theme-mode", themeMode);
-      newTh.setAttribute("default-theme-header", isDefault);  newTh.classList.add("semantic-table-cell");
+      newTh.setAttribute("default-theme-header", isDefault);
+      if (isDefault) {
+        newTh.style.backgroundColor = "#93c4fd";
+      }  
+      newTh.classList.add("semantic-table-cell");
       newTh.classList.add("semantic-table-cell-has-padding");
       newTh.innerHTML = themeMode;
 
