@@ -398,6 +398,16 @@ function updatePrimitive(projectName, primitiveName, newPrimitiveName = "@defaul
           ));
         }
         CacheOperations.updatePrimitive(primitiveName, newPrimitiveName, newPrimitiveValue);
+
+        // Unlink primitive color in semantic values
+        CacheOperations.getAllSemantics().forEach((themeData, themeMode) => {
+          Object.entries(themeData).forEach(([semanticName, semanticValue]) => {
+
+            if (semanticValue === primitiveName) {
+              updateSemantic(CacheOperations.activeProject, semanticName, "@default", themeMode, newPrimitiveName, "@default", true);
+            }
+          });
+        });
       
         resolve(`Updated primitive color '${primitiveName}' successfully.`);
       };
@@ -465,7 +475,7 @@ function deletePrimitiveColor(projectName, primitiveName) {
             Object.entries(themeData).forEach(([semanticName, semanticValue]) => {
 
               if (semanticValue === primitiveName) {
-                updateSemanticValue(CacheOperations.activeProject, semanticName, themeMode, "Click to link color");
+                updateSemantic(CacheOperations.activeProject, semanticName, "@default", themeMode, "Click to link color", "@default", true);
               }
             });
           });

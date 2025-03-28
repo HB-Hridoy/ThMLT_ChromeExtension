@@ -475,7 +475,7 @@
     static semanticTableValueCell(dataIndex, semanticValue, themeMode) {
       return `
                 <td class="semantic-table-cell semantic-value-cell" data-index = "${dataIndex}" theme-mode = ${themeMode}>
-                    <div class="semantic-mode-value semantic-mode-cell hide-border ${semanticValue === "Click to link color" ? 'bg-red-200' : 'bg-white'} bg-red-200">
+                    <div class="semantic-mode-value semantic-mode-cell hide-border bg-white">
                         <div class="semantic-alias-pill-cell semantic-alias-pill-base">
                             <div class="semantic-pill-cover "
                                 aria-disabled="false" 
@@ -487,7 +487,7 @@
                                         </div>
                                     </div>
                                     <div class="semantic-pill-text">
-                                                ${semanticValue === "Click to link color" ? semanticValue : "/ " + semanticValue}
+                                                ${semanticValue === "Click to link color" ? semanticValue : semanticValue}
                                     </div>
                                 </div>
                             </div>
