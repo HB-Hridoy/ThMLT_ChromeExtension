@@ -741,8 +741,11 @@
             const themeMode = cell.getAttribute('theme-mode');
             if (themeMode === CacheOperations.defaultThemeMode) {
               cell.setAttribute('default-theme-header', 'true');
+              cell.style.backgroundColor = "#93c4fd";
+              
             } else {
               cell.setAttribute('default-theme-header', 'false');
+              cell.style.backgroundColor = "#fff";
             }
           });
         }
