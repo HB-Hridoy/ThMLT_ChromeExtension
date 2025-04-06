@@ -2,11 +2,9 @@ let selectedTranslationTableRow = null;
 let selectedFontTableRow = null;
 let selectedColorTableRow = null;
 let shadowRoot = null;
-let textFormatterPopup = null; 
+
 let textFormatterModal = null;
-let tarnslationScopeSections = null;
-let textFormatterNavTabs = null;
-let isPopupOpen = false;
+let isTextFormatterModalOpen = false;
 let activeSearchInput = null;
 
 let activeProjectName = "";
@@ -20,28 +18,6 @@ let fontTable = null;
 let colorTable = null;
 
 let lastComponentNameText = "";
-
-// Establish a persistent connection (you can name it for clarity)
-const port = chrome.runtime.connect({ name: 'persistentConnection' });
-
-// Listen for messages on this port
-port.onMessage.addListener((msg) => {
-  if (msg.action === "Project Availability") {
-    
-    if (msg.status === "success") {
-      console.log(`${msg.projectName} is available`);
-
-        setTimeout(() => {
-          //popuplate table on success
-        }, 3000);
-      TextFormatterModal.show();
-    } else {
-      console.log(`${msg.projectName} is not available`);
-      alert(`${msg.projectName} is not available`);
-    }
-  
-  }
-});
 
 class MessageClient {
   /**
@@ -88,7 +64,7 @@ createShadowDOM();
     static async initialize(){
       try {
           // Fetch the HTML content
-          const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.html'));
+          const response = await fetch(chrome.runtime.getURL('Extras/textFormatterModal/textFormatterModal.html'));
 
           // Check if the fetch was successful
           if (!response.ok) {
@@ -103,7 +79,7 @@ createShadowDOM();
           tempDiv.innerHTML = htmlContent;
 
           // Find the specific element by its ID and get its inner text
-          const textFormatterPopupSourceElement = tempDiv.querySelector('#textFormatterPopup');
+          const textFormatterPopupSourceElement = tempDiv.querySelector('#textFormatterModal');
 
           if (textFormatterPopupSourceElement) {
             // Create the overlay div
@@ -126,7 +102,7 @@ createShadowDOM();
 
             console.log("Text formatter modal created inside Shadow DOM");
           } else {
-              console.error("Element #textFormatterPopup not found in source HTML");
+              console.error("Element #textFormatterModal not found in source HTML");
           }
           tempDiv.remove();
       } catch (error) {
@@ -135,7 +111,7 @@ createShadowDOM();
     }
 
     static show(){
-      isPopupOpen = true;
+      isTextFormatterModalOpen = true;
       shadowRoot.getElementById('overlay').style.display = 'block';
       textFormatterModal.style.display = 'block';
 
@@ -144,7 +120,7 @@ createShadowDOM();
     }
 
     static hide(){
-      isPopupOpen = false;
+      isTextFormatterModalOpen = false;
       shadowRoot.getElementById('overlay').style.display = 'none';
       textFormatterModal.style.display = 'none';
 
@@ -281,7 +257,7 @@ createShadowDOM();
 
     // Add a keydown event listener to refocus on the input if the specified keys are pressed
     document.addEventListener('keydown', (event) => {
-      if (isPopupOpen) {
+      if (isTextFormatterModalOpen) {
         // Check if the pressed key is in the refocusKeys array
         if (refocusKeys.includes(event.key.toLowerCase())) {
           // Use setTimeout to refocus on the input
@@ -324,7 +300,7 @@ createShadowDOM();
   
     // Load and inject styles inside Shadow DOM
     try {
-      const response = await fetch(chrome.runtime.getURL('Extras/textFormatterPopup/textFormatterPopup.css'));
+      const response = await fetch(chrome.runtime.getURL('Extras/textFormatterModal/textFormatterModal.css'));
       let cssText = await response.text();
   
       // Replace ":root" with ":host"
@@ -447,7 +423,6 @@ function createTestButton(toolBarElement) {
         toolBarElement.querySelector(".left").appendChild(newDiv);
 
         newDiv.addEventListener('click', async (e) => {
-          TextFormatterModal.show();
           const clickedElement = e.target.closest('td[thmltTestButtonDiv="true"]');
 
           const response = await MessageClient.sendMessage({ 
@@ -457,14 +432,11 @@ function createTestButton(toolBarElement) {
 
           if (response.status === "success") {
             console.log(`${response.projectName} is available`);
-      
-              //openTextFormatterPopup();
-              //TextFormatterModal.show();
+              TextFormatterModal.show();
       
               setTimeout(() => {
                 //refreshColorTable(response.projectData, response.themeMode);
               }, 500);
-            //openTextFormatterPopup();
           } else {
             console.log(`${response.projectName} is not available`);
             alert(`${response.projectName} is not available`);
@@ -542,10 +514,7 @@ function createEditTextWithThmltModalButton() {
                 if (!projectName && projectName === activeProjectName) {
                   //call isNeededUpdate
                 } else {
-                  port.postMessage({ 
-                    action: "Project Availability", 
-                    projectName: activeProjectName 
-                  });
+                 // fetch data
                 }
 
                 

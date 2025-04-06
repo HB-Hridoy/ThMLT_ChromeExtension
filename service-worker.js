@@ -68,62 +68,7 @@ openDB.onerror = function (event) {
   console.error("Database error:", event.target.errorCode);
 };
 
-chrome.runtime.onConnect.addListener((port) => {
-  if (port.name === 'persistentConnection') {
-    console.log('Persistent connection established');
-    
-    port.onMessage.addListener((msg) => {
-
-      if (msg.action === "Project Availability") {
-        console.log(`Checking ${msg.projectName} available on chrome.storage.local`);
-        
-        chrome.storage.local.get(["ThMLT-Projects"], async (result) => {
-          const projectNames = result["ThMLT-Projects"];
-          if ( projectNames && projectNames.includes(msg.projectName)) {
-            try {
-              defaultThemeMode = "";
-              const semanticColors = await getSemanticColors(msg.projectName);
-              port.postMessage({ 
-                  action: "Project Availability",
-                  status: "success",
-                  projectName: msg.projectName,
-                  projectData: semanticColors,
-                  themeMode: defaultThemeMode
-              });
-            } catch (error) {
-              port.postMessage({ 
-                  action: "Project Availability",
-                  status: "failed",
-                  projectName: msg.projectName,
-                  projectData: `Error fetching semantic colors:, ${error}`,
-                  themeMode: defaultThemeMode
-              });
-            }
-            
-            
-          } else {
-            port.postMessage({ 
-              action: "Project Availability",
-              status: "failed",
-              projectName: msg.projectName,
-              projectData: `Error fetching semantic colors:, ${error}`,
-              themeMode: defaultThemeMode
-          });
-          }
-        });
-      
-      }
-
-    });
-    
-    port.onDisconnect.addListener(() => {
-      console.log('Port disconnected');
-    });
-  }
-});
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  //console.log("📥 Received message:", message);
 
   if (message.action === "Project Availability") {
     console.log(`Checking ${message.projectName} available on chrome.storage.local`);
