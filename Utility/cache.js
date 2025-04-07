@@ -1,6 +1,6 @@
 class SessionCache {
   constructor() {
-      this.storage = sessionStorage; // Use sessionStorage for caching
+    this.storage = chrome.storage.session;
   }
 
   // ✅ Store data in session cache
