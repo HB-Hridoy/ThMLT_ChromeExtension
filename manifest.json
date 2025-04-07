@@ -10,7 +10,8 @@
     "128": "assets/images/icon-128.png"
   },
   "background": {
-    "service_worker": "service-worker.js"
+    "service_worker": "service-worker.js",
+    "type": "module"
   },
   "action": {
     "default_title": "Open ThMLT color theme editor"

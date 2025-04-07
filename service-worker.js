@@ -1,3 +1,7 @@
+import SessionCache from './Utility/cache.js';
+
+const cache = new SessionCache();
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 });

@@ -1,3 +1,5 @@
+import SessionCache from './Utility/cache.js';
+
 let selectedTranslationTableRow = null;
 let selectedFontTableRow = null;
 let selectedColorTableRow = null;
@@ -18,6 +20,8 @@ let fontTable = null;
 let colorTable = null;
 
 let lastComponentNameText = "";
+
+const cache = new SessionCache();
 
 class MessageClient {
   /**
@@ -559,6 +563,7 @@ function refreshTranslationTable(tableBody){
   fontTableBody.innerHTML = tableBodyRows;
   colorTableBody.innerHTML = tableBodyRows;
 }
+
 
 // function refreshColorTable(colorData, themeMode) {
 //   const colorTableBody = shadowRoot.querySelector('.colorTableBody');
