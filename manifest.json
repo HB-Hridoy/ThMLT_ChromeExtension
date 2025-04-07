@@ -24,8 +24,8 @@
     {
       "resources": [
         "BlockyWorkspaceInjector.js",
-        "Extras/textFormatterPopup/textFormatterPopup.html",
-        "Extras/textFormatterPopup/textFormatterPopup.css"
+        "Extras/textFormatterModal/textFormatterModal.html",
+        "Extras/textFormatterModal/textFormatterModal.css"
       ],
       "matches": ["https://ai2.appinventor.mit.edu/*"]
     }
