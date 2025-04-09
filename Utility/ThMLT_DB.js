@@ -1,3 +1,5 @@
+import SessionCache, { CACHE_KEYS } from '/Utility/cache.js';
+
 class ThMLT_DB {
   constructor(dbName, dbVersion) {
       this.db = null;
@@ -20,6 +22,7 @@ class ThMLT_DB {
       request.onerror = (event) => {
           console.error("Database error:", event.target.errorCode);
       };
+
   }
 
   // Create Object Stores
@@ -77,10 +80,11 @@ class ThMLT_DB {
   // Check if a project exists in the 'projects' store
   isProjectAvailable(projectName) {
     return new Promise((resolve, reject) => {
-        if (!this.db) {
-            reject("Database is not initialized yet.");
-            return;
-        }
+        if (!this.isDBOpenSuccess || !this.db) {
+            const error = "Database is not initialized";
+            console.error(error);
+            return reject(error);
+          }
 
         const transaction = this.db.transaction("projects", "readonly");
         const store = transaction.objectStore("projects");
@@ -93,6 +97,35 @@ class ThMLT_DB {
         request.onerror = () => {
             reject("Error checking project availability.");
         };
+    });
+  }
+
+  getAllProjects() {
+    return new Promise((resolve, reject) => {
+      if (!this.isDBOpenSuccess || !this.db) {
+        const error = "Database is not initialized";
+        console.error(error);
+        return reject(error);
+      }
+      const transaction = this.db.transaction(["projects"], "readonly");
+      const store = transaction.objectStore("projects");
+      const request = store.getAll();
+    
+      request.onsuccess = () => {
+        let result = request.result;
+        if (result.length > 0) {
+          const projectNames = result.map(project => project.projectName);
+          SessionCache.set(CACHE_KEYS.PROJECTS, projectNames);
+          console.log("All projects:", projectNames);
+          resolve(projectNames);
+        }
+      };
+    
+      request.onerror = (event) => {
+        const error = "Error getting projects: " + event.target.error;
+        console.error(error);
+        reject(error);
+      };
     });
   }
 }
