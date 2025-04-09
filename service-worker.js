@@ -1,6 +1,7 @@
-import SessionCache from './Utility/cache.js';
+import SessionCache, { CACHE_KEYS } from './Utility/cache.js';
+import ThMLT_DB from './Utility/ThMLT_DB.js';
 
-const cache = new SessionCache();
+const thmltDatabase = new ThMLT_DB("ThMLT DB", 1);
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
