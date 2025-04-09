@@ -1,75 +1,62 @@
-class SessionCache {
+// Define a constants object for your predefined keys
+const CACHE_KEYS = {
+    PROJECTS: 'projects',
+
+    TRANSLATION_DATA : 'translationData',
+    FONTS_DATA : 'fontsData',
+    PRIMARY_COLOR_DATA : 'primaryColorData',
+    SEMANTIC_COLOR_DATA : 'semanticColorData',
+
+    PREVIOUS_PROJECT_NAME: 'previousProjectName',
+    CURRENT_PROJECT_NAME: 'currentProjectName',
+
+};
+
+class HybridSessionCache {
     constructor() {
-        this.memoryCache = new Map(); // In-memory cache
-        this.storage = chrome.storage.local; // Persistent storage
-
-        // Load initial cache from chrome.storage.local
-        this._loadInitialCache();
-
-        // Listen for storage changes and update memoryCache
-        chrome.storage.onChanged.addListener((changes, areaName) => {
-            if (areaName === "local") {
-                this._updateMemoryCache(changes);
-            }
-        });
-    }
-
-    // ✅ Load all stored data from chrome.storage.local into memoryCache
-    _loadInitialCache() {
-        this.storage.get(null, (result) => {
-            Object.entries(result).forEach(([key, value]) => {
-                this.memoryCache.set(key, value);
-            });
-        });
-    }
-
-    // ✅ Update memoryCache when chrome.storage.local changes
-    _updateMemoryCache(changes) {
-        Object.entries(changes).forEach(([key, { newValue }]) => {
-            if (newValue !== undefined) {
-                this.memoryCache.set(key, newValue); // Update or add key
-            } else {
-                this.memoryCache.delete(key); // Remove key if deleted from storage
-            }
-        });
-    }
-
-    // ✅ Store data in memory and chrome.storage.local
-    set(key, value) {
-        this.memoryCache.set(key, value); // Fast access
-        this.storage.set({ [key]: value }); // Persist in storage
-    }
-
-    // ✅ Retrieve data from memory, then fallback to chrome.storage.local
-    get(key) {
-        if (this.memoryCache.has(key)) {
-            return this.memoryCache.get(key);
+        if (!HybridSessionCache.instance) {
+            this.cache = {}; // Shared in-memory storage
+            HybridSessionCache.instance = this;
         }
-
-        return new Promise((resolve) => {
-            this.storage.get([key], (result) => {
-                if (result[key]) {
-                    this.memoryCache.set(key, result[key]); // Cache it for faster access
-                    resolve(result[key]);
-                } else {
-                    resolve(null);
-                }
-            });
-        });
+        return HybridSessionCache.instance;
     }
 
-    // ✅ Remove data from both memory and storage
-    remove(key) {
-        this.memoryCache.delete(key);
-        this.storage.remove([key]);
+    // Store data in both memory and session storage
+    async set(key, value) {
+        this.cache[key] = value;
+        await chrome.storage.session.set({ [key]: value });
     }
 
-    // ✅ Clear everything
-    clear() {
-        this.memoryCache.clear();
-        this.storage.clear();
+    // Retrieve data from memory first, fallback to session storage
+    async get(key) {
+        if (this.cache[key]) {
+            return this.cache[key];
+        }
+        return this.getFromSessionStorage(key);
+    }
+
+    // Fetch from session storage and update memory cache
+    async getFromSessionStorage(key) {
+        const result = await chrome.storage.session.get(key);
+        this.cache[key] = result[key] || null;
+        return this.cache[key];
+    }
+
+    // Remove a specific key from both caches
+    async remove(key) {
+        delete this.cache[key];
+        await chrome.storage.session.remove(key);
+    }
+
+    // Clear the entire cache
+    async clear() {
+        this.cache = {};
+        await chrome.storage.session.clear();
     }
 }
 
-// Export the class for usage in other parts of the extension
+// Ensure only one instance is used across the extension
+const SessionCache = new HybridSessionCache();
+export { CACHE_KEYS };
 export default SessionCache;
+
