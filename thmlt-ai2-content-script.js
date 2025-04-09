@@ -95,226 +95,218 @@ class MessageClient {
 }
 
 createShadowDOM();
-// // ✅ **Usage Example:**
-// MessageClient.sendMessage({ action: "getData", payload: "hello" })
-//   .then(response => {
-//     console.log("📩 Response received:", response);
-//   })
-//   .catch(err => {
-//     console.error("🚨 Error:", err.message);
-//   });
 
-  class TextFormatterModal {
+class TextFormatterModal {
 
-    static async initialize(){
-      try {
-          // Fetch the HTML content
-          const response = await fetch(chrome.runtime.getURL('Extras/textFormatterModal/textFormatterModal.html'));
+  static async initialize(){
+    try {
+        // Fetch the HTML content
+        const response = await fetch(chrome.runtime.getURL('Extras/textFormatterModal/textFormatterModal.html'));
 
-          // Check if the fetch was successful
-          if (!response.ok) {
-              throw new Error(`Failed to fetch source HTML: ${response.statusText}`);
+        // Check if the fetch was successful
+        if (!response.ok) {
+            throw new Error(`Failed to fetch source HTML: ${response.statusText}`);
+        }
+
+        // Get the HTML content as text
+        const htmlContent = await response.text();
+
+        // Create a temporary div element to parse the HTML content
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+
+        // Find the specific element by its ID and get its inner text
+        const textFormatterPopupSourceElement = tempDiv.querySelector('#textFormatterModal');
+
+        if (textFormatterPopupSourceElement) {
+          // Create the overlay div
+          const overlay = document.createElement('div');
+          overlay.id = 'overlay';
+
+          shadowRoot.appendChild(overlay);
+
+          textFormatterModal = document.createElement('div');
+          textFormatterModal.id = 'textFormatterModal';
+          textFormatterModal.innerHTML = textFormatterPopupSourceElement.innerHTML;
+
+          shadowRoot.appendChild(textFormatterModal);
+
+          overlay.addEventListener('click', () => {
+            TextFormatterModal.hide();
           }
-
-          // Get the HTML content as text
-          const htmlContent = await response.text();
-
-          // Create a temporary div element to parse the HTML content
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = htmlContent;
-
-          // Find the specific element by its ID and get its inner text
-          const textFormatterPopupSourceElement = tempDiv.querySelector('#textFormatterModal');
-
-          if (textFormatterPopupSourceElement) {
-            // Create the overlay div
-            const overlay = document.createElement('div');
-            overlay.id = 'overlay';
-
-            shadowRoot.appendChild(overlay);
-
-            textFormatterModal = document.createElement('div');
-            textFormatterModal.id = 'textFormatterModal';
-            textFormatterModal.innerHTML = textFormatterPopupSourceElement.innerHTML;
-
-            shadowRoot.appendChild(textFormatterModal);
-
-            overlay.addEventListener('click', () => {
-              TextFormatterModal.hide();
-            }
-            );
+          );
 
 
-            console.log("Text formatter modal created inside Shadow DOM");
-          } else {
-              console.error("Element #textFormatterModal not found in source HTML");
-          }
-          tempDiv.remove();
-      } catch (error) {
-          console.error('Error fetching source HTML:', error);
-      }
-    }
-
-    static show(){
-      isTextFormatterModalOpen = true;
-      shadowRoot.getElementById('overlay').style.display = 'block';
-      textFormatterModal.style.display = 'block';
-
-      console.log("Text formatter modal opened");
-      
-    }
-
-    static hide(){
-      isTextFormatterModalOpen = false;
-      shadowRoot.getElementById('overlay').style.display = 'none';
-      textFormatterModal.style.display = 'none';
-
-      console.log("Text formatter modal closed");
-      
-    }
-
-    static TranslationTable = class {
-      static selectTableRow(clickedRow){
-        if (!clickedRow) return; // Ignore clicks outside of rows
-
-        // If another row is already selected, revert its background
-        if (selectedTranslationTableRow) {
-            selectedTranslationTableRow.classList.remove('highlight');
+          console.log("Text formatter modal created inside Shadow DOM");
+        } else {
+            console.error("Element #textFormatterModal not found in source HTML");
         }
-
-        // If the same row is clicked, deselect it
-        if (selectedTranslationTableRow === clickedRow) {
-            selectedTranslationTableRow = null; // Reset selection
-            return;
-        }
-
-        // Highlight the clicked row
-        clickedRow.classList.add('highlight');
-        selectedTranslationTableRow = clickedRow; // Update the selected row
-      }
-
-      static selectScope(scope){
-        const targetScope = scope;
-        const scopeSections = shadowRoot.getElementById("tarnslationScopeSections");
-        const activeScope = scopeSections.querySelector('.translationScopeSelectionActive');
-
-        if (targetScope !== activeScope) {
-            const scopeElements = Array.from(scopeSections.children);
-
-            scopeElements.forEach(scopeElement => {
-                scopeElement.className = ''; 
-                if (scopeElement === targetScope) {
-                    scopeElement.classList.add('translationScopeSelectionActive'); 
-                } else {
-                    scopeElement.classList.add('translationScopeSelectionInactive'); 
-                }
-            });
-        }
-      }
-    }
-
-    static TabManager = class {
-
-      static #defaultTab = "translation-tab";
-      static #activeTab = null;
-      static #previousTab = null;
-      static #nextTab = null;
-
-      static switchToTab(tabId) {
-        const targetTab = shadowRoot.getElementById(tabId);
-
-        if (targetTab === this.#activeTab) return;
-
-        if (!this.#activeTab) {
-          this.#activeTab = shadowRoot.getElementById(this.#defaultTab);
-        }
-
-        // Update the previously active tab
-        this.#activeTab.classList.replace('textFormatterNavTabSelected', 'textFormatterNavTab');
-        this.#activeTab.setAttribute('isTabSelected', 'false');
-
-        // Set the new active tab
-        this.#activeTab = targetTab;
-        this.#activeTab.classList.replace('textFormatterNavTab', 'textFormatterNavTabSelected');
-        this.#activeTab.setAttribute('isTabSelected', 'true');
-
-        // Update tab screens visibility
-        Array.from(shadowRoot.getElementById("textFormatterNavTabs").children).forEach(tab => {
-          const tabScreen = shadowRoot.getElementById(tab.id.replace('-tab', '-screen'));
-          tabScreen.style.display = tab.id === tabId ? 'block' : 'none';
-        });
-      }
-      
-      static activeTab() {
-        return this.#activeTab ? this.#activeTab.id : this.#defaultTab;
-      }
-      
+        tempDiv.remove();
+    } catch (error) {
+        console.error('Error fetching source HTML:', error);
     }
   }
 
-  (async function() {
-    await TextFormatterModal.initialize();
-    TextFormatterModal.hide();
+  static show(){
+    isTextFormatterModalOpen = true;
+    shadowRoot.getElementById('overlay').style.display = 'block';
+    textFormatterModal.style.display = 'block';
 
-    translationTable = shadowRoot.getElementById("translationTable");
-    fontTable = shadowRoot.getElementById("fontTable");
-    colorTable = shadowRoot.getElementById("colorTable");
-    refreshTranslationTable();
+    console.log("Text formatter modal opened");
+    
+  }
 
-    // Close text formatter button 
-    shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', ()=>{
-      TextFormatterModal.hide();
-    });
+  static hide(){
+    isTextFormatterModalOpen = false;
+    shadowRoot.getElementById('overlay').style.display = 'none';
+    textFormatterModal.style.display = 'none';
 
-    // Switch Tabs
-    shadowRoot.getElementById("textFormatterNavTabs").addEventListener("click", (e) => {
-        TextFormatterModal.TabManager.switchToTab(e.target.id);
-    });
+    console.log("Text formatter modal closed");
+    
+  }
 
+  static TranslationTable = class {
+    static selectTableRow(clickedRow){
+      if (!clickedRow) return; // Ignore clicks outside of rows
 
-    translationTable.querySelector("tbody").addEventListener('click', function(event) {
-      TextFormatterModal.TranslationTable.selectTableRow(event.target.closest('tr'));
-    });
-
-    fontTable.querySelector("tbody").addEventListener('click', function(event) {
-      selectTableRow(event.target.closest('tr'), 'fontTable');
-    });
-
-    colorTable.querySelector("tbody").addEventListener('click', function(event) {
-      selectTableRow(event.target.closest('tr'), 'colorTable');
-    });
-
-    // Translation Scopes
-    shadowRoot.getElementById("tarnslationScopeSections").addEventListener("click", (e) => {
-        TextFormatterModal.TranslationTable.selectScope(e.target);
-    });
-
-    // Disable AI2 Keyboard shortcuts while modal is open or any infput focused
-    ['.searchTranslationInput', '.searchColorInput'].forEach(selector => {
-      const inputElement = shadowRoot.querySelector(selector);
-      inputElement.addEventListener('focus', () => {
-      activeSearchInput = inputElement;
-      });
-    });
-
-    // Define the keys that should refocus on input
-    const refocusKeys = ['/', 't', 'v', 'p', 'm'];
-
-    // Add a keydown event listener to refocus on the input if the specified keys are pressed
-    document.addEventListener('keydown', (event) => {
-      if (isTextFormatterModalOpen) {
-        // Check if the pressed key is in the refocusKeys array
-        if (refocusKeys.includes(event.key.toLowerCase())) {
-          // Use setTimeout to refocus on the input
-          setTimeout(() => {
-            activeSearchInput.focus(); // Keep the focus on the input field
-          }, 0);
-        }
+      // If another row is already selected, revert its background
+      if (selectedTranslationTableRow) {
+          selectedTranslationTableRow.classList.remove('highlight');
       }
-        
-    });
 
-  })();
+      // If the same row is clicked, deselect it
+      if (selectedTranslationTableRow === clickedRow) {
+          selectedTranslationTableRow = null; // Reset selection
+          return;
+      }
+
+      // Highlight the clicked row
+      clickedRow.classList.add('highlight');
+      selectedTranslationTableRow = clickedRow; // Update the selected row
+    }
+
+    static selectScope(scope){
+      const targetScope = scope;
+      const scopeSections = shadowRoot.getElementById("tarnslationScopeSections");
+      const activeScope = scopeSections.querySelector('.translationScopeSelectionActive');
+
+      if (targetScope !== activeScope) {
+          const scopeElements = Array.from(scopeSections.children);
+
+          scopeElements.forEach(scopeElement => {
+              scopeElement.className = ''; 
+              if (scopeElement === targetScope) {
+                  scopeElement.classList.add('translationScopeSelectionActive'); 
+              } else {
+                  scopeElement.classList.add('translationScopeSelectionInactive'); 
+              }
+          });
+      }
+    }
+  }
+
+  static TabManager = class {
+
+    static #defaultTab = "translation-tab";
+    static #activeTab = null;
+    static #previousTab = null;
+    static #nextTab = null;
+
+    static switchToTab(tabId) {
+      const targetTab = shadowRoot.getElementById(tabId);
+
+      if (targetTab === this.#activeTab) return;
+
+      if (!this.#activeTab) {
+        this.#activeTab = shadowRoot.getElementById(this.#defaultTab);
+      }
+
+      // Update the previously active tab
+      this.#activeTab.classList.replace('textFormatterNavTabSelected', 'textFormatterNavTab');
+      this.#activeTab.setAttribute('isTabSelected', 'false');
+
+      // Set the new active tab
+      this.#activeTab = targetTab;
+      this.#activeTab.classList.replace('textFormatterNavTab', 'textFormatterNavTabSelected');
+      this.#activeTab.setAttribute('isTabSelected', 'true');
+
+      // Update tab screens visibility
+      Array.from(shadowRoot.getElementById("textFormatterNavTabs").children).forEach(tab => {
+        const tabScreen = shadowRoot.getElementById(tab.id.replace('-tab', '-screen'));
+        tabScreen.style.display = tab.id === tabId ? 'block' : 'none';
+      });
+    }
+    
+    static activeTab() {
+      return this.#activeTab ? this.#activeTab.id : this.#defaultTab;
+    }
+    
+  }
+}
+
+(async function() {
+  await TextFormatterModal.initialize();
+  TextFormatterModal.hide();
+
+  translationTable = shadowRoot.getElementById("translationTable");
+  fontTable = shadowRoot.getElementById("fontTable");
+  colorTable = shadowRoot.getElementById("colorTable");
+  refreshTranslationTable();
+
+  // Close text formatter button 
+  shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', ()=>{
+    TextFormatterModal.hide();
+  });
+
+  // Switch Tabs
+  shadowRoot.getElementById("textFormatterNavTabs").addEventListener("click", (e) => {
+      TextFormatterModal.TabManager.switchToTab(e.target.id);
+  });
+
+
+  translationTable.querySelector("tbody").addEventListener('click', function(event) {
+    TextFormatterModal.TranslationTable.selectTableRow(event.target.closest('tr'));
+  });
+
+  fontTable.querySelector("tbody").addEventListener('click', function(event) {
+    selectTableRow(event.target.closest('tr'), 'fontTable');
+  });
+
+  colorTable.querySelector("tbody").addEventListener('click', function(event) {
+    selectTableRow(event.target.closest('tr'), 'colorTable');
+  });
+
+  // Translation Scopes
+  shadowRoot.getElementById("tarnslationScopeSections").addEventListener("click", (e) => {
+      TextFormatterModal.TranslationTable.selectScope(e.target);
+  });
+
+  // Disable AI2 Keyboard shortcuts while modal is open or any infput focused
+  ['.searchTranslationInput', '.searchColorInput'].forEach(selector => {
+    const inputElement = shadowRoot.querySelector(selector);
+    inputElement.addEventListener('focus', () => {
+    activeSearchInput = inputElement;
+    });
+  });
+
+  // Define the keys that should refocus on input
+  const refocusKeys = ['/', 't', 'v', 'p', 'm'];
+
+  // Add a keydown event listener to refocus on the input if the specified keys are pressed
+  document.addEventListener('keydown', (event) => {
+    if (isTextFormatterModalOpen) {
+      // Check if the pressed key is in the refocusKeys array
+      if (refocusKeys.includes(event.key.toLowerCase())) {
+        // Use setTimeout to refocus on the input
+        setTimeout(() => {
+          activeSearchInput.focus(); // Keep the focus on the input field
+        }, 0);
+      }
+    }
+      
+  });
+
+})();
 
   /**
    * Creates a new script element named BlockyWorkspaceInjector.js
@@ -401,27 +393,38 @@ const observer = new MutationObserver(() => {
     } 
     
     if (projectEditorElement) {
-      const activeProjectNameElement = projectEditorElement.querySelector(".ya-ProjectName");
-      if (activeProjectNameElement) {
-        console.log("Active project name element found! Watching for text changes");
-
-        activeProjectName = activeProjectNameElement.innerText.trim(); 
-
-        // observer to watch for Project Name changes
-        const textObserver = new MutationObserver(() => {
-          const newProjectName = activeProjectNameElement.innerText.trim(); 
-
-          if (newProjectName !== activeProjectName) { 
-            activeProjectName = newProjectName;
-            console.log(`[Active Project] ${activeProjectName}`);
+      const projectNameElement = projectEditorElement.querySelector(".ya-ProjectName");
+    
+      if (projectNameElement) {
+        console.log("Project name element found! Watching for changes...");
+    
+        const initialProjectName = projectNameElement.innerText.trim();
+        if (initialProjectName !== cache.get(CACHE_KEYS.CURRENT_PROJECT_NAME)) {
+          cache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
+          cache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
+          cache.remove(CACHE_KEYS.FONTS_DATA);
+          cache.remove(CACHE_KEYS.TRANSLATION_DATA);
+        }
+        cache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, initialProjectName);
+    
+        // Observer to detect project name changes
+        const projectNameObserver = new MutationObserver(() => {
+          const updatedProjectName = projectNameElement.innerText.trim();
+    
+          if (updatedProjectName !== initialProjectName) {
+            cache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, updatedProjectName);
+            cache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
+            cache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
+            cache.remove(CACHE_KEYS.FONTS_DATA);
+            cache.remove(CACHE_KEYS.TRANSLATION_DATA);
+            console.log(`[Current Project] ${updatedProjectName}`);
           }
         });
-
-        textObserver.observe(propertiesComponentNameElement, { childList: true, subtree: true, characterData: true });
+    
+        projectNameObserver.observe(projectNameElement, { childList: true, subtree: true, characterData: true });
       }
-      
-      
     }
+    
 
     if (toolbarElement){
       console.log("Toolbar element found creating test button");
@@ -470,22 +473,28 @@ function createTestButton(toolBarElement) {
         newDiv.addEventListener('click', async (e) => {
           const clickedElement = e.target.closest('td[thmltTestButtonDiv="true"]');
 
-          const response = await MessageClient.sendMessage({ 
-            action: "Project Availability", 
-            projectName: "exTest" 
-          });
+          try {
+            const response = await MessageClient.sendMessage({ 
+              action: "Project Availability", 
+              projectName: "exTest" 
+            });
 
-          if (response.status === "success") {
-            console.log(`${response.projectName} is available`);
-              TextFormatterModal.show();
-      
-              setTimeout(() => {
-                //refreshColorTable(response.projectData, response.themeMode);
-              }, 500);
-          } else {
-            console.log(`${response.projectName} is not available`);
-            alert(`${response.projectName} is not available`);
+            if (response.status === "success") {
+              console.log(`${response.projectName} is available`);
+                TextFormatterModal.show();
+        
+                setTimeout(() => {
+                  //refreshColorTable(response.projectData, response.themeMode);
+                }, 500);
+            } else {
+              console.log(`${response.projectName} is not available`);
+              alert(`${response.projectName} is not available`);
+            }
+          } catch (error) {
+            console.error(error);
+            
           }
+          
         });
   
 }
