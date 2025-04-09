@@ -1,5 +1,3 @@
-import SessionCache from './Utility/cache.js';
-
 let selectedTranslationTableRow = null;
 let selectedFontTableRow = null;
 let selectedColorTableRow = null;
@@ -21,7 +19,50 @@ let colorTable = null;
 
 let lastComponentNameText = "";
 
-const cache = new SessionCache();
+const CACHE_KEYS = {
+  PROJECTS: 'projects',
+
+  TRANSLATION_DATA : 'translationData',
+  FONTS_DATA : 'fontsData',
+  PRIMARY_COLOR_DATA : 'primaryColorData',
+  SEMANTIC_COLOR_DATA : 'semanticColorData',
+
+  PREVIOUS_PROJECT_NAME: 'previousProjectName',
+  CURRENT_PROJECT_NAME: 'currentProjectName',
+  
+};
+
+class ContentScriptCache {
+  constructor() {
+      this.cache = {}; // In-memory storage
+  }
+
+  // Set data in both in-memory and session storage
+  set(key, value) {
+      this.cache[key] = value;
+  }
+
+  // Get data from memory first, fallback to session storage
+  get(key) {
+      // Check in-memory cache first
+      if (this.cache[key]) {
+          return this.cache[key];
+      }
+  }
+
+  // Remove a specific key from both in-memory and session storage
+  remove(key) {
+      delete this.cache[key];
+  }
+
+  // Clear all stored data from both in-memory and session storage
+  clear() {
+      this.cache = {};
+  }
+}
+
+const cache = new ContentScriptCache();
+
 
 class MessageClient {
   /**
