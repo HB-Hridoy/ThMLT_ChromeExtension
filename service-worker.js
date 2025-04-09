@@ -127,6 +127,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 
 
+
+async function isProjectAvailable(projectName) {
+  try {
+    const projects = await SessionCache.get(CACHE_KEYS.PROJECTS);
+
+    if (projects && projects.includes(projectName)) {
+      console.log("Project found in SessionCache");
+      return true;
+    } 
+
+    // Check the database if not found in SessionCache
+    return await thmltDatabase.isProjectAvailable(projectName);
+  } catch (error) {
+    console.error(`Error checking project availability: ${error.message}`);
+    return false; // Return false in case of an error
+  }
+}
+
+
 function getSemanticColors(projectName) {
   return new Promise((resolve, reject) => {
     if (!isDBOpenSuccess || !db) {
