@@ -65,24 +65,37 @@ const cache = new ContentScriptCache();
 
 
 class MessageClient {
+  constructor(timeout = 5000) {
+    this.timeout = timeout;
+  }
+
   /**
-   * Sends a message to the service worker (or background script).
+   * Sends a message to the service worker (or background script) using a callback or a Promise.
    * @param {Object} message - The message object to send.
-   * @param {number} [timeout=5000] - Timeout in milliseconds (default: 5000ms).
-   * @returns {Promise<Object>} - Resolves with the response message or rejects on error.
+   * @param {Function} [callback] - Optional callback function (error, response).
+   * @returns {Promise<Object>|void} - Resolves with the response message if no callback is provided.
    */
-  static sendMessage(message, timeout = 5000) {
+  sendMessage(message, callback) {
+    if (typeof callback === "function") {
+      this._sendWithCallback(message, callback);
+    } else {
+      return this._sendWithPromise(message);
+    }
+  }
+
+  /**
+   * Internal method to send a message using a Promise.
+   * @param {Object} message - The message object.
+   * @returns {Promise<Object>} - Resolves with the response or rejects on error.
+   */
+  _sendWithPromise(message) {
     return new Promise((resolve, reject) => {
-      let timeoutId;
-
-      // Set up a timeout to reject if no response is received
-      timeoutId = setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         reject(new Error("⏳ Timeout: No response from service worker."));
-      }, timeout);
+      }, this.timeout);
 
-      // Send message and wait for response
       chrome.runtime.sendMessage(message, (response) => {
-        clearTimeout(timeoutId); // Clear timeout if we get a response
+        clearTimeout(timeoutId);
 
         if (chrome.runtime.lastError) {
           reject(new Error(`❌ Runtime Error: ${chrome.runtime.lastError.message}`));
@@ -92,7 +105,30 @@ class MessageClient {
       });
     });
   }
+
+  /**
+   * Internal method to send a message using a callback.
+   * @param {Object} message - The message object.
+   * @param {Function} callback - Callback function (error, response).
+   */
+  _sendWithCallback(message, callback) {
+    const timeoutId = setTimeout(() => {
+      callback(new Error("⏳ Timeout: No response from service worker."), null);
+    }, this.timeout);
+
+    chrome.runtime.sendMessage(message, (response) => {
+      clearTimeout(timeoutId);
+
+      if (chrome.runtime.lastError) {
+        callback(new Error(`❌ Runtime Error: ${chrome.runtime.lastError.message}`), null);
+      } else {
+        callback(null, response);
+      }
+    });
+  }
 }
+
+const messageClient = new MessageClient();
 
 createShadowDOM();
 
