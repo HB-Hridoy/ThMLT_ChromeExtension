@@ -7,122 +7,103 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 });
 
+// setTimeout(async () => {
+//   await thmltDatabase.getAllProjects();
+//   console.log("all project stored in SessionCache");
+  
+// }, 5000);
+
 let defaultThemeMode = "";
 
-const openDB = indexedDB.open("ThMLT DB", 1);
-let db;
-let isDBOpenSuccess = false;
+// const openDB = indexedDB.open("ThMLT DB", 1);
+// let db;
+// let isDBOpenSuccess = false;
 
-openDB.onupgradeneeded = function (event) {
-  db = event.target.result;
+// openDB.onupgradeneeded = function (event) {
+//   db = event.target.result;
 
-  // Create 'projects' object store
-  if (!db.objectStoreNames.contains("projects")) {
-    let projectsStore = db.createObjectStore("projects", { keyPath: "projectName" });
-    projectsStore.createIndex("projectName", "projectName", { unique: true });
-    projectsStore.createIndex("author", "author", { unique: false });
-    projectsStore.createIndex("version", "version", { unique: false });
-    projectsStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
-  }
+//   // Create 'projects' object store
+//   if (!db.objectStoreNames.contains("projects")) {
+//     let projectsStore = db.createObjectStore("projects", { keyPath: "projectName" });
+//     projectsStore.createIndex("projectName", "projectName", { unique: true });
+//     projectsStore.createIndex("author", "author", { unique: false });
+//     projectsStore.createIndex("version", "version", { unique: false });
+//     projectsStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
+//   }
 
-  // Create 'primitiveColors' object store
-  if (!db.objectStoreNames.contains("primitiveColors")) {
-    let primitiveColorsStore = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true  });
-    primitiveColorsStore.createIndex("projectName", "projectName", { unique: false });
-    primitiveColorsStore.createIndex("primitiveName", "primitiveName", { unique: false });
-    primitiveColorsStore.createIndex("primitiveValue", "primitiveValue", { unique: false });
-    primitiveColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
-  }
+//   // Create 'primitiveColors' object store
+//   if (!db.objectStoreNames.contains("primitiveColors")) {
+//     let primitiveColorsStore = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true  });
+//     primitiveColorsStore.createIndex("projectName", "projectName", { unique: false });
+//     primitiveColorsStore.createIndex("primitiveName", "primitiveName", { unique: false });
+//     primitiveColorsStore.createIndex("primitiveValue", "primitiveValue", { unique: false });
+//     primitiveColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
+//   }
 
-  // Create 'semanticColors' object store
-  if (!db.objectStoreNames.contains("semanticColors")) {
-    let semanticColorsStore = db.createObjectStore("semanticColors", { keyPath: "id", autoIncrement: true  });
-    semanticColorsStore.createIndex("projectName", "projectName", { unique: false });
-    semanticColorsStore.createIndex("semanticName", "semanticName", { unique: false });
-    semanticColorsStore.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
-    semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
-    semanticColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
-  }
+//   // Create 'semanticColors' object store
+//   if (!db.objectStoreNames.contains("semanticColors")) {
+//     let semanticColorsStore = db.createObjectStore("semanticColors", { keyPath: "id", autoIncrement: true  });
+//     semanticColorsStore.createIndex("projectName", "projectName", { unique: false });
+//     semanticColorsStore.createIndex("semanticName", "semanticName", { unique: false });
+//     semanticColorsStore.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
+//     semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
+//     semanticColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
+//   }
 
-  // Create 'fonts' object store
-  if (!db.objectStoreNames.contains("fonts")) {
-    let fontsStore = db.createObjectStore("fonts", { keyPath: "id", autoIncrement: true  });
-    fontsStore.createIndex("projectName", "projectName", { unique: false });
-    fontsStore.createIndex("fontTag", "fontTag", { unique: false });
-    fontsStore.createIndex("shortFontTag", "shortFontTag", { unique: false });
-    fontsStore.createIndex("fontName", "fontName", { unique: false });
-    fontsStore.createIndex("orderIndex", "orderIndex", { unique: false });
-  }
+//   // Create 'fonts' object store
+//   if (!db.objectStoreNames.contains("fonts")) {
+//     let fontsStore = db.createObjectStore("fonts", { keyPath: "id", autoIncrement: true  });
+//     fontsStore.createIndex("projectName", "projectName", { unique: false });
+//     fontsStore.createIndex("fontTag", "fontTag", { unique: false });
+//     fontsStore.createIndex("shortFontTag", "shortFontTag", { unique: false });
+//     fontsStore.createIndex("fontName", "fontName", { unique: false });
+//     fontsStore.createIndex("orderIndex", "orderIndex", { unique: false });
+//   }
 
-  // Create 'translations' object store
-  if (!db.objectStoreNames.contains("translations")) {
-    let translationStore = db.createObjectStore("translations", { keyPath: "id", autoIncrement: true  });
-    translationStore.createIndex("projectName", "projectName", { unique: false });
-    translationStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
-    translationStore.createIndex("translationData", "translationData", { unique: false });
-  }
+//   // Create 'translations' object store
+//   if (!db.objectStoreNames.contains("translations")) {
+//     let translationStore = db.createObjectStore("translations", { keyPath: "id", autoIncrement: true  });
+//     translationStore.createIndex("projectName", "projectName", { unique: false });
+//     translationStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
+//     translationStore.createIndex("translationData", "translationData", { unique: false });
+//   }
 
-};
+// };
 
-openDB.onsuccess = (event) => {
-  isDBOpenSuccess = true;
-  db = openDB.result;
-};
+// openDB.onsuccess = (event) => {
+//   isDBOpenSuccess = true;
+//   db = openDB.result;
+// };
 
-openDB.onerror = function (event) {
-  console.error("Database error:", event.target.errorCode);
-};
+// openDB.onerror = function (event) {
+//   console.error("Database error:", event.target.errorCode);
+// };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
   if (message.action === "Project Availability") {
-    console.log(`Checking ${message.projectName} available on chrome.storage.local`);
-    
-    chrome.storage.local.get(["ThMLT-Projects"], async (result) => {
-
-      const projectNames = result["ThMLT-Projects"];
-
-      if ( projectNames && projectNames.includes(message.projectName)) {
-
-        try {
-
-          defaultThemeMode = "";
-          const semanticColors = await getSemanticColors(message.projectName);
-          sendResponse({ 
-              action: "Project Availability",
-              status: "success",
-              projectName: message.projectName,
-              projectData: semanticColors,
-              themeMode: defaultThemeMode
-          });
-
-        } catch (error) {
-
-          sendResponse({ 
-              action: "Project Availability",
-              status: "failed",
-              projectName: message.projectName,
-              projectData: `Error fetching semantic colors:, ${error}`,
-              themeMode: defaultThemeMode
-          });
-          
-        }
-        
-        
-      } else {
+    console.log(`Checking if ${message.projectName} is available`);
+    isProjectAvailable(message.projectName)
+      .then(isAvailable => {
+        sendResponse({ 
+          action: "Project Availability",
+          status: isAvailable ? "success" : "failed",
+          projectName: message.projectName,
+          projectData: "",
+          themeMode: ""
+        });
+      })
+      .catch(error => {
+        console.error(`Error checking project availability: ${error}`);
         sendResponse({ 
           action: "Project Availability",
           status: "failed",
           projectName: message.projectName,
-          projectData: `Error fetching semantic colors:, ${error}`,
-          themeMode: defaultThemeMode
+          projectData: "",
+          themeMode: ""
+        });
       });
-      }
-    });
-  
+    return true; // Keep the message channel open for async response
   }
-
-  return true; // Keep the sendResponse function valid for async responses
 });
 
 
