@@ -1,15 +1,41 @@
 {
-  "SupportedLanguages": ["en", "bn"],
-  "DefaultLanguage": "en",
-  "Translations": {
-      "LandingScreen":"thmltSection",
-      "home":{
-          "en":"Home",
-          "bn":""
-      },
-      "discover":{
-          "en":"Discover",
-          "bn":""
-      }
-  }
+    "SupportedLanguages": ["en", "bn", "es", "fr", "de"],
+    "DefaultLanguage": "bn",
+    "Translations": {
+            "home": {
+                    "en": "Home",
+                    "bn": "বাড়ি",
+                    "es": "Inicio",
+                    "fr": "Accueil",
+                    "de": "Startseite"
+            },
+            "discover": {
+                    "en": "Discover",
+                    "bn": "আবিষ্কার করুন",
+                    "es": "Descubrir",
+                    "fr": "Découvrir",
+                    "de": "Entdecken"
+            },
+            "settings": {
+                    "en": "Settings",
+                    "bn": "সেটিংস",
+                    "es": "Configuraciones",
+                    "fr": "Paramètres",
+                    "de": "Einstellungen"
+            },
+            "profile": {
+                    "en": "Profile",
+                    "bn": "প্রোফাইল",
+                    "es": "Perfil",
+                    "fr": "Profil",
+                    "de": "Profil"
+            },
+            "logout": {
+                    "en": "Logout",
+                    "bn": "প্রস্থান",
+                    "es": "Cerrar sesión",
+                    "fr": "Déconnexion",
+                    "de": "Abmelden"
+            }
+    }
 }

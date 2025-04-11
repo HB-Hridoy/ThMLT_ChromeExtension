@@ -9,20 +9,20 @@
 <body>
     
 
-    <div id="textFormatterPopup">
+    <div id="textFormatterModal">
         
          <div id="textFormatterNavTabs" class="textFormatterNavTabs">
                 
-                <div id="translation-tab" isTabSelected="true" class="textFormatterNavTabSelected">Translation</div>
+                <div id="translation-tab" isTabSelected="true" tfTabindex="1" class="textFormatterNavTabSelected">Translation</div>
             
-                <div id="font-tab" isTabSelected="false" class="textFormatterNavTab">Font</div>
+                <div id="font-tab" isTabSelected="false" tfTabindex="2" class="textFormatterNavTab">Font</div>
             
-                <div id="color-tab" isTabSelected="false" class="textFormatterNavTab">Color</div>
+                <div id="color-tab" isTabSelected="false" tfTabindex="3" class="textFormatterNavTab">Color</div>
             
             </div>
             <div class="screensContainerParent">
                 <div class="screensContainer" style="display: block;">
-                    <div id="translationScreen" >
+                    <div id="translation-screen" >
 
                         <div class="searchTranslationParent">
                             <svg width="1rem" height="1rem" style="color:var(--gray-500) ;"  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
@@ -33,23 +33,11 @@
                                 placeholder="Search Translation...">
                             </input>
                         </div>
-
-                        <div id="tarnslationScopeSections" style="margin: 0.5rem;">
-                            <span id="translation-scope-All" class="translationScopeSelectionInactive">
-                                All
-                            </span>
-                            <span id="translation-scope-Global" class="translationScopeSelectionInactive ">
-                                Global
-                            </span>
-                            <span id="translation-scope-Screen1" class="translationScopeSelectionActive">
-                                Screen1
-                            </span>
-                        </div>
                         <table id="translationTable" class="tableWrapper">
                             <thead>
                             <tr>
                                 <th>Key</th>
-                                <th>Translation (en)</th>
+                                <th id="defaultlanguage">Translation (en)</th>
                             </tr>
                             </thead>
                             <tbody class="translationTableBody">    
@@ -60,7 +48,7 @@
                         
 
                     </div>
-                    <div id="fontScreen" style="display: none;">
+                    <div id="font-screen" style="display: none;">
                         <table id="fontTable" class="tableWrapper">
                             <thead>
                             <tr>
@@ -72,7 +60,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div id="colorScreen" style="display: none;">
+                    <div id="color-screen" style="display: none;">
                         <div class="searchColorParent">
                             <svg width="1rem" height="1rem" style="color:var(--gray-500) ;"  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>

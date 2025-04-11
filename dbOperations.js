@@ -1,8 +1,11 @@
-const openDB = indexedDB.open("ThMLT DB", 1);
+
+
 console.log(...Logger.multiLog(
   ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
   ["Getting database ready"]
 ));
+const openDB = indexedDB.open("ThMLT DB", 1);
+
 let db;
 let isDBOpenSuccess = false;
 
@@ -169,21 +172,14 @@ function getAllProjects() {
       ScreenManager.showNoProjectScreen();
     } else {
       // Iterate over the result array and inject HTML for each project
+      let projectNames = [];
       result.forEach((project) => {
-        CacheOperations.addProject(project.projectName);
-       
         projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(project.projectName, project.author, project.version));
+        CacheOperations.addProject(project.projectName);
+        projectNames.push(project.projectName);
+        
       });
       
-      chrome.storage.local.set({ "ThMLT-Projects": CacheOperations.getAllProjects() }, () => {
-        console.log(...Logger.multiLog(
-          ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
-          ["All project names stored to"],
-          ["chrome.storage.local", Logger.Types.INFO]
-        ));
-        
-
-      });
     }
 
     // Retrive Previous session
@@ -764,7 +760,7 @@ async function getAllSemanticColors(projectName) {
     }
 
     // This script dynamically manages theme modes in a semantic table.
-    // 1. It retrieves all available theme modes from the cache.
+    // 1. It retrieves all available theme modes from the SessionCache.
     // 2. If no theme modes exist, it logs a warning and adds "Light" as the default theme.
     // 3. If theme modes are found, it iterates through them and inserts them into the table.
     // 4. The script adjusts the table's column structure dynamically based on the number of theme modes.
@@ -835,12 +831,12 @@ async function getAllSemanticColors(projectName) {
     }
 
     // This script initializes and manages semantic names in a table based on available theme modes.
-    // 1. It retrieves all semantic names from the cache.
+    // 1. It retrieves all semantic names from the SessionCache.
     // 2. If no semantic names and theme modes exist, it logs a warning and:
     //    - Adds "surface-primary" as a default semantic name linked to the "Light" theme mode.
     //    - Updates the default theme mode and caches the new semantic entry.
     // 3. If semantic names exist, it iterates through them:
-    //    - Retrieves semantic values for each theme mode from the cache.
+    //    - Retrieves semantic values for each theme mode from the SessionCache.
     //    - If all expected semantic values are found, it adds them as a new row to the semantic table.
 
     const allSemanticNames = CacheOperations.getAllSemanticNames();

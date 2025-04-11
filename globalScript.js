@@ -1,3 +1,5 @@
+
+  
   class CacheOperations {
 
     static #activeThemeModesInSemantic = [];
@@ -732,6 +734,8 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
   let confirmationCallback = null;
   let confirmationModal = null;
 
+  let messageModal = null;
+
   let pickrInstance = null;
   
   document.addEventListener('DOMContentLoaded', () => {
@@ -764,6 +768,8 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
         ScreenManager.switchScreen(button.getAttribute("data-nav-button-screen-target"));
       });
     });
+
+
     ScreenManager.showHomeScreen();
 
     // If Pickr instance doesn't exist, create it
