@@ -14,6 +14,8 @@ let fontData = "";
 let colorData = "";
 
 let translationTable = null;
+let translationTableBody = null;
+let defaultLanguageElement = null;
 let fontTable = null;
 let colorTable = null;
 
@@ -21,6 +23,7 @@ let lastComponentNameText = "";
 
 const CACHE_KEYS = {
   PROJECTS: 'projects',
+  PROJECT_NAMES: 'projectNames',
 
   TRANSLATION_DATA : 'translationData',
   FONTS_DATA : 'fontsData',
@@ -61,7 +64,7 @@ class ContentScriptCache {
   }
 }
 
-const cache = new ContentScriptCache();
+const SessionCache = new ContentScriptCache();
 
 
 class MessageClient {
@@ -202,6 +205,15 @@ class TextFormatterModal {
   }
 
   static TranslationTable = class {
+    static addRow(key, value){
+      const newRow = `
+                      <tr rowId="${key}">
+                          <td>${key}</td>
+                          <td>${value}</td>
+                      </tr>
+                      `;
+      translationTableBody.insertAdjacentHTML("beforeend", newRow);
+    }
     static selectTableRow(clickedRow){
       if (!clickedRow) return; // Ignore clicks outside of rows
 
@@ -220,6 +232,12 @@ class TextFormatterModal {
       clickedRow.classList.add('highlight');
       selectedTranslationTableRow = clickedRow; // Update the selected row
     }
+
+    static clear(){
+      translationTableBody.innerHTML = "";
+    }
+
+
   }
 
   static TabManager = class {
@@ -266,6 +284,8 @@ class TextFormatterModal {
   TextFormatterModal.hide();
 
   translationTable = shadowRoot.getElementById("translationTable");
+  translationTableBody = translationTable.querySelector("tbody");
+  defaultLanguageElement = shadowRoot.getElementById("defaultlanguage");
   fontTable = shadowRoot.getElementById("fontTable");
   colorTable = shadowRoot.getElementById("colorTable");
   refreshTranslationTable();
@@ -411,24 +431,24 @@ const observer = new MutationObserver(() => {
         console.log("Project name element found! Watching for changes...");
     
         const initialProjectName = projectNameElement.innerText.trim();
-        if (initialProjectName !== cache.get(CACHE_KEYS.CURRENT_PROJECT_NAME)) {
-          cache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
-          cache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
-          cache.remove(CACHE_KEYS.FONTS_DATA);
-          cache.remove(CACHE_KEYS.TRANSLATION_DATA);
+        if (initialProjectName !== SessionCache.get(CACHE_KEYS.CURRENT_PROJECT_NAME)) {
+          SessionCache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
+          SessionCache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
+          SessionCache.remove(CACHE_KEYS.FONTS_DATA);
+          SessionCache.remove(CACHE_KEYS.TRANSLATION_DATA);
         }
-        cache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, initialProjectName);
+        SessionCache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, initialProjectName);
     
         // Observer to detect project name changes
         const projectNameObserver = new MutationObserver(() => {
           const updatedProjectName = projectNameElement.innerText.trim();
     
           if (updatedProjectName !== initialProjectName) {
-            cache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, updatedProjectName);
-            cache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
-            cache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
-            cache.remove(CACHE_KEYS.FONTS_DATA);
-            cache.remove(CACHE_KEYS.TRANSLATION_DATA);
+            SessionCache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, updatedProjectName);
+            SessionCache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
+            SessionCache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
+            SessionCache.remove(CACHE_KEYS.FONTS_DATA);
+            SessionCache.remove(CACHE_KEYS.TRANSLATION_DATA);
             console.log(`[Current Project] ${updatedProjectName}`);
           }
         });
@@ -479,36 +499,54 @@ function createTestButton(toolBarElement) {
           </div>
         `;
 
-        // Insert the newTd into the DOM next to the target <td> element
-        toolBarElement.querySelector(".left").appendChild(newDiv);
+  // Insert the newTd into the DOM next to the target <td> element
+  toolBarElement.querySelector(".left").appendChild(newDiv);
 
-        newDiv.addEventListener('click', async (e) => {
-          const clickedElement = e.target.closest('td[thmltTestButtonDiv="true"]');
+  newDiv.addEventListener('click', async (e) => {
+    const clickedElement = e.target.closest('td[thmltTestButtonDiv="true"]');
 
-          try {
-            const response = await MessageClient.sendMessage({ 
-              action: "Project Availability", 
-              projectName: "exTest" 
-            });
+    // Check is data available in cache or not
+    if (SessionCache.get(CACHE_KEYS.CURRENT_PROJECT_NAME)) {
+      // Found
 
-            if (response.status === "success") {
-              console.log(`${response.projectName} is available`);
-                TextFormatterModal.show();
-        
-                setTimeout(() => {
-                  //refreshColorTable(response.projectData, response.themeMode);
-                }, 500);
-            } else {
-              console.log(`${response.projectName} is not available`);
-              alert(`${response.projectName} is not available`);
+    } else {
+      // Check Project Avaiability
+      messageClient.sendMessage({ action: "Projects" }, (error, response) => {
+        if (error) return console.error("Error:", error.message);
+
+        const projectNames = response.projectNames;
+        if (projectNames.includes("exTest")) {
+
+          // Fetch Data from ThMLT DB
+          messageClient.sendMessage({ 
+            action: "fetchData",
+            projectName: "exTest"
+           }, (error, response) => {
+            if (error) return console.error("Error:", error.message);
+
+            TextFormatterModal.TranslationTable.clear();
+            const translationData = response.translationData;
+
+            // Get the default language
+            const defaultLanguage = translationData.DefaultLanguage;
+
+            // Extract translations based on the default language
+            const defaultLanguageValue = {};
+            for (const key in translationData.Translations) {
+              defaultLanguageValue[key] = translationData.Translations[key][defaultLanguage];
             }
-          } catch (error) {
-            console.error(error);
-            
-          }
-          
-        });
-  
+
+            // Loop through the sorted data and print the values
+            for (const key in defaultLanguageValue) {
+              TextFormatterModal.TranslationTable.addRow(key, defaultLanguageValue[key]);
+            }
+            defaultLanguageElement.innerText = `Translation (${defaultLanguage})`;
+            TextFormatterModal.show();
+          });
+        }
+      });
+    } 
+  });
 }
 
 

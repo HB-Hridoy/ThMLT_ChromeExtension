@@ -20,29 +20,42 @@ chrome.runtime.onInstalled.addListener(() => {
 let defaultThemeMode = "";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "Project Availability") {
-    console.log(`Checking if ${message.projectName} is available`);
-    isProjectAvailable(message.projectName)
-      .then(isAvailable => {
+  if (message.action === "Projects") {
+    cache.get(CACHE_KEYS.PROJECTS, (projects) => {
+      cache.get(CACHE_KEYS.PROJECT_NAMES, (projectNames) => {
         sendResponse({ 
-          action: "Project Availability",
-          status: isAvailable ? "success" : "failed",
-          projectName: message.projectName,
-          projectData: "",
-          themeMode: ""
+          action: "Projects",
+          projects: projects,
+          projectNames: projectNames
         });
       })
-      .catch(error => {
-        console.error(`Error checking project availability: ${error}`);
-        sendResponse({ 
-          action: "Project Availability",
-          status: "failed",
-          projectName: message.projectName,
-          projectData: "",
-          themeMode: ""
-        });
-      });
+    })
     return true; // Keep the message channel open for async response
+
+  } else if (message.action === "fetchData") {
+    thmltDatabase.isTranslationDataAvailable(message.projectName, (error, isTranslationDataAvailable) => {
+      if (error) return console.error("Error:", error.message);
+      if (isTranslationDataAvailable){
+        thmltDatabase.getTranslationData(message.projectName, (error, translationData) => {
+          if (error) return console.error("Error:", error.message);
+  
+          console.log(translationData);
+          sendResponse({ 
+            action: "fetchData",
+            translationData: translationData
+          });
+        
+        })
+      } else {
+        console.log("Translation Data not available");
+        sendResponse({ 
+          action: "fetchData",
+          translationData: "Translation Data not available"
+        });
+      }
+      
+    })
+    return true;
   }
 });
 
