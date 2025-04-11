@@ -220,25 +220,6 @@ class TextFormatterModal {
       clickedRow.classList.add('highlight');
       selectedTranslationTableRow = clickedRow; // Update the selected row
     }
-
-    static selectScope(scope){
-      const targetScope = scope;
-      const scopeSections = shadowRoot.getElementById("tarnslationScopeSections");
-      const activeScope = scopeSections.querySelector('.translationScopeSelectionActive');
-
-      if (targetScope !== activeScope) {
-          const scopeElements = Array.from(scopeSections.children);
-
-          scopeElements.forEach(scopeElement => {
-              scopeElement.className = ''; 
-              if (scopeElement === targetScope) {
-                  scopeElement.classList.add('translationScopeSelectionActive'); 
-              } else {
-                  scopeElement.classList.add('translationScopeSelectionInactive'); 
-              }
-          });
-      }
-    }
   }
 
   static TabManager = class {
@@ -310,11 +291,6 @@ class TextFormatterModal {
 
   colorTable.querySelector("tbody").addEventListener('click', function(event) {
     selectTableRow(event.target.closest('tr'), 'colorTable');
-  });
-
-  // Translation Scopes
-  shadowRoot.getElementById("tarnslationScopeSections").addEventListener("click", (e) => {
-      TextFormatterModal.TranslationTable.selectScope(e.target);
   });
 
   // Disable AI2 Keyboard shortcuts while modal is open or any infput focused
