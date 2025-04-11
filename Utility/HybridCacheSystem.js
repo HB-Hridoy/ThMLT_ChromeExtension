@@ -126,7 +126,7 @@ class HybridSessionCache {
 }
 
 // Ensure only one instance is used across the extension
-const SessionCache = new HybridSessionCache();
+const cache = new HybridSessionCache();
 export { CACHE_KEYS };
-export default SessionCache;
+export default cache;
 
