@@ -1,83 +1,23 @@
-import SessionCache, { CACHE_KEYS } from './Utility/cache.js';
+import cache, { CACHE_KEYS } from './Utility/HybridCacheSystem.js';
 import ThMLT_DB from './Utility/ThMLT_DB.js';
 
 const thmltDatabase = new ThMLT_DB("ThMLT DB", 1);
+
+setTimeout(() => {
+  thmltDatabase.getAllProjects((error, projects) => {
+    if (error) return console.error("Error:", error.message);
+
+    const projectNames = projects.map(project => project.projectName);
+    cache.set(CACHE_KEYS.PROJECTS, projects);
+    cache.set(CACHE_KEYS.PROJECT_NAMES, projectNames);
+  });
+}, 2000);
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 });
 
-// setTimeout(async () => {
-//   await thmltDatabase.getAllProjects();
-//   console.log("all project stored in SessionCache");
-  
-// }, 5000);
-
 let defaultThemeMode = "";
-
-// const openDB = indexedDB.open("ThMLT DB", 1);
-// let db;
-// let isDBOpenSuccess = false;
-
-// openDB.onupgradeneeded = function (event) {
-//   db = event.target.result;
-
-//   // Create 'projects' object store
-//   if (!db.objectStoreNames.contains("projects")) {
-//     let projectsStore = db.createObjectStore("projects", { keyPath: "projectName" });
-//     projectsStore.createIndex("projectName", "projectName", { unique: true });
-//     projectsStore.createIndex("author", "author", { unique: false });
-//     projectsStore.createIndex("version", "version", { unique: false });
-//     projectsStore.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
-//   }
-
-//   // Create 'primitiveColors' object store
-//   if (!db.objectStoreNames.contains("primitiveColors")) {
-//     let primitiveColorsStore = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true  });
-//     primitiveColorsStore.createIndex("projectName", "projectName", { unique: false });
-//     primitiveColorsStore.createIndex("primitiveName", "primitiveName", { unique: false });
-//     primitiveColorsStore.createIndex("primitiveValue", "primitiveValue", { unique: false });
-//     primitiveColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
-//   }
-
-//   // Create 'semanticColors' object store
-//   if (!db.objectStoreNames.contains("semanticColors")) {
-//     let semanticColorsStore = db.createObjectStore("semanticColors", { keyPath: "id", autoIncrement: true  });
-//     semanticColorsStore.createIndex("projectName", "projectName", { unique: false });
-//     semanticColorsStore.createIndex("semanticName", "semanticName", { unique: false });
-//     semanticColorsStore.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
-//     semanticColorsStore.createIndex("themeMode", "themeMode", { unique: false });
-//     semanticColorsStore.createIndex("orderIndex", "orderIndex", { unique: false });
-//   }
-
-//   // Create 'fonts' object store
-//   if (!db.objectStoreNames.contains("fonts")) {
-//     let fontsStore = db.createObjectStore("fonts", { keyPath: "id", autoIncrement: true  });
-//     fontsStore.createIndex("projectName", "projectName", { unique: false });
-//     fontsStore.createIndex("fontTag", "fontTag", { unique: false });
-//     fontsStore.createIndex("shortFontTag", "shortFontTag", { unique: false });
-//     fontsStore.createIndex("fontName", "fontName", { unique: false });
-//     fontsStore.createIndex("orderIndex", "orderIndex", { unique: false });
-//   }
-
-//   // Create 'translations' object store
-//   if (!db.objectStoreNames.contains("translations")) {
-//     let translationStore = db.createObjectStore("translations", { keyPath: "id", autoIncrement: true  });
-//     translationStore.createIndex("projectName", "projectName", { unique: false });
-//     translationStore.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
-//     translationStore.createIndex("translationData", "translationData", { unique: false });
-//   }
-
-// };
-
-// openDB.onsuccess = (event) => {
-//   isDBOpenSuccess = true;
-//   db = openDB.result;
-// };
-
-// openDB.onerror = function (event) {
-//   console.error("Database error:", event.target.errorCode);
-// };
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "Project Availability") {
@@ -105,8 +45,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true; // Keep the message channel open for async response
   }
 });
-
-
 
 function getSemanticColors(projectName) {
   return new Promise((resolve, reject) => {
