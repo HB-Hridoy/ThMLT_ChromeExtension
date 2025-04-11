@@ -191,6 +191,31 @@ class ThMLT_DB {
           this.log(error, true);
           callback(error, false);
       };
+    }
+
+  getAllFonts(projectName, callback) {
+    if (!this.isDBOpenSuccess || !this.db) {
+      const error = "Database is not initialized";
+      this.log(error, true);
+      return callback(error, false);
+    }
+    let transaction = this.db.transaction(["fonts"], "readonly");
+    let store = transaction.objectStore("fonts");
+    let index = store.index("projectName");
+    let request = index.getAll(IDBKeyRange.only(projectName));
+    
+    request.onsuccess = () => {
+      let result = request.result;
+      // Sort the array by orderIndex
+      const sortedData = result.sort((a, b) => a.orderIndex - b.orderIndex);
+      callback(null, sortedData);
+    };
+
+    request.onerror = () =>  {
+      const error = "Error retrieving fonts";
+        this.log(error, true);
+        callback(error, false);
+    };
   }
 }
 
