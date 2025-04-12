@@ -39,6 +39,8 @@ const CACHE_KEYS = {
   
 };
 
+
+
 class ContentScriptCache {
   constructor() {
       this.cache = {}; // In-memory storage
@@ -232,7 +234,7 @@ class TextFormatterModal {
            }, (error, response) => {
             if (error) return console.error("Error:", error.message);
 
-            this._integrateTranslationData(response.translationData);
+            TextFormatterModal.TranslationTable.refreshData(response.translationData, false);
             this._integrateFontData(response.fontData);
             this._integrateColorData(response.colorData, response.defaultThemeMode);
             
@@ -242,24 +244,6 @@ class TextFormatterModal {
     } 
   }
 
-  static _integrateTranslationData(translationData){
-    TextFormatterModal.TranslationTable.clear();
-
-    // Get the default language
-    const defaultLanguage = translationData.DefaultLanguage;
-
-    // Extract translations based on the default language
-    const defaultLanguageValue = {};
-    for (const key in translationData.Translations) {
-      defaultLanguageValue[key] = translationData.Translations[key][defaultLanguage];
-    }
-
-    // Loop through the sorted data and print the values
-    for (const key in defaultLanguageValue) {
-      TextFormatterModal.TranslationTable.addRow(key, defaultLanguageValue[key]);
-    }
-    defaultLanguageElement.innerText = `Translation (${defaultLanguage})`;
-  }
   static _integrateFontData(fontData){
     TextFormatterModal.FontTable.clear();
 
@@ -278,6 +262,15 @@ class TextFormatterModal {
       const primitiveValue = colorData[semanticName];
       TextFormatterModal.ColorTable.addRow(semanticName, primitiveValue);
     }
+  }
+
+  // A debounce function to limit how often the search input handler runs
+  static debounce(func, delay) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+    };
   }
 
   static TranslationTable = class {
@@ -313,7 +306,57 @@ class TextFormatterModal {
       translationTableBody.innerHTML = "";
     }
 
+    static flattenTranslations(data) {
+      const defaultLang = data.DefaultLanguage;
+      const translations = {};
+    
+      for (const key in data.Translations) {
+        if (data.Translations.hasOwnProperty(key)) {
+          translations[key] = data.Translations[key][defaultLang];
+        }
+      }
+    
+      return translations;
+    }
 
+    static initializeSearch(){
+      const searchInput = shadowRoot.querySelector(".searchTranslationInput");
+      // Apply debounce to the search function
+      const debouncedSearch = TextFormatterModal.debounce(function() {
+        const query = searchInput.value.toLowerCase();
+        TextFormatterModal.TranslationTable.search(query);
+      }, 300);  // 300ms debounce delay
+
+      searchInput.addEventListener('input', debouncedSearch);
+    }
+
+    static search(query) {
+      const searchResults = Object.entries(SessionCache.get(CACHE_KEYS.TRANSLATION_DATA))
+          .filter(([key, value]) => key.toLowerCase().includes(query) || value.toLowerCase().includes(query))
+          .reduce((acc, [key, value]) => {
+              acc[key] = value;
+              return acc;
+          }, {});
+  
+      this.refreshData(searchResults, true);
+    }
+
+    static refreshData(translationData, search = false){
+      const translations = search 
+        ? translationData 
+        : this.flattenTranslations(translationData);
+
+      if (!search) {
+        SessionCache.set(CACHE_KEYS.TRANSLATION_DATA, translations);
+        defaultLanguageElement.innerText = `Translation (${translationData.DefaultLanguage})`;
+      }
+
+      this.clear();
+
+      for (const [key, value] of Object.entries(translations)) {
+        this.addRow(key, value);
+      }
+    }
   }
 
   static FontTable = class {
@@ -436,6 +479,7 @@ class TextFormatterModal {
   translationTable = shadowRoot.getElementById("translationTable");
   translationTableBody = translationTable.querySelector("tbody");
   defaultLanguageElement = shadowRoot.getElementById("defaultlanguage");
+  TextFormatterModal.TranslationTable.initializeSearch();
 
   fontTable = shadowRoot.getElementById("fontTable");
   fontTableBody = fontTable.querySelector("tbody");
