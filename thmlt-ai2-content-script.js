@@ -313,6 +313,19 @@ class TextFormatterModal {
       translationTableBody.innerHTML = "";
     }
 
+    static flattenTranslations(data) {
+      const defaultLang = data.DefaultLanguage;
+      const translations = {};
+    
+      for (const key in data.Translations) {
+        if (data.Translations.hasOwnProperty(key)) {
+          translations[key] = data.Translations[key][defaultLang];
+        }
+      }
+    
+      return translations;
+    }
+
 
   }
 
