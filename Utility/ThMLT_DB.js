@@ -217,6 +217,61 @@ class ThMLT_DB {
         callback(error, false);
     };
   }
+
+  getColorDataForAI2(projectName, callback) {
+    if (!this.isDBOpenSuccess || !this.db) {
+        const error = "Database is not initialized";
+        this.log(error, true);
+        return callback(error, false);
+    }
+    const transaction = this.db.transaction(["projects", "semanticColors", "primitiveColors"], "readonly");
+    const projectsStore = transaction.objectStore("projects");
+    const semanticStore = transaction.objectStore("semanticColors");
+    const primitiveStore = transaction.objectStore("primitiveColors");
+
+    // Step 1: Get the defaultThemeMode from the projects store
+    const projectRequest = projectsStore.get(projectName);
+
+    projectRequest.onsuccess = function(event) {
+      const project = event.target.result;
+      if (!project) {
+        callback("Project not found.", false);
+        return;
+      }
+
+      const defaultThemeMode = project.defaultThemeMode;
+
+      // Step 2: Get all semantic colors for the project and themeMode
+      const semanticIndex = semanticStore.index("projectName");
+      const semanticRequest = semanticIndex.getAll(projectName);
+
+      semanticRequest.onsuccess = function(event) {
+        let semanticColors = event.target.result.filter(sc => sc.themeMode === defaultThemeMode);
+
+        // Step 3: Get all primitive colors for the project
+        const primitiveIndex = primitiveStore.index("projectName");
+        const primitiveRequest = primitiveIndex.getAll(projectName);
+
+        primitiveRequest.onsuccess = function(event) {
+          const primitives = event.target.result;
+          const primitiveMap = new Map(primitives.map(p => [p.primitiveName, p.primitiveValue]));
+
+          // Step 4: Replace linkedPrimitive with primitiveValue
+          const result = {};
+          semanticColors.forEach(sc => {
+            result[sc.semanticName] = primitiveMap.get(sc.linkedPrimitive) || sc.linkedPrimitive;
+          });
+          callback(null, result, defaultThemeMode);
+        };
+
+        primitiveRequest.onerror = () => callback("Failed to fetch primitive colors.", false);
+      };
+
+      semanticRequest.onerror = () => callback("Failed to fetch semantic colors.", false);
+    };
+
+    projectRequest.onerror = () => callback("Failed to fetch project details.", false);
+  }
 }
 
 export default ThMLT_DB;

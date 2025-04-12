@@ -11,6 +11,14 @@ setTimeout(() => {
     cache.set(CACHE_KEYS.PROJECTS, projects);
     cache.set(CACHE_KEYS.PROJECT_NAMES, projectNames);
   });
+
+  // thmltDatabase.getColorDataForAI2("exTest", (error, colorData, defaultThemeMode) => {
+  //   if (error) return console.error("Error:", error.message);
+
+  //   console.log("Color Data:", colorData);
+  //   console.log("Default Theme Mode:", defaultThemeMode);
+    
+  // });
 }, 2000);
 
 chrome.runtime.onInstalled.addListener(() => {
@@ -34,7 +42,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     let messageResponse = {
         action: "fetchData",
         translationData: null,
-        fontData: null
+        fontData: null,
+        colorData: null,
+        defaultThemeMode: null
     };
 
     const translationPromise = new Promise((resolve) => {
@@ -42,7 +52,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             thmltDatabase.isTranslationDataAvailable(message.projectName, (error, isTranslationDataAvailable) => {
                 if (error) {
                     console.error("Error:", error.message);
-                    return resolve();
                 }
                 if (isTranslationDataAvailable) {
                     thmltDatabase.getTranslationData(message.projectName, (error, translationData) => {
@@ -78,7 +87,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
     });
 
-    Promise.all([translationPromise, fontPromise]).then(() => {
+    const colorPromise = new Promise((resolve) => {
+        if (message.colorData) {
+            thmltDatabase.getColorDataForAI2(message.projectName, (error, colorData, defaultThemeMode) => {
+                if (error) {
+                    console.error("Error:", error.message);
+                } else {
+                    messageResponse.colorData = colorData;
+                    messageResponse.defaultThemeMode = defaultThemeMode;
+                }
+                resolve();
+            });
+        } else {
+            resolve();
+        }
+    });
+
+    Promise.all([translationPromise, fontPromise, colorPromise]).then(() => {
         sendResponse(messageResponse);
     });
 
@@ -87,62 +112,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 });
 
-function getSemanticColors(projectName) {
-  return new Promise((resolve, reject) => {
-    if (!isDBOpenSuccess || !db) {
-      return reject("Database is not initialized");
-    }
-
-    const transaction = db.transaction(["projects", "semanticColors", "primitiveColors"], "readonly");
-    const projectsStore = transaction.objectStore("projects");
-    const semanticStore = transaction.objectStore("semanticColors");
-    const primitiveStore = transaction.objectStore("primitiveColors");
-
-    // Step 1: Get the defaultThemeMode from the projects store
-    const projectRequest = projectsStore.get(projectName);
-
-    projectRequest.onsuccess = function(event) {
-      const project = event.target.result;
-      if (!project) {
-        return reject("Project not found.");
-      }
-
-      const themeMode = project.defaultThemeMode;
-      defaultThemeMode = themeMode;
-
-      // Step 2: Get all semantic colors for the project and themeMode
-      const semanticIndex = semanticStore.index("projectName");
-      const semanticRequest = semanticIndex.getAll(projectName);
-
-      semanticRequest.onsuccess = function(event) {
-        let semanticColors = event.target.result.filter(sc => sc.themeMode === themeMode);
-
-        // Step 3: Get all primitive colors for the project
-        const primitiveIndex = primitiveStore.index("projectName");
-        const primitiveRequest = primitiveIndex.getAll(projectName);
-
-        primitiveRequest.onsuccess = function(event) {
-          const primitives = event.target.result;
-          const primitiveMap = new Map(primitives.map(p => [p.primitiveName, p.primitiveValue]));
-
-          // Step 4: Replace linkedPrimitive with primitiveValue
-          const result = {};
-          semanticColors.forEach(sc => {
-            result[sc.semanticName] = primitiveMap.get(sc.linkedPrimitive) || sc.linkedPrimitive;
-          });
-
-          resolve(result);
-        };
-
-        primitiveRequest.onerror = () => reject("Failed to fetch primitive colors.");
-      };
-
-      semanticRequest.onerror = () => reject("Failed to fetch semantic colors.");
-    };
-
-    projectRequest.onerror = () => reject("Failed to fetch project details.");
-  });
-}
 
 
 

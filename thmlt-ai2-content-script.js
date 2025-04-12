@@ -1,6 +1,3 @@
-
-
-
 let shadowRoot = null;
 
 let textFormatterModal = null;
@@ -23,6 +20,7 @@ let fontTableBody = null;
 let selectedFontTableRow = null;
 
 let colorTable = null;
+let colorTableBody = null;
 let selectedColorTableRow = null;
 
 let lastComponentNameText = "";
@@ -229,12 +227,14 @@ class TextFormatterModal {
             action: "fetchData",
             projectName: projectName,
             translationData: true,
-            fontData: true
+            fontData: true,
+            colorData: true
            }, (error, response) => {
             if (error) return console.error("Error:", error.message);
 
             this._integrateTranslationData(response.translationData);
             this._integrateFontData(response.fontData);
+            this._integrateColorData(response.colorData, response.defaultThemeMode);
             
           });
         }
@@ -266,6 +266,18 @@ class TextFormatterModal {
     fontData.forEach((font) => {
       TextFormatterModal.FontTable.addRow(font.fontTag, font.fontName);
     });
+  }
+  static _integrateColorData(colorData, defaultThemeMode){
+    TextFormatterModal.ColorTable.clear();
+    const themeHeader = shadowRoot.querySelector('.themeModeText'); 
+
+    // 🟢 Update the theme mode text dynamically
+    themeHeader.textContent = `${defaultThemeMode} Theme` ;
+    
+    for (const semanticName in colorData) {
+      const primitiveValue = colorData[semanticName];
+      TextFormatterModal.ColorTable.addRow(semanticName, primitiveValue);
+    }
   }
 
   static TranslationTable = class {
@@ -305,11 +317,11 @@ class TextFormatterModal {
   }
 
   static FontTable = class {
-    static addRow(key, value){
+    static addRow(fontTag, fontName){
       const newRow = `
-                      <tr rowId="${key}">
-                          <td>${key}</td>
-                          <td>${value}</td>
+                      <tr rowId="${fontTag}">
+                          <td>${fontTag}</td>
+                          <td>${fontName}</td>
                       </tr>
                       `;
       fontTableBody.insertAdjacentHTML("beforeend", newRow);
@@ -338,6 +350,44 @@ class TextFormatterModal {
     }
 
 
+  }
+
+  static ColorTable = class {
+    static addRow(semanticName, primitiveValue){
+
+      const newRow = `
+                                  <tr rowId="${semanticName}">
+                                    <td>${semanticName}</td>
+                                    <td>
+                                      <div class="semanticValueCell">
+                                        <div class="colorThumbnail" style="background-color: ${primitiveValue};"></div>
+                                        <div><span>${primitiveValue}</span></div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                `;
+    
+
+    colorTableBody.insertAdjacentHTML("beforeend", newRow);
+  }
+    static selectRow(clickedRow){
+      if (!clickedRow) return; // Ignore clicks outside of rows
+      // If another row is already selected, revert its background
+      if (selectedColorTableRow) {
+        selectedColorTableRow.classList.remove('highlight');
+      }
+      // If the same row is clicked, deselect it
+      if (selectedColorTableRow === clickedRow) {
+        selectedColorTableRow = null; // Reset selection
+          return;
+      }
+      // Highlight the clicked row
+      clickedRow.classList.add('highlight');
+      selectedColorTableRow = clickedRow; // Update the selected row
+    }
+    static clear(){
+      colorTableBody.innerHTML = "";
+    }
   }
 
   static TabManager = class {
@@ -391,7 +441,7 @@ class TextFormatterModal {
   fontTableBody = fontTable.querySelector("tbody");
 
   colorTable = shadowRoot.getElementById("colorTable");
-  refreshTranslationTable();
+  colorTableBody = colorTable.querySelector("tbody");
 
   // Close text formatter button 
   shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', ()=>{
@@ -413,7 +463,7 @@ class TextFormatterModal {
   });
 
   colorTable.querySelector("tbody").addEventListener('click', function(event) {
-    selectRow(event.target.closest('tr'), 'colorTable');
+    TextFormatterModal.ColorTable.selectRow(event.target.closest('tr'));
   });
 
   // Disable AI2 Keyboard shortcuts while modal is open or any infput focused
@@ -701,62 +751,4 @@ function createEditTextWithThmltModalButton() {
   } else {
         console.log('Table with class "ode-PropertiesPanel" not found.');
   }
-}
-
-
-function refreshTranslationTable(tableBody){
-  let count = 20;
-  const colorTableBody = shadowRoot.querySelector('.colorTableBody');
-  
-  let tableBodyRows = ``;
-
-  for (let i = 1; i < count; i++) {
-      tableBodyRows += `
-      <tr rowId="${i}">
-          <td>Some stuff</td>
-          <td>Some more stuff</td>
-      </tr>
-      `; 
-  }
-  
-  colorTableBody.innerHTML = tableBodyRows;
-}
-
-
-// function refreshColorTable(colorData, themeMode) {
-//   const colorTableBody = shadowRoot.querySelector('.colorTableBody');
-//   const themeHeader = shadowRoot.querySelector('.themeModeText'); // Target the theme column header
-
-//   // 🟢 Update the theme mode text dynamically
-//   themeHeader.textContent = `${themeMode} Theme` ;
-
-//   let colorTableBodyRows = ``;
-
-//   for (let key in colorData) {
-//     //console.log(`${key}: ${colorData[key]}`);
-
-//     colorTableBodyRows += `
-//       <tr rowId="${key}">
-//         <td>${key}</td>
-//         <td>
-//           <div class="semanticValueCell">
-//             <div class="colorThumbnail" style="background-color: ${colorData[key]};"></div>
-//             <div><span>${key}</span></div>
-//           </div>
-//         </td>
-//       </tr>
-//     `;
-//   }
-
-//   colorTableBody.innerHTML = colorTableBodyRows;
-// }
-
-
-
-
-
-
-
-
-
-  
+}  
