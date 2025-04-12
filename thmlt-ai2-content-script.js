@@ -39,6 +39,8 @@ const CACHE_KEYS = {
   
 };
 
+
+
 class ContentScriptCache {
   constructor() {
       this.cache = {}; // In-memory storage
@@ -262,6 +264,15 @@ class TextFormatterModal {
     }
   }
 
+  // A debounce function to limit how often the search input handler runs
+  static debounce(func, delay) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(this, args), delay);
+    };
+  }
+
   static TranslationTable = class {
     static addRow(key, value){
       const newRow = `
@@ -308,6 +319,27 @@ class TextFormatterModal {
       return translations;
     }
 
+    static initializeSearch(){
+      const searchInput = shadowRoot.querySelector(".searchTranslationInput");
+      // Apply debounce to the search function
+      const debouncedSearch = TextFormatterModal.debounce(function() {
+        const query = searchInput.value.toLowerCase();
+        TextFormatterModal.TranslationTable.search(query);
+      }, 300);  // 300ms debounce delay
+
+      searchInput.addEventListener('input', debouncedSearch);
+    }
+
+    static search(query) {
+      const searchResults = Object.entries(SessionCache.get(CACHE_KEYS.TRANSLATION_DATA))
+          .filter(([key, value]) => key.toLowerCase().includes(query) || value.toLowerCase().includes(query))
+          .reduce((acc, [key, value]) => {
+              acc[key] = value;
+              return acc;
+          }, {});
+  
+      this.refreshData(searchResults, true);
+    }
 
     static refreshData(translationData, search = false){
       const translations = search 
@@ -447,6 +479,7 @@ class TextFormatterModal {
   translationTable = shadowRoot.getElementById("translationTable");
   translationTableBody = translationTable.querySelector("tbody");
   defaultLanguageElement = shadowRoot.getElementById("defaultlanguage");
+  TextFormatterModal.TranslationTable.initializeSearch();
 
   fontTable = shadowRoot.getElementById("fontTable");
   fontTableBody = fontTable.querySelector("tbody");
