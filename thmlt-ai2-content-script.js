@@ -232,7 +232,7 @@ class TextFormatterModal {
            }, (error, response) => {
             if (error) return console.error("Error:", error.message);
 
-            this._integrateTranslationData(response.translationData);
+            TextFormatterModal.TranslationTable.refreshData(response.translationData, false);
             this._integrateFontData(response.fontData);
             this._integrateColorData(response.colorData, response.defaultThemeMode);
             
@@ -242,24 +242,6 @@ class TextFormatterModal {
     } 
   }
 
-  static _integrateTranslationData(translationData){
-    TextFormatterModal.TranslationTable.clear();
-
-    // Get the default language
-    const defaultLanguage = translationData.DefaultLanguage;
-
-    // Extract translations based on the default language
-    const defaultLanguageValue = {};
-    for (const key in translationData.Translations) {
-      defaultLanguageValue[key] = translationData.Translations[key][defaultLanguage];
-    }
-
-    // Loop through the sorted data and print the values
-    for (const key in defaultLanguageValue) {
-      TextFormatterModal.TranslationTable.addRow(key, defaultLanguageValue[key]);
-    }
-    defaultLanguageElement.innerText = `Translation (${defaultLanguage})`;
-  }
   static _integrateFontData(fontData){
     TextFormatterModal.FontTable.clear();
 
@@ -327,6 +309,22 @@ class TextFormatterModal {
     }
 
 
+    static refreshData(translationData, search = false){
+      const translations = search 
+        ? translationData 
+        : this.flattenTranslations(translationData);
+
+      if (!search) {
+        SessionCache.set(CACHE_KEYS.TRANSLATION_DATA, translations);
+        defaultLanguageElement.innerText = `Translation (${translationData.DefaultLanguage})`;
+      }
+
+      this.clear();
+
+      for (const [key, value] of Object.entries(translations)) {
+        this.addRow(key, value);
+      }
+    }
   }
 
   static FontTable = class {
