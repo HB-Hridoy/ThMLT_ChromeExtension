@@ -34,6 +34,7 @@ const CACHE_KEYS = {
   COLOR_DATA: 'colorData',
   DEFAULT_THEME_MODE: 'defaultThemeMode',
 
+  AI2_SELECTED_PROJECT: 'ai2SelectedProject',
   PREVIOUS_PROJECT_NAME: 'previousProjectName',
   CURRENT_PROJECT_NAME: 'currentProjectName',
   
@@ -691,22 +692,24 @@ const observer = new MutationObserver(() => {
         console.log("Project name element found! Watching for changes...");
     
         const initialProjectName = projectNameElement.innerText.trim();
-        if (initialProjectName !== SessionCache.get(CACHE_KEYS.CURRENT_PROJECT_NAME)) {
-          SessionCache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
-          SessionCache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
+        
+        if (initialProjectName && initialProjectName !== SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT)) {
+          SessionCache.remove(CACHE_KEYS.COLOR_DATA);
           SessionCache.remove(CACHE_KEYS.FONTS_DATA);
           SessionCache.remove(CACHE_KEYS.TRANSLATION_DATA);
+          SessionCache.set(CACHE_KEYS.AI2_SELECTED_PROJECT, initialProjectName);
+          SessionCache.setSessionStorage(CACHE_KEYS.CURRENT_PROJECT_NAME, initialProjectName);
+          console.log(`[Current Project] ${initialProjectName}`);
         }
-        SessionCache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, initialProjectName);
-    
+        
         // Observer to detect project name changes
         const projectNameObserver = new MutationObserver(() => {
           const updatedProjectName = projectNameElement.innerText.trim();
     
-          if (updatedProjectName !== initialProjectName) {
-            SessionCache.set(CACHE_KEYS.CURRENT_PROJECT_NAME, updatedProjectName);
-            SessionCache.remove(CACHE_KEYS.PRIMARY_COLOR_DATA);
-            SessionCache.remove(CACHE_KEYS.SEMANTIC_COLOR_DATA);
+          if (updatedProjectName && updatedProjectName !== SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT)) {
+            SessionCache.set(CACHE_KEYS.AI2_SELECTED_PROJECT, updatedProjectName);
+            SessionCache.setSessionStorage(CACHE_KEYS.AI2_SELECTED_PROJECT, updatedProjectName);
+            SessionCache.remove(CACHE_KEYS.COLOR_DATA);
             SessionCache.remove(CACHE_KEYS.FONTS_DATA);
             SessionCache.remove(CACHE_KEYS.TRANSLATION_DATA);
             console.log(`[Current Project] ${updatedProjectName}`);
