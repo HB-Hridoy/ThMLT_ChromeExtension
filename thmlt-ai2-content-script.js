@@ -237,9 +237,7 @@ class TextFormatterModal {
             this.TranslationTable.refreshData(response.translationData, false);
             this._integrateFontData(response.fontData);
             this.ColorTable.refreshData(response.colorData, response.defaultThemeMode);
-            console.log(response.colorData);
-            
-            
+
           });
         }
       });
@@ -252,18 +250,6 @@ class TextFormatterModal {
     fontData.forEach((font) => {
       TextFormatterModal.FontTable.addRow(font.fontTag, font.fontName);
     });
-  }
-  static _integrateColorData(colorData, defaultThemeMode){
-    TextFormatterModal.ColorTable.clear();
-    const themeHeader = shadowRoot.querySelector('.themeModeText'); 
-
-    // 🟢 Update the theme mode text dynamically
-    themeHeader.textContent = `${defaultThemeMode} Theme` ;
-    
-    for (const semanticName in colorData) {
-      const primitiveValue = colorData[semanticName];
-      TextFormatterModal.ColorTable.addRow(semanticName, primitiveValue);
-    }
   }
 
   // A debounce function to limit how often the search input handler runs
@@ -393,8 +379,6 @@ class TextFormatterModal {
     static clear(){
       fontTableBody.innerHTML = "";
     }
-
-
   }
 
   static ColorTable = class {
@@ -435,12 +419,15 @@ class TextFormatterModal {
       colorTableBody.innerHTML = "";
     }
 
-    static refreshData(colorData, defaultThemeMode){
+    static refreshData(colorData, defaultThemeMode, search = false){
     
-      SessionCache.set(CACHE_KEYS.COLOR_DATA, colorData);
-      SessionCache.set(CACHE_KEYS.DEFAULT_THEME_MODE, defaultThemeMode);
+      if (!search) {
+        SessionCache.set(CACHE_KEYS.COLOR_DATA, colorData);
+        SessionCache.set(CACHE_KEYS.DEFAULT_THEME_MODE, defaultThemeMode);
+      }
 
       this.clear();
+
       if (defaultThemeMode) {
         // Update the theme mode text dynamically
         shadowRoot.querySelector('.themeModeText').textContent = `${defaultThemeMode} Theme` ;
@@ -450,6 +437,28 @@ class TextFormatterModal {
         const primitiveValue = colorData[semanticName];
         this.addRow(semanticName, primitiveValue);
       }
+    }
+
+    static initializeSearch(){
+      const searchInput = shadowRoot.querySelector(".searchColorInput");
+      // Apply debounce to the search function
+      const debouncedSearch = TextFormatterModal.debounce(function() {
+        const query = searchInput.value.toLowerCase();
+        TextFormatterModal.ColorTable.search(query);
+      }, 300);  // 300ms debounce delay
+
+      searchInput.addEventListener('input', debouncedSearch);
+    }
+
+    static search(query) {
+      const searchResults = Object.entries(SessionCache.get(CACHE_KEYS.COLOR_DATA))
+          .filter(([key, value]) => key.toLowerCase().includes(query) || value.toLowerCase().includes(query))
+          .reduce((acc, [key, value]) => {
+              acc[key] = value;
+              return acc;
+          }, {});
+  
+      this.refreshData(searchResults, false, true);
     }
   }
 
@@ -506,6 +515,7 @@ class TextFormatterModal {
 
   colorTable = shadowRoot.getElementById("colorTable");
   colorTableBody = colorTable.querySelector("tbody");
+  TextFormatterModal.ColorTable.initializeSearch();
 
   // Close text formatter button 
   shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', ()=>{
