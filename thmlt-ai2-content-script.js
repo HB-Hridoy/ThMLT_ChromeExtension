@@ -31,8 +31,8 @@ const CACHE_KEYS = {
 
   TRANSLATION_DATA : 'translationData',
   FONTS_DATA : 'fontsData',
-  PRIMARY_COLOR_DATA : 'primaryColorData',
-  SEMANTIC_COLOR_DATA : 'semanticColorData',
+  COLOR_DATA: 'colorData',
+  DEFAULT_THEME_MODE: 'defaultThemeMode',
 
   PREVIOUS_PROJECT_NAME: 'previousProjectName',
   CURRENT_PROJECT_NAME: 'currentProjectName',
@@ -234,9 +234,11 @@ class TextFormatterModal {
            }, (error, response) => {
             if (error) return console.error("Error:", error.message);
 
-            TextFormatterModal.TranslationTable.refreshData(response.translationData, false);
+            this.TranslationTable.refreshData(response.translationData, false);
             this._integrateFontData(response.fontData);
-            this._integrateColorData(response.colorData, response.defaultThemeMode);
+            this.ColorTable.refreshData(response.colorData, response.defaultThemeMode);
+            console.log(response.colorData);
+            
             
           });
         }
@@ -428,8 +430,26 @@ class TextFormatterModal {
       clickedRow.classList.add('highlight');
       selectedColorTableRow = clickedRow; // Update the selected row
     }
+
     static clear(){
       colorTableBody.innerHTML = "";
+    }
+
+    static refreshData(colorData, defaultThemeMode){
+    
+      SessionCache.set(CACHE_KEYS.COLOR_DATA, colorData);
+      SessionCache.set(CACHE_KEYS.DEFAULT_THEME_MODE, defaultThemeMode);
+
+      this.clear();
+      if (defaultThemeMode) {
+        // Update the theme mode text dynamically
+        shadowRoot.querySelector('.themeModeText').textContent = `${defaultThemeMode} Theme` ;
+      }
+      
+      for (const semanticName in colorData) {
+        const primitiveValue = colorData[semanticName];
+        this.addRow(semanticName, primitiveValue);
+      }
     }
   }
 
