@@ -3,23 +3,13 @@ import ThMLT_DB from './Utility/ThMLT_DB.js';
 
 const thmltDatabase = new ThMLT_DB();
 
-setTimeout(() => {
-  thmltDatabase.getAllProjects((error, projects) => {
+thmltDatabase.getAllProjects((error, projects) => {
     if (error) return console.error("Error:", error.message);
 
     const projectNames = projects.map(project => project.projectName);
     cache.set(CACHE_KEYS.PROJECTS, projects);
     cache.set(CACHE_KEYS.PROJECT_NAMES, projectNames);
-  });
-
-  // thmltDatabase.getColorDataForAI2("exTest", (error, colorData, defaultThemeMode) => {
-  //   if (error) return console.error("Error:", error.message);
-
-  //   console.log("Color Data:", colorData);
-  //   console.log("Default Theme Mode:", defaultThemeMode);
-    
-  // });
-}, 2000);
+});
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
