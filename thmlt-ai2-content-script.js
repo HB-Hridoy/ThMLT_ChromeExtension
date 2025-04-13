@@ -31,8 +31,8 @@ const CACHE_KEYS = {
 
   TRANSLATION_DATA : 'translationData',
   FONTS_DATA : 'fontsData',
-  PRIMARY_COLOR_DATA : 'primaryColorData',
-  SEMANTIC_COLOR_DATA : 'semanticColorData',
+  COLOR_DATA: 'colorData',
+  DEFAULT_THEME_MODE: 'defaultThemeMode',
 
   PREVIOUS_PROJECT_NAME: 'previousProjectName',
   CURRENT_PROJECT_NAME: 'currentProjectName',
@@ -234,10 +234,10 @@ class TextFormatterModal {
            }, (error, response) => {
             if (error) return console.error("Error:", error.message);
 
-            TextFormatterModal.TranslationTable.refreshData(response.translationData, false);
+            this.TranslationTable.refreshData(response.translationData, false);
             this._integrateFontData(response.fontData);
-            this._integrateColorData(response.colorData, response.defaultThemeMode);
-            
+            this.ColorTable.refreshData(response.colorData, response.defaultThemeMode);
+
           });
         }
       });
@@ -250,18 +250,6 @@ class TextFormatterModal {
     fontData.forEach((font) => {
       TextFormatterModal.FontTable.addRow(font.fontTag, font.fontName);
     });
-  }
-  static _integrateColorData(colorData, defaultThemeMode){
-    TextFormatterModal.ColorTable.clear();
-    const themeHeader = shadowRoot.querySelector('.themeModeText'); 
-
-    // 🟢 Update the theme mode text dynamically
-    themeHeader.textContent = `${defaultThemeMode} Theme` ;
-    
-    for (const semanticName in colorData) {
-      const primitiveValue = colorData[semanticName];
-      TextFormatterModal.ColorTable.addRow(semanticName, primitiveValue);
-    }
   }
 
   // A debounce function to limit how often the search input handler runs
@@ -391,8 +379,6 @@ class TextFormatterModal {
     static clear(){
       fontTableBody.innerHTML = "";
     }
-
-
   }
 
   static ColorTable = class {
@@ -428,8 +414,51 @@ class TextFormatterModal {
       clickedRow.classList.add('highlight');
       selectedColorTableRow = clickedRow; // Update the selected row
     }
+
     static clear(){
       colorTableBody.innerHTML = "";
+    }
+
+    static refreshData(colorData, defaultThemeMode, search = false){
+    
+      if (!search) {
+        SessionCache.set(CACHE_KEYS.COLOR_DATA, colorData);
+        SessionCache.set(CACHE_KEYS.DEFAULT_THEME_MODE, defaultThemeMode);
+      }
+
+      this.clear();
+
+      if (defaultThemeMode) {
+        // Update the theme mode text dynamically
+        shadowRoot.querySelector('.themeModeText').textContent = `${defaultThemeMode} Theme` ;
+      }
+      
+      for (const semanticName in colorData) {
+        const primitiveValue = colorData[semanticName];
+        this.addRow(semanticName, primitiveValue);
+      }
+    }
+
+    static initializeSearch(){
+      const searchInput = shadowRoot.querySelector(".searchColorInput");
+      // Apply debounce to the search function
+      const debouncedSearch = TextFormatterModal.debounce(function() {
+        const query = searchInput.value.toLowerCase();
+        TextFormatterModal.ColorTable.search(query);
+      }, 300);  // 300ms debounce delay
+
+      searchInput.addEventListener('input', debouncedSearch);
+    }
+
+    static search(query) {
+      const searchResults = Object.entries(SessionCache.get(CACHE_KEYS.COLOR_DATA))
+          .filter(([key, value]) => key.toLowerCase().includes(query) || value.toLowerCase().includes(query))
+          .reduce((acc, [key, value]) => {
+              acc[key] = value;
+              return acc;
+          }, {});
+  
+      this.refreshData(searchResults, false, true);
     }
   }
 
@@ -486,6 +515,7 @@ class TextFormatterModal {
 
   colorTable = shadowRoot.getElementById("colorTable");
   colorTableBody = colorTable.querySelector("tbody");
+  TextFormatterModal.ColorTable.initializeSearch();
 
   // Close text formatter button 
   shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', ()=>{
