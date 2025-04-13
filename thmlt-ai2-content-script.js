@@ -68,6 +68,39 @@ class ContentScriptCache {
   clear() {
       this.cache = {};
   }
+
+  // Get data from chrome.storage.session using a callback
+  getFromSessionStorage(key, callback) {
+    messageClient.sendMessage({ 
+      action: "getSessionStorage", 
+      key: key
+    }, (error, response) => {
+      if (error) {
+        console.error(`Error getting key "${key}" from session storage:`, error.message);
+        return;
+      }
+      this.cache[key] = response.value; // Update in-memory cache
+      console.log(`Fetched from session storage: ${key} = ${response.value}`);
+      callback(response.value);
+    });
+  }
+
+  // Store data in memory and session storage
+  setSessionStorage(key, value, callback = () => {}) {
+    messageClient.sendMessage({ 
+      action: "setSessionStorage", 
+      key: key, 
+      value: value 
+    }, (error, response) => {
+      if (error) {
+        console.error(`Error setting key "${key}" in session storage:`, error.message);
+        return;
+      }
+      this.cache[key] = value; // Update in-memory cache
+      console.log(`Session storage updated: ${key} = ${value}`);
+      callback(response);
+    });
+  }
 }
 
 const SessionCache = new ContentScriptCache();
