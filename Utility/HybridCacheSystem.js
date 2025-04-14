@@ -5,19 +5,21 @@ const CACHE_KEYS = {
 
     TRANSLATION_DATA : 'translationData',
     FONTS_DATA : 'fontsData',
-    PRIMARY_COLOR_DATA : 'primaryColorData',
-    SEMANTIC_COLOR_DATA : 'semanticColorData',
+    COLOR_DATA : 'colorData',
 
-    PREVIOUS_PROJECT_NAME: 'previousProjectName',
-    CURRENT_PROJECT_NAME: 'currentProjectName',
+    AI2_SELECTED_PROJECT: 'ai2SelectedProject',
+
+    IS_TRANSLATION_DATA_CHANGED: 'isTranslationDataChanged',
+    IS_FONT_DATA_CHANGED: 'isFontDataChanged',
+    IS_COLOR_DATA_CHANGED: 'isColorDataChanged'
 
 };
 
 class HybridSessionCache {
     constructor() {
         if (!HybridSessionCache.instance) {
-            this.cache = {}; // Shared in-memory cache
-            this.debug = true; // Set to 'false' in production to disable logs
+            this.cache = {};
+            this.debug = true;
             HybridSessionCache.instance = this;
             this._restoreCache(); // Automatically restore cache on initialization
         }
