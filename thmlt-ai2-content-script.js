@@ -26,17 +26,18 @@ let selectedColorTableRow = null;
 let lastComponentNameText = "";
 
 const CACHE_KEYS = {
-  PROJECTS: 'projects',
-  PROJECT_NAMES: 'projectNames',
-
   TRANSLATION_DATA : 'translationData',
   FONTS_DATA : 'fontsData',
   COLOR_DATA: 'colorData',
   DEFAULT_THEME_MODE: 'defaultThemeMode',
 
   AI2_SELECTED_PROJECT: 'ai2SelectedProject',
-  PREVIOUS_PROJECT_NAME: 'previousProjectName',
-  CURRENT_PROJECT_NAME: 'currentProjectName',
+  PREVIOUS_AI2_SELECTED_PROJECT: 'previousAi2SelectedProject',
+  HAS_PROJECT_CHANGED: 'hasProjectChanged',
+
+  IS_TRANSLATION_DATA_CHANGED: 'isTranslationDataChanged',
+  IS_FONT_DATA_CHANGED: 'isFontDataChanged',
+  IS_COLOR_DATA_CHANGED: 'isColorDataChanged'
   
 };
 
@@ -247,10 +248,8 @@ class TextFormatterModal {
 
   static _integrateData(projectName){
     // Check is data available in cache or not
-    if (SessionCache.get(CACHE_KEYS.CURRENT_PROJECT_NAME)) {
-      // Found
-
-    } else {
+    if (SessionCache.get(CACHE_KEYS.HAS_PROJECT_CHANGED)){
+      console.log(`Fetching data for: ${projectName}`);
       // Check Project Avaiability
       messageClient.sendMessage({ action: "Projects" }, (error, response) => {
         if (error) return console.error("Error:", error.message);
@@ -273,7 +272,74 @@ class TextFormatterModal {
             this.ColorTable.refreshData(response.colorData, response.defaultThemeMode);
 
           });
+        } else {
+          console.log(`Project '${projectName}' not found in the list of available projects.`);
+          this.TranslationTable.clear();
+          this.FontTable.clear();
+          this.ColorTable.clear();
+          defaultLanguageElement.innerText = "Translation (Default Language)";
+          
         }
+      });
+    } else {
+      console.log("Cache datat found. Checking for Data Changes");
+      
+      const changedFlags = {
+        action: "fetchData",
+        projectName: projectName,
+        translationData: false,
+        fontData: false,
+        colorData: false
+      };
+      
+      const cacheKeys = [
+        {
+          key: CACHE_KEYS.IS_TRANSLATION_DATA_CHANGED,
+          flagKey: 'translationData'
+        },
+        {
+          key: CACHE_KEYS.IS_FONT_DATA_CHANGED,
+          flagKey: 'fontData'
+        },
+        {
+          key: CACHE_KEYS.IS_COLOR_DATA_CHANGED,
+          flagKey: 'colorData'
+        }
+      ];
+      
+      const promises = cacheKeys.map(({ key, flagKey }) => {
+        return new Promise((resolve) => {
+          SessionCache.getFromSessionStorage(key, (isDataChanged) => {
+            if (isDataChanged) {
+              changedFlags[flagKey] = true;
+            }
+            resolve();
+          });
+        });
+      });
+      
+      Promise.all(promises).then(() => {
+        // Fetch Data from ThMLT DB
+        messageClient.sendMessage(changedFlags, (error, response) => {
+          if (error) return console.error("Error:", error.message);
+          if(!response.translationData){
+            this.TranslationTable.refreshData(response.translationData, false);
+          }else{
+            this.TranslationTable.refreshData(CACHE_KEYS.TRANSLATION_DATA, false);
+          }
+
+          if(!response.fontData){
+            this._integrateFontData(response.fontData);
+          }else{
+            this._integrateFontData(CACHE_KEYS.FONTS_DATA);
+          }
+
+          if(!response.colorData){
+            this.ColorTable.refreshData(response.colorData, response.defaultThemeMode);
+          } else{
+            this.ColorTable.refreshData(CACHE_KEYS.COLOR_DATA, CACHE_KEYS.DEFAULT_THEME_MODE);
+          }
+        });
       });
     } 
   }
@@ -690,29 +756,27 @@ const observer = new MutationObserver(() => {
     
       if (projectNameElement) {
         console.log("Project name element found! Watching for changes...");
-    
-        const initialProjectName = projectNameElement.innerText.trim();
-        
-        if (initialProjectName && initialProjectName !== SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT)) {
-          SessionCache.remove(CACHE_KEYS.COLOR_DATA);
-          SessionCache.remove(CACHE_KEYS.FONTS_DATA);
-          SessionCache.remove(CACHE_KEYS.TRANSLATION_DATA);
-          SessionCache.set(CACHE_KEYS.AI2_SELECTED_PROJECT, initialProjectName);
-          SessionCache.setSessionStorage(CACHE_KEYS.CURRENT_PROJECT_NAME, initialProjectName);
-          console.log(`[Current Project] ${initialProjectName}`);
-        }
-        
+      
         // Observer to detect project name changes
         const projectNameObserver = new MutationObserver(() => {
+
           const updatedProjectName = projectNameElement.innerText.trim();
-    
-          if (updatedProjectName && updatedProjectName !== SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT)) {
-            SessionCache.set(CACHE_KEYS.AI2_SELECTED_PROJECT, updatedProjectName);
+          const currentProject = SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT) || "";
+
+          if (updatedProjectName && updatedProjectName !== currentProject) {
+
+            SessionCache.set(CACHE_KEYS.PREVIOUS_AI2_SELECTED_PROJECT, SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT));
             SessionCache.setSessionStorage(CACHE_KEYS.AI2_SELECTED_PROJECT, updatedProjectName);
+            SessionCache.set(CACHE_KEYS.HAS_PROJECT_CHANGED, true);
+
             SessionCache.remove(CACHE_KEYS.COLOR_DATA);
             SessionCache.remove(CACHE_KEYS.FONTS_DATA);
             SessionCache.remove(CACHE_KEYS.TRANSLATION_DATA);
-            console.log(`[Current Project] ${updatedProjectName}`);
+            console.log(`Project changed to  '${updatedProjectName}'`);
+          } else {
+            console.log(`Project name is unchanged: '${updatedProjectName}'`);
+            
+            SessionCache.set(CACHE_KEYS.HAS_PROJECT_CHANGED, false);
           }
         });
     
@@ -768,7 +832,7 @@ function createTestButton(toolBarElement) {
   newDiv.addEventListener('click', async (e) => {
     const clickedElement = e.target.closest('td[thmltTestButtonDiv="true"]');
 
-    TextFormatterModal.show("exTest");
+    TextFormatterModal.show(SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT));
   });
 }
 
