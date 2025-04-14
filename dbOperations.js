@@ -299,6 +299,12 @@ function addPrimitiveColor(projectName, primitiveName, primitiveValue, orderInde
             [primitiveName, Logger.Types.INFO, Logger.Formats.BOLD],
             ["added"]
           ));
+
+          cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+            if (selectedProject === projectName) {
+              cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+            }
+          });
           
         }
 
@@ -393,6 +399,11 @@ function updatePrimitive(projectName, primitiveName, newPrimitiveName = "@defaul
             ["successfully."]
           ));
         }
+        cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+          if (selectedProject === projectName) {
+            cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+          }
+        });
         CacheOperations.updatePrimitive(primitiveName, newPrimitiveName, newPrimitiveValue);
 
         // Unlink primitive color in semantic values
@@ -484,6 +495,11 @@ function deletePrimitiveColor(projectName, primitiveName) {
             [primitiveName, Logger.Types.ERROR, Logger.Formats.BOLD],
             ["deleted."]
           ));
+          cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+            if (selectedProject === projectName) {
+              cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+            }
+          });
           resolve(`Primitive color '${primitiveName}' deleted.`);
         } else {
 
@@ -551,6 +567,11 @@ function addSemantic(projectName, semanticName, linkedPrimitive, themeMode, orde
             ["Added semantic color:"],
             [semanticName, Logger.Types.INFO, Logger.Formats.BOLD]
             ));
+            cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+              if (selectedProject === projectName) {
+                cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+              }
+            });
           resolve(`Added semantic color: ${semanticName}`);
       };
 
@@ -635,6 +656,12 @@ function updateSemantic(projectName, semanticName, newSemanticName = "@default",
                 [semanticName, Logger.Types.INFO, Logger.Formats.BOLD]
               ));
             }
+
+            cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+              if (selectedProject === projectName) {
+                cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+              }
+            });
             CacheOperations.updateSemantic(semanticName, newSemanticName, themeMode, newLinkedPrimitive);
             resolve(`Updated semantic color: ${entry.semanticName}`);
 
@@ -943,6 +970,12 @@ function deleteSemantic( projectName, semanticName) {
               [semanticName, Logger.Types.ERROR, Logger.Formats.BOLD],
               ["deleted successfully."]
             ));
+
+            cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+              if (selectedProject === projectName) {
+                cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+              }
+            });
             
             resolve(`Semantic color '${semanticName}' deleted successfully.`);
           } else {
@@ -1004,6 +1037,11 @@ function updateDefaultThemeMode(projectName, newDefaultThemeMode) {
               ["Default theme mode updated to"],
               [newDefaultThemeMode, Logger.Types.SUCCESS, Logger.Formats.BOLD]
             ));
+            cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+              if (selectedProject === projectName) {
+                cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+              }
+            });
             CacheOperations.defaultThemeMode = newDefaultThemeMode;
             resolve("Default theme mode updated successfully.");
           };
@@ -1113,6 +1151,11 @@ function deleteTheme(projectName, themeMode) {
               [themeMode, Logger.Types.ERROR, Logger.Formats.BOLD],
               ["deleted."]
             ));
+            cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+              if (selectedProject === projectName) {
+                cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+              }
+            });
             resolve(`${deletionCount} record(s) from '${themeMode}' theme deleted successfully.`);
           } else {
             console.log(...Logger.multiLog(
@@ -1181,6 +1224,11 @@ function renameThemeMode(projectName, oldThemeMode, newThemeMode) {
               ["=>"],
               [newThemeMode, Logger.Types.INFO, Logger.Formats.BOLD]
             ));
+            cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+              if (selectedProject === projectName) {
+                cache.set(CACHE_KEYS.IS_COLOR_DATA_CHANGED, true);
+              }
+            });
             resolve(`${updateCount} record(s) theme mode changed successfully from '${oldThemeMode}' to '${newThemeMode}'.`);
           } else {
             console.log(...Logger.multiLog(
@@ -1600,6 +1648,11 @@ function addFont(projectName, fontTag, shortFontTag, fontName, orderIndex) {
     
     request.onsuccess = () =>{
       CacheOperations.addFont(fontTag, shortFontTag, fontName);
+      cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+        if (selectedProject === projectName) {
+          cache.set(CACHE_KEYS.IS_FONT_DATA_CHANGED, true);
+        }
+      });
       resolve("Font added successfully");
       console.log(...Logger.multiLog(
         ["[SUCCESS]", Logger.Types.SUCCESS, Logger.Formats.BOLD],
@@ -1660,6 +1713,11 @@ function updateFont(projectName, fontTag, newFontTag = "@default", newShortFontT
           if (newOrderIndex !== '@default') updateData.orderIndex = newOrderIndex;
 
           store.put(updateData);
+          cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+            if (selectedProject === projectName) {
+              cache.set(CACHE_KEYS.IS_FONT_DATA_CHANGED, true);
+            }
+          });
           resolve("Font updated successfully");
 
           CacheOperations.updateFont(fontTag, newFontTag, newShortFontTag, newFontName);
@@ -1707,6 +1765,11 @@ function deleteFont(projectName, fontTag) {
             [fontTag, Logger.Types.ERROR, Logger.Formats.BOLD],
             ["deleted successfully."]
           ));
+          cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+            if (selectedProject === projectName) {
+              cache.set(CACHE_KEYS.IS_FONT_DATA_CHANGED, true);
+            }
+          });
         }
         cursor.continue();
       } else {
@@ -1779,6 +1842,11 @@ function addTranslations(projectName, translationJson) {
           let updateRequest = store.put(existingData);
           
           updateRequest.onsuccess = function() {
+            cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+              if (selectedProject === projectName) {
+                cache.set(CACHE_KEYS.IS_TRANSLATION_DATA_CHANGED, true);
+              }
+            });
               console.log("Translation updated successfully");
               resolve("Translation updated successfully");
           };
@@ -1799,6 +1867,11 @@ function addTranslations(projectName, translationJson) {
           
           addRequest.onsuccess = function() {
               console.log("Translation added successfully");
+              cache.get(CACHE_KEYS.AI2_SELECTED_PROJECT, (selectedProject) => {
+                if (selectedProject === projectName) {
+                  cache.set(CACHE_KEYS.IS_TRANSLATION_DATA_CHANGED, true);
+                }
+              });
               resolve("Translation added successfully");
           };
           
