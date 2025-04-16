@@ -23,6 +23,9 @@ let colorTable = null;
 let colorTableBody = null;
 let selectedColorTableRow = null;
 
+let formattedText = null;
+let applyFormattedTextButton = null;
+
 let lastComponentNameText = "";
 
 const CACHE_KEYS = {
@@ -246,6 +249,15 @@ class TextFormatterModal {
     
   }
 
+  static refreshFormattedText() {
+  
+    const translation = selectedTranslationTableRow?.cells[0]?.textContent?.trim() || '#';
+    const font = selectedFontTableRow?.cells[0]?.textContent?.trim() || '#';
+    const color = selectedColorTableRow?.cells[0]?.textContent?.trim() || '#';
+  
+    formattedText.textContent = `[${translation}, ${font}, ${color}]`;
+  }
+
   static _integrateData(projectName){
     // Check is data available in cache or not
     if (SessionCache.get(CACHE_KEYS.HAS_PROJECT_CHANGED)){
@@ -382,12 +394,14 @@ class TextFormatterModal {
       // If the same row is clicked, deselect it
       if (selectedTranslationTableRow === clickedRow) {
           selectedTranslationTableRow = null; // Reset selection
+          TextFormatterModal.refreshFormattedText();
           return;
       }
 
       // Highlight the clicked row
       clickedRow.classList.add('highlight');
       selectedTranslationTableRow = clickedRow; // Update the selected row
+      TextFormatterModal.refreshFormattedText();
     }
 
     static clear(){
@@ -461,19 +475,21 @@ class TextFormatterModal {
       if (!clickedRow) return; // Ignore clicks outside of rows
 
       // If another row is already selected, revert its background
-      if (selectedColorTableRow) {
-        selectedColorTableRow.classList.remove('highlight');
+      if (selectedFontTableRow) {
+        selectedFontTableRow.classList.remove('highlight');
       }
 
       // If the same row is clicked, deselect it
-      if (selectedColorTableRow === clickedRow) {
-        selectedColorTableRow = null; // Reset selection
+      if (selectedFontTableRow === clickedRow) {
+        selectedFontTableRow = null; // Reset selection
+        TextFormatterModal.refreshFormattedText();
           return;
       }
 
       // Highlight the clicked row
       clickedRow.classList.add('highlight');
-      selectedColorTableRow = clickedRow; // Update the selected row
+      selectedFontTableRow = clickedRow; // Update the selected row
+      TextFormatterModal.refreshFormattedText();
     }
 
     static clear(){
@@ -508,11 +524,13 @@ class TextFormatterModal {
       // If the same row is clicked, deselect it
       if (selectedColorTableRow === clickedRow) {
         selectedColorTableRow = null; // Reset selection
+        TextFormatterModal.refreshFormattedText();
           return;
       }
       // Highlight the clicked row
       clickedRow.classList.add('highlight');
       selectedColorTableRow = clickedRow; // Update the selected row
+      TextFormatterModal.refreshFormattedText();
     }
 
     static clear(){
@@ -605,6 +623,9 @@ class TextFormatterModal {
   await TextFormatterModal.initialize();
   TextFormatterModal.hide();
 
+  SessionCache.setSessionStorage(CACHE_KEYS.AI2_SELECTED_PROJECT, "exTest");
+  SessionCache.set(CACHE_KEYS.HAS_PROJECT_CHANGED, true);
+
   translationTable = shadowRoot.getElementById("translationTable");
   translationTableBody = translationTable.querySelector("tbody");
   defaultLanguageElement = shadowRoot.getElementById("defaultlanguage");
@@ -616,6 +637,9 @@ class TextFormatterModal {
   colorTable = shadowRoot.getElementById("colorTable");
   colorTableBody = colorTable.querySelector("tbody");
   TextFormatterModal.ColorTable.initializeSearch();
+
+  formattedText = shadowRoot.getElementById("formattedText");
+  applyFormattedTextButton = shadowRoot.getElementById("applyFormattedText");
 
   // Close text formatter button 
   shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', ()=>{
