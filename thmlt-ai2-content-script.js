@@ -26,6 +26,8 @@ let selectedColorTableRow = null;
 let formattedText = null;
 let applyFormattedTextButton = null;
 
+let activeAI2TextArea = null;
+
 let lastComponentNameText = "";
 
 const CACHE_KEYS = {
@@ -231,6 +233,22 @@ class TextFormatterModal {
   }
 
   static show(projectName){
+    // Reset modal state
+    [selectedTranslationTableRow, selectedFontTableRow, selectedColorTableRow].forEach(row => row?.classList.remove('highlight'));
+
+    selectedTranslationTableRow = selectedFontTableRow = selectedColorTableRow = null;
+
+    formattedText.textContent = "Please select a translation, font, and color.";
+    applyFormattedTextButton.classList.toggle("disabled", true);
+
+    this.TabManager.switchToTab("translation-tab");
+
+    ['.searchTranslationInput', '.searchColorInput'].forEach(selector => {
+      const inputElement = shadowRoot.querySelector(selector);
+      inputElement.value = ""; // Clear the input value
+    });
+
+    
     this._integrateData(projectName);
     isTextFormatterModalOpen = true;
     shadowRoot.getElementById('overlay').style.display = 'block';
@@ -255,7 +273,24 @@ class TextFormatterModal {
     const font = selectedFontTableRow?.cells[0]?.textContent?.trim() || '#';
     const color = selectedColorTableRow?.cells[0]?.textContent?.trim() || '#';
   
+    if (translation === "#" && font === "#" && color === "#") {
+      formattedText.textContent = "Please select a translation, font, and color.";
+      applyFormattedTextButton.classList.toggle("disabled", true);
+      return;
+    }
+    applyFormattedTextButton.classList.toggle("disabled", false);
     formattedText.textContent = `[${translation}, ${font}, ${color}]`;
+  }
+
+  static applyFormattedTextToAI2TextArea() {
+    const textArea = activeAI2TextArea;
+    if (textArea) {
+                
+      textArea.value = formattedText.textContent;
+      // Trigger input and change events
+      textArea.dispatchEvent(new Event("input", { bubbles: true }));
+      textArea.dispatchEvent(new Event("change", { bubbles: true }));
+    }
   }
 
   static _integrateData(projectName){
@@ -623,9 +658,6 @@ class TextFormatterModal {
   await TextFormatterModal.initialize();
   TextFormatterModal.hide();
 
-  SessionCache.setSessionStorage(CACHE_KEYS.AI2_SELECTED_PROJECT, "exTest");
-  SessionCache.set(CACHE_KEYS.HAS_PROJECT_CHANGED, true);
-
   translationTable = shadowRoot.getElementById("translationTable");
   translationTableBody = translationTable.querySelector("tbody");
   defaultLanguageElement = shadowRoot.getElementById("defaultlanguage");
@@ -643,6 +675,11 @@ class TextFormatterModal {
 
   // Close text formatter button 
   shadowRoot.getElementById('closeFormatterPopup').addEventListener('click', ()=>{
+    TextFormatterModal.hide();
+  });
+
+  applyFormattedTextButton.addEventListener('click', () => {
+    TextFormatterModal.applyFormattedTextToAI2TextArea();
     TextFormatterModal.hide();
   });
 
@@ -855,8 +892,9 @@ function createTestButton(toolBarElement) {
 
   newDiv.addEventListener('click', async (e) => {
     const clickedElement = e.target.closest('td[thmltTestButtonDiv="true"]');
-
-    TextFormatterModal.show(SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT));
+    if (clickedElement) {
+      TextFormatterModal.show(SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT));
+    }
   });
 }
 
@@ -875,6 +913,7 @@ function createEditTextWithThmltModalButton() {
     });
 
     const textArea = targetRow.nextElementSibling.querySelector('.ode-PropertyEditor');
+    activeAI2TextArea = textArea;
     
 
     if (targetRow) {
@@ -924,20 +963,7 @@ function createEditTextWithThmltModalButton() {
 
           
           if (clickedElement) {
-              if (textArea) {
-
-                if (!projectName && projectName === activeProjectName) {
-                  //call isNeededUpdate
-                } else {
-                 // fetch data
-                }
-
-                
-                // textArea.value = "success i have done it";
-                // // Trigger input and change events
-                // textArea.dispatchEvent(new Event("input", { bubbles: true }));
-                // textArea.dispatchEvent(new Event("change", { bubbles: true }));
-              }
+            TextFormatterModal.show(SessionCache.get(CACHE_KEYS.AI2_SELECTED_PROJECT));
           }
         });
       } else {

@@ -140,6 +140,13 @@ div {
     text-align: center;
 }
 
+.buttonBlue.disabled {
+    background-color: var(--gray-700);
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+
 .buttonBlue:hover {
     background-color: var(--blue-800);
 }
