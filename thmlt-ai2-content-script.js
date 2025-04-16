@@ -24,6 +24,8 @@ let colorTableBody = null;
 let selectedColorTableRow = null;
 
 let formattedText = null;
+let applyFormattedTextButton = null;
+
 let lastComponentNameText = "";
 
 const CACHE_KEYS = {
