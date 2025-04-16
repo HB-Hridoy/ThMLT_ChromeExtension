@@ -257,6 +257,12 @@ class TextFormatterModal {
     const font = selectedFontTableRow?.cells[0]?.textContent?.trim() || '#';
     const color = selectedColorTableRow?.cells[0]?.textContent?.trim() || '#';
   
+    if (translation === "#" && font === "#" && color === "#") {
+      formattedText.textContent = "Please select a translation, font, and color.";
+      applyFormattedTextButton.classList.toggle("disabled", true);
+      return;
+    }
+    applyFormattedTextButton.classList.toggle("disabled", false);
     formattedText.textContent = `[${translation}, ${font}, ${color}]`;
   }
 
