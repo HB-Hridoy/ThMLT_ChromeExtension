@@ -233,6 +233,22 @@ class TextFormatterModal {
   }
 
   static show(projectName){
+    // Reset modal state
+    [selectedTranslationTableRow, selectedFontTableRow, selectedColorTableRow].forEach(row => row?.classList.remove('highlight'));
+
+    selectedTranslationTableRow = selectedFontTableRow = selectedColorTableRow = null;
+
+    formattedText.textContent = "Please select a translation, font, and color.";
+    applyFormattedTextButton.classList.toggle("disabled", true);
+
+    this.TabManager.switchToTab("translation-tab");
+
+    ['.searchTranslationInput', '.searchColorInput'].forEach(selector => {
+      const inputElement = shadowRoot.querySelector(selector);
+      inputElement.value = ""; // Clear the input value
+    });
+
+    
     this._integrateData(projectName);
     isTextFormatterModalOpen = true;
     shadowRoot.getElementById('overlay').style.display = 'block';
