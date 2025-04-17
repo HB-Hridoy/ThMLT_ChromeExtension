@@ -1,5 +1,5 @@
-import cache, { CACHE_KEYS } from './src/utils/HybridCacheSystem.js';
-import ThMLT_DB from './src/db/ThMLT_DB.js';
+import cache, { CACHE_KEYS } from '../utils/HybridCacheSystem.js';
+import ThMLT_DB from '../db/ThMLT_DB.js';
 
 const thmltDatabase = new ThMLT_DB();
 
