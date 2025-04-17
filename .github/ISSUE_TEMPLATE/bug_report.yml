@@ -1,0 +1,55 @@
+name: ✨ Bug Report
+description: File a bug report to help us improve ThMLT.
+title: "[Bug] <title>"
+labels: [bug, needs-triage]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug in ThMLT! Please provide detailed information so we can investigate and fix it.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: e.g., JSON export does not include semantic colors
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Go to Dashboard
+        2. Click on a project
+        3. Attempt to export JSON
+        4. Notice missing fields
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      placeholder: What should happen instead?
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      placeholder: What actually happened?
+
+  - type: input
+    id: browser-os
+    attributes:
+      label: Browser & OS
+      placeholder: Chrome 123, macOS Sonoma
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      placeholder: Links, logs, screenshots, etc.

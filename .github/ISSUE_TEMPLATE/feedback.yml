@@ -1,0 +1,35 @@
+name: 💭 Alpha Feedback
+description: Share general thoughts from using the alpha version.
+title: "[Feedback] <title>"
+labels: [feedback, alpha]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for testing ThMLT! Share anything you'd like us to know.
+
+  - type: textarea
+    id: what-you-liked
+    attributes:
+      label: What You Liked
+      placeholder: Which parts of ThMLT did you enjoy or find useful?
+
+  - type: textarea
+    id: what-confused-you
+    attributes:
+      label: What Was Confusing or Frustrating?
+      placeholder: Was anything hard to understand or annoying?
+
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Suggestions
+      placeholder: Any quick wins or ideas we could implement?
+
+  - type: textarea
+    id: extra-thoughts
+    attributes:
+      label: Anything Else?
+      placeholder: Feel free to speak your mind! 🙂
