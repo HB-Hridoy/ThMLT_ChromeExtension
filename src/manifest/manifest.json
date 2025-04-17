@@ -5,27 +5,27 @@
   "description": "",
   "host_permissions": ["https://ai2.appinventor.mit.edu/*"],
   "icons": {
-    "16": "assets/images/icon-16.png",
-    "48": "assets/images/icon-48.png",
-    "128": "assets/images/icon-128.png"
+    "16": "public/assets/images/icon-16.png",
+    "48": "public/assets/images/icon-48.png",
+    "128": "public/assets/images/icon-128.png"
   },
   "background": {
-    "service_worker": "service-worker.js",
+    "service_worker": "src/background/service_worker.js",
     "type": "module"
   },
   "action": {
     "default_title": "Open ThMLT color theme editor"
   },
   "side_panel": {
-    "default_path": "sidepanel.html"
+    "default_path": "src/sidepanel/sidepanel.html"
   },
   "permissions": ["sidePanel","storage","scripting", "activeTab"],
   "web_accessible_resources": [
     {
       "resources": [
-        "BlockyWorkspaceInjector.js",
-        "Extras/textFormatterModal/textFormatterModal.html",
-        "Extras/textFormatterModal/textFormatterModal.css"
+        "src/content/inject/BlockyManipulator.js",
+        "src/content/inject/textFormatterModal.html",
+        "src/content/inject/textFormatterModal.css"
       ],
       "matches": ["https://ai2.appinventor.mit.edu/*"]
     }
@@ -33,7 +33,7 @@
   "content_scripts": [
     {
       "matches": ["https://ai2.appinventor.mit.edu/*"],
-      "js": ["thmlt-ai2-content-script.js"],
+      "js": ["src/content/thmlt-ai2-content-script.js"],
       "run_at": "document_end"
     }
   ]
