@@ -1,2 +1,2 @@
-# Ignore macOS folder metadata
 .DS_Store
+assets/.DS_Store
