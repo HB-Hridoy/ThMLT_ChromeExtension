@@ -186,7 +186,7 @@ class TextFormatterModal {
   static async initialize(){
     try {
         // Fetch the HTML content
-        const response = await fetch(chrome.runtime.getURL('Extras/textFormatterModal/textFormatterModal.html'));
+        const response = await fetch(chrome.runtime.getURL('src/content/inject/textFormatterModal.html'));
 
         // Check if the fetch was successful
         if (!response.ok) {
@@ -757,7 +757,7 @@ class TextFormatterModal {
   
     // Load and inject styles inside Shadow DOM
     try {
-      const response = await fetch(chrome.runtime.getURL('Extras/textFormatterModal/textFormatterModal.css'));
+      const response = await fetch(chrome.runtime.getURL('src/content/inject/textFormatterModal.css'));
       let cssText = await response.text();
   
       // Replace ":root" with ":host"
