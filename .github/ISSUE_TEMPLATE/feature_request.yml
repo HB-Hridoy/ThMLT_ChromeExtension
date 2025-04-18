@@ -1,0 +1,46 @@
+name: 💡 Feature Request
+description: Suggest a new idea for ThMLT.
+title: "[Feature] <title>"
+labels: [enhancement]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve ThMLT by suggesting a feature!
+
+  - type: input
+    id: feature-title
+    attributes:
+      label: Feature Title
+      placeholder: e.g., Dark mode switcher in settings
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this solve?
+      placeholder: It's hard to work at night without dark mode.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      placeholder: Add a dark theme toggle in top-right nav.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      placeholder: Other ideas or plugins you considered?
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      placeholder: Add any other context, designs, or screenshots.
