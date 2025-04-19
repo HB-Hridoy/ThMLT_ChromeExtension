@@ -107,6 +107,8 @@
   const fontsDataDownloadButton = document.getElementById("fonts-data-download-button");
   const fontsDataCopyButton = document.getElementById("fonts-data-copy-button");
 
+  const translationDataDownloadButton = document.getElementById("translation-data-download-button");
+  const translationDataCopyButton = document.getElementById("translation-data-copy-button");
   
   const projectDeleteButton = document.getElementById("delete-project-button");
   const projectDeleteInput = document.getElementById("delete-project-input");
@@ -176,6 +178,50 @@
     } catch (err) {
         AlertManager.error("Failed to copy fonts data to clipboard", 1700);
         console.error("Failed to copy fonts data to clipboard", err);
+    }
+  });
+
+  translationDataDownloadButton.addEventListener("click", async ()=>{
+    try {
+      const isDataAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
+      if (isDataAvailable) {
+        const translationData = await getTranslationData(CacheOperations.activeProject);
+
+        // Trigger a download of the JSON file.
+        const blob = new Blob([JSON.stringify(translationData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        // Use the project name as the filename.
+        a.download = `${CacheOperations.activeProject}_translations.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        AlertManager.error("No translation data available for this project", 1700);
+      }
+    } catch (err) {
+        AlertManager.error("Failed to download translations data", 1700);
+        console.error("Failed to download translations data", err);
+    }
+  });
+
+  translationDataCopyButton.addEventListener("click", async ()=>{
+
+    try {
+      const isDataAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
+      if (isDataAvailable) {
+        const translationData = await getTranslationData(CacheOperations.activeProject);
+
+        await navigator.clipboard.writeText(JSON.stringify(translationData, null, 2));
+        AlertManager.success("Translations data copied to clipboard", 1700);
+      } else {
+        AlertManager.error("No translation data available for this project", 1700);
+      }
+    } catch (err) {
+        AlertManager.error("Failed to copy translations data to clipboard", 1700);
+        console.error("Failed to copy translations data to clipboard", err);
     }
   });
 
