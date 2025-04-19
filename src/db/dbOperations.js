@@ -1769,39 +1769,62 @@ function deleteFont(projectName, fontTag) {
   });
 }
 
-function exportFonts(author, version) {
+function getFontsData(projectName) {
   return new Promise((resolve, reject) => {
     if (!isDBOpenSuccess || !db) {
       const error = "Database is not initialized";
       console.error(error);
       return reject(error);
     }
-    let transaction = db.transaction(["fonts"], "readonly");
-    let store = transaction.objectStore("fonts");
-    let request = store.getAll();
-    
-    request.onsuccess = function () {
-      let fonts = request.result;
-      let fontExport = {};
-      
-      fonts.forEach((font) => {
-        if (!fontExport[font.projectName]) {
-          fontExport[font.projectName] = {
-            ProjectName: font.projectName,
-            Author: author,
-            Version: version,
-            Fonts: {}
+
+    const transaction = db.transaction(["projects", "fonts"], "readonly");
+    const projectsStore = transaction.objectStore("projects");
+    const fontsStore = transaction.objectStore("fonts");
+
+    const projectRequest = projectsStore.get(projectName);
+    const fontsIndex = fontsStore.index("projectName");
+    const fontsRequest = fontsIndex.getAll(projectName);
+
+    projectRequest.onsuccess = () => {
+      const project = projectRequest.result;
+
+      if (!project) {
+        return reject(`Project "${projectName}" not found`);
+      }
+
+      fontsRequest.onsuccess = () => {
+        const fonts = fontsRequest.result;
+        const fontsObj = {};
+
+        fonts.forEach((font) => {
+          fontsObj[font.fontTag] = {
+            shortFontTag: font.shortFontTag,
+            fontName: font.fontName
           };
-        }
-        let fontKey = `${font.fontTag}{${font.shortFontTag}}`;
-        fontExport[font.projectName].Fonts[fontKey] = font.fontName;
-      });
-      
-      resolve(fontExport);
+        });
+
+        const result = {
+          ProjectName: project.projectName,
+          Author: project.author,
+          Version: project.version,
+          Fonts: fontsObj
+        };
+
+        const jsonString = JSON.stringify(result, null, 2);
+        resolve(jsonString);
+      };
+
+      fontsRequest.onerror = () => {
+        reject("Error fetching fonts data");
+      };
     };
-    request.onerror = () => reject("Error exporting font store");
+
+    projectRequest.onerror = () => {
+      reject("Error fetching project data");
+    };
   });
 }
+
 
 function addTranslations(projectName, translationJson) {
 

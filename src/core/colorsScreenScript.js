@@ -103,6 +103,10 @@
 
   const colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
   const colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
+
+  const fontsDataDownloadButton = document.getElementById("fonts-data-download-button");
+  const fontsDataCopyButton = document.getElementById("fonts-data-copy-button");
+
   
   const projectDeleteButton = document.getElementById("delete-project-button");
   const projectDeleteInput = document.getElementById("delete-project-input");
@@ -138,6 +142,40 @@
     } catch (err) {
         AlertManager.error("Failed to copy project data to clipboard", 2500);
         console.error("Clipboard copy failed", err);
+    }
+  });
+
+  fontsDataDownloadButton.addEventListener("click", async ()=>{
+    try {
+      const fontsData = await getFontsData(CacheOperations.activeProject);
+
+      // Trigger a download of the JSON file.
+      const blob = new Blob([fontsData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      // Use the project name as the filename.
+      a.download = `${CacheOperations.activeProject}_fonts.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch (err) {
+        AlertManager.error("Failed to download Fonts data", 1700);
+        console.error("Failed to download Fonts data", err);
+    }
+  });
+
+  fontsDataCopyButton.addEventListener("click", async ()=>{
+
+    try {
+        const fontsData = await getFontsData(CacheOperations.activeProject);
+        await navigator.clipboard.writeText(fontsData);
+        AlertManager.success("Fonts data copied to clipboard", 1700);
+    } catch (err) {
+        AlertManager.error("Failed to copy fonts data to clipboard", 1700);
+        console.error("Failed to copy fonts data to clipboard", err);
     }
   });
 
