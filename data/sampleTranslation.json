@@ -1,475 +1,475 @@
 {
-        "SupportedLanguages": ["en", "bn", "es", "fr", "de"],
-        "DefaultLanguage": "fr",
-        "Translations": {
-                "home": {
-                        "en": "Home",
-                        "bn": "বাড়ি",
-                        "es": "Inicio",
-                        "fr": "Accueil",
-                        "de": "Startseite"
-                },
-                "discover": {
-                        "en": "Discover",
-                        "bn": "আবিষ্কার করুন",
-                        "es": "Descubrir",
-                        "fr": "Découvrir",
-                        "de": "Entdecken"
-                },
-                "settings": {
-                        "en": "Settings",
-                        "bn": "সেটিংস",
-                        "es": "Configuraciones",
-                        "fr": "Paramètres",
-                        "de": "Einstellungen"
-                },
-                "profile": {
-                        "en": "Profile",
-                        "bn": "প্রোফাইল",
-                        "es": "Perfil",
-                        "fr": "Profil",
-                        "de": "Profil"
-                },
-                "logout": {
-                        "en": "Logout",
-                        "bn": "প্রস্থান",
-                        "es": "Cerrar sesión",
-                        "fr": "Déconnexion",
-                        "de": "Abmelden"
-                },
-                "help": {
-                        "en": "Help",
-                        "bn": "সাহায্য",
-                        "es": "Ayuda",
-                        "fr": "Aide",
-                        "de": "Hilfe"
-                },
-                "about": {
-                        "en": "About",
-                        "bn": "সম্পর্কে",
-                        "es": "Acerca de",
-                        "fr": "À propos",
-                        "de": "Über"
-                },
-                "contact": {
-                        "en": "Contact",
-                        "bn": "যোগাযোগ",
-                        "es": "Contacto",
-                        "fr": "Contact",
-                        "de": "Kontakt"
-                },
-                "privacy": {
-                        "en": "Privacy",
-                        "bn": "গোপনীয়তা",
-                        "es": "Privacidad",
-                        "fr": "Confidentialité",
-                        "de": "Datenschutz"
-                },
-                "terms": {
-                        "en": "Terms",
-                        "bn": "শর্তাবলী",
-                        "es": "Términos",
-                        "fr": "Conditions",
-                        "de": "Bedingungen"
-                },
-                "notifications": {
-                        "en": "Notifications",
-                        "bn": "বিজ্ঞপ্তি",
-                        "es": "Notificaciones",
-                        "fr": "Notifications",
-                        "de": "Benachrichtigungen"
-                },
-                "messages": {
-                        "en": "Messages",
-                        "bn": "বার্তা",
-                        "es": "Mensajes",
-                        "fr": "Messages",
-                        "de": "Nachrichten"
-                },
-                "like": {
-                        "en": "Like",
-                        "bn": "পছন্দ",
-                        "es": "Me gusta",
-                        "fr": "J'aime",
-                        "de": "Gefällt mir"
-                },
-                "comment": {
-                        "en": "Comment",
-                        "bn": "মন্তব্য",
-                        "es": "Comentario",
-                        "fr": "Commentaire",
-                        "de": "Kommentar"
-                },
-                "share": {
-                        "en": "Share",
-                        "bn": "শেয়ার",
-                        "es": "Compartir",
-                        "fr": "Partager",
-                        "de": "Teilen"
-                },
-                "follow": {
-                        "en": "Follow",
-                        "bn": "অনুসরণ করুন",
-                        "es": "Seguir",
-                        "fr": "Suivre",
-                        "de": "Folgen"
-                },
-                "unfollow": {
-                        "en": "Unfollow",
-                        "bn": "অনুসরণ বন্ধ করুন",
-                        "es": "Dejar de seguir",
-                        "fr": "Ne plus suivre",
-                        "de": "Entfolgen"
-                },
-                "post": {
-                        "en": "Post",
-                        "bn": "পোস্ট",
-                        "es": "Publicar",
-                        "fr": "Publier",
-                        "de": "Beitrag"
-                },
-                "edit": {
-                        "en": "Edit",
-                        "bn": "সম্পাদনা",
-                        "es": "Editar",
-                        "fr": "Modifier",
-                        "de": "Bearbeiten"
-                },
-                "delete": {
-                        "en": "Delete",
-                        "bn": "মুছে ফেলুন",
-                        "es": "Eliminar",
-                        "fr": "Supprimer",
-                        "de": "Löschen"
-                },
-                "save": {
-                        "en": "Save",
-                        "bn": "সংরক্ষণ করুন",
-                        "es": "Guardar",
-                        "fr": "Enregistrer",
-                        "de": "Speichern"
-                },
-                "search": {
-                        "en": "Search",
-                        "bn": "অনুসন্ধান",
-                        "es": "Buscar",
-                        "fr": "Rechercher",
-                        "de": "Suchen"
-                },
-                "block": {
-                        "en": "Block",
-                        "bn": "ব্লক করুন",
-                        "es": "Bloquear",
-                        "fr": "Bloquer",
-                        "de": "Blockieren"
-                },
-                "report": {
-                        "en": "Report",
-                        "bn": "প্রতিবেদন",
-                        "es": "Reportar",
-                        "fr": "Signaler",
-                        "de": "Melden"
-                },
-                "subscribe": {
-                        "en": "Subscribe",
-                        "bn": "সাবস্ক্রাইব করুন",
-                        "es": "Suscribirse",
-                        "fr": "S'abonner",
-                        "de": "Abonnieren"
-                },
-                "unsubscribe": {
-                        "en": "Unsubscribe",
-                        "bn": "সাবস্ক্রিপশন বাতিল করুন",
-                        "es": "Darse de baja",
-                        "fr": "Se désabonner",
-                        "de": "Abbestellen"
-                },
-                "upload": {
-                        "en": "Upload",
-                        "bn": "আপলোড করুন",
-                        "es": "Subir",
-                        "fr": "Téléverser",
-                        "de": "Hochladen"
-                },
-                "download": {
-                        "en": "Download",
-                        "bn": "ডাউনলোড করুন",
-                        "es": "Descargar",
-                        "fr": "Télécharger",
-                        "de": "Herunterladen"
-                },
-                "refresh": {
-                        "en": "Refresh",
-                        "bn": "রিফ্রেশ করুন",
-                        "es": "Actualizar",
-                        "fr": "Rafraîchir",
-                        "de": "Aktualisieren"
-                },
-                "retry": {
-                        "en": "Retry",
-                        "bn": "পুনরায় চেষ্টা করুন",
-                        "es": "Reintentar",
-                        "fr": "Réessayer",
-                        "de": "Erneut versuchen"
-                },
-                "yes": {
-                        "en": "Yes",
-                        "bn": "হ্যাঁ",
-                        "es": "Sí",
-                        "fr": "Oui",
-                        "de": "Ja"
-                },
-                "no": {
-                        "en": "No",
-                        "bn": "না",
-                        "es": "No",
-                        "fr": "Non",
-                        "de": "Nein"
-                },
-                "cancel": {
-                        "en": "Cancel",
-                        "bn": "বাতিল করুন",
-                        "es": "Cancelar",
-                        "fr": "Annuler",
-                        "de": "Abbrechen"
-                },
-                "confirm": {
-                        "en": "Confirm",
-                        "bn": "নিশ্চিত করুন",
-                        "es": "Confirmar",
-                        "fr": "Confirmer",
-                        "de": "Bestätigen"
-                },
-                "loading": {
-                        "en": "Loading...",
-                        "bn": "লোড হচ্ছে...",
-                        "es": "Cargando...",
-                        "fr": "Chargement...",
-                        "de": "Laden..."
-                },
-                "error": {
-                        "en": "Error",
-                        "bn": "ত্রুটি",
-                        "es": "Error",
-                        "fr": "Erreur",
-                        "de": "Fehler"
-                },
-                "success": {
-                        "en": "Success",
-                        "bn": "সফলতা",
-                        "es": "Éxito",
-                        "fr": "Succès",
-                        "de": "Erfolg"
-                },
-                "failure": {
-                        "en": "Failure",
-                        "bn": "ব্যর্থতা",
-                        "es": "Fallo",
-                        "fr": "Échec",
-                        "de": "Fehler"
-                },
-                "welcome": {
-                        "en": "Welcome",
-                        "bn": "স্বাগতম",
-                        "es": "Bienvenido",
-                        "fr": "Bienvenue",
-                        "de": "Willkommen"
-                },
-                "goodbye": {
-                        "en": "Goodbye",
-                        "bn": "বিদায়",
-                        "es": "Adiós",
-                        "fr": "Au revoir",
-                        "de": "Auf Wiedersehen"
-                },
-                "thank_you": {
-                        "en": "Thank you",
-                        "bn": "ধন্যবাদ",
-                        "es": "Gracias",
-                        "fr": "Merci",
-                        "de": "Danke"
-                },
-                "please_wait": {
-                        "en": "Please wait...",
-                        "bn": "দয়া করে অপেক্ষা করুন...",
-                        "es": "Por favor espera...",
-                        "fr": "Veuillez patienter...",
-                        "de": "Bitte warten..."
-                },
-                "no_internet": {
-                        "en": "No internet connection",
-                        "bn": "কোন ইন্টারনেট সংযোগ নেই",
-                        "es": "Sin conexión a Internet",
-                        "fr": "Pas de connexion Internet",
-                        "de": "Keine Internetverbindung"
-                },
-                "network_error": {
-                        "en": "Network error",
-                        "bn": "নেটওয়ার্ক ত্রুটি",
-                        "es": "Error de red",
-                        "fr": "Erreur réseau",
-                        "de": "Netzwerkfehler"
-                },
-                "server_error": {
-                        "en": "Server error",
-                        "bn": "সার্ভার ত্রুটি",
-                        "es": "Error del servidor",
-                        "fr": "Erreur du serveur",
-                        "de": "Serverfehler"
-                },
-                "not_found": {
-                        "en": "Not found",
-                        "bn": "পাওয়া যায়নি",
-                        "es": "No encontrado",
-                        "fr": "Introuvable",
-                        "de": "Nicht gefunden"
-                },
-                "unauthorized": {
-                        "en": "Unauthorized",
-                        "bn": "অননুমোদিত",
-                        "es": "No autorizado",
-                        "fr": "Non autorisé",
-                        "de": "Unbefugt"
-                },
-                "forbidden": {
-                        "en": "Forbidden",
-                        "bn": "নিষিদ্ধ",
-                        "es": "Prohibido",
-                        "fr": "Interdit",
-                        "de": "Verboten"
-                },
-                "internal_server_error": {
-                        "en": "Internal server error",
-                        "bn": "অভ্যন্তরীণ সার্ভার ত্রুটি",
-                        "es": "Error interno del servidor",
-                        "fr": "Erreur interne du serveur",
-                        "de": "Interner Serverfehler"
-                },
-                "bad_request": {
-                        "en": "Bad request",
-                        "bn": "খারাপ অনুরোধ",
-                        "es": "Solicitud incorrecta",
-                        "fr": "Mauvaise demande",
-                        "de": "Schlechte Anfrage"
-                },
-                "service_unavailable": {
-                        "en": "Service unavailable",
-                        "bn": "সেবা অপ্রাপ্য",
-                        "es": "Servicio no disponible",
-                        "fr": "Service indisponible",
-                        "de": "Dienst nicht verfügbar"
-                },
-                "gateway_timeout": {
-                        "en": "Gateway timeout",
-                        "bn": "গেটওয়ে টাইমআউট",
-                        "es": "Tiempo de espera de la puerta de enlace",
-                        "fr": "Délai d'attente de la passerelle",
-                        "de": "Gateway-Zeitüberschreitung"
-                },
-                "session_expired": {
-                        "en": "Session expired",
-                        "bn": "সেশন মেয়াদ শেষ",
-                        "es": "Sesión expirada",
-                        "fr": "Session expirée",
-                        "de": "Sitzung abgelaufen"
-                },
-                "session_invalid": {
-                        "en": "Session invalid",
-                        "bn": "সেশন অবৈধ",
-                        "es": "Sesión inválida",
-                        "fr": "Session invalide",
-                        "de": "Sitzung ungültig"
-                },
-                "session_terminated": {
-                        "en": "Session terminated",
-                        "bn": "সেশন বাতিল",
-                        "es": "Sesión terminada",
-                        "fr": "Session terminée",
-                        "de": "Sitzung beendet"
-                },
-                "session_ended": {
-                        "en": "Session ended",
-                        "bn": "সেশন শেষ",
-                        "es": "Sesión finalizada",
-                        "fr": "Session terminée",
-                        "de": "Sitzung beendet"
-                },
-                "session_logged_out": {
-                        "en": "Session logged out",
-                        "bn": "সেশন লগ আউট",
-                        "es": "Sesión cerrada",
-                        "fr": "Session déconnectée",
-                        "de": "Sitzung abgemeldet"
-                },
-                "session_logged_in": {
-                        "en": "Session logged in",
-                        "bn": "সেশন লগ ইন",
-                        "es": "Sesión iniciada",
-                        "fr": "Session connectée",
-                        "de": "Sitzung angemeldet"
-                },
-                "session_logged_in_as": {
-                        "en": "Session logged in as",
-                        "bn": "সেশন লগ ইন হিসাবে",
-                        "es": "Sesión iniciada como",
-                        "fr": "Session connectée en tant que",
-                        "de": "Sitzung angemeldet als"
-                },
-                "session_logged_in_user": {
-                        "en": "Session logged in user",
-                        "bn": "সেশন লগ ইন ব্যবহারকারী",
-                        "es": "Usuario de sesión iniciada",
-                        "fr": "Utilisateur de session connectée",
-                        "de": "Angemeldeter Benutzer"
-                },
-                "session_logged_in_user_id": {
-                        "en": "Session logged in user ID",
-                        "bn": "সেশন লগ ইন ব্যবহারকারী আইডি",
-                        "es": "ID de usuario de sesión iniciada",
-                        "fr": "ID utilisateur de session connectée",
-                        "de": "Angemeldete Benutzer-ID"
-                },
-                "session_logged_in_user_name": {
-                        "en": "Session logged in user name",
-                        "bn": "সেশন লগ ইন ব্যবহারকারীর নাম",
-                        "es": "Nombre de usuario de sesión iniciada",
-                        "fr": "Nom d'utilisateur de session connectée",
-                        "de": "Angemeldeter Benutzername"
-                },
-                "session_logged_in_user_email": {
-                        "en": "Session logged in user email",
-                        "bn": "সেশন লগ ইন ব্যবহারকারীর ইমেল",
-                        "es": "Correo electrónico de sesión iniciada",
-                        "fr": "E-mail de session connectée",
-                        "de": "Angemeldete Benutzer-E-Mail"
-                },
-                "session_logged_in_user_phone": {
-                        "en": "Session logged in user phone",
-                        "bn": "সেশন লগ ইন ব্যবহারকারীর ফোন",
-                        "es": "Teléfono de sesión iniciada",
-                        "fr": "Téléphone de session connectée",
-                        "de": "Angemeldete Benutzer-Telefon"
-                },
-                "session_logged_in_user_address": {
-                        "en": "Session logged in user address",
-                        "bn": "সেশন লগ ইন ব্যবহারকারীর ঠিকানা",
-                        "es": "Dirección de sesión iniciada",
-                        "fr": "Adresse de session connectée",
-                        "de": "Angemeldete Benutzeradresse"
-                },
-                "session_logged_in_user_profile": {
-                        "en": "Session logged in user profile",
-                        "bn": "সেশন লগ ইন ব্যবহারকারীর প্রোফাইল",
-                        "es": "Perfil de sesión iniciada",
-                        "fr": "Profil de session connectée",
-                        "de": "Angemeldeter Benutzerprofil"
-                },
-                "session_logged_in_user_profile_picture": {
-                        "en": "Session logged in user profile picture",
-                        "bn": "সেশন লগ ইন ব্যবহারকারীর প্রোফাইল ছবি",
-                        "es": "Foto de perfil de sesión iniciada",
-                        "fr": "Photo de profil de session connectée",
-                        "de": "Profilbild des angemeldeten Benutzers"
-                }
-        }
+  "SupportedLanguages": ["en", "bn", "es", "fr", "de"],
+  "DefaultLanguage": "fr",
+  "Translations": {
+    "home": {
+      "en": "Home",
+      "bn": "বাড়ি",
+      "es": "Inicio",
+      "fr": "Accueil",
+      "de": "Startseite"
+    },
+    "discover": {
+      "en": "Discover",
+      "bn": "আবিষ্কার করুন",
+      "es": "Descubrir",
+      "fr": "Découvrir",
+      "de": "Entdecken"
+    },
+    "settings": {
+      "en": "Settings",
+      "bn": "সেটিংস",
+      "es": "Configuraciones",
+      "fr": "Paramètres",
+      "de": "Einstellungen"
+    },
+    "profile": {
+      "en": "Profile",
+      "bn": "প্রোফাইল",
+      "es": "Perfil",
+      "fr": "Profil",
+      "de": "Profil"
+    },
+    "logout": {
+      "en": "Logout",
+      "bn": "প্রস্থান",
+      "es": "Cerrar sesión",
+      "fr": "Déconnexion",
+      "de": "Abmelden"
+    },
+    "help": {
+      "en": "Help",
+      "bn": "সাহায্য",
+      "es": "Ayuda",
+      "fr": "Aide",
+      "de": "Hilfe"
+    },
+    "about": {
+      "en": "About",
+      "bn": "সম্পর্কে",
+      "es": "Acerca de",
+      "fr": "À propos",
+      "de": "Über"
+    },
+    "contact": {
+      "en": "Contact",
+      "bn": "যোগাযোগ",
+      "es": "Contacto",
+      "fr": "Contact",
+      "de": "Kontakt"
+    },
+    "privacy": {
+      "en": "Privacy",
+      "bn": "গোপনীয়তা",
+      "es": "Privacidad",
+      "fr": "Confidentialité",
+      "de": "Datenschutz"
+    },
+    "terms": {
+      "en": "Terms",
+      "bn": "শর্তাবলী",
+      "es": "Términos",
+      "fr": "Conditions",
+      "de": "Bedingungen"
+    },
+    "notifications": {
+      "en": "Notifications",
+      "bn": "বিজ্ঞপ্তি",
+      "es": "Notificaciones",
+      "fr": "Notifications",
+      "de": "Benachrichtigungen"
+    },
+    "messages": {
+      "en": "Messages",
+      "bn": "বার্তা",
+      "es": "Mensajes",
+      "fr": "Messages",
+      "de": "Nachrichten"
+    },
+    "like": {
+      "en": "Like",
+      "bn": "পছন্দ",
+      "es": "Me gusta",
+      "fr": "J'aime",
+      "de": "Gefällt mir"
+    },
+    "comment": {
+      "en": "Comment",
+      "bn": "মন্তব্য",
+      "es": "Comentario",
+      "fr": "Commentaire",
+      "de": "Kommentar"
+    },
+    "share": {
+      "en": "Share",
+      "bn": "শেয়ার",
+      "es": "Compartir",
+      "fr": "Partager",
+      "de": "Teilen"
+    },
+    "follow": {
+      "en": "Follow",
+      "bn": "অনুসরণ করুন",
+      "es": "Seguir",
+      "fr": "Suivre",
+      "de": "Folgen"
+    },
+    "unfollow": {
+      "en": "Unfollow",
+      "bn": "অনুসরণ বন্ধ করুন",
+      "es": "Dejar de seguir",
+      "fr": "Ne plus suivre",
+      "de": "Entfolgen"
+    },
+    "post": {
+      "en": "Post",
+      "bn": "পোস্ট",
+      "es": "Publicar",
+      "fr": "Publier",
+      "de": "Beitrag"
+    },
+    "edit": {
+      "en": "Edit",
+      "bn": "সম্পাদনা",
+      "es": "Editar",
+      "fr": "Modifier",
+      "de": "Bearbeiten"
+    },
+    "delete": {
+      "en": "Delete",
+      "bn": "মুছে ফেলুন",
+      "es": "Eliminar",
+      "fr": "Supprimer",
+      "de": "Löschen"
+    },
+    "save": {
+      "en": "Save",
+      "bn": "সংরক্ষণ করুন",
+      "es": "Guardar",
+      "fr": "Enregistrer",
+      "de": "Speichern"
+    },
+    "search": {
+      "en": "Search",
+      "bn": "অনুসন্ধান",
+      "es": "Buscar",
+      "fr": "Rechercher",
+      "de": "Suchen"
+    },
+    "block": {
+      "en": "Block",
+      "bn": "ব্লক করুন",
+      "es": "Bloquear",
+      "fr": "Bloquer",
+      "de": "Blockieren"
+    },
+    "report": {
+      "en": "Report",
+      "bn": "প্রতিবেদন",
+      "es": "Reportar",
+      "fr": "Signaler",
+      "de": "Melden"
+    },
+    "subscribe": {
+      "en": "Subscribe",
+      "bn": "সাবস্ক্রাইব করুন",
+      "es": "Suscribirse",
+      "fr": "S'abonner",
+      "de": "Abonnieren"
+    },
+    "unsubscribe": {
+      "en": "Unsubscribe",
+      "bn": "সাবস্ক্রিপশন বাতিল করুন",
+      "es": "Darse de baja",
+      "fr": "Se désabonner",
+      "de": "Abbestellen"
+    },
+    "upload": {
+      "en": "Upload",
+      "bn": "আপলোড করুন",
+      "es": "Subir",
+      "fr": "Téléverser",
+      "de": "Hochladen"
+    },
+    "download": {
+      "en": "Download",
+      "bn": "ডাউনলোড করুন",
+      "es": "Descargar",
+      "fr": "Télécharger",
+      "de": "Herunterladen"
+    },
+    "refresh": {
+      "en": "Refresh",
+      "bn": "রিফ্রেশ করুন",
+      "es": "Actualizar",
+      "fr": "Rafraîchir",
+      "de": "Aktualisieren"
+    },
+    "retry": {
+      "en": "Retry",
+      "bn": "পুনরায় চেষ্টা করুন",
+      "es": "Reintentar",
+      "fr": "Réessayer",
+      "de": "Erneut versuchen"
+    },
+    "yes": {
+      "en": "Yes",
+      "bn": "হ্যাঁ",
+      "es": "Sí",
+      "fr": "Oui",
+      "de": "Ja"
+    },
+    "no": {
+      "en": "No",
+      "bn": "না",
+      "es": "No",
+      "fr": "Non",
+      "de": "Nein"
+    },
+    "cancel": {
+      "en": "Cancel",
+      "bn": "বাতিল করুন",
+      "es": "Cancelar",
+      "fr": "Annuler",
+      "de": "Abbrechen"
+    },
+    "confirm": {
+      "en": "Confirm",
+      "bn": "নিশ্চিত করুন",
+      "es": "Confirmar",
+      "fr": "Confirmer",
+      "de": "Bestätigen"
+    },
+    "loading": {
+      "en": "Loading...",
+      "bn": "লোড হচ্ছে...",
+      "es": "Cargando...",
+      "fr": "Chargement...",
+      "de": "Laden..."
+    },
+    "error": {
+      "en": "Error",
+      "bn": "ত্রুটি",
+      "es": "Error",
+      "fr": "Erreur",
+      "de": "Fehler"
+    },
+    "success": {
+      "en": "Success",
+      "bn": "সফলতা",
+      "es": "Éxito",
+      "fr": "Succès",
+      "de": "Erfolg"
+    },
+    "failure": {
+      "en": "Failure",
+      "bn": "ব্যর্থতা",
+      "es": "Fallo",
+      "fr": "Échec",
+      "de": "Fehler"
+    },
+    "welcome": {
+      "en": "Welcome",
+      "bn": "স্বাগতম",
+      "es": "Bienvenido",
+      "fr": "Bienvenue",
+      "de": "Willkommen"
+    },
+    "goodbye": {
+      "en": "Goodbye",
+      "bn": "বিদায়",
+      "es": "Adiós",
+      "fr": "Au revoir",
+      "de": "Auf Wiedersehen"
+    },
+    "thank_you": {
+      "en": "Thank you",
+      "bn": "ধন্যবাদ",
+      "es": "Gracias",
+      "fr": "Merci",
+      "de": "Danke"
+    },
+    "please_wait": {
+      "en": "Please wait...",
+      "bn": "দয়া করে অপেক্ষা করুন...",
+      "es": "Por favor espera...",
+      "fr": "Veuillez patienter...",
+      "de": "Bitte warten..."
+    },
+    "no_internet": {
+      "en": "No internet connection",
+      "bn": "কোন ইন্টারনেট সংযোগ নেই",
+      "es": "Sin conexión a Internet",
+      "fr": "Pas de connexion Internet",
+      "de": "Keine Internetverbindung"
+    },
+    "network_error": {
+      "en": "Network error",
+      "bn": "নেটওয়ার্ক ত্রুটি",
+      "es": "Error de red",
+      "fr": "Erreur réseau",
+      "de": "Netzwerkfehler"
+    },
+    "server_error": {
+      "en": "Server error",
+      "bn": "সার্ভার ত্রুটি",
+      "es": "Error del servidor",
+      "fr": "Erreur du serveur",
+      "de": "Serverfehler"
+    },
+    "not_found": {
+      "en": "Not found",
+      "bn": "পাওয়া যায়নি",
+      "es": "No encontrado",
+      "fr": "Introuvable",
+      "de": "Nicht gefunden"
+    },
+    "unauthorized": {
+      "en": "Unauthorized",
+      "bn": "অননুমোদিত",
+      "es": "No autorizado",
+      "fr": "Non autorisé",
+      "de": "Unbefugt"
+    },
+    "forbidden": {
+      "en": "Forbidden",
+      "bn": "নিষিদ্ধ",
+      "es": "Prohibido",
+      "fr": "Interdit",
+      "de": "Verboten"
+    },
+    "internal_server_error": {
+      "en": "Internal server error",
+      "bn": "অভ্যন্তরীণ সার্ভার ত্রুটি",
+      "es": "Error interno del servidor",
+      "fr": "Erreur interne du serveur",
+      "de": "Interner Serverfehler"
+    },
+    "bad_request": {
+      "en": "Bad request",
+      "bn": "খারাপ অনুরোধ",
+      "es": "Solicitud incorrecta",
+      "fr": "Mauvaise demande",
+      "de": "Schlechte Anfrage"
+    },
+    "service_unavailable": {
+      "en": "Service unavailable",
+      "bn": "সেবা অপ্রাপ্য",
+      "es": "Servicio no disponible",
+      "fr": "Service indisponible",
+      "de": "Dienst nicht verfügbar"
+    },
+    "gateway_timeout": {
+      "en": "Gateway timeout",
+      "bn": "গেটওয়ে টাইমআউট",
+      "es": "Tiempo de espera de la puerta de enlace",
+      "fr": "Délai d'attente de la passerelle",
+      "de": "Gateway-Zeitüberschreitung"
+    },
+    "session_expired": {
+      "en": "Session expired",
+      "bn": "সেশন মেয়াদ শেষ",
+      "es": "Sesión expirada",
+      "fr": "Session expirée",
+      "de": "Sitzung abgelaufen"
+    },
+    "session_invalid": {
+      "en": "Session invalid",
+      "bn": "সেশন অবৈধ",
+      "es": "Sesión inválida",
+      "fr": "Session invalide",
+      "de": "Sitzung ungültig"
+    },
+    "session_terminated": {
+      "en": "Session terminated",
+      "bn": "সেশন বাতিল",
+      "es": "Sesión terminada",
+      "fr": "Session terminée",
+      "de": "Sitzung beendet"
+    },
+    "session_ended": {
+      "en": "Session ended",
+      "bn": "সেশন শেষ",
+      "es": "Sesión finalizada",
+      "fr": "Session terminée",
+      "de": "Sitzung beendet"
+    },
+    "session_logged_out": {
+      "en": "Session logged out",
+      "bn": "সেশন লগ আউট",
+      "es": "Sesión cerrada",
+      "fr": "Session déconnectée",
+      "de": "Sitzung abgemeldet"
+    },
+    "session_logged_in": {
+      "en": "Session logged in",
+      "bn": "সেশন লগ ইন",
+      "es": "Sesión iniciada",
+      "fr": "Session connectée",
+      "de": "Sitzung angemeldet"
+    },
+    "session_logged_in_as": {
+      "en": "Session logged in as",
+      "bn": "সেশন লগ ইন হিসাবে",
+      "es": "Sesión iniciada como",
+      "fr": "Session connectée en tant que",
+      "de": "Sitzung angemeldet als"
+    },
+    "session_logged_in_user": {
+      "en": "Session logged in user",
+      "bn": "সেশন লগ ইন ব্যবহারকারী",
+      "es": "Usuario de sesión iniciada",
+      "fr": "Utilisateur de session connectée",
+      "de": "Angemeldeter Benutzer"
+    },
+    "session_logged_in_user_id": {
+      "en": "Session logged in user ID",
+      "bn": "সেশন লগ ইন ব্যবহারকারী আইডি",
+      "es": "ID de usuario de sesión iniciada",
+      "fr": "ID utilisateur de session connectée",
+      "de": "Angemeldete Benutzer-ID"
+    },
+    "session_logged_in_user_name": {
+      "en": "Session logged in user name",
+      "bn": "সেশন লগ ইন ব্যবহারকারীর নাম",
+      "es": "Nombre de usuario de sesión iniciada",
+      "fr": "Nom d'utilisateur de session connectée",
+      "de": "Angemeldeter Benutzername"
+    },
+    "session_logged_in_user_email": {
+      "en": "Session logged in user email",
+      "bn": "সেশন লগ ইন ব্যবহারকারীর ইমেল",
+      "es": "Correo electrónico de sesión iniciada",
+      "fr": "E-mail de session connectée",
+      "de": "Angemeldete Benutzer-E-Mail"
+    },
+    "session_logged_in_user_phone": {
+      "en": "Session logged in user phone",
+      "bn": "সেশন লগ ইন ব্যবহারকারীর ফোন",
+      "es": "Teléfono de sesión iniciada",
+      "fr": "Téléphone de session connectée",
+      "de": "Angemeldete Benutzer-Telefon"
+    },
+    "session_logged_in_user_address": {
+      "en": "Session logged in user address",
+      "bn": "সেশন লগ ইন ব্যবহারকারীর ঠিকানা",
+      "es": "Dirección de sesión iniciada",
+      "fr": "Adresse de session connectée",
+      "de": "Angemeldete Benutzeradresse"
+    },
+    "session_logged_in_user_profile": {
+      "en": "Session logged in user profile",
+      "bn": "সেশন লগ ইন ব্যবহারকারীর প্রোফাইল",
+      "es": "Perfil de sesión iniciada",
+      "fr": "Profil de session connectée",
+      "de": "Angemeldeter Benutzerprofil"
+    },
+    "session_logged_in_user_profile_picture": {
+      "en": "Session logged in user profile picture",
+      "bn": "সেশন লগ ইন ব্যবহারকারীর প্রোফাইল ছবি",
+      "es": "Foto de perfil de sesión iniciada",
+      "fr": "Photo de profil de session connectée",
+      "de": "Profilbild des angemeldeten Benutzers"
+    }
+  }
 }

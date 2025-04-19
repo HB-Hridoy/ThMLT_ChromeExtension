@@ -3,6 +3,9 @@
   "Author": "here put author name",
   "Version": "here put version name",
   "Fonts":{
-    "fontTag{shortFontTag}":"fontName"
+    "fontTag":{
+      "shortFontTag": "shortFontTag",
+      "fontName": "fontName"
+    }
   }
 }
