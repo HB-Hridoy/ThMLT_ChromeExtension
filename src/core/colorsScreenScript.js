@@ -101,7 +101,6 @@
   const selectPrimitiveModal = document.getElementById("select-primitive-modal");
   const editThemeModeModal = document.getElementById("edit-theme-mode-modal");
 
-  const injectProjectDataToBlocky = document.getElementById("inject-project-data-to-blocky-button");
   const colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
   const colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
   
@@ -142,10 +141,10 @@
     }
   });
 
-  injectProjectDataToBlocky.addEventListener("click", async () => {
-    const projectData = await exportProjectAsJson(CacheOperations.activeProject, false);
-    BlockyInjector.updateColorThemes(projectData);
-  })
+  // injectProjectDataToBlocky.addEventListener("click", async () => {
+  //   const projectData = await getColorThemesData(CacheOperations.activeProject, false);
+  //   BlockyInjector.updateColorThemes(projectData);
+  // })
 
   projectDeleteButton.addEventListener("click", async ()=>{
     const projectName = CacheOperations.activeProject;
