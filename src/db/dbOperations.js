@@ -1254,7 +1254,7 @@ function renameThemeMode(projectName, oldThemeMode, newThemeMode) {
  * Exports a project’s data as a formatted JSON file.
  * @param {string} projectName - The project key used in the 'projects' store.
  */
-function exportProjectAsJson(projectName, shouldDownload = false) {
+function getColorThemesData(projectName) {
 
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
@@ -1328,24 +1328,8 @@ function exportProjectAsJson(projectName, shouldDownload = false) {
 
             // 5. Convert the export object to a JSON string.
             const jsonString = JSON.stringify(exportData, null, 2);
-            //console.log("Exported JSON:", jsonString);
-
-            if (shouldDownload) {
-              // 6. Trigger a download of the JSON file.
-              const blob = new Blob([jsonString], { type: "application/json" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              // Use the project name as the filename.
-              a.download = `${project.projectName}.json`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-              
-            } else {
-              resolve(jsonString);
-            }
+            resolve(jsonString);
+            
           }; // semanticRequest.onsuccess
         }; // primitivesRequest.onsuccess
       }; // projectRequest.onsuccess
@@ -1785,39 +1769,62 @@ function deleteFont(projectName, fontTag) {
   });
 }
 
-function exportFonts(author, version) {
+function getFontsData(projectName) {
   return new Promise((resolve, reject) => {
     if (!isDBOpenSuccess || !db) {
       const error = "Database is not initialized";
       console.error(error);
       return reject(error);
     }
-    let transaction = db.transaction(["fonts"], "readonly");
-    let store = transaction.objectStore("fonts");
-    let request = store.getAll();
-    
-    request.onsuccess = function () {
-      let fonts = request.result;
-      let fontExport = {};
-      
-      fonts.forEach((font) => {
-        if (!fontExport[font.projectName]) {
-          fontExport[font.projectName] = {
-            ProjectName: font.projectName,
-            Author: author,
-            Version: version,
-            Fonts: {}
+
+    const transaction = db.transaction(["projects", "fonts"], "readonly");
+    const projectsStore = transaction.objectStore("projects");
+    const fontsStore = transaction.objectStore("fonts");
+
+    const projectRequest = projectsStore.get(projectName);
+    const fontsIndex = fontsStore.index("projectName");
+    const fontsRequest = fontsIndex.getAll(projectName);
+
+    projectRequest.onsuccess = () => {
+      const project = projectRequest.result;
+
+      if (!project) {
+        return reject(`Project "${projectName}" not found`);
+      }
+
+      fontsRequest.onsuccess = () => {
+        const fonts = fontsRequest.result;
+        const fontsObj = {};
+
+        fonts.forEach((font) => {
+          fontsObj[font.fontTag] = {
+            shortFontTag: font.shortFontTag,
+            fontName: font.fontName
           };
-        }
-        let fontKey = `${font.fontTag}{${font.shortFontTag}}`;
-        fontExport[font.projectName].Fonts[fontKey] = font.fontName;
-      });
-      
-      resolve(fontExport);
+        });
+
+        const result = {
+          ProjectName: project.projectName,
+          Author: project.author,
+          Version: project.version,
+          Fonts: fontsObj
+        };
+
+        const jsonString = JSON.stringify(result, null, 2);
+        resolve(jsonString);
+      };
+
+      fontsRequest.onerror = () => {
+        reject("Error fetching fonts data");
+      };
     };
-    request.onerror = () => reject("Error exporting font store");
+
+    projectRequest.onerror = () => {
+      reject("Error fetching project data");
+    };
   });
 }
+
 
 function addTranslations(projectName, translationJson) {
 

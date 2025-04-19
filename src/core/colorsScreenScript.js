@@ -101,32 +101,134 @@
   const selectPrimitiveModal = document.getElementById("select-primitive-modal");
   const editThemeModeModal = document.getElementById("edit-theme-mode-modal");
 
-  const projectDataDownloadButton = document.getElementById("project-data-download-button");
-  const projectDataCopyButton = document.getElementById("project-data-copy-button");
-  const injectProjectDataToBlocky = document.getElementById("inject-project-data-to-blocky-button");
+  const colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
+  const colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
+
+  const fontsDataDownloadButton = document.getElementById("fonts-data-download-button");
+  const fontsDataCopyButton = document.getElementById("fonts-data-copy-button");
+
+  const translationDataDownloadButton = document.getElementById("translation-data-download-button");
+  const translationDataCopyButton = document.getElementById("translation-data-copy-button");
+  
   const projectDeleteButton = document.getElementById("delete-project-button");
   const projectDeleteInput = document.getElementById("delete-project-input");
 
-  projectDataDownloadButton.addEventListener("click", ()=>{
-    exportProjectAsJson(CacheOperations.activeProject, true);
+  colorThemesDataDownloadButton.addEventListener("click", async ()=>{
+    try {
+      const colorThemesData = await getColorThemesData(CacheOperations.activeProject);
+
+      // Trigger a download of the JSON file.
+      const blob = new Blob([colorThemesData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      // Use the project name as the filename.
+      a.download = `${CacheOperations.activeProject}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch (err) {
+        AlertManager.error("Failed to download Color Themes data", 1700);
+        console.error("Failed to download Color Themes data", err);
+    }
   });
 
-  projectDataCopyButton.addEventListener("click", async ()=>{
+  colorThemesDataCopyButton.addEventListener("click", async ()=>{
 
     try {
-        const dataToCopy = await exportProjectAsJson(CacheOperations.activeProject, false);
-        await navigator.clipboard.writeText(dataToCopy);
-        AlertManager.success("Project data copied to clipboard", 2500);
+        const colorThemesData = await getColorThemesData(CacheOperations.activeProject);
+        await navigator.clipboard.writeText(colorThemesData);
+        AlertManager.success("Project data copied to clipboard", 1700);
     } catch (err) {
-        AlertManager.error("Failed to copy project data to clipboard", 2500);
+        AlertManager.error("Failed to copy project data to clipboard", 1700);
         console.error("Clipboard copy failed", err);
     }
   });
 
-  injectProjectDataToBlocky.addEventListener("click", async () => {
-    const projectData = await exportProjectAsJson(CacheOperations.activeProject, false);
-    BlockyInjector.updateColorThemes(projectData);
-  })
+  fontsDataDownloadButton.addEventListener("click", async ()=>{
+    try {
+      const fontsData = await getFontsData(CacheOperations.activeProject);
+
+      // Trigger a download of the JSON file.
+      const blob = new Blob([fontsData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      // Use the project name as the filename.
+      a.download = `${CacheOperations.activeProject}_fonts.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch (err) {
+        AlertManager.error("Failed to download Fonts data", 1700);
+        console.error("Failed to download Fonts data", err);
+    }
+  });
+
+  fontsDataCopyButton.addEventListener("click", async ()=>{
+
+    try {
+        const fontsData = await getFontsData(CacheOperations.activeProject);
+        await navigator.clipboard.writeText(fontsData);
+        AlertManager.success("Fonts data copied to clipboard", 1700);
+    } catch (err) {
+        AlertManager.error("Failed to copy fonts data to clipboard", 1700);
+        console.error("Failed to copy fonts data to clipboard", err);
+    }
+  });
+
+  translationDataDownloadButton.addEventListener("click", async ()=>{
+    try {
+      const isDataAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
+      if (isDataAvailable) {
+        const translationData = await getTranslationData(CacheOperations.activeProject);
+
+        // Trigger a download of the JSON file.
+        const blob = new Blob([JSON.stringify(translationData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        // Use the project name as the filename.
+        a.download = `${CacheOperations.activeProject}_translations.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        AlertManager.error("No translation data available for this project", 1700);
+      }
+    } catch (err) {
+        AlertManager.error("Failed to download translations data", 1700);
+        console.error("Failed to download translations data", err);
+    }
+  });
+
+  translationDataCopyButton.addEventListener("click", async ()=>{
+
+    try {
+      const isDataAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
+      if (isDataAvailable) {
+        const translationData = await getTranslationData(CacheOperations.activeProject);
+
+        await navigator.clipboard.writeText(JSON.stringify(translationData, null, 2));
+        AlertManager.success("Translations data copied to clipboard", 1700);
+      } else {
+        AlertManager.error("No translation data available for this project", 1700);
+      }
+    } catch (err) {
+        AlertManager.error("Failed to copy translations data to clipboard", 1700);
+        console.error("Failed to copy translations data to clipboard", err);
+    }
+  });
+
+  // injectProjectDataToBlocky.addEventListener("click", async () => {
+  //   const projectData = await getColorThemesData(CacheOperations.activeProject, false);
+  //   BlockyInjector.updateColorThemes(projectData);
+  // })
 
   projectDeleteButton.addEventListener("click", async ()=>{
     const projectName = CacheOperations.activeProject;
