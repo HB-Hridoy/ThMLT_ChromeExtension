@@ -101,21 +101,40 @@
   const selectPrimitiveModal = document.getElementById("select-primitive-modal");
   const editThemeModeModal = document.getElementById("edit-theme-mode-modal");
 
-  const projectDataDownloadButton = document.getElementById("project-data-download-button");
-  const projectDataCopyButton = document.getElementById("project-data-copy-button");
   const injectProjectDataToBlocky = document.getElementById("inject-project-data-to-blocky-button");
+  const colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
+  const colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
+  
   const projectDeleteButton = document.getElementById("delete-project-button");
   const projectDeleteInput = document.getElementById("delete-project-input");
 
-  projectDataDownloadButton.addEventListener("click", ()=>{
-    exportProjectAsJson(CacheOperations.activeProject, true);
+  colorThemesDataDownloadButton.addEventListener("click", async ()=>{
+    try {
+      const colorThemesData = await getColorThemesData(CacheOperations.activeProject);
+
+      // Trigger a download of the JSON file.
+      const blob = new Blob([colorThemesData], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      // Use the project name as the filename.
+      a.download = `${CacheOperations.activeProject}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+    } catch (err) {
+        AlertManager.error("Failed to download Color Themes data", 2500);
+        console.error("Failed to download Color Themes data", err);
+    }
   });
 
-  projectDataCopyButton.addEventListener("click", async ()=>{
+  colorThemesDataCopyButton.addEventListener("click", async ()=>{
 
     try {
-        const dataToCopy = await exportProjectAsJson(CacheOperations.activeProject, false);
-        await navigator.clipboard.writeText(dataToCopy);
+        const colorThemesData = await getColorThemesData(CacheOperations.activeProject);
+        await navigator.clipboard.writeText(colorThemesData);
         AlertManager.success("Project data copied to clipboard", 2500);
     } catch (err) {
         AlertManager.error("Failed to copy project data to clipboard", 2500);

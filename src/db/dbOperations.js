@@ -1254,7 +1254,7 @@ function renameThemeMode(projectName, oldThemeMode, newThemeMode) {
  * Exports a project’s data as a formatted JSON file.
  * @param {string} projectName - The project key used in the 'projects' store.
  */
-function exportProjectAsJson(projectName, shouldDownload = false) {
+function getColorThemesData(projectName) {
 
   return new Promise((resolve, reject) => {
     if (isDBOpenSuccess && db) {
@@ -1328,24 +1328,8 @@ function exportProjectAsJson(projectName, shouldDownload = false) {
 
             // 5. Convert the export object to a JSON string.
             const jsonString = JSON.stringify(exportData, null, 2);
-            //console.log("Exported JSON:", jsonString);
-
-            if (shouldDownload) {
-              // 6. Trigger a download of the JSON file.
-              const blob = new Blob([jsonString], { type: "application/json" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              // Use the project name as the filename.
-              a.download = `${project.projectName}.json`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              URL.revokeObjectURL(url);
-              
-            } else {
-              resolve(jsonString);
-            }
+            resolve(jsonString);
+            
           }; // semanticRequest.onsuccess
         }; // primitivesRequest.onsuccess
       }; // projectRequest.onsuccess
