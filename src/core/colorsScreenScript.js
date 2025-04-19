@@ -130,7 +130,7 @@
       URL.revokeObjectURL(url);
       
     } catch (err) {
-        AlertManager.error("Failed to download Color Themes data", 2500);
+        AlertManager.error("Failed to download Color Themes data", 1700);
         console.error("Failed to download Color Themes data", err);
     }
   });
@@ -140,9 +140,9 @@
     try {
         const colorThemesData = await getColorThemesData(CacheOperations.activeProject);
         await navigator.clipboard.writeText(colorThemesData);
-        AlertManager.success("Project data copied to clipboard", 2500);
+        AlertManager.success("Project data copied to clipboard", 1700);
     } catch (err) {
-        AlertManager.error("Failed to copy project data to clipboard", 2500);
+        AlertManager.error("Failed to copy project data to clipboard", 1700);
         console.error("Clipboard copy failed", err);
     }
   });
