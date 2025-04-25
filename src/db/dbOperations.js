@@ -194,6 +194,96 @@ function getAllProjects() {
   };
 }
 
+async function duplicateProject(projectName) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction(
+      ["projects", "primitiveColors", "semanticColors", "fonts", "translations"],
+      "readwrite"
+    );
+
+    transaction.onerror = () => reject(transaction.error);
+
+    const projectsStore = transaction.objectStore("projects");
+
+    // Step 0: Generate unique name
+    const generateUniqueName = (baseName, count = 0) => {
+      return new Promise((res, rej) => {
+        let candidate =
+          count === 0 ? `${baseName}_Copy` : `${baseName}_Copy_${count}`;
+        const checkRequest = projectsStore.get(candidate);
+        checkRequest.onsuccess = () => {
+          if (!checkRequest.result) {
+            res(candidate);
+          } else {
+            res(generateUniqueName(baseName, count + 1)); // Recursive check
+          }
+        };
+        checkRequest.onerror = () => rej(checkRequest.error);
+      });
+    };
+
+    // Step 1: Get original project
+    const getRequest = projectsStore.get(projectName);
+    getRequest.onsuccess = async () => {
+      const originalProject = getRequest.result;
+
+      if (!originalProject) {
+        reject(new Error("Original project not found"));
+        return;
+      }
+
+      try {
+        const newProjectName = await generateUniqueName(projectName);
+
+        // Step 2: Duplicate the main project
+        const newProject = {
+          ...originalProject,
+          projectName: newProjectName
+        };
+        projectsStore.add(newProject);
+
+        // Helper to copy store data
+        const copyStoreData = (storeName) => {
+          return new Promise((res, rej) => {
+            const store = transaction.objectStore(storeName);
+            const index = store.index("projectName");
+            const request = index.getAll(projectName);
+
+            request.onsuccess = () => {
+              const records = request.result;
+              for (const record of records) {
+                const { id, ...rest } = record; // remove auto-incremented id
+                store.add({ ...rest, projectName: newProjectName });
+              }
+              res();
+            };
+
+            request.onerror = () => rej(request.error);
+          });
+        };
+
+        // Step 3: Copy related entries
+        await Promise.all([
+          copyStoreData("primitiveColors"),
+          copyStoreData("semanticColors"),
+          copyStoreData("fonts"),
+          copyStoreData("translations"),
+        ]);
+
+        transaction.oncomplete = () => {
+          resolve(newProjectName);
+        } 
+      } catch (err) {
+        reject(err);
+      }
+    };
+
+    getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+
+
 /**
  * Retrieves all primitive colors for a given project from the IndexedDB.
  *
