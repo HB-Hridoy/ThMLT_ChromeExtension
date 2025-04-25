@@ -13,6 +13,7 @@
     const projectManagementBackButton = document.getElementById("pm-back-button");
     const projectManagementOptionsContainer = document.getElementById("pm-options-container");
 
+  const projectSettingsTitle = document.getElementById("project-name-settings-screen");
 
   const colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
   const colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
@@ -22,6 +23,8 @@
 
   const translationDataDownloadButton = document.getElementById("translation-data-download-button");
   const translationDataCopyButton = document.getElementById("translation-data-copy-button");
+
+  const projectDuplicateButton = document.getElementById("duplicate-project-button");
   
   const projectDeleteButton = document.getElementById("delete-project-button");
   const projectDeleteInput = document.getElementById("delete-project-input");
@@ -50,7 +53,6 @@
 
     document.getElementById("open-project-settings").addEventListener("click", function(){
       const projectName = CacheOperations.activeProject;
-      const projectSettingsTitle = document.getElementById("project-name-settings-screen");
 
       projectSettingsTitle.innerText = projectName;
       projectDeleteInput.value = "";
@@ -172,6 +174,27 @@
         AlertManager.error("Failed to copy translations data to clipboard", 1700);
         console.error("Failed to copy translations data to clipboard", err);
     }
+  });
+
+  projectDuplicateButton.addEventListener("click", async () => {
+    const projectName = CacheOperations.activeProject;
+
+    openConfirmation(`Are you sure you want to duplicate the project "${projectName}"?`, async () => {
+
+      try {
+        const newProjectName = await duplicateProject(projectName);
+        projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(newProjectName, "Author", "Version"));
+        AlertManager.success("Project duplicated successfully.", 1200);
+        console.log("Project duplicated successfully.");
+
+        ScreenManager.showHomeScreen();
+        
+      } catch (error) {
+        console.error("Error duplicating project:", error);
+        AlertManager.error("Error duplicating project. Please check the logs.");
+      }
+
+    }, "Yes, Duplicate");
   });
 
   projectDeleteButton.addEventListener("click", async ()=>{
@@ -367,30 +390,8 @@
     });
 
     document.getElementById("projects-container").addEventListener("click", async function(event) {
-      const duplicateBtn = event.target.closest('#duplicateProject');
+      
       const projectCard = event.target.closest('.project-preview-parent');
-    
-      if (duplicateBtn) {
-        // 🔁 Handle duplicate button click
-        const projectName = duplicateBtn.getAttribute("projectName");
-
-        openConfirmation(`Are you sure you want to duplicate the project "${projectName}"?`, async () => {
-
-          try {
-            const newProjectName = await duplicateProject(projectName);
-            projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(newProjectName, "Author", "Version"));
-            AlertManager.success("Project duplicated successfully.");
-            console.log("Project duplicated successfully.");
-            
-          } catch (error) {
-            console.error("Error duplicating project:", error);
-            AlertManager.error("Error duplicating project. Please check the logs.");
-          }
-
-        }, "Yes, Duplicate");
-        
-        return; // Prevent bubbling to parent
-      }
     
       if (projectCard) {
         
