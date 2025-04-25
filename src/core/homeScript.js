@@ -161,26 +161,32 @@
   });
 
   projectDeleteButton.addEventListener("click", async ()=>{
-    const projectName = CacheOperations.activeProject;
-    if (projectDeleteInput.value.trim() === projectName) {
-      try {
-        await deleteProject(projectName);
 
-        const projectElement = document.querySelector(`div[project-id="${projectName}"]`);
-        if (projectElement) {
-          projectElement.remove();
+    const projectName = CacheOperations.activeProject;
+
+    if (projectDeleteInput.value.trim() === projectName) {
+
+      openConfirmation(`Are you sure you want to delete the project "${projectName}"?`, async () => {
+
+        try {
+          await deleteProject(projectName);
+  
+          const projectElement = document.querySelector(`div[project-id="${projectName}"]`);
+          if (projectElement) {
+            projectElement.remove();
+          }
+          const projectsContainer = document.getElementById("projects-container");
+          if (projectsContainer.children.length === 0) { 
+            ScreenManager.showNoProjectScreen();
+          } else {
+            ScreenManager.showProjectsScreen();
+          }
+          ScreenManager.showHomeScreen();
+        } catch (error) {
+          console.log(error);
         }
-        const projectsContainer = document.getElementById("projects-container");
-        if (projectsContainer.children.length === 0) { 
-          ScreenManager.showNoProjectScreen();
-        } else {
-          ScreenManager.showProjectsScreen();
-        }
-        ScreenManager.showHomeScreen();
-      } catch (error) {
-        console.log(error);
-        
-      }
+
+      }, "Yes, Delete");
       
     }
   });
