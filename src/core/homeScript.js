@@ -184,32 +184,57 @@
     });
 
     document.getElementById("projects-container").addEventListener("click", async function(event) {
-        // Check if the clicked element or any of its parents has the 'project-preview-parent' class
-        if (event.target.closest('.project-preview-parent')) {
+      const duplicateBtn = event.target.closest('#duplicateProject');
+      const projectCard = event.target.closest('.project-preview-parent');
+    
+      if (duplicateBtn) {
+        // 🔁 Handle duplicate button click
+        const projectName = duplicateBtn.getAttribute("projectName");
 
-          CacheOperations.clearCache();
-          
-          const projectDiv = event.target.closest('.project-preview-parent');
-      
-          CacheOperations.activeProject = projectDiv.getAttribute('project-id')
-
-          document.getElementById("pm-project-name").innerText = CacheOperations.activeProject;
-
-          ScreenManager.showProjectManagementScreen();
+        openConfirmation(`Are you sure you want to duplicate the project "${projectName}"?`, async () => {
 
           try {
-            const statusError = document.getElementById("translation-status-error");
-            const statusImported = document.getElementById("translation-status-imported");
-
-            const isTranslationsAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
-            statusError.classList.toggle("hidden", isTranslationsAvailable);
-            statusImported.classList.toggle("hidden", !isTranslationsAvailable);
+            const newProjectName = await duplicateProject(projectName);
+            projectsContainer.insertAdjacentHTML("beforeend", CreateElement.projectTemplate(newProjectName, "Author", "Version"));
+            AlertManager.success("Project duplicated successfully.");
+            console.log("Project duplicated successfully.");
+            
           } catch (error) {
-            console.error("Error checking translation data availability:", error);
+            console.error("Error duplicating project:", error);
+            AlertManager.error("Error duplicating project. Please check the logs.");
           }
 
+        }, "Yes, Duplicate");
+        
+        return; // Prevent bubbling to parent
+      }
+    
+      if (projectCard) {
+        
+        CacheOperations.clearCache();
+          
+        const projectDiv = event.target.closest('.project-preview-parent');
+    
+        CacheOperations.activeProject = projectDiv.getAttribute('project-id')
+
+        document.getElementById("pm-project-name").innerText = CacheOperations.activeProject;
+
+        ScreenManager.showProjectManagementScreen();
+
+        try {
+          const statusError = document.getElementById("translation-status-error");
+          const statusImported = document.getElementById("translation-status-imported");
+
+          const isTranslationsAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
+          statusError.classList.toggle("hidden", isTranslationsAvailable);
+          statusImported.classList.toggle("hidden", !isTranslationsAvailable);
+        } catch (error) {
+          console.error("Error checking translation data availability:", error);
         }
-      });
+
+      }
+    });
+      
 
     function validateJsonStructure(data) {
       const errors = [];
