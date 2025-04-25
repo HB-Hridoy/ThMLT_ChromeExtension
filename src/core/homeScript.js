@@ -48,6 +48,20 @@
       });
     });
 
+    document.getElementById("open-project-settings").addEventListener("click", function(){
+      const projectName = CacheOperations.activeProject;
+      const projectSettingsTitle = document.getElementById("project-name-settings-screen");
+
+      projectSettingsTitle.innerText = projectName;
+      projectDeleteInput.value = "";
+
+      ScreenManager.showProjecSettingsScreen();
+    });
+
+    document.getElementById("ps-back-button").addEventListener("click", function(){
+      ScreenManager.showProjectManagementScreen();
+    });
+
   colorThemesDataDownloadButton.addEventListener("click", async ()=>{
     try {
       const colorThemesData = await getColorThemesData(CacheOperations.activeProject);
