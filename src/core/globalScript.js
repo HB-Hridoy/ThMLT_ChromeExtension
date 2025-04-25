@@ -425,6 +425,7 @@
   class SessionManager {
     static HOME_SCREEN = "home-screen";
     static PROJECT_MANAGEMENT_SCREEN = "project-management-screen";
+    static PROJECT_SETTINGS_SCREEN = "project-settings-screen";
     static COLORS_SCREEN = "colors-screen";
     static FONTS_SCREEN = "fonts-screen";
     static TOOLS_SCREEN = "tools-screen";
@@ -676,6 +677,13 @@
       this.hideBottomNavBar();
 
       SessionManager.setScreen(SessionManager.PROJECT_MANAGEMENT_SCREEN);
+    }
+
+    static showProjecSettingsScreen() {
+      this.switchScreen(SessionManager.PROJECT_SETTINGS_SCREEN); 
+      this.hideBottomNavBar();
+
+      SessionManager.setScreen(SessionManager.PROJECT_SETTINGS_SCREEN);
     }
 
     static showColorsScreen() {
