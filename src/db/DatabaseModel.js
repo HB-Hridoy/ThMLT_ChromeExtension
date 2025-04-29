@@ -61,6 +61,7 @@ class DatabaseModel {
       const store = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true });
       store.createIndex("projectId", "projectId", { unique: false });
       store.createIndex("primitiveName", "primitiveName", { unique: false });
+      store.createIndex("projectId_primitiveName", ["projectId", "primitiveName"], { unique: true });
       store.createIndex("primitiveValue", "primitiveValue", { unique: false });
       store.createIndex("orderIndex", "orderIndex", { unique: false });
       store.createIndex("deleted", "deleted", { unique: false });
