@@ -13,3 +13,5 @@ class DatabaseManager {
     this.translations = new TranslationModel();
   }
 }
+
+export default new DatabaseManager();
