@@ -1,4 +1,4 @@
-import DatabaseModel from "./DatabaseModel";
+import DatabaseModel from "./DatabaseModel.js";
 
 class FontModel extends DatabaseModel {
   constructor() {

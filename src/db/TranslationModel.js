@@ -1,5 +1,5 @@
 
-import DatabaseModel  from "./DatabaseModel";
+import DatabaseModel  from "./DatabaseModel.js";
 
 class TranslationModel extends DatabaseModel{
   constructor(){
@@ -94,3 +94,5 @@ class TranslationModel extends DatabaseModel{
   }
 
 }
+
+export default TranslationModel;
