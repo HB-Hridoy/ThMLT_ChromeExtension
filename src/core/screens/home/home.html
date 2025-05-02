@@ -1,0 +1,38 @@
+<div id="home-screen" class="visible">
+
+  <div class="w-full p-3 flex justify-start items-center">
+
+    <h3 class="text-lg flex-1 font-extrabold ">My projects</h3>
+    <button id="add-new-project-toggle" data-modal-target="new-project-modal" data-modal-toggle="new-project-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-full text-xs px-3 py-2.5 text-center inline-flex items-center me-1">
+      <svg class="w-3.5 h-3.5 me-1 -ms-1"  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 21">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7 7V5"/>
+      </svg>
+      New
+    </button>
+    <button id="open-import-json" class="text-white bg-green-700 hover:bg-green-800  font-medium rounded-full text-xs px-3 py-2.5 text-center inline-flex items-center me-1 ">
+      <svg class="me-1 -ms-1 w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd" d="M13 11.15V4a1 1 0 1 0-2 0v7.15L8.78 8.374a1 1 0 1 0-1.56 1.25l4 5a1 1 0 0 0 1.56 0l4-5a1 1 0 1 0-1.56-1.25L13 11.15Z" clip-rule="evenodd"/>
+        <path fill-rule="evenodd" d="M9.657 15.874 7.358 13H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-2.358l-2.3 2.874a3 3 0 0 1-4.685 0ZM17 16a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H17Z" clip-rule="evenodd"/>
+      </svg>
+      Import
+    </button>
+  </div>
+  <div id="projects-container">
+    <div class="block max-w-[clac(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+      <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 ">My First Project</h5>
+      <p class="text-xs font-normal text-gray-700 dark:text-gray-400">Last modified: 07 January, 2025</p>
+    </div>
+
+    <div class="block max-w-[clac(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+      <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900 ">My second Project</h5>
+      <p class="text-xs text-gray-700 dark:text-gray-400">Last modified: 07 January, 2025</p>
+    </div>
+  </div>
+  <div id="no-projects-container" class="hidden w-full pt-16 p-4 text-center bg-white">
+    <h5 class="mb-2 text-3xl font-bold text-gray-900 ">No projects found</h5>
+    <p class="mb-5 text-base text-gray-500 sm:text-lg dark:text-gray-400">Create a new project to continue.</p>
+    <div class="items-center justify-center space-y-4 sm:flex sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
+    </div>
+</div>
+  <div class="h-24"></div>
+</div>

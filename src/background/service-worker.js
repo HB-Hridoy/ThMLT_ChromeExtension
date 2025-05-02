@@ -1,15 +1,15 @@
-import cache, { CACHE_KEYS } from '../utils/HybridCacheSystem.js';
-import ThMLT_DB from '../db/ThMLT_DB.js';
+// import cache, { CACHE_KEYS } from '../utils/HybridCacheSystem.js';
+// import ThMLT_DB from '../db/ThMLT_DB.js';
 
-const thmltDatabase = new ThMLT_DB();
+// const thmltDatabase = new ThMLT_DB();
 
-thmltDatabase.getAllProjects((error, projects) => {
-    if (error) return console.error("Error:", error.message);
+// thmltDatabase.getAllProjects((error, projects) => {
+//     if (error) return console.error("Error:", error.message);
 
-    const projectNames = projects.map(project => project.projectName);
-    cache.set(CACHE_KEYS.PROJECTS, projects);
-    cache.set(CACHE_KEYS.PROJECT_NAMES, projectNames);
-});
+//     const projectNames = projects.map(project => project.projectName);
+//     cache.set(CACHE_KEYS.PROJECTS, projects);
+//     cache.set(CACHE_KEYS.PROJECT_NAMES, projectNames);
+// });
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });

@@ -1,4 +1,30 @@
 
+import {addProject,
+  getAllProjects,
+  duplicateProject,
+  getAllPrimitiveColors,
+  addPrimitiveColor,
+  updatePrimitive,
+  deletePrimitiveColor,
+  addSemantic,
+  updateSemantic,
+  getAllSemanticColors,
+  deleteSemantic,
+  updateDefaultThemeMode,
+  getDefaultThemeMode,
+  deleteTheme,
+  renameThemeMode,
+  getColorThemesData,
+  deleteProject,
+  importProjectFromJson,
+  getAllFonts,
+  addFont,
+  updateFont,
+  deleteFont,
+  getFontsData,
+  addTranslations,
+  getTranslationData,
+  isTranslationDataAvailable} from "../db/dbOperations.js";
   
   class CacheOperations {
 
@@ -786,49 +812,7 @@
       }
     }
   }
-  // **Example Usage**
-
-/* 1. Single Log */
-// console.log(...Logger.log("✔ Operation successful!", Logger.Types.SUCCESS, Logger.Formats.BOLD));
-// Output: ✔ Operation successful! *(Green, Bold)*
-
-// console.log(...Logger.log("System initialized."));
-// Output: System initialized. *(Gray, Regular)*
-
-// console.log(...Logger.log("⚠ Low disk space.", Logger.Types.WARNING, Logger.Formats.UNDERLINE));
-// Output: ⚠ Low disk space. *(Yellow, Underlined)*
-
-// console.log(...Logger.log("❌ Connection lost!", Logger.Types.ERROR, Logger.Formats.STRIKETHROUGH));
-// Output: ❌ Connection lost! *(Red, Strikethrough)*
-
-// console.log(...Logger.log("ℹ Data fetching...", Logger.Types.INFO, Logger.Formats.ITALIC));
-// Output: ℹ Data fetching... *(Blue, Italic)*
-
-// console.log(...Logger.log("🚨 Critical failure!", Logger.Types.CRITICAL, Logger.Formats.UPPERCASE));
-// Output: 🚨 CRITICAL FAILURE! *(Red, Bold, Uppercase)*
-
-
-/* 2. Multi Log */
-// console.log(...Logger.multiLog(
-//     ["[INFO] ", Logger.Types.INFO, Logger.Formats.BOLD],
-//     ["Fetching data...", Logger.Types.DEFAULT],
-//     [" Done!", Logger.Types.SUCCESS, Logger.Formats.ITALIC]
-// ));
-// Output: **[INFO]** *(Blue, Bold)* **Fetching data...** *(Gray, Regular)* **Done!** *(Green, Italic)*
-
-// console.log(...Logger.multiLog(
-//     ["Old Price: $100", Logger.Types.WARNING],
-//     [" New Price: $50", Logger.Types.SUCCESS, Logger.Formats.BOLD]
-// ));
-// Output: Old Price: $100 *(Yellow, Regular)* **New Price: $50** *(Green, Bold)*
-
-// console.log(...Logger.multiLog(
-//     ["Initializing system... ", Logger.Types.INFO],
-//     ["⚠ Low memory! ", Logger.Types.WARNING, Logger.Formats.ITALIC],
-//     ["✔ Operation completed", Logger.Types.SUCCESS, Logger.Formats.HIGHLIGHT]
-// ));
-// Output: Initializing system... *(Blue, Regular)* ⚠ *Low memory!* *(Yellow, Italic)* ✔ **Operation completed** *(Green, Highlight)*
-
+ 
 
 
 console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Formats.HIGHLIGHT));
@@ -847,30 +831,11 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
 
   let semanticTableColumns = 2;
 
-  let confirmationCallback = null;
-  let confirmationModal = null;
-
-  let messageModal = null;
+  
 
   let pickrInstance = null;
   
   document.addEventListener('DOMContentLoaded', () => {
-
-    messageModal = new Modal(document.getElementById("message-modal"), {
-      onHide: () => {
-          document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
-              backdrop.remove();
-          });
-      }
-    });
-    // Gets the Confirmation Modal
-    confirmationModal = new Modal(document.getElementById("confirmation-modal"), {
-      onHide: () => {
-          document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
-              backdrop.remove();
-          });
-      }
-    });
 
     // Excecutes callback passed by openConfirmation function
     document.getElementById("confirmation-modal-confirm-button").addEventListener("click", function() {
@@ -993,25 +958,9 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
 
   }
 
-  function openConfirmation(message, callback, confirmButtonText = '@default', cancelButtonText = '@default') {
-    document.getElementById("confirmation-modal-message").innerHTML = message;
+  
 
-    document.getElementById("confirmation-modal-confirm-button").innerText = confirmButtonText !== "@default" ? confirmButtonText : "Yes, I'm sure";
-
-    document.getElementById("confirmation-modal-cancel-button").innerText = cancelButtonText !== "@default" ? cancelButtonText : "No, cancel";
-
-    confirmationModal.show();
-
-    // Store the callback function
-    confirmationCallback = callback;
-  }
-
-  function showMessage(title, message, buttonText = "OK") {
-    document.getElementById("message-modal-title").innerText = title;
-    document.getElementById("message-modal-text").innerText = message;
-    document.getElementById("message-modal-button").innerText = buttonText
-    messageModal.show();
-  }
+ 
 
   function replaceClass(element, prefix, newClass) {
     element.className = element.className
@@ -1021,3 +970,29 @@ console.log(...Logger.log("System initialized.", Logger.Types.WARNING, Logger.Fo
     
     element.classList.add(newClass); // Add new class
   }
+  export {
+    openConfirmation,
+    showMessage,
+    replaceClass,
+    nameRegex,
+    currentPrimitiveRowId,
+    currentSemanticRowId,
+    currentFontsRowId,
+    semanticTableColumns,
+    shouldUpdateBlocky,
+    CacheOperations,
+    CACHE_KEYS,
+    cache_temp,
+    SessionManager,
+    Logger,
+    CreateElement,
+    ScreenManager,
+    AlertManager,
+    BlockyInjector,
+    pickrInstance,
+    oldPrimitiveInputValues,
+    confirmationModal,
+    messageModal,
+    
+    restoreSession
+  };

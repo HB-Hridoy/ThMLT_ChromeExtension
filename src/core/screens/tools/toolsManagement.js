@@ -1,20 +1,11 @@
+
+
 const ai2LayoutTetxt = document.getElementById('ai2-layout-text');
 const filterLayoutButton = document.getElementById('filter-layout-button');
 
 const copyFilteredLayoutButton = document.getElementById('copy-filtered-layout-button');
 const downloadFilteredLayoutButton = document.getElementById('download-filtered-layout-button');
 
-let filteredtedArrangementCodeEditor;
-document.addEventListener('DOMContentLoaded', function() {
-    filteredtedArrangementCodeEditor = CodeMirror.fromTextArea(document.getElementById("filtered-arrangement-code-editor"), {
-        mode: "application/json",       
-        theme: "dracula",
-        lineWrapping: true,
-        tabSize: 2,  
-        indentUnit: 2, 
-        indentWithTabs: true
-      });
-});
 filterLayoutButton.addEventListener('click', function() {
     try {
         const json = JSON.parse(ai2LayoutTetxt.value);

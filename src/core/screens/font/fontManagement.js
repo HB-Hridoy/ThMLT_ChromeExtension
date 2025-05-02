@@ -1,4 +1,57 @@
 
+import {
+  openConfirmation,
+  showMessage,
+  replaceClass,
+  nameRegex,
+  currentPrimitiveRowId,
+  currentSemanticRowId,
+  currentFontsRowId,
+  semanticTableColumns,
+  shouldUpdateBlocky,
+  CacheOperations,
+  CACHE_KEYS,
+  cache_temp,
+  SessionManager,
+  Logger,
+  CreateElement,
+  ScreenManager,
+  AlertManager,
+  BlockyInjector,
+  pickrInstance,
+  oldPrimitiveInputValues,
+  confirmationModal,
+  messageModal,
+  
+  restoreSession
+} from "../../globalScript.js";
+
+import {addProject,
+  getAllProjects,
+  duplicateProject,
+  getAllPrimitiveColors,
+  addPrimitiveColor,
+  updatePrimitive,
+  deletePrimitiveColor,
+  addSemantic,
+  updateSemantic,
+  getAllSemanticColors,
+  deleteSemantic,
+  updateDefaultThemeMode,
+  getDefaultThemeMode,
+  deleteTheme,
+  renameThemeMode,
+  getColorThemesData,
+  deleteProject,
+  importProjectFromJson,
+  getAllFonts,
+  addFont,
+  updateFont,
+  deleteFont,
+  getFontsData,
+  addTranslations,
+  getTranslationData,
+  isTranslationDataAvailable} from "../../../db/dbOperations.js";
 
   const fontsTable = document.getElementById("fonts-table");
   const fontsTableBody = document.querySelector("#fonts-table tbody");

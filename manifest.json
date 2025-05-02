@@ -33,7 +33,9 @@
       "resources": [
         "vendor/*.js",
         "src/core/*.js",
-        "src/styles/*.css"
+        "src/styles/*.css",
+        "src/db/*.js",
+        "src/utils/*.js"
       ],
       "matches": ["<all_urls>"]
     }

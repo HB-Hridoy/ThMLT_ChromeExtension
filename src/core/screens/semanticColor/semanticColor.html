@@ -1,0 +1,90 @@
+<div id="semantic-screen" class="hidden p-3 rounded-lg bg-gray-50 dark:bg-gray-800 h-full max-w-full" >
+
+  <div class="rounded-br-sm overflow-auto flex-grow">
+    <table
+      id="semantic-table"
+      class=" semantic-table-root semantic-table-sticky-top semantic-table-sticky-left gap-1 text-black w-full text-xs"
+      style="grid-template-columns: 200px minmax(200px, 1fr) 40px;">
+
+          <tbody class="semantic-table-body">
+              <!-- Table head -->
+              <tr id="semantic-table-header-row" class="semantic-table-row header-row">
+                  <td id="semantic-name-column" class="semantic-table-cell semantic-table-cell-has-padding ">
+                      Name
+                  </td>
+                  <td theme-mode="Light" data-modal-target= "theme-modal" data-modal-toggle= "theme-modal" class="semantic-table-cell semantic-table-cell-has-padding">
+                      Light
+                  </td>
+                  <td id="show-add-theme-modal" data-modal-target="theme-modal" data-modal-toggle="theme-modal" class="semantic-table-cell cursor-pointer"
+                      style="position: sticky; right: 0px; z-index: 100;">
+                      <div class="new-mode-button">
+                          +
+                      </div>
+                  </td>
+              </tr>
+
+              <!-- Table Rows -->
+              <tr data-index="0"
+                  class="semantic-table-row  semantic-table-item-row">
+                  <td class="semantic-table-cell semantic-table-cell-has-padding">
+                      <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
+                          <div class="row-icon">
+                              <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                  <path fill="var(--color-icon)" fill-rule="evenodd"
+                                      d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                      clip-rule="evenodd"></path>
+                              </svg>
+                          </div>
+                          <div class="semantic-name inline-flex min-w-0">
+                              surface-primary
+                          </div>
+                      </div>
+                  </td>
+                  <td class="semantic-table-cell">
+                      <div class="semantic-mode-value semantic-mode-cell semantic-mode-value hide-border">
+                          <div class="semantic-alias-pill-cell semantic-alias-pill-base">
+                              <div class="semantic-pill-cover "
+                                  aria-disabled="false" 
+                                  style="transform: translate(0px, 0px);">
+                                  <div class="semantic-pill" >
+                                      <div class="semantic-color-thumbnail-container">
+                                          <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
+                                              style="background-color: rgb(22, 22, 27);">
+                                          </div>
+                                      </div>
+                                      <div class="semantic-pill-text">
+                                                  <span class="">color/brand/900</span>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </td>
+                  <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
+                    <div id="semantic-row-edit-button-container-0" class="h-full w-full"></div>
+                      <div id="semantic-edit-button" data-modal-target="semantic-modal" data-modal-toggle="semantic-modal" class="hidden justify-center items-center h-full w-full cursor-pointer">
+                        <svg class="w-5 h-5 text-gray-800 "  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <path stroke="#6b7280" stroke-linecap="round" stroke-width="2" d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
+                        </svg>
+                      </div>
+                  </td>
+              </tr>
+
+              
+          </tbody>
+
+    </table>
+      
+  </div>
+
+  <div class="flex justify-center items-center w-full">
+    <button id="show-add-semantic-modal" data-modal-target="semantic-modal" data-modal-toggle="semantic-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-full text-sm px-5 py-2.5 mt-3 mb-10 text-center inline-flex items-center me-2 cursor-pointer">
+      <svg class="w-3.5 h-3.5 me-2"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961"/>
+      </svg>
+      Link new primitive
+    </button>
+  </div>
+
+  <div class="h-24"></div>
+</div>
