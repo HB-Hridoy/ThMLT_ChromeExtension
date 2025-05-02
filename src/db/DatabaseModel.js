@@ -1,34 +1,40 @@
+// import { Dexie } from '../../vendor/dexie.min.js';
+
+let instance = null;
+
 class DatabaseModel {
   constructor() {
-    this.db = null;
-    this.debug = true;
-    this.SKIP = "@skip";
+    if (instance) return instance; // Ensure singleton
 
-    this.DB_NAME = "ThMLT DB";
-    this.DB_VERSION = 1;
+    this.db = new Dexie("ThMLT_DB");
 
-    // Initialize DB and store the Promise
-    this.ready = new Promise((resolve, reject) => {
-      this.log("Initializing database...");
-      const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+    // Define the schema using Dexie's versioning system
+    this.db.version(1).stores({
+      // Projects Store
+      projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
 
-      request.onupgradeneeded = (event) => {
-        this.db = event.target.result;
-        this._createStores();
-      };
+      // Primitive Colors Store
+      primitiveColors: "++id, projectId, primitiveName, orderIndex, deleted, deletedAt",
 
-      request.onsuccess = (event) => {
-        this.db = event.target.result;
-        this.log("Database opened successfully!");
-        resolve();
-      };
+      // Semantic Colors Store
+      semanticColors: "++id, projectId, semanticName, linkedPrimitive, themeMode, orderIndex, deleted, deletedAt",
 
-      request.onerror = (event) => {
-        const error = "Database error: " + event.target.errorCode;
-        this.log(error, true);
-        reject(error);
-      };
+      // Fonts Store
+      fonts: "++id, projectId, fontTag, shortFontTag, fontName, orderIndex, deleted, deletedAt",
+
+      // Translations Store
+      translations: "++id, projectId, defaultLanguage, translationData, deleted, deletedAt"
     });
+
+    this.db.open().catch((error) => {
+      console.error("Failed to open Dexie database:", error);
+    });
+    
+    this.debug = true; // Debug mode flag
+    this.SKIP = "@skip"; // Placeholder for skipped values
+
+    instance = this; // Save the singleton instance
+    return instance;
   }
 
   log(message, isError = false) {
@@ -42,73 +48,13 @@ class DatabaseModel {
     this.log(`Debug mode set to: ${enabled}`);
   }
 
-  _createStores() {
-    const db = this.db;
-    if (!db) return;
-
-    if (!db.objectStoreNames.contains("projects")) {
-      const store = db.createObjectStore("projects", { keyPath: "projectId" });
-      store.createIndex("projectName", "projectName", { unique: true });
-      store.createIndex("author", "author", { unique: false });
-      store.createIndex("version", "version", { unique: false });
-      store.createIndex("defaultThemeMode", "defaultThemeMode", { unique: false });
-      store.createIndex("deleted", "deleted", { unique: false });
-      store.createIndex("deletedAt", "deletedAt", { unique: false });
-
-    }
-
-    if (!db.objectStoreNames.contains("primitiveColors")) {
-      const store = db.createObjectStore("primitiveColors", { keyPath: "id", autoIncrement: true });
-      store.createIndex("projectId", "projectId", { unique: false });
-      store.createIndex("primitiveName", "primitiveName", { unique: false });
-      store.createIndex("projectId_primitiveName", ["projectId", "primitiveName"], { unique: true });
-      store.createIndex("primitiveValue", "primitiveValue", { unique: false });
-      store.createIndex("orderIndex", "orderIndex", { unique: false });
-      store.createIndex("deleted", "deleted", { unique: false });
-      store.createIndex("deletedAt", "deletedAt", { unique: false });
-    }
-
-    if (!db.objectStoreNames.contains("semanticColors")) {
-      const store = db.createObjectStore("semanticColors", { keyPath: "id", autoIncrement: true });
-      store.createIndex("projectId", "projectId", { unique: false });
-      store.createIndex("semanticName", "semanticName", { unique: false });
-      store.createIndex("linkedPrimitive", "linkedPrimitive", { unique: false });
-      store.createIndex("themeMode", "themeMode", { unique: false });
-      store.createIndex("orderIndex", "orderIndex", { unique: false });
-      store.createIndex("deleted", "deleted", { unique: false });
-      store.createIndex("deletedAt", "deletedAt", { unique: false });
-    }
-
-    if (!db.objectStoreNames.contains("fonts")) {
-      const store = db.createObjectStore("fonts", { keyPath: "id", autoIncrement: true });
-      store.createIndex("projectId", "projectId", { unique: false });
-      store.createIndex("fontTag", "fontTag", { unique: false });
-      store.createIndex("shortFontTag", "shortFontTag", { unique: false });
-      store.createIndex("fontName", "fontName", { unique: false });
-      store.createIndex("orderIndex", "orderIndex", { unique: false });
-      store.createIndex("deleted", "deleted", { unique: false });
-      store.createIndex("deletedAt", "deletedAt", { unique: false });
-    }
-
-    if (!db.objectStoreNames.contains("translations")) {
-      const store = db.createObjectStore("translations", { keyPath: "id", autoIncrement: true });
-      store.createIndex("projectId", "projectId", { unique: false });
-      store.createIndex("defaultLanguage", "defaultLanguage", { unique: false });
-      store.createIndex("translationData", "translationData", { unique: false });
-      store.createIndex("deleted", "deleted", { unique: false });
-      store.createIndex("deletedAt", "deletedAt", { unique: false });
-    }
-  }
-
   sanitizeForUpdate(data) {
     const result = {};
-
     for (const [key, value] of Object.entries(data)) {
-        if (value !== this.SKIP) {
-            result[key] = value;
-        }
+      if (value !== this.SKIP) {
+        result[key] = value;
+      }
     }
-
     return result;
   }
 }
