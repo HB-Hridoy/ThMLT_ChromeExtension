@@ -1,32 +1,36 @@
-<div id="colors-screen" class="hidden bg-gray-50 h-full">
+<div id="color-management-screen" class="hidden bg-gray-50 h-full">
 
   <div class="w-full p-3 flex justify-start items-center">
-    <button id="color-screen-back-button" type="button" class="text-white bg-blue-700 hover:bg-blue-800  font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center me-2 ">
-      <svg  class="w-6 h-6"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12l4-4m-4 4 4 4"/>
+    <button id="color-screen-back-button" type="button"
+      class="text-white bg-blue-700 hover:bg-blue-800  font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center me-2 ">
+      <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M5 12h14M5 12l4-4m-4 4 4 4" />
       </svg>
       <span class="sr-only">Icon description</span>
     </button>
     <div>
-      <h3 class="text-lg font-extrabold ">Color Themes</h3>
-      <p id="project-name-colors-screen" class="text-xs text-gray-500 "></p>
+      <h3 class="text-lg font-extrabold ">Color Management</h3>
+      <p id="color-screen-project-name" class="text-xs text-gray-500 "></p>
     </div>
   </div>
 
   <div class=" border-b border-blue-200 dark:border-gray-700">
     <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="colors-tab">
-        <li class="me-2">
-            <button class="inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white" id="primitives-tab" color-tab-target="primitives-screen" color-tab-selected="true">Primitives</button>
-        </li>
-        <li class="me-2">
-            <button class="inline-block p-2 hover:text-blue-600 " id="semantic-tab" color-tab-target="semantic-screen" color-tab-selected="false">Semantic</button>
-        </li>
+      <li class="me-2">
+        <button class="inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white"
+          id="primitives-tab" color-tab-target="primitives-screen" color-tab-selected="true">Primitives</button>
+      </li>
+      <li class="me-2">
+        <button class="inline-block p-2 hover:text-blue-600 " id="semantic-tab" color-tab-target="semantic-screen"
+          color-tab-selected="false">Semantic</button>
+      </li>
     </ul>
   </div>
   <div id="colors-tab-content" class="h-full">
-    
 
-    
+
+
   </div>
 
 </div>

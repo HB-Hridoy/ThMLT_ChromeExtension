@@ -1,4 +1,30 @@
 
+ import {
+  openConfirmation,
+  showMessage,
+  replaceClass,
+  nameRegex,
+  currentPrimitiveRowId,
+  currentSemanticRowId,
+  currentFontsRowId,
+  semanticTableColumns,
+  shouldUpdateBlocky,
+  CacheOperations,
+  CACHE_KEYS,
+  cache_temp,
+  SessionManager,
+  Logger,
+  CreateElement,
+  ScreenManager,
+  AlertManager,
+  BlockyInjector,
+  pickrInstance,
+  oldPrimitiveInputValues,
+  confirmationModal,
+  messageModal,
+  
+  restoreSession
+} from "../core/globalScript.js"; 
 
 console.log(...Logger.multiLog(
   ["[PROCESS]", Logger.Types.WARNING, Logger.Formats.BOLD],
@@ -183,7 +209,7 @@ function getAllProjects() {
     }
 
     // Retrive Previous session
-    restoreSession();
+    // restoreSession();
     
   };
 
@@ -2034,5 +2060,34 @@ function isTranslationDataAvailable(projectName) {
     };
   });
 }
+
+export {
+  addProject,
+  getAllProjects,
+  duplicateProject,
+  getAllPrimitiveColors,
+  addPrimitiveColor,
+  updatePrimitive,
+  deletePrimitiveColor,
+  addSemantic,
+  updateSemantic,
+  getAllSemanticColors,
+  deleteSemantic,
+  updateDefaultThemeMode,
+  getDefaultThemeMode,
+  deleteTheme,
+  renameThemeMode,
+  getColorThemesData,
+  deleteProject,
+  importProjectFromJson,
+  getAllFonts,
+  addFont,
+  updateFont,
+  deleteFont,
+  getFontsData,
+  addTranslations,
+  getTranslationData,
+  isTranslationDataAvailable
+};
 
 

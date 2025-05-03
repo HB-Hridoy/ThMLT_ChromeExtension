@@ -32,7 +32,7 @@
     {
       "resources": [
         "vendor/*.js",
-        "src/core/*.js",
+        "src/core/*",
         "src/styles/*.css",
         "src/db/*.js",
         "src/utils/*.js"

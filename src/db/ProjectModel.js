@@ -1,184 +1,158 @@
-
 import DatabaseModel from "./DatabaseModel.js";
+import sidepanelCache from "../utils/sidepanelCache.js";
 
-class ProjectModel extends DatabaseModel{
+class ProjectModel extends DatabaseModel {
   constructor() {
-    super("projects");
+    super(); // Call the constructor of DatabaseModel
   }
 
+  // Create a new project
   async create({ projectName, author, version } = {}) {
-    if (!projectId) this.log("projectId is required", true);
-  
-    try {
-      await this.ready;  // Ensure the DB is ready
-  
-      const transaction = this.db.transaction(["projects"], "readwrite");
-      const store = transaction.objectStore("projects");
-  
-      // Check if the project already exists by projectName index
-      const checkRequest = store.index("projectName").get(projectName);
-  
-      return new Promise((resolve, reject) => {
-        checkRequest.onsuccess = () => {
-          if (checkRequest.result) {
-            return reject(this.log("Project already exists", true));
-          }
-  
-          const projectData = { 
-            projectId: crypto.randomUUID(),
-            projectName, 
-            author, 
-            version,
-            deleted: false,
-            deletedAt: null
-          };
-  
-          // Add the new project
-          const addRequest = store.add(projectData);
-  
-          addRequest.onsuccess = () => resolve({status:"success", data: projectData});
-          addRequest.onerror = (event) => reject(this.log(`Error adding project: ${event.target.error}`, true));
+    if (!projectName) this.log("projectName is required", true);
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const existingProject = await this.db.projects
+          .where("projectName")
+          .equals(projectName)
+          .first();
+
+        if (existingProject) {
+          this.log("Project already exists", true);
+          reject("Project already exists");
+        }
+
+        const projectData = {
+          projectId: crypto.randomUUID(),
+          projectName,
+          author,
+          version,
+          defaultThemeMode: "Light",
+          lastModified: Date.now(),
+          deleted: 0,
+          deletedAt: 0,
         };
-  
-        checkRequest.onerror = () => reject(this.log("[ERROR] Error checking for existing project"), true);
-  
-        // Handle transaction completion
-        transaction.oncomplete = () => {
-          this.log("[SUCCESS] Transaction completed successfully");
-        };
-  
-        // Handle transaction errors
-        transaction.onerror = (event) => {
-          reject(this.log(`Transaction error: ${event.target.error}`, true));
-        };
-      });
-    } catch (error) {
-      this.log(error, true);
-    }
+
+        await this.db.projects.add(projectData);
+
+        sidepanelCache.addProject(projectData);
+        this.log(`[SUCCESS] Project ${projectName} created`);
+
+        resolve(projectData);
+      } catch (error) {
+        this.log(error, true);
+        reject("Error creating project");
+      }
+    });
   }
-  
+
+  // Get a specific project by projectId
   async get({ projectId } = {}) {
     if (!projectId) this.log("projectId is required", true);
-  
+
     await this.ready;
-  
-    return new Promise((resolve, reject) => {
-      const store = this.db.transaction(["projects"], "readonly").objectStore("projects");
-  
-      const request = store.get(projectId);
-  
-      request.onsuccess = () => {
-        const result = request.result;
-        if (!result || result.deleted) return resolve(null); // hide deleted entries
+    this.log("[INFO] Getting project...");
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const result = await this.db.projects.get(projectId);
+        if (!result || result.deleted) resolve(null); // hide deleted entries
         resolve(result);
-      };
-  
-      request.onerror = () => reject(this.log("Error getting project", true));
+      } catch (error) {
+        this.log("Error getting project", true);
+        reject("Error getting project");
+      }
     });
   }
-  
-  async getAll() {
-    await this.ready;
-  
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["projects"], "readonly");
-      const store = transaction.objectStore("projects");
-      const request = store.getAll();
-  
-      request.onsuccess = () => {
-        this.log("[SUCCESS] Got all projects!");
-  
-        // Filter out soft-deleted records
-        const result = request.result.filter(project => !project.deleted);
-  
-        resolve(result);
-      };
-  
-      request.onerror = (event) => {
-        const error = "Error getting projects: " + event.target.error;
-        this.log(error, true);
-        reject(new Error(error));
-      };
-    });
-  }  
 
+  async getAll() {
+    this.log("[INFO] Getting all projects...");
+
+    try {
+      const result = await this.db.projects
+        .where("deleted")
+        .equals(0)
+        .toArray();
+
+      // Sort in memory by lastModified (newest first)
+      const sorted = result.sort((a, b) => b.lastModified - a.lastModified);
+
+      this.log("[SUCCESS] Got all projects!");
+
+      sidepanelCache.replaceAllProjects(sorted);
+      return sorted;
+    } catch (error) {
+      this.log("Error getting projects", true);
+      throw error;
+    }
+  }
+
+  // Update a project
   async update({
     projectId,
     projectName = this.SKIP,
     author = this.SKIP,
-    version = this.SKIP
+    version = this.SKIP,
   } = {}) {
     if (!projectId) this.log("projectId is required", true);
-  
+
     await this.ready;
-  
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["projects"], "readwrite");
-      const store = transaction.objectStore("projects");
-  
-      const getRequest = store.get(projectId);
-  
-      getRequest.onsuccess = () => {
-        const record = getRequest.result;
-  
-        if (!record) {
-          return reject(this.log("Project not found", true));
-        }
-  
-        // Merge in only the fields that should be updated
-        const sanitizedUpdates = this.sanitizeForUpdate({ projectName, author, version });
-        const updatedRecord = { ...record, ...sanitizedUpdates };
 
-        const updateRequest = store.put(updatedRecord);
+    return new Promise(async (resolve, reject) => {
+      try {
+        const record = await this.db.projects.get(projectId);
+        if (!record) reject("Project not found");
 
-        updateRequest.onsuccess = () => {
-          this.log(`[SUCCESS] Project ${projectId} updated`);
-          resolve("Project updated successfully");
+        const updatedRecord = {
+          ...record,
+          projectName:
+            projectName !== this.SKIP ? projectName : record.projectName,
+          author: author !== this.SKIP ? author : record.author,
+          version: version !== this.SKIP ? version : record.version,
+          lastModified: Date.now(),
         };
-  
-        updateRequest.onerror = (event) => {
-          const error = `Error updating project: ${event.target.error}`;
-          this.log(error, true);
-          reject();
-        };
-      };
-  
-      getRequest.onerror = () => {
-        reject(this.log("Error retrieving project for update", true));
-      };
+
+        await this.db.projects.put(updatedRecord);
+
+        sidepanelCache.updateProject(projectId, updatedRecord);
+
+        this.log(`[SUCCESS] Project ${projectId} updated`);
+        resolve(updatedRecord);
+      } catch (error) {
+        this.log("Error updating project", true);
+        reject("Error updating project");
+      }
     });
   }
-  
+
+  // Soft delete a project
   async delete({ projectId } = {}) {
     if (!projectId) this.log("projectId is required", true);
-  
+
     await this.ready;
-  
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["projects"], "readwrite");
-      const store = transaction.objectStore("projects");
-  
-      const getRequest = store.get(projectId);
-  
-      getRequest.onsuccess = () => {
-        const record = getRequest.result;
-  
-        if (!record) return reject(new Error("Project not found"));
-  
+    this.log(`[INFO] Soft-deleting project ${projectId}...`);
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        const record = await this.db.projects.get(projectId);
+        if (!record) reject("Project not found");
+
         record.deleted = true;
         record.deletedAt = new Date().toISOString(); // timestamp of deletion
-  
-        const updateRequest = store.put(record);
-  
-        updateRequest.onsuccess = () => resolve("Project soft-deleted");
-        updateRequest.onerror = (event) =>
-          reject(new Error(`Failed to soft delete project: ${event.target.error}`));
-      };
-  
-      getRequest.onerror = () => reject(new Error("Error retrieving project for deletion"));
+        record.lastModified = Date.now();
+
+        await this.db.projects.put(record);
+
+        sidepanelCache.deleteProject(projectId);
+
+        this.log(`[INFO] Project ${projectId} soft-deleted`);
+        resolve(`Project ${projectId} soft-deleted`);
+      } catch (error) {
+        this.log("Error soft-deleting project", true);
+        reject("Error soft-deleting project");
+      }
     });
   }
-  
 }
 
 export default ProjectModel;

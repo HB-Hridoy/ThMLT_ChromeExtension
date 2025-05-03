@@ -1,7 +1,5 @@
-
 class SidepanelCache {
-  constructor(){
-
+  constructor() {
     this.themeModes = [];
     this._defaultThemeMode = "";
 
@@ -15,36 +13,122 @@ class SidepanelCache {
     this.fonts = new Map();
 
     this._activeProjectId = "";
+    this._activeProject = {};
+    this._activeProjectName = "";
     this.projects = [];
+
+    this.debug = true;
   }
-  
+
+  log(message, isError = false) {
+    if (this.debug) {
+      isError ? console.error(message) : console.log(message);
+    }
+  }
+
+  setDebugMode(enabled) {
+    this.debug = enabled;
+    this.log(`[CACHE] Debug mode set to: ${enabled}`);
+  }
+
+  addProject(project) {
+    const exists = this.projects.some((p) => p.projectId === project.projectId);
+    if (exists) {
+      this.log(
+        `[CACHE] Add failed: Project with ID ${project.projectId} already exists.`,
+        true
+      );
+      return null;
+    }
+    this.projects.push(project);
+    this.log(`[CACHE] Added project:`, project);
+    return project;
+  }
+
+  replaceAllProjects(projectArray) {
+    if (!Array.isArray(projectArray)) {
+      this.log(
+        "[CACHE] replaceAllProjects failed: input is not an array.",
+        true
+      );
+      return;
+    }
+
+    this.projects = [...projectArray];
+    this.log(
+      `[CACHE] Replaced all projects with new data ${JSON.stringify(
+        this.projects,
+        null,
+        2
+      )}`
+    );
+  }
+
+  getProject(projectId) {
+    const project =
+      this.projects.find((p) => p.projectId === projectId) || null;
+    this.log(`[CACHE] Got project ${projectId}`);
+    return project;
+  }
+
+  getAllProjects() {
+    this.log("[CACHE] Got all projects");
+    return [...this.projects];
+  }
+
+  updateProject(projectId, updates) {
+    const index = this.projects.findIndex((p) => p.projectId === projectId);
+    if (index === -1) {
+      this.log(
+        `[CACHE] Update failed: Project with ID ${projectId} not found.`,
+        true
+      );
+      return null;
+    }
+    this.projects[index] = {
+      ...this.projects[index],
+      ...updates,
+      lastModified: Date.now(),
+    };
+    this.log(`[CACHE] Updated project ${projectId}:`, this.projects[index]);
+    return this.projects[index];
+  }
+
+  deleteProject(projectId) {
+    const index = this.projects.findIndex((p) => p.projectId === projectId);
+    if (index === -1) {
+      this.log(
+        `[CACHE] Delete failed: Project with ID ${projectId} not found.`,
+        true
+      );
+      return null;
+    }
+    const deleted = this.projects.splice(index, 1)[0];
+    this.log(`[CACHE] Deleted project ${projectId}:`, deleted);
+    return deleted;
+  }
+
+  isProjectExists(projectId) {
+    const result = this.projects.some((p) => p.projectId === projectId);
+    this.log(`[CACHE] Exists check for ${projectId}: ${result}`);
+    return result;
+  }
 
   get activeProjectId() {
     return this._activeProjectId;
   }
+
   set activeProjectId(projectId) {
+    if (!this.isProjectExists(projectId)) {
+      this.log(`[CACHE] Project with ID ${projectId} not found.`, true);
+      return null;
+    }
     this._activeProjectId = projectId;
+    this._activeProjectName = this.getProject(projectId).projectName;
   }
 
-  addProject(projectId) {
-    if (!this.projects.includes(projectId)) {
-      this.projects.push(projectId);
-    }
-  }
-
-  deleteProject(projectId) {
-    const index = this.projects.indexOf(projectId);
-    if (index !== -1) {
-      this.projects.splice(index, 1);
-    }
-  }
-
-  isProjectExist(projectId) {
-    return this.projects.includes(projectId);
-  }
-
-  getAllProjects() {
-    return [...this.projects];
+  activeProjectName(){
+    return this._activeProjectName;
   }
 
   addNewThemeMode(themeMode) {
@@ -112,10 +196,7 @@ class SidepanelCache {
       return;
     }
 
-    if (
-      newLinkedPrimitive !== "@default" &&
-      this.semantics.has(themeMode)
-    ) {
+    if (newLinkedPrimitive !== "@default" && this.semantics.has(themeMode)) {
       const themeData = this.semantics.get(themeMode);
       if (themeData.hasOwnProperty(semanticName)) {
         themeData[semanticName] = newLinkedPrimitive;
@@ -256,7 +337,7 @@ class SidepanelCache {
     newFontName = "@default"
   ) {
     if (!this.fonts.has(fontTag)) {
-      console.log(`Font with tag ${fontTag} not found.`);
+      this.log(`Font with tag ${fontTag} not found.`);
       return;
     }
 
@@ -284,8 +365,6 @@ class SidepanelCache {
     }));
   }
 
-  
-
   // 🔹 Get font name from font tag
   getFontName(fontTag) {
     return this.fonts.get(fontTag) || null;
@@ -308,7 +387,7 @@ class SidepanelCache {
       this.fontTags.splice(index, 1);
       this.fonts.delete(fontTag);
     } else {
-      console.log(`Font with tag ${fontTag} not found in cache.`);
+      this.log(`Font with tag ${fontTag} not found in cache.`);
     }
   }
 

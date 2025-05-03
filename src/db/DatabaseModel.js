@@ -14,7 +14,7 @@ class DatabaseModel {
       projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
 
       // Primitive Colors Store
-      primitiveColors: "++id, projectId, primitiveName, orderIndex, deleted, deletedAt",
+      primitiveColors: "++id, projectId, primitiveName, orderIndex, deleted, deletedAt, [projectId+deleted]",
 
       // Semantic Colors Store
       semanticColors: "++id, projectId, semanticName, linkedPrimitive, themeMode, orderIndex, deleted, deletedAt",
