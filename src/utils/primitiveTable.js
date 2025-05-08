@@ -5,8 +5,6 @@ class PrimitiveTable {
     this.currentRowId = 1;
     this.table = document.getElementById(primitiveTableId);
     this.tableBody = this.table.querySelector("tbody");
-
-    console.log(this.table);
     
   }
 
@@ -24,24 +22,36 @@ class PrimitiveTable {
                         </div>
                       </td>`;
 
-    const valueTd = `<td class="px-6 py-3 w-2/4">
-                        <div id="color-box-parent" class="w-full flex items-center">
-                          <div id="color-box" class=" h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue} ;"></div>
+                      const valueTd = `
+                      <td class="px-6 py-3 w-2/4">
+                        <div class="w-full flex items-center relative">
+                          <div class="h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue};"></div>
                           <p id="color-text" class="flex-1 text-xs mr-2">${primitiveValue}</p>
+                    
+                          <button id="primitive-edit-button_${primitiveId}" 
+                            class="primitive-edit-button hidden text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 items-center ml-2 transition-all duration-150">
+                            <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <path stroke="#ffffff" stroke-linecap="round" stroke-width="2"
+                                d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
+                            </svg>
+                            <span class="sr-only">Edit</span>
+                          </button>
                         </div>
-                      </td>`;
-  
-      const newRow = `
-                    <tr id="${primitiveId}" order-index="${this.currentRowId}" draggable="true" class="bg-white border-b cursor-grab active:cursor-grabbing">
-                      ${nameTd}
-                      ${valueTd}
-                    </tr>
-      `;
-      
-      this.table.insertAdjacentHTML("beforeend", newRow);
+                      </td>
+                    `;
+                    
+                    const newRow = `
+                      <tr id="${primitiveId}" order-index="${this.currentRowId}" draggable="true" class="primitive-row bg-white border-b cursor-grab active:cursor-grabbing hover:bg-gray-50">
+                        ${nameTd}
+                        ${valueTd}
+                      </tr>
+                    `;
+                    
+                    this.tableBody.insertAdjacentHTML("beforeend", newRow);
+                    
   
       // Make the new row draggable
-      const addedRow = this.table.lastElementChild;
+      const addedRow = this.tableBody.lastElementChild;
       makePrimitiveRowDraggable(addedRow);
   
       this.currentRowId++;
