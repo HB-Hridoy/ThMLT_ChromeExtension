@@ -16,6 +16,8 @@ let colorValue = null;
 let deleteButton = null;
 let actionButton = null;
 
+let pickrInstance = null;
+
 class PrimitiveModal {
   constructor() {
     this.primitiveModal = null;
@@ -57,6 +59,41 @@ class PrimitiveModal {
 
   hide(){
     this.primitiveModal.hide();
+  }
+
+  createPickr(){
+
+     if (!pickrInstance) {
+
+      pickrInstance = Pickr.create({
+        el: '#primitive-modal-color-picker-container', 
+        theme: 'classic',
+        default: "#FFFFFF",
+        components: {
+          preview: true,
+          hue: true,
+          interaction: {
+            hex: true,
+            rgba: true,
+            input: true,
+            save: false
+          }
+        }
+      });
+      const pickrRoot = document.querySelector('.pickr'); // Root element of Pickr
+      pickrRoot.style.border = '1px solid #D1D5DB';
+      pickrRoot.style.borderRadius = '5px';
+
+      const button = document.querySelector(".pcr-button");
+      
+      pickrInstance.on('change', (color) => {
+        const hex = color.toHEXA().toString(); 
+        button.style.setProperty("--pcr-color", hex);
+        
+        colorValue.textContent = hex;
+      });
+    }
+
   }
 
   restoreDeafaults(){
