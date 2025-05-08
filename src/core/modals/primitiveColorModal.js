@@ -97,6 +97,23 @@ class PrimitiveModal {
   }
 
   restoreDeafaults(){
+
+    // Reset action button to default
+    replaceClass(actionButton, "bg-", "bg-gray-500");
+    replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
+    actionButton.disabled = true;
+    actionButton.innerHTML = "Add new primitive";
+
+    // hide delete button
+    deleteButton.classList.add("hidden");
+
+    // If there's an open pickr, close it before opening the new one
+    if (pickrInstance && pickrInstance.isOpen()) {
+      pickrInstance.hide();
+    }
+
+    primitiveNameInputError.classList.toggle("hidden", true);
+    primitiveNameInput.style.borderColor = "";
     
   }
 
