@@ -14,3 +14,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error(error);
   }
 });
+
+export function replaceClass(element, prefix, newClass) {
+  element.className = element.className
+      .split(" ") // Split into array
+      .filter(cls => !cls.startsWith(prefix)) // Remove old class with prefix
+      .join(" "); // Convert back to string
+  
+  element.classList.add(newClass); // Add new class
+}
