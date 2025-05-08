@@ -46,6 +46,13 @@ class PrimitiveModal {
     actionButton = document.getElementById("primitive-modal-action-button");
 
     // ========== GLOABL VARIABLE END ========== //
+
+    // ========== EVENT LISTENERS BEGIN ========== //
+
+    primitiveNameInput.addEventListener("input", () => {
+      handlePrimitiveNameInputChange();
+    });
+
   }
 
   hide(){
@@ -63,3 +70,48 @@ class PrimitiveModal {
 const primitiveModal = new PrimitiveModal();
 
 export { primitiveModal };
+
+function handlePrimitiveNameInputChange(){
+
+  // Reset action button to default
+  replaceClass(actionButton, "bg-", "bg-gray-500");
+  replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
+  actionButton.disabled = true;
+
+  const primitiveName = primitiveModalElement.getAttribute("primitiveName");
+  const inputValue = primitiveNameInput.value.trim();
+  let errorMessage = "";
+
+  if (!inputValue) {
+    errorMessage = "Primitive name is required";
+  } else if (sidepanelCache.isPrimitiveExist(inputValue) && primitiveName !== inputValue) {
+    errorMessage = "Primitive name already exist!";
+  } else if (!nameRegex.test(inputValue)) {
+    errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+  }
+  
+  if (errorMessage) {
+    primitiveNameInputError.innerHTML = errorMessage;
+    primitiveNameInputError.classList.remove("hidden");
+
+    primitiveNameInput.style.borderColor = "red";
+
+    replaceClass(actionButton, "bg-", "bg-gray-500");
+    replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
+    actionButton.disabled = true;
+
+  } else {
+    primitiveNameInputError.classList.add("hidden");
+    replaceClass(actionButton, "bg-", "bg-blue-700");
+    replaceClass(actionButton, "hover:bg-", "hover:bg-blue-800");
+    actionButton.disabled = false;
+  }
+
+  if (primitiveName === inputValue) {
+    replaceClass(actionButton, "bg-", "bg-gray-500");
+    replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
+    actionButton.disabled = true;
+  }
+}
+
+
