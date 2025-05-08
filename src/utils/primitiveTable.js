@@ -1,4 +1,5 @@
 
+import { primitiveModal } from "../core/modals/primitiveColorModal.js";
 class PrimitiveTable {
   constructor(primitiveTableId){
 
@@ -55,6 +56,16 @@ class PrimitiveTable {
       makePrimitiveRowDraggable(addedRow);
   
       this.currentRowId++;
+
+      document.querySelector(`#primitive-edit-button_${primitiveId}`).addEventListener("click", (e) => {
+        e.stopPropagation();
+        
+        primitiveModal.show(primitiveModal.modes.EDIT, {
+          primitiveId: primitiveId,
+          primitiveName: primitiveName,
+          primitiveValue: primitiveValue
+        });
+      });
     
   }
 
