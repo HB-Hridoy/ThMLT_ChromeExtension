@@ -283,6 +283,10 @@ class SidepanelCache {
     return [...this.primitiveNames];
   }
 
+  isPrimitiveExist(key){
+    return this.primitives.has(key);
+  }
+
   renamePrimitive(oldPrimitiveName, newPrimitiveName) {
     if (this.primitives.has(oldPrimitiveName)) {
       const value = this.primitives.get(oldPrimitiveName);
