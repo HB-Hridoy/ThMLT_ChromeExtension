@@ -26,7 +26,7 @@ class PrimitiveTable {
     });
   }
 
-  addRow({ primitiveId = 0,  primitiveName = "Unknown", primitiveValue = "#ffffff"} = {}){
+  addRow({ primitiveId = 0,  primitiveName = "Unknown", primitiveValue = "#ffffff", animation = false} = {}){
     
     const nameTd = `<td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap w-2/4">
                         <div class="flex items-center w-full">
@@ -38,39 +38,47 @@ class PrimitiveTable {
                           <p id="primitive-name" class="text-xs text-gray-500 ml-2 w-full">${primitiveName}</p>
                           
                         </div>
-                      </td>`;
-
-                      const valueTd = `
-                      <td class="px-6 py-3 w-2/4">
-                        <div class="w-full flex items-center relative">
-                          <div id="primitive-value-thumbnail" class="h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue};"></div>
-                          <p id="primitive-value" class="flex-1 text-xs mr-2">${primitiveValue}</p>
-                    
-                          <button id="primitive-edit-button_${primitiveId}" 
-                            class="primitive-edit-button hidden text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 items-center ml-2 transition-all duration-150">
-                            <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <path stroke="#ffffff" stroke-linecap="round" stroke-width="2"
-                                d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
-                            </svg>
-                            <span class="sr-only">Edit</span>
-                          </button>
-                        </div>
                       </td>
                     `;
-                    
-                    const newRow = `
-                      <tr id="${primitiveId}" order-index="${this.currentRowId}" draggable="true" class="primitive-row bg-white border-b cursor-grab active:cursor-grabbing hover:bg-gray-50">
-                        ${nameTd}
-                        ${valueTd}
-                      </tr>
+
+    const valueTd = `
+    <td class="px-6 py-3 w-2/4">
+      <div class="w-full flex items-center relative">
+        <div id="primitive-value-thumbnail" class="h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue};"></div>
+        <p id="primitive-value" class="flex-1 text-xs mr-2">${primitiveValue}</p>
+  
+        <button id="primitive-edit-button_${primitiveId}" 
+          class="primitive-edit-button hidden text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 items-center ml-2 transition-all duration-150">
+          <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="#ffffff" stroke-linecap="round" stroke-width="2"
+              d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
+          </svg>
+          <span class="sr-only">Edit</span>
+        </button>
+      </div>
+    </td>
                     `;
-                    
-                    this.tableBody.insertAdjacentHTML("beforeend", newRow);
+  
+  const newRow = ` <tr id="${primitiveId}" order-index="${this.currentRowId}" draggable="true" class="primitive-row bg-white border-b cursor-grab active:cursor-grabbing hover:bg-gray-50">
+                      ${nameTd}
+                      ${valueTd}
+                    </tr>
+                  `;
+  
+  this.tableBody.insertAdjacentHTML("beforeend", newRow);
                     
   
       // Make the new row draggable
       const addedRow = this.tableBody.lastElementChild;
       makePrimitiveRowDraggable(addedRow);
+
+      if (animation) {
+        addedRow.classList.add("highlight-added-row");
+        setTimeout(() => {
+          addedRow.classList.remove("highlight-added-row");
+        }, 500);
+      }
+      
   
       this.currentRowId++;
 
