@@ -10,7 +10,6 @@ class CacheManager {
   clearAll() {
     this.projects.clear();
     this.primitives.clear();
-    this.fonts.clear();
   }
 }
 

@@ -25,6 +25,7 @@ export async function showHomeScreen() {
       const selectedProjectId = projectCard.getAttribute("project-id");
 
       if (selectedProjectId !== cacheManager.projects.activeProjectId) {
+        cacheManager.clearAll();
         
         cacheManager.projects.activeProjectId = projectCard.getAttribute("project-id");
         console.log(`[INFO] Active project ID set to: ${cacheManager.projects.activeProjectId}`);
