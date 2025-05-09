@@ -112,12 +112,18 @@ class PrimitiveTable {
     }
   }
   
-  deleteRow(primitiveId){
+  deleteRow(primitiveId) {
     const row = this.table.querySelector(`tr[id="${primitiveId}"]`);
     if (row) {
-      row.remove();
+      row.classList.add("highlight-deleted-row");
+  
+      // Remove the row after the fade-out transition ends
+      row.addEventListener("transitionend", () => {
+        row.remove();
+      }, { once: true }); // Ensures the handler only runs once
     }
   }
+  
   deleteAllRows(){
     const rows = this.table.querySelectorAll("tr");
     rows.forEach((row) => {
