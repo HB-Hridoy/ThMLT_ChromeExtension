@@ -1,38 +1,56 @@
-
 import BaseCache from './baseCache.js';
-
 
 export default class PrimitiveCache extends BaseCache {
   constructor(){
     super();
-    this.primitiveNames = [];
-    this.primitives = [];
+    this.primitiveMap = new Map(); // Stores primitives by ID
+    this.nameMap = new Map(); // Stores primitives by name
   }
 
   add(primitive) {
-    const { primitiveName, primitiveValue } = primitive;
+    const { primitiveName, primitiveValue, id } = primitive;
     
-    if (!this.primitiveNames.includes(primitiveName)) {
-      this.primitiveNames.push(primitiveName);
-      this.primitives.push(primitive);
+    if (!this.primitiveMap.has(id)) {
+      this.primitiveMap.set(id, primitive);
+      this.nameMap.set(primitiveName, primitive);
       this.log(`Added primitive: ${primitiveName} with value: ${primitiveValue}`);
     }
   }
-  
+
   addBulk(primitivesArray) {
     if (!Array.isArray(primitivesArray)) {
       this.log("addBulkPrimitives failed: input is not an array.", true);
       return;
     }
+
+    // Clear the current Maps and add new ones
+    this.primitiveMap.clear();
+    this.nameMap.clear();
+
+    primitivesArray.forEach(p => {
+      this.primitiveMap.set(p.id, p);
+      this.nameMap.set(p.primitiveName, p);
+    });
+
+    this.log(`Replaced all primitives with new data (${this.primitiveMap.size})`);
+  }
+
+  getById(primitiveId) {
+    primitiveId = Number(primitiveId);
+    const primitive = this.primitiveMap.get(primitiveId);
   
-    this.primitives = [...primitivesArray];
-    this.primitiveNames = primitivesArray.map(p => p.primitiveName);
+    if (!primitive) {
+      this.log(`Primitive with ID ${primitiveId} not found.`, true);
+      return null;
+    }
   
-    this.log(`Replaced all primitives with new data (${this.primitives.length})`);
+    return primitive;
   }
   
+
   getValue(primitiveId) {
-    const primitive = this.primitives.find(p => p.id === primitiveId);
+    primitiveId = Number(primitiveId);
+    const primitive = this.primitiveMap.get(primitiveId);
 
     if (!primitive) {
       this.log(`Primitive with ID ${primitiveId} not found.`, true);
@@ -41,95 +59,108 @@ export default class PrimitiveCache extends BaseCache {
 
     return primitive.primitiveValue;
   }
-  
-  getValueByName(primitiveName) {
-    const primitive = this.primitives.find(p => p.primitiveName === primitiveName);
 
-    if (primitive) {
+  getName(primitiveId) {
+
+    primitiveId = Number(primitiveId);
+    const primitive = this.primitiveMap.get(primitiveId);
+
+    if (!primitive) {
+      this.log(`Primitive with ID ${primitiveId} not found.`, true);
+      return null;
+    }
+
+    return primitive.primitiveName;
+  }
+
+  getValueByName(primitiveName) {
+    const primitive = this.nameMap.get(primitiveName);
+
+    if (!primitive) {
       this.log(`Primitive with name "${primitiveName}" not found.`, true);
       return null;
     }
 
     return primitive.primitiveValue;
   }
-  
-  getAl() {
-    return [...this.primitives];
+
+  getAll() {
+    return Array.from(this.primitiveMap.values()); // Return an array of all primitives
   }
-  
+
   getAllNames() {
-    return [...this.primitiveNames];
+    return Array.from(this.nameMap.keys()); // Return an array of all primitive names
   }
-  
+
   isExist(primitiveName) {
-    return this.primitiveNames.includes(primitiveName);
+    return this.nameMap.has(primitiveName);
   }
-  
+
   rename(primitiveId, newPrimitiveName) {
-    const index = this.primitives.findIndex(p => p.id === primitiveId);
-    if (index !== -1) {
-      const oldPrimitiveName = this.primitives[index].primitiveName;
-      this.primitives[index].primitiveName = newPrimitiveName;
-      this.primitives[index].lastModified = Date.now();
+    primitiveId = Number(primitiveId);
+    const primitive = this.primitiveMap.get(primitiveId);
+    if (primitive) {
+      const oldPrimitiveName = primitive.primitiveName;
+      primitive.primitiveName = newPrimitiveName;
+      primitive.lastModified = Date.now();
       
-      // Update primitiveNames array as well
-      const nameIndex = this.primitiveNames.indexOf(oldPrimitiveName);
-      if (nameIndex !== -1) {
-        this.primitiveNames[nameIndex] = newPrimitiveName;
-      }
-  
+      // Update the nameMap with the new primitive name
+      this.nameMap.delete(oldPrimitiveName);
+      this.nameMap.set(newPrimitiveName, primitive);
+
       this.log(`Renamed primitive: ${oldPrimitiveName} → ${newPrimitiveName}`);
     }
   }
-  
+
   update(primitiveId, updatedFields) {
-    
-    const index = this.primitives.findIndex(p => p.id === primitiveId);
-    if (index === -1) return this.log("Primitive not found for updating");
-  
+    primitiveId = Number(primitiveId);
+    const primitive = this.primitiveMap.get(primitiveId);
+    if (!primitive) return this.log("Primitive not found for updating");
+
     // Update the fields dynamically based on the updatedFields object
     const { primitiveName, primitiveValue } = updatedFields;
-  
+
     if (primitiveName && primitiveName !== this.SKIP) {
-      this.primitives[index].primitiveName = primitiveName;
+      this.nameMap.delete(primitive.primitiveName); // Remove old name from nameMap
+      primitive.primitiveName = primitiveName;
+      this.nameMap.set(primitiveName, primitive); // Add new name to nameMap
     }
-  
+
     if (primitiveValue && primitiveValue !== this.SKIP) {
-      this.primitives[index].primitiveValue = primitiveValue;
+      primitive.primitiveValue = primitiveValue;
     }
-  
+
     // Update the lastModified field
-    this.primitives[index].lastModified = Date.now();
+    primitive.lastModified = Date.now();
     
     // Log the update
-    this.log(`Updated primitive: ${this.primitives[index].primitiveName}`);
+    this.log(`Updated primitive: ${primitive.primitiveName}`);
   }
-  
-  
+
   delete(primitiveId) {
-    const index = this.primitives.findIndex(p => p.id === primitiveId);
-    if (index !== -1) {
-      const primitiveName = this.primitives[index].primitiveName;
-      this.primitives.splice(index, 1); // Remove the primitive by index
-      this.primitiveNames = this.primitiveNames.filter(name => name !== primitiveName);
+    primitiveId = Number(primitiveId);
+    const primitive = this.primitiveMap.get(primitiveId);
+    if (primitive) {
+      this.primitiveMap.delete(primitiveId); // Remove by ID
+      this.nameMap.delete(primitive.primitiveName); // Remove by name
   
-      this.log(`Deleted primitive: ${primitiveName}`);
+      this.log(`Deleted primitive: ${primitive.primitiveName}`);
     }
   }
-  
+
   deleteByName(primitiveName) {
-    const index = this.primitives.findIndex(p => p.primitiveName === primitiveName);
-    if (index !== -1) {
-      this.primitives.splice(index, 1); // Remove the primitive by index
-      this.primitiveNames = this.primitiveNames.filter(name => name !== primitiveName);
+    const primitive = this.nameMap.get(primitiveName);
+    if (primitive) {
+      this.primitiveMap.delete(primitive.id); // Remove by ID
+      this.nameMap.delete(primitiveName); // Remove by name
   
       this.log(`Deleted primitive: ${primitiveName}`);
     }
   }
 
   clear(){
-    this.primitiveNames = [];
-    this.primitives = [];
+    this.primitiveMap.clear();
+    this.nameMap.clear();
     this.log("Cleared all primitives");
   }
 }

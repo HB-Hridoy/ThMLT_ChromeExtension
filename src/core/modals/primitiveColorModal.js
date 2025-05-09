@@ -266,7 +266,7 @@ async function handleDeleteButtonClick() {
   primitiveModal.hide();
 
   const confirmed = await confirmationModal.confirm({
-    message: `Are you sure you want to delete ${primitiveId} primitive color?`,
+    message: `Are you sure you want to delete ${cacheManager.primitives.getName(primitiveId)} primitive color?`,
   })
 
   if (confirmed) {
