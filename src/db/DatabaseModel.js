@@ -1,40 +1,27 @@
-// import { Dexie } from '../../vendor/dexie.min.js';
-
-let instance = null;
+let sharedDB = null;
 
 class DatabaseModel {
   constructor() {
-    if (instance) return instance; // Ensure singleton
+    // Ensure shared DB instance only
+    if (!sharedDB) {
+      sharedDB = new Dexie("ThMLT_DB");
 
-    this.db = new Dexie("ThMLT_DB");
+      sharedDB.version(1).stores({
+        projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
+        primitiveColors: "++id, projectId, primitiveName, orderIndex",
+        semanticColors: "++id, projectId, semanticName, linkedPrimitive, themeMode, orderIndex, deleted, deletedAt",
+        fonts: "++id, projectId, fontTag, shortFontTag, fontName, orderIndex, deleted, deletedAt",
+        translations: "++id, projectId, defaultLanguage, translationData, deleted, deletedAt",
+      });
 
-    // Define the schema using Dexie's versioning system
-    this.db.version(1).stores({
-      // Projects Store
-      projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
+      sharedDB.open().catch((error) => {
+        console.error("Failed to open Dexie database:", error);
+      });
+    }
 
-      // Primitive Colors Store
-      primitiveColors: "++id, projectId, primitiveName, orderIndex, deleted, deletedAt, [projectId+deleted]",
-
-      // Semantic Colors Store
-      semanticColors: "++id, projectId, semanticName, linkedPrimitive, themeMode, orderIndex, deleted, deletedAt",
-
-      // Fonts Store
-      fonts: "++id, projectId, fontTag, shortFontTag, fontName, orderIndex, deleted, deletedAt",
-
-      // Translations Store
-      translations: "++id, projectId, defaultLanguage, translationData, deleted, deletedAt"
-    });
-
-    this.db.open().catch((error) => {
-      console.error("Failed to open Dexie database:", error);
-    });
-    
-    this.debug = true; // Debug mode flag
-    this.SKIP = "@skip"; // Placeholder for skipped values
-
-    instance = this; // Save the singleton instance
-    return instance;
+    this.db = sharedDB; // Inject shared DB
+    this.debug = true;
+    this.SKIP = "@skip";
   }
 
   log(message, isError = false) {

@@ -1,14 +1,12 @@
 
-
-  import sidepanelCache from "../../../utils/sidepanelCache.js";
+  import cacheManager from "../../../utils/cache/cacheManager.js";
   import DatabaseManager from "../../../db/DatabaseManager.js";
-  import { components } from "../../../utils/components.js";
   import { screenManager, screens, COLOR_TABS } from "../../../utils/screenManager.js";
-  import { PrimitiveTable } from "../../../utils/primitiveTable.js";
+  import { primitiveTable } from "../../../utils/primitiveTable.js";
+  import { primitiveModal } from "../../modals/primitiveColorModal.js";
 
   let listenersAdded = false;
-  // const primitivesTable = new PrimitiveTable(document.getElementById("primitives-table"));
-  let primitivesTable = null;
+  let isPrimitiveDataInitialized = false;
 
   const TABS = {
     PRIMITIVE: "primitives",
@@ -20,16 +18,24 @@
     await screenManager.loadTab(COLOR_TABS.PRIMITIVES);
     await screenManager.loadTab(COLOR_TABS.SEMANTIC);
 
-    document.getElementById("color-screen-project-name").innerText = sidepanelCache.activeProjectName();
+
+
+    document.getElementById("color-screen-project-name").innerText = cacheManager.projects.activeProjectName();
 
     if (listenersAdded) return;
 
-    primitivesTable = new PrimitiveTable("primitives-table");
+    await primitiveModal.show(primitiveModal.modes.ADD);
+    primitiveModal.hide();
 
     // Add event listeners and other initialization code here
     document.getElementById("color-screen-back-button").addEventListener("click", () => {
       screenManager.switchScreen(screens.PROJECT_MANAGEMENT);
     });
+
+    document.getElementById("addNewColor").addEventListener("click", () => {
+      primitiveModal.show(primitiveModal.modes.ADD);
+    });
+
 
     listenersAdded = true;
   }
@@ -48,24 +54,29 @@
 
   export async function showPrimitivesTab(){
 
-    SwitchTabs(TABS.PRIMITIVE);
+    if (!isPrimitiveDataInitialized) {
 
-    //get data from db
+      const primitiveData = await DatabaseManager.primitives.getAllByProject({
+        projectId: cacheManager.projects.activeProjectId
+      });
 
-    //show data in table
-
-    for (let i = 0; i < 20; i++) {
-      const primitiveName = `Primitive ${i + 1}`;
-      const primitiveValue = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-      primitivesTable.addRow({
-         primitiveId: i,  
-         primitiveName: primitiveName, 
-         primitiveValue: primitiveValue
+      primitiveTable.deleteAllRows();
+      primitiveData.forEach((primitive) => {
+        
+        const { id, primitiveName, primitiveValue } = primitive;
+        primitiveTable.addRow({ 
+          primitiveId: id, 
+          primitiveName: primitiveName, 
+          primitiveValue: primitiveValue
+        });
 
       });
-      // primitiveTable.addRow(i, primitiveName, primitiveValue);
+
+      isPrimitiveDataInitialized = true;
+      
     }
 
+    SwitchTabs(TABS.PRIMITIVE);
 
   }
 

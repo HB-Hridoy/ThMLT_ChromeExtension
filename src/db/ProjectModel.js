@@ -1,9 +1,10 @@
 import DatabaseModel from "./DatabaseModel.js";
-import sidepanelCache from "../utils/sidepanelCache.js";
+import cacheManager from "../utils/cache/cacheManager.js";
 
 class ProjectModel extends DatabaseModel {
   constructor() {
     super(); // Call the constructor of DatabaseModel
+    this.log("[INFO] ProjectModel initialized");
   }
 
   // Create a new project
@@ -35,7 +36,7 @@ class ProjectModel extends DatabaseModel {
 
         await this.db.projects.add(projectData);
 
-        sidepanelCache.addProject(projectData);
+        cacheManager.projects.add(projectData)
         this.log(`[SUCCESS] Project ${projectName} created`);
 
         resolve(projectData);
@@ -79,7 +80,7 @@ class ProjectModel extends DatabaseModel {
 
       this.log("[SUCCESS] Got all projects!");
 
-      sidepanelCache.replaceAllProjects(sorted);
+      cacheManager.projects.addBulk(sorted);
       return sorted;
     } catch (error) {
       this.log("Error getting projects", true);
@@ -114,7 +115,7 @@ class ProjectModel extends DatabaseModel {
 
         await this.db.projects.put(updatedRecord);
 
-        sidepanelCache.updateProject(projectId, updatedRecord);
+        cacheManager.projects.update(projectId, updatedRecord);
 
         this.log(`[SUCCESS] Project ${projectId} updated`);
         resolve(updatedRecord);
@@ -143,7 +144,7 @@ class ProjectModel extends DatabaseModel {
 
         await this.db.projects.put(record);
 
-        sidepanelCache.deleteProject(projectId);
+        cacheManager.projects.delete(projectId);
 
         this.log(`[INFO] Project ${projectId} soft-deleted`);
         resolve(`Project ${projectId} soft-deleted`);

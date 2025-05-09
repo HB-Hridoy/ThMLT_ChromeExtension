@@ -1,4 +1,5 @@
-import sidepanelCache from "../../../utils/sidepanelCache.js";
+
+import cacheManager from "../../../utils/cache/cacheManager.js";
 import DatabaseManager from "../../../db/DatabaseManager.js";
 import { components } from "../../../utils/components.js";
 import { screenManager, screens } from "../../../utils/screenManager.js";
@@ -21,11 +22,16 @@ export async function showHomeScreen() {
     const projectCard = event.target.closest(".project-card");
 
     if (projectCard) {
-      // sidepanelCache.clearCache();
-      sidepanelCache.activeProjectId = projectCard.getAttribute("project-id");
+      const selectedProjectId = projectCard.getAttribute("project-id");
 
-      console.log(sidepanelCache.getProject(sidepanelCache.activeProjectId));
-
+      if (selectedProjectId !== cacheManager.projects.activeProjectId) {
+        
+        cacheManager.projects.activeProjectId = projectCard.getAttribute("project-id");
+        console.log(`[INFO] Active project ID set to: ${cacheManager.projects.activeProjectId}`);
+        
+      } else {
+        console.log(`[INFO] Active project ID already set to: ${cacheManager.projects.activeProjectId}`);
+      }
       await showProjectManagementScreen();
 
       // try {

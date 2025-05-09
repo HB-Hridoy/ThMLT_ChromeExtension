@@ -1,90 +1,104 @@
+import cacheManager from "../utils/cache/cacheManager.js";
 import DatabaseModel from "./DatabaseModel.js";
 
 class PrimitiveColorModel extends DatabaseModel {
   constructor() {
-    super(); // Uses the parent constructor to initialize Dexie DB
-    this.table = this.db.primitiveColors; // Directly accessing the "primitiveColors" store
+    super();
+    this.table = this.db.primitiveColors;
+    this.log("[INFO] PrimitiveColorModel initialized");
   }
 
   // Create a new primitive color
   async create({ projectId, primitiveName, primitiveValue, orderIndex } = {}) {
-  
-    if (!projectId) this.log("projectId is required", true);
-    
-  
-    const newPrimitiveColorData = {
+    if (!projectId || !primitiveName) {
+      throw new Error("projectId and primitiveName are required");
+    }
+
+    const newEntry = {
       projectId,
       primitiveName,
       primitiveValue,
       orderIndex,
       lastModified: Date.now(),
-      deleted: 0,
-      deletedAt: 0
     };
-  
+
     try {
-      await this.table.add(newPrimitiveColorData);
-      this.log("[SUCCESS] Primitive color added");
-      return "success";
+      const id = await this.table.add(newEntry);
+      this.log(`[CREATE] PrimitiveColor added with ID ${id}`);
+
+      cacheManager.primitives.add(newEntry);
+      return id;
     } catch (error) {
-      this.log("[ERROR] Primitive color adding failed", true);
-      throw new Error("Primitive Color adding failed");
+      this.log("[ERROR] Failed to add PrimitiveColor", true);
+      throw error;
     }
   }
-  
 
   // Read (get by ID)
-  async get(id) {
-    try {
-      return await this.table.get(id);
-    } catch (err) {
-      this.log(`[ERROR] Failed to get primitive color: ${err}`, true);
-      throw err;
-    }
+  async get({ id } = {}) {
+    if (!id) throw new Error("ID is required");
+    id = Number(id);
+    return await this.table.get(id);
   }
 
-  // Read all by projectId (non-deleted)
-  async getAllByProject(projectId) {
-    try {
-      return await this.table
-        .where("[projectId+deleted]")
-        .equals([projectId, 0])
-        .sortBy("orderIndex");
-    } catch (err) {
-      this.log(`[ERROR] Failed to get primitive colors by project: ${err}`, true);
-      throw err;
-    }
+  // Read all by projectId
+  async getAllByProject({projectId} = {}) {
+    if (!projectId) throw new Error("projectId is required");
+
+    const primitivesArray =  await this.table
+                                          .where("projectId")
+                                          .equals(projectId)
+                                          .sortBy("orderIndex");
+    cacheManager.primitives.addBulk(primitivesArray);
+
+    return primitivesArray;
+
+    
   }
 
-  // Update
-  async update(id, updatedFields) {
+  async update({ id, updatedFields } = {}) {
+    if (!id || typeof updatedFields !== "object") {
+      throw new Error("Both id and updatedFields are required.");
+    }
+
+    id = Number(id);
+
     try {
-      const count = await this.table.update(id, {
+      const updatedCount = await this.table.update(id, {
         ...updatedFields,
         lastModified: Date.now()
       });
-      if (count === 0) throw new Error("No record updated.");
-      this.log(`[UPDATE] Updated primitive color with ID: ${id}`);
-    } catch (err) {
-      this.log(`[ERROR] Failed to update primitive color ${err}`, true);
-      throw err;
+
+      if (updatedCount === 0) {
+        this.log(`[WARN] No primitive color found with ID: ${id}`, true);
+      } else {
+        this.log(`[SUCCESS] Updated primitive color with ID: ${id}`);
+      }
+
+      return updatedCount;
+    } catch (error) {
+      this.log(`[ERROR] Failed to update primitive color with ID: ${id}`, true);
+      throw error;
     }
   }
 
-  // Soft Delete
-  async delete(id) {
+
+  // Delete (hard delete)
+  async delete({ id }) {
+    if (!id) throw new Error("ID is required for deletion");
+
+    id = Number(id);
+
     try {
-      await this.table.update(id, {
-        deleted: 1,
-        deletedAt: Date.now()
-      });
-      this.log(`[DELETE] Soft-deleted primitive color ID: ${id}`);
-      return "success";
-    } catch (err) {
-      this.log(`[ERROR] Failed to soft-delete primitive color ${err}`, true);
+      await this.table.delete(id);
+      this.log(`[DELETE] PrimitiveColor with ID ${id} deleted`);
+      cacheManager.primitives.delete(id);
+      return true;
+    } catch (error) {
+      this.log("[ERROR] Failed to delete PrimitiveColor", true);
+      throw error;
     }
   }
-
 }
 
 export default PrimitiveColorModel;

@@ -1,12 +1,13 @@
+import DatabaseManager from '../../db/DatabaseManager.js';
+import PrimitiveColorModel from '../../db/PrimitiveColorModel.js';
 import { modalManager, MODALS } from '../../utils/modalManager.js';
-import sidepanelCache from '../../utils/sidepanelCache.js';
+import { primitiveTable } from '../../utils/primitiveTable.js';
+import cacheManager from '../../utils/cache/cacheManager.js';
 import { replaceClass } from '../sidepanel.js';
 
 let primitiveModalElement = null;
 
-
-
-let primitiveModalMode = null;
+let titleElement = null;
 
 let primitiveNameInput = null;
 let primitiveNameInputError = null;
@@ -20,24 +21,32 @@ let pickrInstance = null;
 
 class PrimitiveModal {
   constructor() {
-    this.primitiveModal = null;
+    this.modal = null;
     this.listenersAdded = false;
+    this.modes = {
+      ADD: "add",
+      EDIT: "edit"
+    }
+    this.currentMode = this.modes.ADD;
   }
 
-  async show() {
-    if (!this.primitiveModal){
+  async show(mode, editValues) {
+    if (!this.modal){
 
-      this.primitiveModal = await modalManager.register(MODALS.PRIMITIVE_MODAL);
+      this.modal = await modalManager.register(MODALS.PRIMITIVE_MODAL);
     }
-    this.primitiveModal.show();
+    this.setMode(mode, editValues);
+    this.modal.show();
 
     if (this.listenersAdded) return;
+
+    this.createPickr();
 
     // ========== GLOBAL VARIABLES BEGIN ========== //
 
     primitiveModalElement = document.getElementById("primitive-modal");
 
-    primitiveModalMode = document.querySelector('h3[primitiveModalMode]');
+    titleElement = document.getElementById("primitive-modal-title");
     
     primitiveNameInput = document.getElementById("primitive-modal-name-input");
     primitiveNameInputError = document.getElementById("primitive-modal-name-input-error");
@@ -55,10 +64,36 @@ class PrimitiveModal {
       handlePrimitiveNameInputChange();
     });
 
+    actionButton.addEventListener("click", async () => {
+      handleActionButtonClick();
+    });
+
+    document.getElementById("hide-primitive-modal").addEventListener("click", () => {
+      this.modal.hide();
+    });
+
+    const colorTextObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          if (colorValue.innerText.trim() !== primitiveModalElement.getAttribute("primitiveValue") && primitiveModalElement.classList.contains("flex")) {
+            this.enableActionButton(true);
+          }
+          
+        }
+      });
+    });
+  
+    colorTextObserver.observe(colorValue, { childList: true });
+
+    // ========== EVENT LISTENERS END ========== //
+
+    this.listenersAdded = true;
+    this.setMode(mode, editValues);
+
   }
 
   hide(){
-    this.primitiveModal.hide();
+    this.modal.hide();
   }
 
   createPickr(){
@@ -98,26 +133,78 @@ class PrimitiveModal {
 
   restoreDeafaults(){
 
-    // Reset action button to default
-    replaceClass(actionButton, "bg-", "bg-gray-500");
-    replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
-    actionButton.disabled = true;
-    actionButton.innerHTML = "Add new primitive";
+    this.enableActionButton(false);
 
-    // hide delete button
-    deleteButton.classList.add("hidden");
+    this.enableDeleteButton(false);
 
     // If there's an open pickr, close it before opening the new one
     if (pickrInstance && pickrInstance.isOpen()) {
       pickrInstance.hide();
     }
 
+    primitiveNameInput.value = "";
     primitiveNameInputError.classList.toggle("hidden", true);
     primitiveNameInput.style.borderColor = "";
     
   }
 
-  setMode(mode){
+  enableActionButton(enabled){
+    if (enabled) {
+      replaceClass(actionButton, "bg-", "bg-blue-700");
+      replaceClass(actionButton, "hover:bg-", "hover:bg-blue-800");
+      actionButton.disabled = false;
+    } else {
+      replaceClass(actionButton, "bg-", "bg-gray-500");
+      replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
+      actionButton.disabled = true;
+    }
+  }
+
+  enableDeleteButton(enabled){
+    if (enabled) {
+      deleteButton.classList.remove("hidden");
+    } else {
+      deleteButton.classList.add("hidden");
+    }
+  }
+
+  setMode(mode, editValues = {primitiveId: 0, primitiveName: "", primitiveValue: ""}){
+
+    if (!this.listenersAdded) return console.log("[PRIMITIVE MODAL] setMode: Listeners not added yet");
+    
+    this.restoreDeafaults();
+
+    if (mode === this.modes.ADD) {
+
+      this.currentMode = this.modes.ADD;
+
+      titleElement.innerHTML = "Add New Primitive";
+      actionButton.innerHTML = "Add new primitive";
+
+
+    } else if (mode === this.modes.EDIT){
+
+      this.currentMode = this.modes.EDIT;
+
+      this.enableDeleteButton(true)
+
+      titleElement.innerHTML = "Edit Primitive";
+      actionButton.innerHTML = "Update";
+
+      const primitiveName = editValues.primitiveName;
+      const primitiveValue = editValues.primitiveValue;
+      const primitiveId = editValues.primitiveId;
+
+      primitiveModalElement.setAttribute("primitiveName", primitiveName);
+      primitiveModalElement.setAttribute("primitiveValue", primitiveValue);
+      primitiveModalElement.setAttribute("primitiveId", primitiveId);
+
+      primitiveNameInput.value = primitiveName;
+      pickrInstance.setColor(primitiveValue);
+      colorValue.textContent = primitiveValue;
+
+      document.querySelector(".pcr-last-color").style.setProperty("--pcr-color", primitiveValue);
+    }
     
   }
 }
@@ -127,10 +214,10 @@ export { primitiveModal };
 
 function handlePrimitiveNameInputChange(){
 
-  // Reset action button to default
-  replaceClass(actionButton, "bg-", "bg-gray-500");
-  replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
-  actionButton.disabled = true;
+  primitiveModal.enableActionButton(false);
+
+  const nameRegex = /^[a-zA-Z0-9_-]+$/;
+
 
   const primitiveName = primitiveModalElement.getAttribute("primitiveName");
   const inputValue = primitiveNameInput.value.trim();
@@ -138,7 +225,7 @@ function handlePrimitiveNameInputChange(){
 
   if (!inputValue) {
     errorMessage = "Primitive name is required";
-  } else if (sidepanelCache.isPrimitiveExist(inputValue) && primitiveName !== inputValue) {
+  } else if (cacheManager.primitives.isExist(inputValue) && primitiveName !== inputValue) {
     errorMessage = "Primitive name already exist!";
   } else if (!nameRegex.test(inputValue)) {
     errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
@@ -165,6 +252,90 @@ function handlePrimitiveNameInputChange(){
     replaceClass(actionButton, "bg-", "bg-gray-500");
     replaceClass(actionButton, "hover:bg-", "hover:bg-gray-600");
     actionButton.disabled = true;
+  }
+}
+
+function handleDeleteButtonClick() {
+  const primitiveId = primitiveModalElement.getAttribute("primitiveId");
+  const primitiveName = primitiveModalElement.getAttribute("primitiveName");
+  const primitiveValue = primitiveModalElement.getAttribute("primitiveValue");
+
+  cacheManager.primitives.delete(primitiveId);
+  primitiveTable.deleteRow(primitiveId);
+  DatabaseManager.primitives.delete(primitiveId);
+  primitiveModal.hide();
+}
+
+async function handleActionButtonClick() {
+  if (primitiveModal.currentMode === primitiveModal.modes.ADD) {
+    const primitiveName = primitiveNameInput.value.trim();
+    const primitiveValue = colorValue.textContent.trim();
+
+    try {
+      const newPrimitive = {
+        projectId: cacheManager.projects.activeProjectId,
+        primitiveName: primitiveName,
+        primitiveValue: primitiveValue,
+        orderIndex: primitiveTable.currentRowId
+      };
+      const primitiveId = await DatabaseManager.primitives.create(newPrimitive);
+
+      primitiveTable.addRow({
+        primitiveId: primitiveId,
+        primitiveName: newPrimitive.primitiveName, 
+        primitiveValue: newPrimitive.primitiveValue
+      });
+      primitiveModal.hide();
+    } catch (error) {
+      console.error("Error creating primitive:", error);
+      
+    }
+  
+  } else if (primitiveModal.currentMode === primitiveModal.modes.EDIT) {
+
+    const primitiveId = primitiveModalElement.getAttribute("primitiveId");
+
+    console.log(typeof primitiveId, primitiveId); // should log: number 1
+
+
+    const oldPrimitiveName = primitiveModalElement.getAttribute("primitiveName");
+    const oldPrimitiveValue = primitiveModalElement.getAttribute("primitiveValue");
+
+    const newPrimitiveName  = primitiveNameInput.value.trim();
+    const newPrimitiveValue = colorValue.textContent.trim();
+    
+    try {
+
+      const updatedFields = {};
+
+      if (newPrimitiveName !== oldPrimitiveName) {
+        updatedFields.primitiveName = newPrimitiveName;
+      }
+
+      if (newPrimitiveValue !== oldPrimitiveValue) {
+        updatedFields.primitiveValue = newPrimitiveValue;
+      }
+      
+      
+      await DatabaseManager.primitives.update({
+        id: primitiveId,
+        updatedFields: updatedFields
+      });
+
+      primitiveTable.updateRow(primitiveId, {
+        primitiveName: updatedFields.primitiveName ? newPrimitiveName : oldPrimitiveName,
+        primitiveValue: updatedFields.primitiveValue ? newPrimitiveValue : oldPrimitiveValue
+      });
+
+      primitiveModal.hide();
+      
+
+    } catch (error) {
+      console.log(error);
+      
+    }
+    
+    
   }
 }
 

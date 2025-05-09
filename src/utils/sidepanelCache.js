@@ -1,3 +1,5 @@
+
+
 class SidepanelCache {
   constructor() {
     this.themeModes = [];
@@ -7,7 +9,7 @@ class SidepanelCache {
     this.semantics = new Map();
 
     this.primitiveNames = [];
-    this.primitives = new Map();
+    this.primitives = [];
 
     this.fontTags = [];
     this.fonts = new Map();
@@ -17,6 +19,7 @@ class SidepanelCache {
     this._activeProjectName = "";
     this.projects = [];
 
+    this.SKIP = "@skip";
     this.debug = true;
   }
 
@@ -31,105 +34,11 @@ class SidepanelCache {
     this.log(`[CACHE] Debug mode set to: ${enabled}`);
   }
 
-  addProject(project) {
-    const exists = this.projects.some((p) => p.projectId === project.projectId);
-    if (exists) {
-      this.log(
-        `[CACHE] Add failed: Project with ID ${project.projectId} already exists.`,
-        true
-      );
-      return null;
-    }
-    this.projects.push(project);
-    this.log(`[CACHE] Added project:`, project);
-    return project;
-  }
+ 
 
-  replaceAllProjects(projectArray) {
-    if (!Array.isArray(projectArray)) {
-      this.log(
-        "[CACHE] replaceAllProjects failed: input is not an array.",
-        true
-      );
-      return;
-    }
+  
 
-    this.projects = [...projectArray];
-    this.log(
-      `[CACHE] Replaced all projects with new data ${JSON.stringify(
-        this.projects,
-        null,
-        2
-      )}`
-    );
-  }
-
-  getProject(projectId) {
-    const project =
-      this.projects.find((p) => p.projectId === projectId) || null;
-    this.log(`[CACHE] Got project ${projectId}`);
-    return project;
-  }
-
-  getAllProjects() {
-    this.log("[CACHE] Got all projects");
-    return [...this.projects];
-  }
-
-  updateProject(projectId, updates) {
-    const index = this.projects.findIndex((p) => p.projectId === projectId);
-    if (index === -1) {
-      this.log(
-        `[CACHE] Update failed: Project with ID ${projectId} not found.`,
-        true
-      );
-      return null;
-    }
-    this.projects[index] = {
-      ...this.projects[index],
-      ...updates,
-      lastModified: Date.now(),
-    };
-    this.log(`[CACHE] Updated project ${projectId}:`, this.projects[index]);
-    return this.projects[index];
-  }
-
-  deleteProject(projectId) {
-    const index = this.projects.findIndex((p) => p.projectId === projectId);
-    if (index === -1) {
-      this.log(
-        `[CACHE] Delete failed: Project with ID ${projectId} not found.`,
-        true
-      );
-      return null;
-    }
-    const deleted = this.projects.splice(index, 1)[0];
-    this.log(`[CACHE] Deleted project ${projectId}:`, deleted);
-    return deleted;
-  }
-
-  isProjectExists(projectId) {
-    const result = this.projects.some((p) => p.projectId === projectId);
-    this.log(`[CACHE] Exists check for ${projectId}: ${result}`);
-    return result;
-  }
-
-  get activeProjectId() {
-    return this._activeProjectId;
-  }
-
-  set activeProjectId(projectId) {
-    if (!this.isProjectExists(projectId)) {
-      this.log(`[CACHE] Project with ID ${projectId} not found.`, true);
-      return null;
-    }
-    this._activeProjectId = projectId;
-    this._activeProjectName = this.getProject(projectId).projectName;
-  }
-
-  activeProjectName(){
-    return this._activeProjectName;
-  }
+  // ========== THEME MODE BEGIN ========== //
 
   addNewThemeMode(themeMode) {
     if (!this.themeModes.includes(themeMode)) {
@@ -161,6 +70,10 @@ class SidepanelCache {
   set defaultThemeMode(themeMode) {
     this._defaultThemeMode = themeMode;
   }
+
+  // ========== THEME MODE ENDS ========== //
+
+  // ========== SEMANTIC BEGIN ========== //
 
   addSemantic(semanticName, themeMode, semanticValue) {
     if (!this.semantics.has(themeMode)) {
@@ -262,69 +175,9 @@ class SidepanelCache {
     return false;
   }
 
-  addPrimitive(primitiveName, primitiveValue) {
-    if (!this.primitives.has(primitiveName)) {
-      this.primitives.set(primitiveName, primitiveValue);
-      this.primitiveNames.push(primitiveName);
-    }
-  }
+  // ========== SEMANTIC ENDS ========== //
 
-  getPrimitiveValue(primitiveName) {
-    return this.primitives.has(primitiveName)
-      ? this.primitives.get(primitiveName)
-      : null;
-  }
-
-  getAllPrimitives() {
-    return Array.from(this.primitives.entries());
-  }
-
-  getAllPrimitiveNames() {
-    return [...this.primitiveNames];
-  }
-
-  isPrimitiveExist(key){
-    return this.primitives.has(key);
-  }
-
-  renamePrimitive(oldPrimitiveName, newPrimitiveName) {
-    if (this.primitives.has(oldPrimitiveName)) {
-      const value = this.primitives.get(oldPrimitiveName);
-      this.deletePrimitive(oldPrimitiveName);
-      this.addPrimitive(newPrimitiveName, value);
-    }
-  }
-
-  updatePrimitive(primitiveName, newPrimitiveName, newPrimitiveValue) {
-    if (!this.primitives.has(primitiveName)) {
-      return;
-    }
-
-    if (newPrimitiveName !== "@default" || newPrimitiveValue !== "@default") {
-      const updatedName =
-        newPrimitiveName !== "@default" ? newPrimitiveName : primitiveName;
-      const updatedValue =
-        newPrimitiveValue !== "@default"
-          ? newPrimitiveValue
-          : this.primitives.get(primitiveName);
-
-      this.deletePrimitive(primitiveName);
-      this.addPrimitive(updatedName, updatedValue);
-    }
-  }
-
-  deletePrimitive(primitiveName) {
-    if (this.primitives.has(primitiveName)) {
-      this.primitives.delete(primitiveName);
-      this.primitiveNames = this.primitiveNames.filter(
-        (name) => name !== primitiveName
-      );
-    }
-  }
-
-  isPrimitiveExist(primitiveName) {
-    return this.primitives.has(primitiveName);
-  }
+  // ========== FONT BEGIN ========== //
 
   // 🔹 Add a font with its tag and short tag
   addFont(fontTag, shortFontTag, fontName) {
@@ -395,6 +248,8 @@ class SidepanelCache {
     }
   }
 
+  // ========== FONT ENDS ========== //
+
   clearCache() {
     this._activeProject = "";
     this.themeModes = [];
@@ -405,5 +260,7 @@ class SidepanelCache {
     this.projects = [];
   }
 }
+
+
 
 export default new SidepanelCache();

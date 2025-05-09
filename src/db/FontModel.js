@@ -2,7 +2,8 @@ import DatabaseModel from "./DatabaseModel.js";
 
 class FontModel extends DatabaseModel {
   constructor() {
-    super("fonts");
+    super();
+    this.log("[INFO] FontModel initialized");
   }
 
   async create({ projectId, fontTag, fontName, orderIndex } = {}) {

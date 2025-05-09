@@ -3,7 +3,8 @@ import DatabaseModel from "./DatabaseModel.js";
 
 class SemanticColorModel extends DatabaseModel{
   constructor(){
-    super("semanticColors");
+    super();
+    this.log("[INFO] SemanticColorModel initialized");
   }
 
   async create({projectId, semanticName, linkedPrimitive, themeMode, orderIndex}={}){

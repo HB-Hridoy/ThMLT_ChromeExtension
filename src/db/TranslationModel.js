@@ -3,7 +3,8 @@ import DatabaseModel  from "./DatabaseModel.js";
 
 class TranslationModel extends DatabaseModel{
   constructor(){
-    super("translations");
+    super();
+    this.log("[INFO] TranslationModel initialized");
   }
 
   async create({projectId, translationJson}={}){

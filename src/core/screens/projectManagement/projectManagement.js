@@ -1,7 +1,8 @@
-import sidepanelCache from "../../../utils/sidepanelCache.js";
+import cacheManager from "../../../utils/cache/cacheManager.js";
 import DatabaseManager from "../../../db/DatabaseManager.js";
 import { components } from "../../../utils/components.js";
 import { screenManager, screens } from "../../../utils/screenManager.js";
+import { alertManager } from "../../../utils/alertsManager.js";
 import { showColorManagementScreen, showPrimitivesTab } from "../color/colorManagement.js";
 
 let listenersAdded = false;
@@ -12,7 +13,7 @@ let projectManagementOptionsContainer;
 export async function showProjectManagementScreen() {
   await screenManager.switchScreen(screens.PROJECT_MANAGEMENT);
 
-  document.getElementById("pm-project-name").innerText = sidepanelCache.activeProjectName();
+  document.getElementById("pm-project-name").innerText = cacheManager.projects.activeProjectName();
 
   if (listenersAdded) return;
 
@@ -27,20 +28,10 @@ export async function showProjectManagementScreen() {
     const target = e.target;
 
     if (target.closest("#pm-color-themes")) {
-      // document.getElementById("project-name-colors-screen").innerText = CacheOperations.activeProject;
-
-      // currentPrimitiveRowId = 1;
-      // currentSemanticRowId = 1;
-
-      // getAllPrimitiveColors(CacheOperations.activeProject);
-
-      // getAllSemanticColors(CacheOperations.activeProject);
-
-      // ScreenManager.showColorsScreen();
-
+      
       await showColorManagementScreen();
       await showPrimitivesTab();
-
+      
 
     }
     // else if (target.closest("#pm-fonts")) {
