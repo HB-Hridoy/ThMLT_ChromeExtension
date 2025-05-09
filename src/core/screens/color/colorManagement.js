@@ -18,9 +18,13 @@
     await screenManager.loadTab(COLOR_TABS.PRIMITIVES);
     await screenManager.loadTab(COLOR_TABS.SEMANTIC);
 
+    const colorScreenProjectName = document.getElementById("color-screen-project-name")
 
+    if (cacheManager.projects.activeProjectName !== colorScreenProjectName.innerText.trim()) {
+      isPrimitiveDataInitialized = false;
+    }
 
-    document.getElementById("color-screen-project-name").innerText = cacheManager.projects.activeProjectName();
+    colorScreenProjectName.innerText = cacheManager.projects.activeProjectName();
 
     if (listenersAdded) return;
 

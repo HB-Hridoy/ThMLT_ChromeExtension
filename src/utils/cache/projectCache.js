@@ -112,7 +112,6 @@ export default class ProjectCache extends BaseCache {
     this._activeProjectId = "";
     this._activeProject = {};
     this._activeProjectName = "";
-    this.projects = [];
     this.log("Cleared all projects");
   }
 
