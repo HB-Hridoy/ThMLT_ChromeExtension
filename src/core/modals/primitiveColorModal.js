@@ -1,9 +1,9 @@
 import DatabaseManager from '../../db/DatabaseManager.js';
-import PrimitiveColorModel from '../../db/PrimitiveColorModel.js';
 import { modalManager, MODALS } from '../../utils/modalManager.js';
 import { primitiveTable } from '../../utils/primitiveTable.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
 import { replaceClass } from '../sidepanel.js';
+import { confirmationModal } from '../modals/confirmationModal.js'
 
 let primitiveModalElement = null;
 
@@ -66,6 +66,10 @@ class PrimitiveModal {
 
     actionButton.addEventListener("click", async () => {
       handleActionButtonClick();
+    });
+
+    deleteButton.addEventListener("click", async () => {
+      handleDeleteButtonClick();
     });
 
     document.getElementById("hide-primitive-modal").addEventListener("click", () => {
@@ -255,15 +259,30 @@ function handlePrimitiveNameInputChange(){
   }
 }
 
-function handleDeleteButtonClick() {
-  const primitiveId = primitiveModalElement.getAttribute("primitiveId");
-  const primitiveName = primitiveModalElement.getAttribute("primitiveName");
-  const primitiveValue = primitiveModalElement.getAttribute("primitiveValue");
+async function handleDeleteButtonClick() {
 
-  cacheManager.primitives.delete(primitiveId);
-  primitiveTable.deleteRow(primitiveId);
-  DatabaseManager.primitives.delete(primitiveId);
+  const primitiveId = primitiveModalElement.getAttribute("primitiveId");
+
   primitiveModal.hide();
+
+  const confirmed = await confirmationModal.confirm({
+    message: `Are you sure you want to delete ${primitiveId} primitive color?`,
+  })
+
+  if (confirmed) {
+    try {
+      await DatabaseManager.primitives.delete({
+        id: primitiveId
+      });
+      primitiveTable.deleteRow(primitiveId);
+      
+    } catch (error) {
+      console.error(error);
+      
+    }
+  }
+
+  
 }
 
 async function handleActionButtonClick() {
