@@ -116,7 +116,7 @@ class PrimitiveTable {
   
       setTimeout(() => {
         row.classList.remove("highlight-update-row");
-      }, 600);
+      }, 1500);
     }
   }
   
