@@ -10,9 +10,20 @@
 }
 
 .highlight-update-row {
-    transition: background-color 0.3s;
-    background-color: #c5dfff;
+    animation: highlightFadeOut 1.5s ease-in-out;
 }
+
+@keyframes highlightFadeOut {
+    0% {
+        background-color: #c5dfff;
+        /* Light blue highlight */
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
 
 .highlight-deleted-row {
     transition: background-color 0.5s ease, opacity 1s ease;
