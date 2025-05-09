@@ -302,7 +302,8 @@ async function handleActionButtonClick() {
       primitiveTable.addRow({
         primitiveId: primitiveId,
         primitiveName: newPrimitive.primitiveName, 
-        primitiveValue: newPrimitive.primitiveValue
+        primitiveValue: newPrimitive.primitiveValue,
+        animation: true
       });
       primitiveModal.hide();
     } catch (error) {
