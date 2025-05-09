@@ -3,10 +3,15 @@
 import { loadHtmlFragment } from "./components.js";
 
 export const MODALS = {
+  CONFIRMATON: {
+    id: "confirmation-modal",
+    path: "src/core/modals/confirmationModal.html"
+  },
   PRIMITIVE_MODAL: {
     id: "primitive-modal",
     path: "src/core/modals/primitiveColorModal.html"
   }
+  
 };
 
 class ModalManager {
