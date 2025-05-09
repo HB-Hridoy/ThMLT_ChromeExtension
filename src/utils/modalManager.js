@@ -7,6 +7,10 @@ export const MODALS = {
     id: "confirmation-modal",
     path: "src/core/modals/confirmationModal.html"
   },
+  MESSAGE: {
+    id: "message-modal",
+    path: "src/core/modals/messageModal.html"
+  },
   PRIMITIVE_MODAL: {
     id: "primitive-modal",
     path: "src/core/modals/primitiveColorModal.html"
