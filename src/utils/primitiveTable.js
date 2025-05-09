@@ -43,8 +43,8 @@ class PrimitiveTable {
                       const valueTd = `
                       <td class="px-6 py-3 w-2/4">
                         <div class="w-full flex items-center relative">
-                          <div class="h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue};"></div>
-                          <p id="color-text" class="flex-1 text-xs mr-2">${primitiveValue}</p>
+                          <div id="primitive-value-thumbnail" class="h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue};"></div>
+                          <p id="primitive-value" class="flex-1 text-xs mr-2">${primitiveValue}</p>
                     
                           <button id="primitive-edit-button_${primitiveId}" 
                             class="primitive-edit-button hidden text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 items-center ml-2 transition-all duration-150">
@@ -90,7 +90,7 @@ class PrimitiveTable {
     const row = this.table.querySelector(`tr[id="${primitiveId}"]`);
     if (row) {
       const name = row.querySelector("#primitive-name").textContent.trim();
-      const value = row.querySelector("#color-text").textContent.trim();
+      const value = row.querySelector("#primitive-value").textContent.trim();
       return { primitiveId, name, value };
     }
     return null;
@@ -130,7 +130,7 @@ class PrimitiveTable {
     rows.forEach((row) => {
       const primitiveId = row.getAttribute("id");
       const name = row.querySelector("#primitive-name").textContent.trim();
-      const value = row.querySelector("#color-text").textContent.trim();
+      const value = row.querySelector("#primitive-value").textContent.trim();
       allRows.push({ primitiveId, name, value });
     });
     return allRows;
@@ -211,5 +211,5 @@ function makePrimitiveRowDraggable(row) {
     // }
   });
 }
-
-export { PrimitiveTable };
+const primitiveTable = new PrimitiveTable();
+export { primitiveTable };
