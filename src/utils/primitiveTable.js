@@ -1,12 +1,29 @@
 
 import { primitiveModal } from "../core/modals/primitiveColorModal.js";
 class PrimitiveTable {
-  constructor(primitiveTableId){
-
+  constructor() {
     this.currentRowId = 1;
-    this.table = document.getElementById(primitiveTableId);
-    this.tableBody = this.table.querySelector("tbody");
-    
+    this.table = null;
+    this.tableBody = null;
+
+    const observer = new MutationObserver((mutationsList, observerInstance) => {
+      const table = document.getElementById("primitives-table");
+
+      if (table) {
+        this.table = table;
+        this.tableBody = this.table.querySelector("tbody");
+
+        // Stop observing once table is found and stored
+        observerInstance.disconnect();
+        console.log("Primitive table initialized.");
+      }
+    });
+
+    // Start observing the document body for the table
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
   }
 
   addRow({ primitiveId = 0,  primitiveName = "Unknown", primitiveValue = "#ffffff"} = {}){
