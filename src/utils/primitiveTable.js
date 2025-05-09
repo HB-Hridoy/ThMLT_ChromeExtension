@@ -96,15 +96,22 @@ class PrimitiveTable {
     return null;
   }
 
-  updateRow(primitiveId, data = {}){
-    const { primitiveName = "Unknown", primitiveValue = "#ffffff"} = data;
+  updateRow(primitiveId, { primitiveName = "Unknown", primitiveValue = "#ffffff" } = {}) {
     const row = this.table.querySelector(`tr[id="${primitiveId}"]`);
     if (row) {
       row.querySelector("#primitive-name").textContent = primitiveName;
-      row.querySelector("#color-text").textContent = primitiveValue;
-      row.querySelector("#color-box").style.backgroundColor = primitiveValue;
+      row.querySelector("#primitive-value").textContent = primitiveValue;
+      row.querySelector("#primitive-value-thumbnail").style.backgroundColor = primitiveValue;
+  
+      // Add highlight class
+      row.classList.add("highlight-update-row");
+  
+      setTimeout(() => {
+        row.classList.remove("highlight-update-row");
+      }, 600);
     }
   }
+  
   deleteRow(primitiveId){
     const row = this.table.querySelector(`tr[id="${primitiveId}"]`);
     if (row) {

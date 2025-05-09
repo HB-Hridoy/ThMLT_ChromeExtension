@@ -9,6 +9,11 @@
     /* or you can use 'block' if that's preferred */
 }
 
+.highlight-update-row {
+    transition: background-color 0.3s;
+    background-color: #c5dfff;
+}
+
 
 
 .semantic-table-root {
