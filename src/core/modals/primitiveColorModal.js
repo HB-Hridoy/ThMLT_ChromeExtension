@@ -4,6 +4,7 @@ import { primitiveTable } from '../../utils/primitiveTable.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
 import { replaceClass } from '../sidepanel.js';
 import { confirmationModal } from '../modals/confirmationModal.js'
+import { showNoPrimitivesScreen, showPrimitivesTable } from '../screens/primitiveColor/primitiveColor.js';
 
 let primitiveModalElement = null;
 
@@ -275,6 +276,10 @@ async function handleDeleteButtonClick() {
         id: primitiveId
       });
       primitiveTable.deleteRow(primitiveId);
+
+      if(cacheManager.primitives.getAllNames().length === 0){
+        showNoPrimitivesScreen();
+      }
       
     } catch (error) {
       console.error(error);
@@ -306,6 +311,8 @@ async function handleActionButtonClick() {
         animation: true
       });
       primitiveModal.hide();
+
+      showPrimitivesTable();
     } catch (error) {
       console.error("Error creating primitive:", error);
       
