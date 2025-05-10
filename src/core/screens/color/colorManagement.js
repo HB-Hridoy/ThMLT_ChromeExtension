@@ -4,7 +4,7 @@
   import { screenManager, screens, COLOR_TABS } from "../../../utils/screenManager.js";
   import { primitiveTable } from "../../../utils/primitiveTable.js";
   import { primitiveModal } from "../../modals/primitiveColorModal.js";
-import { InitializePrimitivesScreen, populatePrimitiveData } from "../primitiveColor/primitiveColor.js";
+  import { InitializePrimitivesScreen, populatePrimitiveData } from "../primitiveColor/primitiveColor.js";
 
   let listenersAdded = false;
 
@@ -26,15 +26,30 @@ import { InitializePrimitivesScreen, populatePrimitiveData } from "../primitiveC
     await primitiveModal.show(primitiveModal.modes.ADD);
     primitiveModal.hide();
 
+    const colorsAddButtonText = document.getElementById("colors-add-button-text");
+
+    // ========== EVENT LISTENERS BEGIN ========== // 
+
+    document.getElementById("primitives-tab").addEventListener('click', () => {
+      colorsAddButtonText.innerText = "Add Primitive"
+       showPrimitivesTab();
+    }); 
+
+    document.getElementById("semantic-tab").addEventListener('click', () => {
+      colorsAddButtonText.innerText = "Add Semantic";   
+      showSemanticTab();
+    });
+
     // Add event listeners and other initialization code here
     document.getElementById("color-screen-back-button").addEventListener("click", () => {
       screenManager.switchScreen(screens.PROJECT_MANAGEMENT);
     });
 
-    document.getElementById("addNewColor").addEventListener("click", () => {
+    document.getElementById("colors-add-button").addEventListener("click", () => {
       primitiveModal.show(primitiveModal.modes.ADD);
     });
 
+    // ========== EVENT LISTENERS BEGIN ========== // 
 
     listenersAdded = true;
   }
@@ -65,8 +80,7 @@ import { InitializePrimitivesScreen, populatePrimitiveData } from "../primitiveC
   }
 
   // //Tabs switching function
-  // const primitivesTabButton = document.getElementById("primitives-tab");
-  // const semanticTabButton = document.getElementById("semantic-tab");
+  
 
   // const semanticRowEditButton = document.getElementById("semantic-row-edit-button");
   // const semanticRowDeleteButton = document.getElementById("semantic-row-delete-button");
