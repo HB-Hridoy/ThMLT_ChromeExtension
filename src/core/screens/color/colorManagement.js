@@ -4,9 +4,9 @@
   import { screenManager, screens, COLOR_TABS } from "../../../utils/screenManager.js";
   import { primitiveTable } from "../../../utils/primitiveTable.js";
   import { primitiveModal } from "../../modals/primitiveColorModal.js";
+import { InitializePrimitivesScreen, populatePrimitiveData } from "../primitiveColor/primitiveColor.js";
 
   let listenersAdded = false;
-  let isPrimitiveDataInitialized = false;
 
   const TABS = {
     PRIMITIVE: "primitives",
@@ -15,15 +15,10 @@
 
   export async function showColorManagementScreen() {
     await screenManager.switchScreen(screens.COLOR_MANAGEMENT);
-    await screenManager.loadTab(COLOR_TABS.PRIMITIVES);
+    await InitializePrimitivesScreen();
     await screenManager.loadTab(COLOR_TABS.SEMANTIC);
 
-    const colorScreenProjectName = document.getElementById("color-screen-project-name")
-
-    if (cacheManager.projects.activeProjectName !== colorScreenProjectName.innerText.trim()) {
-      isPrimitiveDataInitialized = false;
-    }
-
+    const colorScreenProjectName = document.getElementById("color-screen-project-name");
     colorScreenProjectName.innerText = cacheManager.projects.activeProjectName();
 
     if (listenersAdded) return;
@@ -58,28 +53,7 @@
 
   export async function showPrimitivesTab(){
 
-    if (!isPrimitiveDataInitialized) {
-
-      const primitiveData = await DatabaseManager.primitives.getAllByProject({
-        projectId: cacheManager.projects.activeProjectId
-      });
-
-      primitiveTable.deleteAllRows();
-      primitiveData.forEach((primitive) => {
-        
-        const { id, primitiveName, primitiveValue } = primitive;
-        primitiveTable.addRow({ 
-          primitiveId: id, 
-          primitiveName: primitiveName, 
-          primitiveValue: primitiveValue
-        });
-
-      });
-
-      isPrimitiveDataInitialized = true;
-      
-    }
-
+    populatePrimitiveData();
     SwitchTabs(TABS.PRIMITIVE);
 
   }
