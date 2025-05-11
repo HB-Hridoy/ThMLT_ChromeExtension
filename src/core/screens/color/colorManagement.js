@@ -659,85 +659,7 @@
   // });
 
 
-  // function addNewRowToSemanticTable(semanticName, semanticValues, themeModes){
-
-  //   const tableBody = document.querySelector("#semantic-table tbody");
-    
-  //   let semanticValueCells =""; 
-
-  //   for (let i = 0; i < themeModes.length; i++) {
-  //     const semanticValue = semanticValues[i] || '';
-  //     semanticValueCells = semanticValueCells + CreateElement.semanticTableValueCell(currentSemanticRowId, semanticValue, themeModes[i]);
-  //     // semanticValueCells = semanticValueCells +`
-  //     //                       <td class="semantic-table-cell semantic-value-cell" data-index = "${currentSemanticRowId}" theme-mode = ${themeModes[i]}>
-  //     //                           <div class="semantic-mode-value semantic-mode-cell hide-border ${semanticValue === "Click to link color" ? 'bg-red-200' : 'bg-white'} bg-red-200">
-  //     //                               <div class="semantic-alias-pill-cell semantic-alias-pill-base">
-  //     //                                   <div class="semantic-pill-cover "
-  //     //                                       aria-disabled="false" 
-  //     //                                       style="transform: translate(0px, 0px);">
-  //     //                                       <div class="semantic-pill" >
-  //     //                                           <div class="semantic-color-thumbnail-container">
-  //     //                                               <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-  //     //                                                   style="background-color: ${semanticValue === "Click to link color" ? "#ffffff" : CacheOperations.getPrimitiveValue(semanticValue)}">
-  //     //                                               </div>
-  //     //                                           </div>
-  //     //                                           <div class="semantic-pill-text">
-  //     //                                                       ${semanticValue === "Click to link color" ? semanticValue : "/ " + semanticValue}
-  //     //                                           </div>
-  //     //                                       </div>
-  //     //                                   </div>
-  //     //                               </div>
-  //     //                           </div>
-  //     //                       </td>
-  //     //                     `;
-  //   }
-    
-
-  //   // const newRow = `
-  //   //                   <tr data-index="${currentSemanticRowId}" class=" seamntic-name-cell semantic-table-row  semantic-table-item-row">
-  //   //                         <td data-index = "${currentSemanticRowId}" class="cursor-copy semantic-table-cell semantic-table-cell-has-padding">
-  //   //                             <div class="flex flex-row items-center w-full overflow-hidden gap-2 select-none">
-  //   //                                 <div class="row-icon">
-  //   //                                     <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-  //   //                                         <path fill="var(--color-icon)" fill-rule="evenodd"
-  //   //                                             d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
-  //   //                                             clip-rule="evenodd"></path>
-  //   //                                     </svg>
-  //   //                                 </div>
-  //   //                                 <div class="semantic-name inline-flex min-w-0 ">
-  //   //                                     ${semanticName}
-  //   //                                 </div>
-  //   //                             </div>
-  //   //                         </td>
-  //   //                         ${semanticValueCells}
-  //   //                         <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
-  //   //                           <div id="semantic-row-edit-button-container-${currentSemanticRowId}" class="h-full w-full">
-  //   //                           </div>
-  //   //                         </td>
-  //   //                     </tr>
-  //   //                 `;
-
-  //   const newRow = `
-  //                     <tr data-index="${currentSemanticRowId}" semantic-row-index = "${currentSemanticRowId}" order-index="${currentSemanticRowId}" draggable="true" class=" seamntic-name-cell semantic-table-row  semantic-table-item-row">
-  //                           ${CreateElement.semanticTableNameCell(currentSemanticRowId, semanticName)}
-  //                           ${semanticValueCells}
-  //                           <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
-  //                             <div id="semantic-row-edit-button-container-${currentSemanticRowId}" class="h-full w-full">
-  //                             </div>
-  //                           </td>
-  //                       </tr>
-  //                   `;
-      
-  //   // Insert the new row into the table body
-  //   tableBody.insertAdjacentHTML("beforeend", newRow);
-
-  //   // Make the new row draggable
-  //   const addedRow = tableBody.lastElementChild;
-  //   makeSemanticRowDraggable(addedRow);
-  //   currentSemanticRowId++;
-
-
-  // }
+  
 
   // async function renameSemanticRow() {
   //   const rowId = semanticRowDeleteButton.getAttribute("data-index");
@@ -933,41 +855,6 @@
   //   }
   // }
 
-  // function addNewRowToPrimitiveTable(primitiveName, primitiveValue) {
-    
-  //   const tableBody = document.querySelector("#primitives-table tbody");
-
-  //   const newRow = `
-  //                 <tr primitive-row-index = "${currentPrimitiveRowId}" order-index="${currentPrimitiveRowId}" draggable="true" class="bg-white border-b cursor-grab active:cursor-grabbing">
-  //                   <td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap w-2/4">
-  //                     <div class="flex items-center w-full">
-  //                       <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
-  //                         <path fill="#000000" fill-rule="evenodd"
-  //                             d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
-  //                             clip-rule="evenodd"></path>
-  //                       </svg>
-  //                       <p id="primitive-name" class="text-xs text-gray-500 ml-2 w-full">${primitiveName}</p>
-                        
-  //                     </div>
-  //                   </td>
-  //                   <td class="px-6 py-3 w-2/4">
-  //                     <div id="color-box-parent" class="w-full flex items-center">
-  //                       <div id="color-box" class=" h-4 w-4 min-h-4 min-w-4 mr-2 border rounded-sm" style="background-color: ${primitiveValue} ;"></div>
-  //                       <p id="color-text" class="flex-1 text-xs mr-2">${primitiveValue}</p>
-  //                     </div>
-  //                   </td>
-  //                 </tr>
-  //   `;
-    
-  //   tableBody.insertAdjacentHTML("beforeend", newRow);
-
-  //   // Make the new row draggable
-  //   const addedRow = tableBody.lastElementChild;
-  //   makePrimitiveRowDraggable(addedRow);
-
-  //   currentPrimitiveRowId++;
-    
-  // }
 
   // function ShowSelectPrimitiveModal(dataIndex, themeMode, semanticName) {
 
@@ -998,89 +885,7 @@
 
   
 
-  // function makeSemanticRowDraggable(row) {
-  //   row.setAttribute('draggable', true);
   
-  //   // Drag Start
-  //   row.addEventListener('dragstart', function (e) {
-  //     e.dataTransfer.setData('text/plain', row.getAttribute('semantic-row-index'));
-  //     row.classList.add('dragging');
-  //     row.querySelector('td:first-child').style.backgroundColor = 'rgb(225, 239, 254)';
-  //   });
-  
-  //   // Drag Over
-  //   row.addEventListener('dragover', function (e) {
-  //     e.preventDefault(); // Allow dropping
-  
-  //     const draggingRow = document.querySelector('.dragging'); // Get the row being dragged
-  //     const currentRow = e.target.closest('tr'); // Get the row being hovered over
-  
-  //     if (draggingRow && currentRow && draggingRow !== currentRow) {
-  //       const rows = Array.from(row.parentElement.querySelectorAll('tr'));
-  //       const currentIndex = rows.indexOf(currentRow);
-  //       const draggingIndex = rows.indexOf(draggingRow);
-
-  //       if (draggingIndex < currentIndex) {
-  //         // Insert the dragging row after the current row
-  //         row.parentElement.insertBefore(draggingRow, currentRow.nextSibling);
-  //       } else {
-  //         // Insert the dragging row before the current row
-  //         row.parentElement.insertBefore(draggingRow, currentRow);
-  //       }
-
-  //     }
-
-  //   });
-  
-  //   // Drop
-  //   row.addEventListener('drop', function (e) {
-  //     e.preventDefault();
-
-  //     const rows = Array.from(row.parentElement.querySelectorAll('tr'));
-  
-  //     // Update the order-index for all rows
-  //     rows.forEach((row, index) => {
-  //       row.setAttribute('order-index', index + 1); // Start from 1
-  //     });
-  
-  //     row.classList.remove('dragging'); 
-  //     row.querySelector('td:first-child').style.removeProperty('background-color');
-  //   });
-  
-  //   // Drag End
-  //   row.addEventListener('dragend', function () {
-      
-  //     row.classList.remove('dragging');
-  //     row.querySelector('td:first-child').style.removeProperty('background-color');
-
-  //     // Update Order Indexes in DB
-  //     const rows = semanticTableBody.querySelectorAll('tr');
-
-  //     try {
-  //       const themeModes = CacheOperations.getAllThemeModes();
-  //       rows.forEach(async (row, index) => {
-  //         const semanticElement = row.querySelector(".semantic-name");
-  //         if (semanticElement) {
-  //           const semanticName = semanticElement.innerText.trim();
-  //           const newOrderIndex = index + 1;
-
-  //           await Promise.all(themeModes.map(themeMode => 
-  //             updateSemantic(CacheOperations.activeProject, semanticName, "@default", themeMode, "@default", newOrderIndex, false)
-  //           ));
-  //         }
-          
-  //       });
-
-  //       console.log(...Logger.multiLog(
-  //         ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
-  //         ["Updated semantic table order index"]
-  //       ));
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-
-  //   });
-  // }
 
   
 
