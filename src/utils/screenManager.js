@@ -1,5 +1,7 @@
 import { loadHtmlFragment } from "./components.js";
 
+const bottomNavBar = document.getElementById("bottom-nav-bar");
+
 const screens = {
   HOME: {
     id: "home-screen",
@@ -151,6 +153,17 @@ class ScreenManager {
 
     this._loadedTabs.push(tabId);
     this.log(`Tab loaded: ${tabId}`);
+  }
+
+  bottomNavigationBar(show){
+
+    if (show) {
+      bottomNavBar.classList.replace("hidden", "visible");
+    } else {
+      bottomNavBar.classList.replace("visible", "hidden");
+    }
+
+
   }
 }
 
