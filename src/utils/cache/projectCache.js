@@ -22,7 +22,7 @@ export default class ProjectCache extends BaseCache {
       return null;
     }
     this.projects.push(project);
-    this.log(`Added project:`, project);
+    this.log(`Added project: ${project}`);
     return project;
   }
 
@@ -90,6 +90,13 @@ export default class ProjectCache extends BaseCache {
     this.log(`Exists check for ${projectId}: ${result}`);
     return result;
   }
+
+  existProjectName(projectName) {
+    const result = this.projects.some((p) => p.projectName === projectName);
+    this.log(`Exists check for project name "${projectName}": ${result}`);
+    return result;
+  }
+  
 
   get activeProjectId() {
     return this._activeProjectId;
