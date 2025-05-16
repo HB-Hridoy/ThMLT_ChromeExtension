@@ -35,6 +35,10 @@ export async function showHomeScreen() {
         cacheManager.clearAll();
         
         cacheManager.projects.activeProjectId = projectCard.getAttribute("project-id");
+
+         cacheManager.projects.get(cacheManager.projects.activeProjectId).themeModes.forEach((theme) =>{
+          cacheManager.semantics.theme().add({ themeName: theme });
+         });
         console.log(`[INFO] Active project ID set to: ${cacheManager.projects.activeProjectId}`);
         
       } else {
