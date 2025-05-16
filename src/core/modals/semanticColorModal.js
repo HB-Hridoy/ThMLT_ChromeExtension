@@ -91,7 +91,9 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
       semanticNameInput.value = "";
       semanticNameInputError.classList.toggle("hidden", true);
       semanticNameInput.style.borderColor = "";
-        
+
+      semanticModalElement.removeAttribute("semanticName");  
+      semanticModalElement.removeAttribute("semanticId"); 
     }
   
     enableActionButton(enabled){
@@ -219,8 +221,6 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
         console.error(error);
       }
     }
-  
-    
   }
   
   async function handleActionButtonClick() {
