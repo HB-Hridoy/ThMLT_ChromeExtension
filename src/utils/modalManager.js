@@ -14,6 +14,14 @@ export const MODALS = {
   PRIMITIVE_MODAL: {
     id: "primitive-modal",
     path: "src/core/modals/primitiveColorModal.html"
+  },
+  SEMANTIC: {
+    id: "semantic-modal",
+    path: "src/core/modals/semanticColorModal.html"
+  },
+  PROJECT: {
+    id: "project-modal",
+    path: "src/core/modals/newProjectModal.html"
   }
   
 };

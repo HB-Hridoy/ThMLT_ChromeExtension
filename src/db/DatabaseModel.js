@@ -8,10 +8,10 @@ class DatabaseModel {
 
       sharedDB.version(1).stores({
         projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
-        primitiveColors: "++id, projectId, primitiveName, orderIndex",
-        semanticColors: "++id, projectId, semanticName, linkedPrimitive, themeMode, orderIndex, deleted, deletedAt",
-        fonts: "++id, projectId, fontTag, shortFontTag, fontName, orderIndex, deleted, deletedAt",
-        translations: "++id, projectId, defaultLanguage, translationData, deleted, deletedAt",
+        primitiveColors: "++primitiveId, projectId, primitiveName, orderIndex",
+        semanticColors: "++semanticId, projectId, semanticName, orderIndex",
+        fonts: "++fontId, projectId, fontName, orderIndex",
+        translations: "++translationId, projectId, defaultLanguage, translationData",
       });
 
       sharedDB.open().catch((error) => {

@@ -9,6 +9,15 @@
     /* or you can use 'block' if that's preferred */
 }
 
+.semantic-edit-button {
+    display: none;
+}
+
+.item-row:hover .semantic-edit-button {
+    display: inline-flex;
+}
+
+
 .highlight-update-row {
     animation: highlightFadeOut 1.5s ease-in-out;
 }
@@ -16,7 +25,6 @@
 @keyframes highlightFadeOut {
     0% {
         background-color: #c5dfff;
-        /* Light blue highlight */
     }
 
     100% {
@@ -24,11 +32,34 @@
     }
 }
 
+.semantic-table .highlight-update-row td {
+    animation: highlightSemanticFadeOut 1.5s ease-in-out;
+}
+
+@keyframes highlightSemanticFadeOut {
+    0% {
+        background-color: white;
+    }
+
+    25% {
+        background-color: #c5dfff;
+    }
+
+    100% {
+        background-color: white;
+    }
+}
+
+
 
 .highlight-deleted-row {
     transition: background-color 0.5s ease, opacity 1s ease;
     background-color: #f87171;
     opacity: 0;
+}
+
+.semantic-table .highlight-deleted-row td {
+    background-color: #f87171 !important;
 }
 
 .highlight-added-row {
@@ -48,266 +79,181 @@
     }
 }
 
+.semantic-table .highlight-added-row td {
+    animation: fadeInBgColor 0.5s ease-in-out forwards;
+}
 
+/* Animate the background-color of <td>s */
+@keyframes fadeInBgColor {
+    from {
+        background-color: #d1fae5;
+    }
 
+    to {
+        background-color: transparent;
+    }
+}
 
-
-.semantic-table-root {
-    position: relative;
-    display: grid;
-    transform: translateX(0px);
-    /* Corrected transform */
+/* Container for horizontal scrolling */
+.semantic-table-container {
+    width: 100%;
     overflow-x: auto;
-    /* Enable horizontal scrolling */
+    position: relative;
+}
+
+/* Table structure */
+.semantic-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: auto;
+    /* Allow table to expand beyond container */
+    min-width: 100%;
+    font-size: 0.75rem;
+    color: black;
+}
+
+/* Column widths */
+.semantic-col-name {
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px;
+}
+
+
+.semantic-col-theme {
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px;
+}
+
+.semantic-col-theme {
+    width: 58px !important;
+    min-width: 58px !important;
+    max-width: 58px;
+}
+
+/* Basic cell styling */
+.semantic-table th,
+.semantic-table td {
+    height: 40px;
+    border: 1px solid #e5e6e7;
+    padding: 0 16px;
+    background-color: white;
+    text-align: left;
     white-space: nowrap;
-    /* Prevents content wrapping */
 }
 
-.hide-border {
-    border: none
+/* Header row styling */
+.semantic-header-row th {
+    background-color: #F3F4F6;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 5;
 }
 
-.semantic-pill-text {
-    -webkit-user-select: none;
-    user-select: none;
-    flex: 1 1 auto;
-    overflow: hidden
+/* Active theme column */
+.semantic-theme-header.active-theme {
+    background-color: rgb(147, 196, 253);
 }
 
-.semantic-pill {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    overflow: hidden;
-    max-width: 100%
+/* Sticky positioning */
+.sticky-left {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    box-shadow: 4px 0 6px rgba(0, 0, 0, 0.1);
 }
 
-.semantic-color-thumbnail-container .semantic-color-thumbnail-container {
-    height: 24px;
-    width: 24px;
-    min-width: 24px;
-    flex: 0;
+.sticky-right {
+    position: sticky;
+    right: 0;
+    z-index: 10;
+    box-shadow: -4px 0 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Corner cells need higher z-index */
+.semantic-header-row .sticky-left,
+.semantic-header-row .sticky-right {
+    z-index: 15;
+}
+
+/* Name column styling */
+.semantic-name-container {
     display: flex;
     align-items: center;
-    justify-content: center
-}
-
-.semantic-mode-cell {
     width: 100%;
-    border-right: 1px solid var(--color-border)
+    overflow: hidden;
+    gap: 0.5rem;
 }
 
-.semantic-mode-cell .icon-hover-visible {
-    margin-right: 8px;
-    margin-left: -8px
-}
-
-.semantic-mode-cell.hide-border {
-    border: none
-}
-
-.semantic-table-root {
-    position: relative;
-    display: grid;
-    transform: "translateX(0px)",
+.semantic-row-icon {
+    display: flex;
+    flex: 0 0 auto;
 }
 
 .semantic-name {
-    flex: 1 1 auto;
-    overflow: hidden
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.semantic-table-cell {
-    background-color: white;
-    min-height: 40px;
-    display: flex;
-    align-items: stretch;
-    border: 1px solid #e5e6e7;
-    border-collapse: collapse;
-}
-
-.semantic-table-cell {
-    font-weight: 600
-}
-
-.header-row .semantic-table-cell {
-    background-color: #F3F4F6;
-    font-weight: 600
-}
-
-.semantic-table-row {
-    display: grid;
-    grid-column-start: 1;
-    grid-column-end: -1;
-    grid-template-columns: inherit;
-    width: 100%;
-
-
-}
-
-.semantic-table-cell {
-    display: flex
-}
-
-.row-icon {
-    display: flex;
-    flex: 0 0 auto
-}
-
-.row-icon svg {
-    fill: black;
-}
-
-.pill {
-    display: flex;
-    gap: 3px
-}
-
-.pill,
-body[data-fpl-version=ui2]:where(body.feature_flag_ui3_mixin_changes) :where([data-fpl-ui3-override]) .pill {
-    gap: 0
-}
-
-.pill.variable_pill--useHover--S6o02:hover,
-.pill.variable_pill--forceHover--EDu9s {
-    background-color: var(--color-bg-tertiary);
-    border-color: var(--color-bg-tertiary)
-}
-
-.semantic-table-cell-has-padding {
-    padding: 0 16px;
-    align-items: center
-}
-
-.icon-hover-visible {
-    display: none
-}
-
-.icon-hover-visible {
-    display: flex
-}
-
-.icon-hover-visible {
-    display: flex
-}
-
-.icon-hover-visible {
-    margin-right: 8px;
-    margin-left: -8px
-}
-
+/* Color cell styling */
 .semantic-value-cell {
-    cursor: context-menu;
+    cursor: pointer;
+    padding-left: 0;
 }
 
-.seamntic-name-cell {
-    cursor: copy;
+.semantic-value-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: 0;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .semantic-color-thumbnail {
-    border-radius: 1px;
-    border: 1px solid #e5e6e7;
-    overflow: hidden;
-    position: relative;
-    flex-shrink: 0;
     height: 16px;
     width: 16px;
-    /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);  */
+    border-radius: 20%;
+    border: 1px solid #e5e6e7;
+    flex-shrink: 0;
 }
 
-.semantic-color-thumbnail,
-body[data-fpl-version=ui2]:where(body.feature_flag_ui3_mixin_changes) :where([data-fpl-ui3-override]) .semantic-color-thumbnail {
-    border-radius: 20%
-}
-
-.semantic-color-thumbnail:focus-visible:after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    box-shadow: inset 0 0 0 1px var(--color-border-selected);
-    transform: scale(1)
-}
-
-.semantic-pill-cover {
-    max-width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-width: 0;
-}
-
-.ellipsis--ellipsis--Tjyfa {
-    white-space: nowrap;
+.semantic-theme-value {
+    user-select: none;
     overflow: hidden;
-    text-overflow: ellipsis
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
-.pill-name-and-icon {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    width: 100%
-}
-
-.semantic-alias-pill-base {
-    max-width: calc(100% - 32px);
-    min-width: 0;
-    height: 100%;
-    display: flex;
-    align-items: center
-}
-
-.semantic-alias-pill-cell {
-    margin-left: 12px;
-    margin-right: 16px
-}
-
-.semantic-table-body {
-    grid-column-start: 1;
-    grid-column-end: -1;
-    display: flex;
-    flex-direction: column;
-    grid-template-columns: inherit;
-    justify-content: stretch;
-    align-items: stretch;
-    position: relative
-}
-
-.semantic-table-sticky-left td:first-of-type {
-    left: 0;
-    position: sticky;
-    z-index: 100
-}
-
-.new-mode-button {
+/* Button styling */
+.add-button,
+.edit-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 40px
+    height: 100%;
+    width: 100%;
+    cursor: pointer;
 }
 
-.semantic-table-sticky-top tr:first-of-type {
-    top: 0;
-    position: sticky;
-    z-index: 200
+/* Make name cell copyable */
+.semantic-name-cell {
+    cursor: copy;
 }
 
-.semantic-mode-value {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between
-}
 
-.semantic-mode-value .icon-hover-visible {
-    display: none
-}
 
-.semantic-mode-value:hover .icon-hover-visible {
-    display: flex
-}
-
-.semantic-mode-value:focus-within .icon-hover-visible {
-    display: flex
+/* Force horizontal scrolling demonstration */
+@media screen and (min-width: 768px) {
+    .semantic-table-container:after {
+        content: '';
+        display: block;
+        min-width: 800px;
+        height: 1px;
+        visibility: hidden;
+    }
 }

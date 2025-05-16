@@ -4,6 +4,7 @@ import DatabaseManager from "../../../db/DatabaseManager.js";
 import { components } from "../../../utils/components.js";
 import { screenManager, screens } from "../../../utils/screenManager.js";
 import { showProjectManagementScreen } from "../projectManagement/projectManagement.js";
+import { projectModal } from "../../modals/newProjectModal.js";
 
 const comp = new components();
 
@@ -16,7 +17,13 @@ export async function showHomeScreen() {
 
   if (listenersAdded) return;
 
+  // ===== GLOBAL VARIABLE BEGIN ===== //
+
   projectsContainer = document.getElementById("projects-container");
+
+  // ===== GLOBAL VARIABLE BEGIN ===== //
+
+  // ===== EVENT LISTENERS BEGIN ===== //
 
   projectsContainer.addEventListener("click", async function (event) {
     const projectCard = event.target.closest(".project-card");
@@ -28,6 +35,10 @@ export async function showHomeScreen() {
         cacheManager.clearAll();
         
         cacheManager.projects.activeProjectId = projectCard.getAttribute("project-id");
+
+         cacheManager.projects.get(cacheManager.projects.activeProjectId).themeModes.forEach((theme) =>{
+          cacheManager.semantics.theme().add({ themeName: theme });
+         });
         console.log(`[INFO] Active project ID set to: ${cacheManager.projects.activeProjectId}`);
         
       } else {
@@ -48,7 +59,11 @@ export async function showHomeScreen() {
     }
   });
 
-  // end of the listeners
+  document.getElementById("show-project-modal").addEventListener('click', () =>{
+    projectModal.show()
+  });
+
+  // ===== EVENT LISTENERS END ===== //
   listenersAdded = true;
 }
 
