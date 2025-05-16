@@ -1,17 +1,29 @@
+import { semanticModal } from "../core/modals/semanticColorModal.js";
+import cacheManager from "./cache/cacheManager.js";
 
-import { primitiveModal } from "../core/modals/primitiveColorModal.js";
-class PrimitiveTable {
+class SemanticTable {
   constructor() {
+    this.defaultValue = "Link Primitive";
     this.currentRowId = 1;
     this.table = null;
+    this.thead = null;
     this.tableBody = null;
+
+    this.colGroup = null;
+    this.nameCol = null;
+    this.editCol = null;
 
     const observer = new MutationObserver((mutationsList, observerInstance) => {
       const table = document.getElementById("semantic-table");
 
       if (table) {
         this.table = table;
+        this.thead = this.table.querySelector('thead');
         this.tableBody = this.table.querySelector("tbody");
+
+        this.colGroup = this.table.querySelector("colgroup");
+        this.nameCol = this.colGroup.querySelector(".semantic-col-name");
+        this.editCol = this.colGroup.querySelector(".semantic-col-edit");
 
         // Stop observing once table is found and stored
         observerInstance.disconnect();
@@ -24,107 +36,295 @@ class PrimitiveTable {
       childList: true,
       subtree: true,
     });
+    
   }
 
-  addRow({ semanticId = 0,  semanticName = "unkonown", semanticValue = "unkonown", animation = false} = {}){
-    
-    let semanticValueCells =""; 
+  // Update order-index for all rows
+  updateRowIndexes() {
+    const rows = Array.from(this.tableBody.querySelectorAll('.item-row'));
+    rows.forEach((row, index) => {
+      row.setAttribute('order-index', index + 1);
+    });
+  }
 
-    for (let i = 0; i < themeModes.length; i++) {
-      const semanticValue = semanticValues[i] || '';
-      semanticValueCells = semanticValueCells + CreateElement.semanticTableValueCell(currentSemanticRowId, semanticValue, themeModes[i]);
+  // Initialize event listeners
+  initializeEventListeners() {
+    // Add theme button listener
+    const addThemeButton = this.thead.querySelector('.add-theme-button');
+    if (addThemeButton) {
+      addThemeButton.addEventListener('click', this.addThemeColumn.bind(this));
+    }
+  }
+
+  // Add a new row to the table
+  addRow({ semanticId, semanticName, themeValues , animation = false }) {
+    // Create a new row element
+    const newRow = document.createElement('tr');
+    newRow.classList.add('item-row');
+    newRow.id = semanticId;
+    newRow.setAttribute('draggable', 'true');
+    newRow.setAttribute('order-index', this.tableBody.children.length + 1);
+
+    // Create name cell
+    const nameCell = this.#createNameCell(semanticName);
+    newRow.appendChild(nameCell);
+
+    // Create theme value cells
+    cacheManager.semantics.theme().getAll().forEach(theme => {
+      const value = themeValues ? themeValues[theme] : this.defaultValue ;
+      const valueCell = this.#createValueCell(theme, value);
+      newRow.appendChild(valueCell);
+    });
+
+    // Create edit cell
+    const editCell = this.#createEditCell({ semanticId: semanticId });
+    newRow.appendChild(editCell);
+
+    // Append row to tbody
+    this.tableBody.appendChild(newRow);
+    makeRowDraggable({
+      row: newRow
+    });
+
+    if (animation) {
+      newRow.classList.add("highlight-added-row");
+      setTimeout(() => {
+        newRow.classList.remove("highlight-added-row");
+      }, 500);
     }
 
+    // ===== EVENT LISTENERS BEGIN ===== //
 
-    const newRow = `
-                      <tr data-index="${currentSemanticRowId}" semantic-row-index = "${currentSemanticRowId}" order-index="${currentSemanticRowId}" draggable="true" class=" seamntic-name-cell semantic-table-row  semantic-table-item-row">
-                            ${CreateElement.semanticTableNameCell(currentSemanticRowId, semanticName)}
-                            ${semanticValueCells}
-                            <td class="semantic-table-cell" style="position: sticky; right: 0px; z-index: 100;">
-                              <div id="semantic-row-edit-button-container-${currentSemanticRowId}" class="h-full w-full">
-                              </div>
-                            </td>
-                        </tr>
-                    `;
-      
-
-    
-  
-  this.tableBody.insertAdjacentHTML("beforeend", newRow);
-                    
-  
-      // Make the new row draggable
-      const addedRow = this.tableBody.lastElementChild;
-      makePrimitiveRowDraggable(addedRow);
-
-      if (animation) {
-        addedRow.classList.add("highlight-added-row");
-        setTimeout(() => {
-          addedRow.classList.remove("highlight-added-row");
-        }, 500);
-      }
-      
-  
-      this.currentRowId++;
-
-      document.querySelector(`#primitive-edit-button_${primitiveId}`).addEventListener("click", (e) => {
-        e.stopPropagation();
+    document.getElementById(`semantic-edit-button-${semanticId}`).addEventListener('click', (e) => {
+      e.stopPropagation();
         
-        primitiveModal.show(primitiveModal.modes.EDIT, {
-          primitiveId: primitiveId,
-          primitiveName: primitiveName,
-          primitiveValue: primitiveValue
-        });
+      semanticModal.show(semanticModal.modes.EDIT, {
+        semanticId: semanticId,
+        semanticName: semanticName
       });
+    });
+
+    // ===== EVENT LISTENERS END ===== //
+
+    return newRow;
+  }
+
+  // Create name cell with icon and semantic name
+  #createNameCell(name) {
+    const cell = document.createElement('td');
+    cell.classList.add('semantic-name-cell', 'sticky-left');
     
+    cell.innerHTML = `
+      <div class="semantic-name-container">
+        <div class="semantic-row-icon">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path fill="currentColor" fill-rule="evenodd"
+              d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+              clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div class="semantic-name">${name}</div>
+      </div>
+    `;
+
+    return cell;
   }
 
-  #semanticValueCell({semanticId, dataIndex, themeMode, semanticValue}={}){
-    const semanticColor = semanticValue === "Click to link color" ? "#ffffff" : CacheOperations.getPrimitiveValue(semanticValue)
-    return `
-            <td class="px-6 py-3 w-2/4" semanticId="${semanticId}" data-index = "${dataIndex}" theme-mode = ${themeMode}>
-              <div class="w-full flex items-center relative">
-                <div class="semantic-color-thumbnail" tabindex="0" data-tooltip-type="text"
-                     style="background-color: ${semanticColor}">
-                </div>
-                <p id="semantic-value" class="flex-1 text-xs mr-2">${semanticValue}</p>
-              </div>
-            </td>
-          `;
+  // Create value cell for a specific theme
+  #createValueCell(theme, value) {
+    const cell = document.createElement('td');
+    cell.classList.add('semantic-value-cell');
+    cell.setAttribute('theme-mode', theme);
+
+    const colorHex = value || '#ffffff';
+    cell.innerHTML = `
+      <div class="semantic-value-container">
+        <div class="semantic-color-thumbnail" style="background-color: ${colorHex}"></div>
+        <div class="semantic-theme-value">${value ? colorHex : 'Click to link color'}</div>
+      </div>
+    `;
+
+    return cell;
   }
 
-  #semanticNameCell({semanticId, dataIndex, semanticName}){
-    return `
-            <td semanticId="${semanticId}" data-index = "${dataIndex}" class="cursor-copy px-6 py-3 font-medium text-gray-900 whitespace-nowrap w-2/4">
-              <div class="flex items-center w-full">
-                <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path fill="var(--color-icon)" fill-rule="evenodd"
-                        d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
-                        clip-rule="evenodd"></path>
-                </svg>
-                <p id="semantic-name" class="text-xs text-gray-500 ml-2 w-full">${semanticName}</p>
-                
-              </div>
-            </td>
-          `;
+  // Create edit cell
+  #createEditCell({ semanticId }) {
+    const cell = document.createElement('td');
+    cell.classList.add('semantic-edit-cell', 'sticky-right');
+    
+    cell.innerHTML = `
+      <div class="edit-button">
+        <button id="semantic-edit-button-${semanticId}" 
+          class="semantic-edit-button hidden w-[35px] h-[35px] text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 items-center justify-center transition-all duration-150"
+>
+          <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <path stroke="#ffffff" stroke-linecap="round" stroke-width="2"
+              d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
+          </svg>
+          <span class="sr-only">Edit</span>
+        </button>
+      </div>
+    `;
+
+    return cell;
   }
 
-  getRow({semanticId} = {}){
+  // Get a specific row by id
+  getRow(id) {
+    const row = this.tableBody.querySelector(`tr[id="${id}"]`);
+    if (!row) return null;
+
+    const rowData = {
+      name: row.querySelector('.semantic-name').textContent,
+      themeModes: {}
+    };
+
+    this.themes.forEach(theme => {
+      const valueCell = row.querySelector(`.semantic-value-cell[theme-mode="${theme}"]`);
+      const colorValue = valueCell.querySelector('.semantic-color-thumbnail').style.backgroundColor;
+      rowData.themeModes[theme] = colorValue;
+    });
+
+    return rowData;
   }
 
-  updateRow({semanticId, primitiveName = "Unknown", primitiveValue = "#ffffff" } = {}) {
+  updateNameCell({ semanticId, newSemanticName = "Unknown", animation = false }) {
+    const row = this.tableBody.querySelector(`tr[id="${semanticId}"]`);
+    if (!row) return false;
+
+    const nameCell = row.querySelector(`.semantic-name`);
+    if (!nameCell) return false;
+
+    if (animation) {
+
+      row.classList.add("highlight-update-row");
+  
+      setTimeout(() => {
+        row.classList.remove("highlight-update-row");
+      }, 1500);
+      
+    }
+
+    nameCell.textContent = newSemanticName;
+
+    return true;
+  }
+
+  // Update a specific cell in a row
+  updateValueCell({ semanticId, theme, value }) {
+    const row = this.tableBody.querySelector(`tr[id="${semanticId}"]`);
+    if (!row) return false;
+
+    const themeCell = row.querySelector(`.semantic-value-cell[theme-mode="${theme}"]`);
+    if (!themeCell) return false;
+
+    const colorThumbnail = themeCell.querySelector('.semantic-color-thumbnail');
+    const pillText = themeCell.querySelector('.semantic-theme-value');
+
+    colorThumbnail.style.backgroundColor = value;
+    pillText.textContent = value;
+
+    return true;
+  }
+
+  // Delete a specific row
+  deleteRow({ semanticId,  animation = false }) {
+    const row = this.tableBody.querySelector(`tr[id="${semanticId}"]`);
+    if (!row) return false;
+
+    if (animation) {
+      row.classList.add("highlight-deleted-row");
+  
+      row.addEventListener("transitionend", () => {
+        row.remove();
+        this.updateRowIndexes();
+        return true;
+      }, { once: true }); 
+    }
+  }
+
+  // Delete all rows
+  deleteAllRows() {
+    this.tableBody.innerHTML = '';
+  }
+
+  // Get all rows
+  getAllRows() {
+    const rows = {};
+    this.tableBody.querySelectorAll('tr.item-row').forEach(row => {
+      const id = row.id;
+      const rowData = this.getRow(id);
+      rows[id] = rowData;
+    });
+    return rows;
+  }
+
+  addThemeColumn({ themeName } = {}) {
+    if (!themeName) return;
+  
+    // Prevent duplicate theme columns
+    const existingHeader = this.thead.querySelector(`.semantic-theme-header[data-theme="${themeName}"]`);
+    if (existingHeader) return;
+  
+    // 1. Add <col> to colGroup before the edit column
+    const newCol = document.createElement('col');
+    newCol.className = 'semantic-col-theme';
+    this.colGroup.insertBefore(newCol, this.editCol);
+  
+    // 2. Add <th> to header row before the edit column
+    const newHeader = document.createElement('th');
+    newHeader.classList.add('semantic-theme-header');
+    newHeader.setAttribute('data-theme', themeName);
+    newHeader.textContent = themeName;
+  
+    const addThemeCell = this.thead.querySelector('.semantic-add-theme-cell');
+    addThemeCell.parentNode.insertBefore(newHeader, addThemeCell);
+  
+    // 3. Add a new <td> to every existing row before the edit cell
+    this.tableBody.querySelectorAll('.item-row').forEach(row => {
+      const newCell = this.#createValueCell(themeName); // Ensure this returns a proper <td>
+      row.insertBefore(newCell, row.lastElementChild);
+    });
   }
   
-  deleteRow({semanticId} = {}) {
+  deleteThemeColumn({ theme }) {
+    if (!theme) return;
+  
+    // 1. Remove header <th>
+    const header = this.thead.querySelector(`.semantic-theme-header[data-theme="${theme}"]`);
+    if (header) header.remove();
+  
+    // 2. Remove the corresponding <col>
+    const themeHeaders = [...this.thead.querySelectorAll('.semantic-theme-header')];
+    const index = themeHeaders.findIndex(th => th.dataset.theme === theme);
+    if (index !== -1) {
+      const themeCols = this.colGroup.querySelectorAll('.semantic-col-theme');
+      if (themeCols[index]) themeCols[index].remove();
+    }
+  
+    // 3. Remove corresponding <td> from each row
+    this.tableBody.querySelectorAll('.item-row').forEach(row => {
+      const cell = row.querySelector(`.semantic-value-cell[theme-mode="${theme}"]`);
+      if (cell) cell.remove();
+    });
+  }
+
+  deleteAllThemeColumns() {
+    // 1. Remove all <th> headers with .semantic-theme-header
+    this.thead.querySelectorAll('.semantic-theme-header').forEach(th => th.remove());
+  
+    // 2. Remove all <col> elements with .semantic-col-theme
+    this.colGroup.querySelectorAll('.semantic-col-theme').forEach(col => col.remove());
+  
+    // 3. Remove all theme <td> cells
+    this.tableBody.querySelectorAll('.item-row').forEach(row => {
+      row.querySelectorAll('.semantic-value-cell').forEach(cell => cell.remove());
+    });
   }
   
-  deleteAllRows(){
-  }
-  getAllRows(){
-  }
 }
 
-function makeSemanticRowDraggable(row) {
+function makeRowDraggable({ row }) {
     row.setAttribute('draggable', true);
   
     // Drag Start
@@ -179,33 +379,7 @@ function makeSemanticRowDraggable(row) {
       row.classList.remove('dragging');
       row.querySelector('td:first-child').style.removeProperty('background-color');
 
-      // Update Order Indexes in DB
-      const rows = semanticTableBody.querySelectorAll('tr');
-
-      try {
-        const themeModes = CacheOperations.getAllThemeModes();
-        rows.forEach(async (row, index) => {
-          const semanticElement = row.querySelector(".semantic-name");
-          if (semanticElement) {
-            const semanticName = semanticElement.innerText.trim();
-            const newOrderIndex = index + 1;
-
-            await Promise.all(themeModes.map(themeMode => 
-              updateSemantic(CacheOperations.activeProject, semanticName, "@default", themeMode, "@default", newOrderIndex, false)
-            ));
-          }
-          
-        });
-
-        console.log(...Logger.multiLog(
-          ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
-          ["Updated semantic table order index"]
-        ));
-      } catch (error) {
-        console.error(error);
-      }
-
     });
   }
-const primitiveTable = new PrimitiveTable();
-export { primitiveTable };
+const semanticTable = new SemanticTable();
+export { semanticTable };
