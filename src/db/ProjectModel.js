@@ -155,6 +155,88 @@ class ProjectModel extends DatabaseModel {
       }
     });
   }
+
+  // Add a theme mode to a project
+  async addThemeMode({ projectId, themeMode } = {}) {
+    this.#validateProjectThemeInput(projectId, themeMode);
+
+    await this.ready;
+
+    const record = await this.db.projects.get(projectId);
+    if (!record) throw new Error("Project not found");
+
+    if (!record.themeModes.includes(themeMode)) {
+      record.themeModes.push(themeMode);
+      record.lastModified = Date.now();
+
+      await this.db.projects.put(record);
+      cacheManager.semantics.theme().add({ themeName: themeMode });
+
+      this.log(`[SUCCESS] Theme mode "${themeMode}" added to project ${projectId}`);
+    }
+
+    return record;
+  }
+
+  // Delete a theme mode from a project
+  async deleteThemeMode({ projectId, themeMode } = {}) {
+    this.#validateProjectThemeInput(projectId, themeMode);
+
+    await this.ready;
+
+    const record = await this.db.projects.get(projectId);
+    if (!record) throw new Error("Project not found");
+
+    const index = record.themeModes.indexOf(themeMode);
+    if (index === -1) throw new Error("Theme mode not found in project");
+
+    record.themeModes.splice(index, 1);
+    record.lastModified = Date.now();
+
+    await this.db.projects.put(record);
+    cacheManager.semantics.theme().delete({ themeName: themeMode });
+
+    this.log(`[SUCCESS] Theme mode "${themeMode}" deleted from project ${projectId}`);
+    return record;
+  }
+
+  // Rename a theme mode in a project
+  async renameThemeMode({ projectId, oldThemeMode, newThemeMode } = {}) {
+    this.#validateProjectThemeInput(projectId, oldThemeMode, "oldThemeMode");
+    this.#validateProjectThemeInput(projectId, newThemeMode, "newThemeMode");
+
+    await this.ready;
+
+    const record = await this.db.projects.get(projectId);
+    if (!record) throw new Error("Project not found");
+
+    const index = record.themeModes.indexOf(oldThemeMode);
+    if (index === -1) throw new Error("Old theme mode not found in project");
+
+    record.themeModes[index] = newThemeMode;
+    record.lastModified = Date.now();
+
+    if (record.defaultThemeMode === oldThemeMode){
+      record.defaultThemeMode = newThemeMode;
+    }
+
+    await this.db.projects.put(record);
+    cacheManager.semantics.theme().rename({
+      oldThemeName: oldThemeMode,
+      newThemeName: newThemeMode
+    });
+
+    this.log(`[SUCCESS] Theme mode "${oldThemeMode}" renamed to "${newThemeMode}" in project ${projectId}`);
+    return record;
+  }
+
+  #validateProjectThemeInput(projectId, themeMode, paramName = "themeMode") {
+    if (!projectId) throw new Error("projectId is required");
+    if (!themeMode || typeof themeMode !== "string") {
+      throw new Error(`${paramName} is required and must be a string`);
+    }
+  }
+
 }
 
 export default ProjectModel;
