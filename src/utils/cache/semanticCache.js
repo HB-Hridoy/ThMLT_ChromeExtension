@@ -90,6 +90,7 @@ export default class SemanticCache {
 
   clear() {
     this.#semantics.clear();
+    this.theme().clear();
   }
 
   exists({ id }) {
@@ -161,5 +162,8 @@ class ThemeCache {
 
   getAll() {
     return Array.from(this.#themes);
+  }
+  clear() {
+    this.#themes.clear();
   }
 }
