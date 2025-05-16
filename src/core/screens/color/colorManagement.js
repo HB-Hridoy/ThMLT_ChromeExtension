@@ -2,9 +2,11 @@
   import cacheManager from "../../../utils/cache/cacheManager.js";
   import DatabaseManager from "../../../db/DatabaseManager.js";
   import { screenManager, screens, COLOR_TABS } from "../../../utils/screenManager.js";
-  import { primitiveTable } from "../../../utils/primitiveTable.js";
   import { primitiveModal } from "../../modals/primitiveColorModal.js";
   import { InitializePrimitivesScreen, populatePrimitiveData } from "../primitiveColor/primitiveColor.js";
+  import { semanticModal } from "../../modals/semanticColorModal.js";
+  import { semanticTable } from "../../../utils/semanticTable.js";
+import { InitializeSemanticScreen, populateSemanticData } from "../semanticColor/semanticColor.js";
 
   let listenersAdded = false;
 
@@ -16,10 +18,13 @@
   export async function showColorManagementScreen() {
     await screenManager.switchScreen(screens.COLOR_MANAGEMENT);
     await InitializePrimitivesScreen();
-    await screenManager.loadTab(COLOR_TABS.SEMANTIC);
+    await InitializeSemanticScreen();
 
     const colorScreenProjectName = document.getElementById("color-screen-project-name");
     colorScreenProjectName.innerText = cacheManager.projects.activeProjectName();
+
+    populatePrimitiveData();
+    populateSemanticData();
 
     if (listenersAdded) return;
 
@@ -46,7 +51,12 @@
     });
 
     document.getElementById("colors-add-button").addEventListener("click", () => {
-      primitiveModal.show(primitiveModal.modes.ADD);
+      if (colorsAddButtonText.innerText === "Add Primitive"){
+        primitiveModal.show(primitiveModal.modes.ADD);
+      } else if (colorsAddButtonText.innerText === "Add Semantic"){
+        semanticModal.show(semanticModal.modes.ADD);
+      }
+      
     });
 
     // ========== EVENT LISTENERS BEGIN ========== // 
@@ -68,55 +78,16 @@
 
   export async function showPrimitivesTab(){
 
-    populatePrimitiveData();
     SwitchTabs(TABS.PRIMITIVE);
 
   }
 
-  function showSemanticTab(){
+  export async function showSemanticTab(){
 
     SwitchTabs(TABS.SEMANTIC);
 
   }
-
-  // //Tabs switching function
   
-
-  // const semanticRowEditButton = document.getElementById("semantic-row-edit-button");
-  // const semanticRowDeleteButton = document.getElementById("semantic-row-delete-button");
-
-  // const addRowToSemanticButton = document.getElementById("add-row-to-semantic-button");
-  // const addNewSemanticRowInput = document.getElementById("add-new-semantic-row-input");
-  // const addNewSemanticRowErrors = document.getElementById("add-new-semantic-row-errors");
-
-  // const renameSemanticRowButton = document.getElementById("rename-semantic-row-button");
-  // const editSemanticRowInput = document.getElementById("edit-semantic-row-input");
-  // const editSemanticRowErrors = document.getElementById("edit-semantic-row-errors");
-
-  
-
-  // //-------------------------
-
-  // const semanticModalElement = document.getElementById("semantic-modal");
-  // const semanticModal = new Modal(semanticModalElement, {
-  //   onHide: () => {
-  //       document.querySelectorAll(".bg-gray-900\\/50, .bg-gray-900\\/80").forEach(backdrop => {
-  //           backdrop.remove();
-  //       });
-  //   }
-  // });
-
-  // const semanticModalMode = document.querySelector('h3[semanticModalMode]');
-
-  // const showAddSemanticModal = document.getElementById("show-add-semantic-modal");
-  // const showEditSemanticModal = document.getElementById("semantic-edit-button");
-
-  // const sm_nameInput = document.getElementById("semantic-modal-name-input");
-  // const sm_nameInputError = document.getElementById("semantic-modal-name-input-error");
-
-  // const sm_deleteButton = document.getElementById("semantic-modal-delete-button");
-  // const sm_actionButton = document.getElementById("semantic-modal-action-button");
-
   // //-----------------
 
   // const themeModalElement = document.getElementById("theme-modal");
