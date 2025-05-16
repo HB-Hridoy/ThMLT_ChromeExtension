@@ -234,12 +234,13 @@ class SemanticTable {
 
     if (animation) {
       row.classList.add("highlight-deleted-row");
-  
-      row.addEventListener("transitionend", () => {
-        row.remove();
-        this.updateRowIndexes();
-        return true;
-      }, { once: true }); 
+
+      setTimeout(() => {
+        if (document.body.contains(row)) {
+          row.remove();
+          this.updateRowIndexes();
+        }
+      }, 1000);
     }
   }
 
