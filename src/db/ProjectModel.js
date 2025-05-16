@@ -29,6 +29,7 @@ class ProjectModel extends DatabaseModel {
           author,
           version,
           defaultThemeMode: "Light",
+          themeModes: ["Light", "Dark"],
           lastModified: Date.now(),
           deleted: 0,
           deletedAt: 0,
