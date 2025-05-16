@@ -257,3 +257,12 @@
         visibility: hidden;
     }
 }
+
+.theme-edit-button {
+    display: none;
+}
+
+/* Show button only on hover, and only if <th> is NOT a default theme */
+th.semantic-theme-header:not([default-theme="true"]):hover .theme-edit-button {
+    display: inline-flex;
+}

@@ -266,6 +266,8 @@ class SemanticTable {
     // Prevent duplicate theme columns
     const existingHeader = this.thead.querySelector(`.semantic-theme-header[data-theme="${themeName}"]`);
     if (existingHeader) return;
+
+    const defaultTheme = cacheManager.projects.get(cacheManager.projects.activeProjectId).defaultThemeMode;
   
     // 1. Add <col> to colGroup before the edit column
     const newCol = document.createElement('col');
@@ -275,8 +277,24 @@ class SemanticTable {
     // 2. Add <th> to header row before the edit column
     const newHeader = document.createElement('th');
     newHeader.classList.add('semantic-theme-header');
-    newHeader.setAttribute('data-theme', themeName);
-    newHeader.textContent = themeName;
+    newHeader.setAttribute('theme', themeName);
+    if (defaultTheme === themeName) {
+      newHeader.setAttribute('default-theme', true);
+    }
+    newHeader.innerHTML = ` <div class="w-full flex items-center relative">
+                              <p id="theme-${themeName}" class="flex-1 text-xs mr-1">${themeName}</p>
+                              <button id="theme-edit-button-${themeName}" 
+                                class="theme-edit-button items-center ml-1">
+                                
+                                <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                </svg>
+
+                                <span class="sr-only">Edit</span>
+                              </button>
+                            </div>
+                          `;
+
   
     const addThemeCell = this.thead.querySelector('.semantic-add-theme-cell');
     addThemeCell.parentNode.insertBefore(newHeader, addThemeCell);
