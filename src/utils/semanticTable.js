@@ -72,7 +72,7 @@ class SemanticTable {
     // Create theme value cells
     cacheManager.semantics.theme().getAll().forEach(theme => {
       const value = themeValues ? themeValues[theme] : this.defaultValue ;
-      const valueCell = this.#createValueCell(theme, value);
+      const valueCell = this.#createValueCell({ theme, value });
       newRow.appendChild(valueCell);
     });
 
