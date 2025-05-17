@@ -340,6 +340,39 @@ class SemanticTable {
       row.querySelectorAll('.semantic-value-cell').forEach(cell => cell.remove());
     });
   }
+
+  renameThemeColumn({ oldThemeName, newThemeName }) {
+    if (!oldThemeName || !newThemeName) {
+      console.error("Both oldThemeName and newThemeName are required.");
+      return false;
+    }
+  
+    // 1. Update the header <th>
+    const header = this.thead.querySelector(`.semantic-theme-header[theme="${oldThemeName}"]`);
+    if (header) {
+      header.setAttribute("theme", newThemeName);
+      const themeText = header.querySelector(`#theme-${oldThemeName}`);
+      if (themeText) {
+        themeText.id = `theme-${newThemeName}`;
+        themeText.textContent = newThemeName;
+      }
+  
+      const editButton = header.querySelector(`#theme-edit-button-${oldThemeName}`);
+      if (editButton) {
+        editButton.id = `theme-edit-button-${newThemeName}`;
+      }
+    }
+  
+    // 2. Update the corresponding <td> cells in each row
+    this.tableBody.querySelectorAll(".item-row").forEach(row => {
+      const cell = row.querySelector(`.semantic-value-cell[theme-mode="${oldThemeName}"]`);
+      if (cell) {
+        cell.setAttribute("theme-mode", newThemeName);
+      }
+    });
+  
+    return true;
+  }
   
 }
 
