@@ -140,7 +140,7 @@ class SemanticTable {
     cell.innerHTML = `
       <div class="semantic-value-container">
         <div class="semantic-color-thumbnail" style="background-color: ${colorHex}"></div>
-        <div class="semantic-theme-value">${value ? colorHex : 'Click to link color'}</div>
+        <div class="semantic-theme-value">${value ? colorHex : this.defaultValue}</div>
       </div>
     `;
 
