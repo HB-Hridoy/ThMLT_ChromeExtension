@@ -86,13 +86,31 @@
 /* Animate the background-color of <td>s */
 @keyframes fadeInBgColor {
     from {
-        background-color: #d1fae5;
+        background-color: #b4ffd8;
     }
 
     to {
         background-color: transparent;
     }
 }
+
+/* ===== SEMANTIC TABLE COLUMN ANIMATIONS BEGIN ===== */
+
+.highlight-added-column {
+    animation: fadeInBgColor 1s ease-in-out forwards;
+}
+
+.highlight-deleted-column {
+    transition: background-color 0.5s ease, opacity 1s ease;
+    background-color: #f87171 !important;
+    opacity: 0;
+}
+
+.highlight-update-column {
+    animation: highlightSemanticFadeOut 1.5s ease-in-out;
+}
+
+/* ===== SEMANTIC TABLE COLUMN ANIMATIONS END ===== */
 
 /* Container for horizontal scrolling */
 .semantic-table-container {
@@ -126,7 +144,7 @@
     max-width: 200px;
 }
 
-.semantic-col-theme {
+.semantic-col-edit {
     width: 58px !important;
     min-width: 58px !important;
     max-width: 58px;
@@ -151,6 +169,29 @@
     top: 0;
     z-index: 5;
 }
+
+.semantic-theme-header {
+    max-width: 200px;
+    /* or whatever fits your layout */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    position: sticky;
+    /* if you want it to stick */
+    left: 0;
+    z-index: 10;
+    background: white;
+    /* or your table background */
+}
+
+.semantic-theme-header p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
 
 /* Active theme column */
 .semantic-theme-header.active-theme {
@@ -182,9 +223,11 @@
 .semantic-name-container {
     display: flex;
     align-items: center;
-    width: 100%;
-    overflow: hidden;
     gap: 0.5rem;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .semantic-row-icon {
@@ -193,11 +236,13 @@
 }
 
 .semantic-name {
-    flex: 1;
+    flex-shrink: 1;
+    min-width: 0;
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
+
 
 /* Color cell styling */
 .semantic-value-cell {
@@ -229,23 +274,10 @@
     text-overflow: ellipsis;
 }
 
-/* Button styling */
-.add-button,
-.edit-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    cursor: pointer;
-}
-
 /* Make name cell copyable */
 .semantic-name-cell {
     cursor: copy;
 }
-
-
 
 /* Force horizontal scrolling demonstration */
 @media screen and (min-width: 768px) {
@@ -256,4 +288,13 @@
         height: 1px;
         visibility: hidden;
     }
+}
+
+.theme-edit-button {
+    display: none;
+}
+
+/* Show button only on hover, and only if <th> is NOT a default theme */
+th.semantic-theme-header:not([default-theme="true"]):hover .theme-edit-button {
+    display: inline-flex;
 }

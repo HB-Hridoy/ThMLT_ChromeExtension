@@ -1,4 +1,5 @@
 import { semanticModal } from "../core/modals/semanticColorModal.js";
+import { themeModal } from "../core/modals/themeModal.js";
 import cacheManager from "./cache/cacheManager.js";
 
 class SemanticTable {
@@ -72,7 +73,7 @@ class SemanticTable {
     // Create theme value cells
     cacheManager.semantics.theme().getAll().forEach(theme => {
       const value = themeValues ? themeValues[theme] : this.defaultValue ;
-      const valueCell = this.#createValueCell(theme, value);
+      const valueCell = this.#createValueCell({ theme, value });
       newRow.appendChild(valueCell);
     });
 
@@ -131,7 +132,7 @@ class SemanticTable {
   }
 
   // Create value cell for a specific theme
-  #createValueCell(theme, value) {
+  #createValueCell({ theme, value }) {
     const cell = document.createElement('td');
     cell.classList.add('semantic-value-cell');
     cell.setAttribute('theme-mode', theme);
@@ -140,11 +141,17 @@ class SemanticTable {
     cell.innerHTML = `
       <div class="semantic-value-container">
         <div class="semantic-color-thumbnail" style="background-color: ${colorHex}"></div>
-        <div class="semantic-theme-value">${value ? colorHex : 'Click to link color'}</div>
+        <div class="semantic-theme-value">${value ? colorHex : this.defaultValue}</div>
       </div>
     `;
 
     return cell;
+  }
+
+  #createDefaultThemeIcon(){
+    return `<svg id="default-theme-icon" class="w-4 h-4 text-blue-600 me-2" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z"/>
+                              </svg>`
   }
 
   // Create edit cell
@@ -260,12 +267,14 @@ class SemanticTable {
     return rows;
   }
 
-  addThemeColumn({ themeName } = {}) {
+  addThemeColumn({ themeName, animation = false } = {}) {
     if (!themeName) return;
   
     // Prevent duplicate theme columns
     const existingHeader = this.thead.querySelector(`.semantic-theme-header[data-theme="${themeName}"]`);
     if (existingHeader) return;
+
+    const defaultTheme = cacheManager.projects.get(cacheManager.projects.activeProjectId).defaultThemeMode;
   
     // 1. Add <col> to colGroup before the edit column
     const newCol = document.createElement('col');
@@ -275,38 +284,92 @@ class SemanticTable {
     // 2. Add <th> to header row before the edit column
     const newHeader = document.createElement('th');
     newHeader.classList.add('semantic-theme-header');
-    newHeader.setAttribute('data-theme', themeName);
-    newHeader.textContent = themeName;
+    newHeader.setAttribute('theme', themeName);
+    if (defaultTheme === themeName) {
+      newHeader.setAttribute('default-theme', true);
+    }
+    newHeader.innerHTML = ` <div class="w-full flex items-center relative">
+
+                            ${defaultTheme === themeName ? this.#createDefaultThemeIcon() : ''}
+
+                              <p id="theme-${themeName}" class="flex-1 text-xs mr-1">${themeName}</p>
+                              <button id="theme-edit-button-${themeName}" 
+                                class="theme-edit-button items-center ml-1">
+                                
+                                <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"/>
+                                </svg>
+
+                                <span class="sr-only">Edit</span>
+                              </button>
+
+                            </div>
+                          `;
+
   
     const addThemeCell = this.thead.querySelector('.semantic-add-theme-cell');
     addThemeCell.parentNode.insertBefore(newHeader, addThemeCell);
+
+    const container = document.querySelector('.semantic-table-container');
+    container.scrollLeft = container.scrollWidth;
+
+
+    if (animation) {
+      newHeader.classList.add("highlight-added-column");
+      setTimeout(() => {
+        newHeader.classList.remove("highlight-added-column");
+      }, 1000);
+    }
+
+    document.getElementById(`theme-edit-button-${themeName}`).addEventListener('click', () => {
+      themeModal.show(themeModal.modes.EDIT, {
+        themeName: themeName
+      })
+    });
   
     // 3. Add a new <td> to every existing row before the edit cell
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
-      const newCell = this.#createValueCell(themeName); // Ensure this returns a proper <td>
+      const newCell = this.#createValueCell({ theme: themeName }); // Ensure this returns a proper <td>
       row.insertBefore(newCell, row.lastElementChild);
+
+      if (animation) {
+        newCell.classList.add("highlight-added-column");
+        setTimeout(() => {
+          newCell.classList.remove("highlight-added-column");
+        }, 1000);
+      }
     });
+
   }
   
-  deleteThemeColumn({ theme }) {
+  deleteThemeColumn({ theme, animation = false }) {
     if (!theme) return;
   
     // 1. Remove header <th>
-    const header = this.thead.querySelector(`.semantic-theme-header[data-theme="${theme}"]`);
-    if (header) header.remove();
+    const header = this.thead.querySelector(`.semantic-theme-header[theme="${theme}"]`);
+    if (!header) throw new Error(`Theme column with theme "${theme}" not found.`);
   
     // 2. Remove the corresponding <col>
-    const themeHeaders = [...this.thead.querySelectorAll('.semantic-theme-header')];
-    const index = themeHeaders.findIndex(th => th.dataset.theme === theme);
-    if (index !== -1) {
-      const themeCols = this.colGroup.querySelectorAll('.semantic-col-theme');
-      if (themeCols[index]) themeCols[index].remove();
-    }
+    this.colGroup.querySelector(".semantic-col-theme").remove();
   
     // 3. Remove corresponding <td> from each row
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
       const cell = row.querySelector(`.semantic-value-cell[theme-mode="${theme}"]`);
-      if (cell) cell.remove();
+      if (cell){
+        if (animation) {
+          header.classList.add("highlight-deleted-column");
+          cell.classList.add("highlight-deleted-column");
+  
+          setTimeout(() => {
+            header.classList.remove("highlight-deleted-column");
+            cell.classList.remove("highlight-deleted-column");
+
+            header.remove();
+            cell.remove();
+          }, 500);
+        }
+        
+      }
     });
   }
 
@@ -321,6 +384,86 @@ class SemanticTable {
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
       row.querySelectorAll('.semantic-value-cell').forEach(cell => cell.remove());
     });
+  }
+
+  renameThemeColumn({ oldThemeName, newThemeName, animation = false }) {
+    if (!oldThemeName || !newThemeName) {
+      console.error("Both oldThemeName and newThemeName are required.");
+      return false;
+    }
+  
+    // 1. Update the header <th>
+    const header = this.thead.querySelector(`.semantic-theme-header[theme="${oldThemeName}"]`);
+    if (header) {
+      header.setAttribute("theme", newThemeName);
+      const themeText = header.querySelector(`#theme-${oldThemeName}`);
+      if (themeText) {
+        themeText.id = `theme-${newThemeName}`;
+        themeText.textContent = newThemeName;
+      }
+  
+      const editButton = header.querySelector(`#theme-edit-button-${oldThemeName}`);
+      if (editButton) {
+        editButton.id = `theme-edit-button-${newThemeName}`;
+      }
+    }
+  
+    // 2. Update the corresponding <td> cells in each row
+    this.tableBody.querySelectorAll(".item-row").forEach(row => {
+      const cell = row.querySelector(`.semantic-value-cell[theme-mode="${oldThemeName}"]`);
+      if (cell) {
+
+        if (animation) {
+          header.classList.add("highlight-update-column");
+          cell.classList.add("highlight-update-column");
+  
+          setTimeout(() => {
+            header.classList.add("highlight-update-column");
+            cell.classList.remove("highlight-update-column");
+          }, 100);
+        }
+        cell.setAttribute("theme-mode", newThemeName);
+      }
+    });
+  
+    return true;
+  }
+
+  setDefaultThemeMode({ themeName }) {
+    if (!themeName) {
+      console.error("Theme name is required to set as default.");
+      return false;
+    }
+  
+    // 1. Remove the "default-theme" attribute from the current default theme
+    const currentDefaultHeader = this.thead.querySelector('.semantic-theme-header[default-theme="true"]');
+    if (currentDefaultHeader) {
+      currentDefaultHeader.removeAttribute('default-theme');
+    }
+  
+    // 2. Set the "default-theme" attribute on the new default theme
+    const newDefaultHeader = this.thead.querySelector(`.semantic-theme-header[theme="${themeName}"]`);
+    if (!newDefaultHeader) {
+      console.error(`Theme "${themeName}" not found.`);
+      return false;
+    }
+  
+    newDefaultHeader.setAttribute('default-theme', true);
+
+    // Move the default theme icon to the new default theme header
+    const defaultThemeIcon = this.#createDefaultThemeIcon();
+    const currentDefaultIcon = currentDefaultHeader?.querySelector('#default-theme-icon');
+    if (currentDefaultIcon) {
+      currentDefaultIcon.remove();
+    }
+
+    const newDefaultIconContainer = newDefaultHeader.querySelector('.w-full.flex.items-center.relative');
+    if (newDefaultIconContainer) {
+      newDefaultIconContainer.insertAdjacentHTML('afterbegin', defaultThemeIcon);
+    }
+  
+    console.log(`[SEMANTIC TABLE] Default theme mode set to "${themeName}".`);
+    return true;
   }
   
 }

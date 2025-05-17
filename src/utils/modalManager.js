@@ -22,6 +22,10 @@ export const MODALS = {
   PROJECT: {
     id: "project-modal",
     path: "src/core/modals/newProjectModal.html"
+  },
+  THEME: {
+    id: "theme-modal",
+    path: "src/core/modals/themeModal.html"
   }
   
 };
