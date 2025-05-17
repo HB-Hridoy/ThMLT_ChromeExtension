@@ -4,6 +4,7 @@ import cacheManager from "../../../utils/cache/cacheManager.js";
 import DatabaseManager from "../../../db/DatabaseManager.js";
 import { screenManager, COLOR_TABS } from "../../../utils/screenManager.js";
 import { semanticTable } from "../../../utils/semanticTable.js";
+import { themeModal } from "../../modals/themeModal.js";
 
 let init = false;
 let semanticTableScreen = null;
@@ -17,6 +18,10 @@ export async function InitializeSemanticScreen() {
   if(!init){
     semanticTableScreen = document.getElementById("semantic-table-container");
     noSemanticScreen = document.getElementById("no-semantic-screen");
+
+    document.querySelector(".add-theme-button").addEventListener('click', ()=>{
+      themeModal.show(themeModal.modes.ADD);
+    });
   }
 
   if (cacheManager.projects.activeProjectName !== document.getElementById("color-screen-project-name").innerText.trim()) {
