@@ -261,7 +261,7 @@ class SemanticTable {
     return rows;
   }
 
-  addThemeColumn({ themeName } = {}) {
+  addThemeColumn({ themeName, animation = false } = {}) {
     if (!themeName) return;
   
     // Prevent duplicate theme columns
@@ -300,6 +300,17 @@ class SemanticTable {
     const addThemeCell = this.thead.querySelector('.semantic-add-theme-cell');
     addThemeCell.parentNode.insertBefore(newHeader, addThemeCell);
 
+    const container = document.querySelector('.semantic-table-container');
+    container.scrollLeft = container.scrollWidth;
+
+
+    if (animation) {
+      newHeader.classList.add("highlight-added-column");
+      setTimeout(() => {
+        newHeader.classList.remove("highlight-added-column");
+      }, 1000);
+    }
+
     document.getElementById(`theme-edit-button-${themeName}`).addEventListener('click', () => {
       themeModal.show(themeModal.modes.EDIT, {
         themeName: themeName
@@ -310,15 +321,23 @@ class SemanticTable {
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
       const newCell = this.#createValueCell({ theme: themeName }); // Ensure this returns a proper <td>
       row.insertBefore(newCell, row.lastElementChild);
+
+      if (animation) {
+        newCell.classList.add("highlight-added-column");
+        setTimeout(() => {
+          newCell.classList.remove("highlight-added-column");
+        }, 1000);
+      }
     });
+
   }
   
-  deleteThemeColumn({ theme }) {
+  deleteThemeColumn({ theme, animation = false }) {
     if (!theme) return;
   
     // 1. Remove header <th>
     const header = this.thead.querySelector(`.semantic-theme-header[theme="${theme}"]`);
-    if (header) header.remove();
+    if (!header) throw new Error(`Theme column with theme "${theme}" not found.`);
   
     // 2. Remove the corresponding <col>
     this.colGroup.querySelector(".semantic-col-theme").remove();
@@ -326,7 +345,21 @@ class SemanticTable {
     // 3. Remove corresponding <td> from each row
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
       const cell = row.querySelector(`.semantic-value-cell[theme-mode="${theme}"]`);
-      if (cell) cell.remove();
+      if (cell){
+        if (animation) {
+          header.classList.add("highlight-deleted-column");
+          cell.classList.add("highlight-deleted-column");
+  
+          setTimeout(() => {
+            header.classList.remove("highlight-deleted-column");
+            cell.classList.remove("highlight-deleted-column");
+
+            header.remove();
+            cell.remove();
+          }, 500);
+        }
+        
+      }
     });
   }
 
@@ -343,7 +376,7 @@ class SemanticTable {
     });
   }
 
-  renameThemeColumn({ oldThemeName, newThemeName }) {
+  renameThemeColumn({ oldThemeName, newThemeName, animation = false }) {
     if (!oldThemeName || !newThemeName) {
       console.error("Both oldThemeName and newThemeName are required.");
       return false;
@@ -369,6 +402,16 @@ class SemanticTable {
     this.tableBody.querySelectorAll(".item-row").forEach(row => {
       const cell = row.querySelector(`.semantic-value-cell[theme-mode="${oldThemeName}"]`);
       if (cell) {
+
+        if (animation) {
+          header.classList.add("highlight-update-column");
+          cell.classList.add("highlight-update-column");
+  
+          setTimeout(() => {
+            header.classList.add("highlight-update-column");
+            cell.classList.remove("highlight-update-column");
+          }, 100);
+        }
         cell.setAttribute("theme-mode", newThemeName);
       }
     });

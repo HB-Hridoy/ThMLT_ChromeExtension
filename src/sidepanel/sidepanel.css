@@ -86,13 +86,31 @@
 /* Animate the background-color of <td>s */
 @keyframes fadeInBgColor {
     from {
-        background-color: #d1fae5;
+        background-color: #b4ffd8;
     }
 
     to {
         background-color: transparent;
     }
 }
+
+/* ===== SEMANTIC TABLE COLUMN ANIMATIONS BEGIN ===== */
+
+.highlight-added-column {
+    animation: fadeInBgColor 1s ease-in-out forwards;
+}
+
+.highlight-deleted-column {
+    transition: background-color 0.5s ease, opacity 1s ease;
+    background-color: #f87171 !important;
+    opacity: 0;
+}
+
+.highlight-update-column {
+    animation: highlightSemanticFadeOut 1.5s ease-in-out;
+}
+
+/* ===== SEMANTIC TABLE COLUMN ANIMATIONS END ===== */
 
 /* Container for horizontal scrolling */
 .semantic-table-container {
