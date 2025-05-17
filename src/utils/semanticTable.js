@@ -1,4 +1,5 @@
 import { semanticModal } from "../core/modals/semanticColorModal.js";
+import { themeModal } from "../core/modals/themeModal.js";
 import cacheManager from "./cache/cacheManager.js";
 
 class SemanticTable {
@@ -298,6 +299,12 @@ class SemanticTable {
   
     const addThemeCell = this.thead.querySelector('.semantic-add-theme-cell');
     addThemeCell.parentNode.insertBefore(newHeader, addThemeCell);
+
+    document.getElementById(`theme-edit-button-${themeName}`).addEventListener('click', () => {
+      themeModal.show(themeModal.modes.EDIT, {
+        themeName: themeName
+      })
+    });
   
     // 3. Add a new <td> to every existing row before the edit cell
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
