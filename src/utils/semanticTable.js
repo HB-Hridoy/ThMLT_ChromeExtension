@@ -317,7 +317,7 @@ class SemanticTable {
     if (!theme) return;
   
     // 1. Remove header <th>
-    const header = this.thead.querySelector(`.semantic-theme-header[data-theme="${theme}"]`);
+    const header = this.thead.querySelector(`.semantic-theme-header[theme="${theme}"]`);
     if (header) header.remove();
   
     // 2. Remove the corresponding <col>
