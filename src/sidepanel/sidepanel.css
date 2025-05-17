@@ -126,7 +126,7 @@
     max-width: 200px;
 }
 
-.semantic-col-theme {
+.semantic-col-edit {
     width: 58px !important;
     min-width: 58px !important;
     max-width: 58px;
@@ -151,6 +151,29 @@
     top: 0;
     z-index: 5;
 }
+
+.semantic-theme-header {
+    max-width: 200px;
+    /* or whatever fits your layout */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    position: sticky;
+    /* if you want it to stick */
+    left: 0;
+    z-index: 10;
+    background: white;
+    /* or your table background */
+}
+
+.semantic-theme-header p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex-shrink: 1;
+}
+
 
 /* Active theme column */
 .semantic-theme-header.active-theme {
@@ -182,9 +205,11 @@
 .semantic-name-container {
     display: flex;
     align-items: center;
-    width: 100%;
-    overflow: hidden;
     gap: 0.5rem;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .semantic-row-icon {
@@ -193,11 +218,13 @@
 }
 
 .semantic-name {
-    flex: 1;
+    flex-shrink: 1;
+    min-width: 0;
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
+
 
 /* Color cell styling */
 .semantic-value-cell {
@@ -229,23 +256,10 @@
     text-overflow: ellipsis;
 }
 
-/* Button styling */
-.add-button,
-.edit-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    width: 100%;
-    cursor: pointer;
-}
-
 /* Make name cell copyable */
 .semantic-name-cell {
     cursor: copy;
 }
-
-
 
 /* Force horizontal scrolling demonstration */
 @media screen and (min-width: 768px) {
