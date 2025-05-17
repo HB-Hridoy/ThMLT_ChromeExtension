@@ -131,7 +131,7 @@ class SemanticTable {
   }
 
   // Create value cell for a specific theme
-  #createValueCell(theme, value) {
+  #createValueCell({ theme, value }) {
     const cell = document.createElement('td');
     cell.classList.add('semantic-value-cell');
     cell.setAttribute('theme-mode', theme);
@@ -301,7 +301,7 @@ class SemanticTable {
   
     // 3. Add a new <td> to every existing row before the edit cell
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
-      const newCell = this.#createValueCell(themeName); // Ensure this returns a proper <td>
+      const newCell = this.#createValueCell({ theme: themeName }); // Ensure this returns a proper <td>
       row.insertBefore(newCell, row.lastElementChild);
     });
   }
