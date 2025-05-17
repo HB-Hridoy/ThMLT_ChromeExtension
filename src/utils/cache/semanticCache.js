@@ -129,7 +129,7 @@ export default class SemanticCache {
 
 
 class ThemeCache {
-  #themes = new Set();
+  #themes = new Map();
   #semanticsRef;
 
   constructor(semanticsMap) {
@@ -141,41 +141,50 @@ class ThemeCache {
       console.error("Invalid theme name");
       return;
     }
-    this.#themes.add(themeName);
+
+    const key = themeName.toLowerCase();
+    if (this.#themes.has(key)) {
+      console.warn(`Theme "${themeName}" already exists (case-insensitive).`);
+      return;
+    }
+
+    this.#themes.set(key, themeName);
 
     for (const entry of this.#semanticsRef.values()) {
-      if (themeName in entry) {
+      if (!(themeName in entry)) {
         entry[themeName] = semanticTable.defaultValue;
       }
     }
-    
   }
 
   delete({ themeName }) {
-    if (!this.#themes.has(themeName)) return false;
+    const key = themeName.toLowerCase();
+    const actualName = this.#themes.get(key);
+    if (!actualName) return false;
 
-    this.#themes.delete(themeName);
+    this.#themes.delete(key);
 
-    // Also remove theme from all semantic entries
     for (const entry of this.#semanticsRef.values()) {
-      if (themeName in entry) {
-        delete entry[themeName];
-      }
+      delete entry[actualName];
     }
 
     return true;
   }
 
   exist({ themeName }) {
-    return this.#themes.has(themeName);
+    return this.#themes.has(themeName.toLowerCase());
   }
 
   getAll() {
-    return Array.from(this.#themes);
+    return Array.from(this.#themes.values());
   }
 
   rename({ oldThemeName, newThemeName }) {
-    if (!this.#themes.has(oldThemeName)) {
+    const oldKey = oldThemeName.toLowerCase();
+    const newKey = newThemeName.toLowerCase();
+  
+    const actualOldName = this.#themes.get(oldKey);
+    if (!actualOldName) {
       console.error(`Theme "${oldThemeName}" does not exist.`);
       return false;
     }
@@ -185,30 +194,37 @@ class ThemeCache {
       return false;
     }
   
-    if (this.#themes.has(newThemeName)) {
+    if (this.#themes.has(newKey)) {
       console.error(`Theme "${newThemeName}" already exists.`);
       return false;
     }
   
-    // Update the theme name in the themes set
-    const themesArray = Array.from(this.#themes);
-    const index = themesArray.indexOf(oldThemeName);
-    themesArray[index] = newThemeName;
+    // Build a new Map with renamed key at the same position
+    const updatedThemes = new Map();
+    for (const [key, value] of this.#themes.entries()) {
+      if (key === oldKey) {
+        updatedThemes.set(newKey, newThemeName); // rename
+      } else {
+        updatedThemes.set(key, value); // preserve others
+      }
+    }
   
-    this.#themes = new Set(themesArray);
+    this.#themes = updatedThemes;
   
-    // Update the theme name in all semantic entries
+    // Update semantic entries
     for (const entry of this.#semanticsRef.values()) {
-      if (oldThemeName in entry) {
-        entry[newThemeName] = entry[oldThemeName];
-        delete entry[oldThemeName];
+      if (actualOldName in entry) {
+        entry[newThemeName] = entry[actualOldName];
+        delete entry[actualOldName];
       }
     }
   
     return true;
   }
+  
 
   clear() {
     this.#themes.clear();
   }
 }
+
