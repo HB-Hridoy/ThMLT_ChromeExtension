@@ -87,7 +87,7 @@ class SemanticColorModel extends DatabaseModel {
    * @param {string} params.projectId - Project ID
    * @returns {Promise<Array>} - Array of semantic colors
    */
-  async getAll({ projectId, cache = false } = {}) {
+  async getAll({ projectId, doCache = false } = {}) {
     console.log("[INFO] Getting all semantic colors", { projectId });
     
     if (!projectId) {
@@ -98,10 +98,11 @@ class SemanticColorModel extends DatabaseModel {
       .where({ projectId })
       .sortBy('orderIndex');
 
+    if (doCache) {
       semanticColors.forEach(semantic => {
         cacheManager.semantics.add(semantic);
       });
-      
+    }
     
     return semanticColors;
   }

@@ -35,7 +35,8 @@ export async function populateSemanticData(){
   if (!isSemanticDataInitialized) {
 
     const semanticData = await DatabaseManager.semantics.getAll({
-      projectId: cacheManager.projects.activeProjectId
+      projectId: cacheManager.projects.activeProjectId,
+      doCache: true
     });
 
     semanticTable.deleteAllRows();
