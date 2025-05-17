@@ -321,12 +321,7 @@ class SemanticTable {
     if (header) header.remove();
   
     // 2. Remove the corresponding <col>
-    const themeHeaders = [...this.thead.querySelectorAll('.semantic-theme-header')];
-    const index = themeHeaders.findIndex(th => th.dataset.theme === theme);
-    if (index !== -1) {
-      const themeCols = this.colGroup.querySelectorAll('.semantic-col-theme');
-      if (themeCols[index]) themeCols[index].remove();
-    }
+    this.colGroup.querySelector(".semantic-col-theme").remove();
   
     // 3. Remove corresponding <td> from each row
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
