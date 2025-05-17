@@ -134,6 +134,7 @@ class ThemeCache {
 
   constructor(semanticsMap) {
     this.#semanticsRef = semanticsMap;
+    this.defaultThemeMode = "";
   }
 
   add({ themeName }) {

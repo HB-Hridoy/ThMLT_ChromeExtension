@@ -418,6 +418,31 @@ class SemanticTable {
   
     return true;
   }
+
+  setDefaultThemeMode({ themeName }) {
+    if (!themeName) {
+      console.error("Theme name is required to set as default.");
+      return false;
+    }
+  
+    // 1. Remove the "default-theme" attribute from the current default theme
+    const currentDefaultHeader = this.thead.querySelector('.semantic-theme-header[default-theme="true"]');
+    if (currentDefaultHeader) {
+      currentDefaultHeader.removeAttribute('default-theme');
+    }
+  
+    // 2. Set the "default-theme" attribute on the new default theme
+    const newDefaultHeader = this.thead.querySelector(`.semantic-theme-header[theme="${themeName}"]`);
+    if (!newDefaultHeader) {
+      console.error(`Theme "${themeName}" not found.`);
+      return false;
+    }
+  
+    newDefaultHeader.setAttribute('default-theme', true);
+  
+    console.log(`[SEMANTIC TABLE] Default theme mode set to "${themeName}".`);
+    return true;
+  }
   
 }
 

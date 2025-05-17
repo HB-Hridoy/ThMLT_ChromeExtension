@@ -237,6 +237,28 @@ class ProjectModel extends DatabaseModel {
     }
   }
 
+  // Change the default theme mode in a project
+  async setDefaultThemeMode({ projectId, themeMode } = {}) {
+    this.#validateProjectThemeInput(projectId, themeMode);
+
+    const record = await this.db.projects.get(projectId);
+    if (!record) throw new Error("Project not found");
+
+    if (!record.themeModes.includes(themeMode)) {
+      throw new Error(`Theme mode "${themeMode}" does not exist in the project`);
+    }
+
+    record.defaultThemeMode = themeMode;
+    record.lastModified = Date.now();
+
+    await this.db.projects.put(record);
+
+    cacheManager.semantics.theme().defaultThemeMode = themeMode;
+
+    this.log(`[SUCCESS] Default theme mode set to "${themeMode}" for project ${projectId}`);
+    return record;
+  }
+
 }
 
 export default ProjectModel;
