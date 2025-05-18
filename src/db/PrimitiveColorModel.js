@@ -74,6 +74,7 @@ class PrimitiveColorModel extends DatabaseModel {
       if (updatedCount === 0) {
         this.log(`[WARN] No primitive color found with ID: ${id}`, true);
       } else {
+        cacheManager.primitives.update(id, updatedFields);
         this.log(`[SUCCESS] Updated primitive color with ID: ${id}`);
       }
 
