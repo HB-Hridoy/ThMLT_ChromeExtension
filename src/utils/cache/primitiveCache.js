@@ -9,8 +9,6 @@ export default class PrimitiveCache extends BaseCache {
 
   add(primitive) {
     const { primitiveName, primitiveValue, primitiveId } = primitive;
-
-    primitiveId = Number(primitiveId);
     
     if (!this.primitiveMap.has(primitiveId)) {
       this.primitiveMap.set(primitiveId, primitive);
