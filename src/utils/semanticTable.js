@@ -1,3 +1,4 @@
+import { linkPrimitiveModal } from "../core/modals/linkPrimitiveModal.js";
 import { semanticModal } from "../core/modals/semanticColorModal.js";
 import { themeModal } from "../core/modals/themeModal.js";
 import cacheManager from "./cache/cacheManager.js";
@@ -75,6 +76,13 @@ class SemanticTable {
       const value = themeValues ? themeValues[theme] : this.defaultValue ;
       const valueCell = this.#createValueCell({ theme, value });
       newRow.appendChild(valueCell);
+
+      valueCell.addEventListener('click', () => {
+        linkPrimitiveModal.show({
+          semanticId: semanticId,
+          theme: valueCell.getAttribute("theme-mode")
+        });
+      });
     });
 
     // Create edit cell
@@ -218,7 +226,7 @@ class SemanticTable {
   }
 
   // Update a specific cell in a row
-  updateValueCell({ semanticId, theme, value }) {
+  updateValueCell({ semanticId, theme, primitiveData }) {
     const row = this.tableBody.querySelector(`tr[id="${semanticId}"]`);
     if (!row) return false;
 
@@ -228,8 +236,8 @@ class SemanticTable {
     const colorThumbnail = themeCell.querySelector('.semantic-color-thumbnail');
     const pillText = themeCell.querySelector('.semantic-theme-value');
 
-    colorThumbnail.style.backgroundColor = value;
-    pillText.textContent = value;
+    colorThumbnail.style.backgroundColor = primitiveData.primitiveValue;
+    pillText.textContent = primitiveData.primitiveName;
 
     return true;
   }

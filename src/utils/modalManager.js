@@ -26,6 +26,10 @@ export const MODALS = {
   THEME: {
     id: "theme-modal",
     path: "src/core/modals/themeModal.html"
+  },
+  LINK_PRIMITIVE: {
+    id: "link-primitive-modal",
+    path: "src/core/modals/linkPrimitiveModal.html"
   }
   
 };
