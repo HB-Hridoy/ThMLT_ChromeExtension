@@ -37,9 +37,9 @@ export async function populatePrimitiveData(){
     primitiveTable.deleteAllRows();
     primitiveData.forEach((primitive) => {
       
-      const { id, primitiveName, primitiveValue } = primitive;
+      const { primitiveId, primitiveName, primitiveValue } = primitive;
       primitiveTable.addRow({ 
-        primitiveId: id, 
+        primitiveId: primitiveId, 
         primitiveName: primitiveName, 
         primitiveValue: primitiveValue
       });

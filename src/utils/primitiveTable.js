@@ -133,7 +133,7 @@ class PrimitiveTable {
   }
   
   deleteAllRows(){
-    const rows = this.table.querySelectorAll("tr");
+    const rows = this.tableBody.querySelectorAll("tr");
     rows.forEach((row) => {
       row.remove();
     });
