@@ -249,6 +249,8 @@ class SemanticTable {
     const themeCell = row.querySelector(`.semantic-value-cell[theme-mode="${theme}"]`);
     if (!themeCell) return false;
 
+    themeCell.setAttribute("linked-primitive", primitiveData.primitiveId);
+
     const colorThumbnail = themeCell.querySelector('.semantic-color-thumbnail');
     const pillText = themeCell.querySelector('.semantic-theme-value');
 
@@ -256,6 +258,25 @@ class SemanticTable {
     pillText.textContent = primitiveData.primitiveName;
 
     return true;
+  }
+
+  updateLinkedPrimitives({ primitiveId, updatedFields }){
+    const linkedPrimitives = this.tableBody.querySelectorAll('[linked-primitive]');
+    linkedPrimitives.forEach(cell => {
+      const cellPrimitiveId = cell.getAttribute('linked-primitive');
+      if (cellPrimitiveId === primitiveId) {
+      const colorThumbnail = cell.querySelector('.semantic-color-thumbnail');
+      const pillText = cell.querySelector('.semantic-theme-value');
+
+      if (updatedFields.primitiveValue) {
+        colorThumbnail.style.backgroundColor = updatedFields.primitiveValue;
+      }
+
+      if (updatedFields.primitiveName) {
+        pillText.textContent = updatedFields.primitiveName;
+      }
+      }
+    });
   }
 
   // Delete a specific row
