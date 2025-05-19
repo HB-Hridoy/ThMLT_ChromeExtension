@@ -298,3 +298,46 @@
 th.semantic-theme-header:not([default-theme="true"]):hover .theme-edit-button {
     display: inline-flex;
 }
+
+.rainbow-background {
+    position: relative;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.rainbow-background::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 100%;
+    background: repeating-linear-gradient(100deg,
+            rgb(232, 121, 249) 0px,
+            rgb(232, 121, 249) 100px,
+            rgb(96, 165, 250) 200px,
+            rgb(94, 234, 212) 300px,
+            rgb(232, 121, 249) 400px,
+            /* looped back to start color */
+            rgb(96, 165, 250) 500px,
+            rgb(94, 234, 212) 600px,
+            rgb(232, 121, 249) 700px
+            /* loop again */
+        );
+    filter: blur(40px) brightness(1.2);
+    background-size: 800% 100%;
+    background-repeat: repeat;
+    animation: rainbowScroll 25s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes rainbowScroll {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: -100% 0%;
+    }
+}

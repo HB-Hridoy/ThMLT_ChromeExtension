@@ -332,6 +332,7 @@ class SemanticTable {
     newHeader.setAttribute('theme', themeName);
     if (defaultTheme === themeName) {
       newHeader.setAttribute('default-theme', true);
+      newHeader.classList.add('rainbow-background');
     }
     newHeader.innerHTML = ` <div class="w-full flex items-center relative">
 
@@ -488,6 +489,7 @@ class SemanticTable {
     const currentDefaultHeader = this.thead.querySelector('.semantic-theme-header[default-theme="true"]');
     if (currentDefaultHeader) {
       currentDefaultHeader.removeAttribute('default-theme');
+      currentDefaultHeader.classList.remove('rainbow-background');
     }
   
     // 2. Set the "default-theme" attribute on the new default theme
@@ -498,6 +500,7 @@ class SemanticTable {
     }
   
     newDefaultHeader.setAttribute('default-theme', true);
+    newDefaultHeader.classList.add('rainbow-background');
 
     // Move the default theme icon to the new default theme header
     const defaultThemeIcon = this.#createDefaultThemeIcon();
