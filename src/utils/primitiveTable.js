@@ -87,8 +87,8 @@ class PrimitiveTable {
         
         primitiveModal.show(primitiveModal.modes.EDIT, {
           primitiveId: primitiveId,
-          primitiveName: primitiveName,
-          primitiveValue: primitiveValue
+          primitiveName: addedRow.querySelector("#primitive-name").textContent.trim(),
+          primitiveValue: addedRow.querySelector("#primitive-value").textContent.trim()
         });
       });
     
@@ -133,7 +133,7 @@ class PrimitiveTable {
   }
   
   deleteAllRows(){
-    const rows = this.table.querySelectorAll("tr");
+    const rows = this.tableBody.querySelectorAll("tr");
     rows.forEach((row) => {
       row.remove();
     });

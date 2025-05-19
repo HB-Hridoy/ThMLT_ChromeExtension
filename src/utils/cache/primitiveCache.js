@@ -8,10 +8,10 @@ export default class PrimitiveCache extends BaseCache {
   }
 
   add(primitive) {
-    const { primitiveName, primitiveValue, id } = primitive;
+    const { primitiveName, primitiveValue, primitiveId } = primitive;
     
-    if (!this.primitiveMap.has(id)) {
-      this.primitiveMap.set(id, primitive);
+    if (!this.primitiveMap.has(primitiveId)) {
+      this.primitiveMap.set(primitiveId, primitive);
       this.nameMap.set(primitiveName, primitive);
       this.log(`Added primitive: ${primitiveName} with value: ${primitiveValue}`);
     }
@@ -28,7 +28,7 @@ export default class PrimitiveCache extends BaseCache {
     this.nameMap.clear();
 
     primitivesArray.forEach(p => {
-      this.primitiveMap.set(p.id, p);
+      this.primitiveMap.set(Number(p.primitiveId), p);
       this.nameMap.set(p.primitiveName, p);
     });
 
@@ -151,7 +151,7 @@ export default class PrimitiveCache extends BaseCache {
   deleteByName(primitiveName) {
     const primitive = this.nameMap.get(primitiveName);
     if (primitive) {
-      this.primitiveMap.delete(primitive.id); // Remove by ID
+      this.primitiveMap.delete(primitive.primitiveId); // Remove by ID
       this.nameMap.delete(primitiveName); // Remove by name
   
       this.log(`Deleted primitive: ${primitiveName}`);

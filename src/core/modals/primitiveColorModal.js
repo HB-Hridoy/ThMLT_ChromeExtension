@@ -5,6 +5,7 @@ import cacheManager from '../../utils/cache/cacheManager.js';
 import { replaceClass } from '../sidepanel.js';
 import { confirmationModal } from '../modals/confirmationModal.js'
 import { showNoPrimitivesScreen, showPrimitivesTable } from '../screens/primitiveColor/primitiveColor.js';
+import { semanticTable } from '../../utils/semanticTable.js';
 
 let primitiveModalElement = null;
 
@@ -352,6 +353,11 @@ async function handleActionButtonClick() {
       primitiveTable.updateRow(primitiveId, {
         primitiveName: updatedFields.primitiveName ? newPrimitiveName : oldPrimitiveName,
         primitiveValue: updatedFields.primitiveValue ? newPrimitiveValue : oldPrimitiveValue
+      });
+
+      semanticTable.updateLinkedPrimitives({
+        primitiveId,
+        updatedFields
       });
 
       primitiveModal.hide();

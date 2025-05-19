@@ -23,11 +23,13 @@ class PrimitiveColorModel extends DatabaseModel {
     };
 
     try {
-      const id = await this.table.add(newEntry);
-      this.log(`[CREATE] PrimitiveColor added with ID ${id}`);
+      const primitiveId = await this.table.add(newEntry);
+      this.log(`[CREATE] PrimitiveColor added with ID ${primitiveId}`);
 
+      newEntry.primitiveId = primitiveId;
+      
       cacheManager.primitives.add(newEntry);
-      return id;
+      return primitiveId;
     } catch (error) {
       this.log("[ERROR] Failed to add PrimitiveColor", true);
       throw error;
@@ -72,6 +74,7 @@ class PrimitiveColorModel extends DatabaseModel {
       if (updatedCount === 0) {
         this.log(`[WARN] No primitive color found with ID: ${id}`, true);
       } else {
+        cacheManager.primitives.update(id, updatedFields);
         this.log(`[SUCCESS] Updated primitive color with ID: ${id}`);
       }
 

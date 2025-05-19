@@ -1,3 +1,4 @@
+import { linkPrimitiveModal } from "../core/modals/linkPrimitiveModal.js";
 import { semanticModal } from "../core/modals/semanticColorModal.js";
 import { themeModal } from "../core/modals/themeModal.js";
 import cacheManager from "./cache/cacheManager.js";
@@ -72,9 +73,13 @@ class SemanticTable {
 
     // Create theme value cells
     cacheManager.semantics.theme().getAll().forEach(theme => {
-      const value = themeValues ? themeValues[theme] : this.defaultValue ;
-      const valueCell = this.#createValueCell({ theme, value });
+      const primitiveData = themeValues && themeValues[theme] !== this.defaultValue
+        ? cacheManager.primitives.getById(themeValues[theme])
+        : { primitiveName: this.defaultValue, primitiveValue: "#ffffff" };
+
+      const valueCell = this.#createValueCell({ theme, primitiveData, semanticId });
       newRow.appendChild(valueCell);
+
     });
 
     // Create edit cell
@@ -132,18 +137,37 @@ class SemanticTable {
   }
 
   // Create value cell for a specific theme
-  #createValueCell({ theme, value }) {
+  #createValueCell({ 
+    theme, 
+    primitiveData = {
+                      primitiveName: this.defaultValue, 
+                      primitiveValue: "#ffffff"
+                    } ,
+    semanticId
+  }) {
     const cell = document.createElement('td');
     cell.classList.add('semantic-value-cell');
     cell.setAttribute('theme-mode', theme);
 
-    const colorHex = value || '#ffffff';
+    console.log(primitiveData);
+
+    if (primitiveData.primitiveName !==this.defaultValue){
+      cell.setAttribute('linked-primitive', primitiveData.primitiveId)
+    }
+
     cell.innerHTML = `
       <div class="semantic-value-container">
-        <div class="semantic-color-thumbnail" style="background-color: ${colorHex}"></div>
-        <div class="semantic-theme-value">${value ? colorHex : this.defaultValue}</div>
+        <div class="semantic-color-thumbnail" style="background-color: ${primitiveData.primitiveValue}"></div>
+        <div class="semantic-theme-value">${primitiveData.primitiveName}</div>
       </div>
     `;
+
+    cell.addEventListener('click', () => {
+      linkPrimitiveModal.show({
+        semanticId,
+        theme: cell.getAttribute("theme-mode")
+      });
+    });
 
     return cell;
   }
@@ -218,20 +242,41 @@ class SemanticTable {
   }
 
   // Update a specific cell in a row
-  updateValueCell({ semanticId, theme, value }) {
+  updateValueCell({ semanticId, theme, primitiveData }) {
     const row = this.tableBody.querySelector(`tr[id="${semanticId}"]`);
     if (!row) return false;
 
     const themeCell = row.querySelector(`.semantic-value-cell[theme-mode="${theme}"]`);
     if (!themeCell) return false;
 
+    themeCell.setAttribute("linked-primitive", primitiveData.primitiveId);
+
     const colorThumbnail = themeCell.querySelector('.semantic-color-thumbnail');
     const pillText = themeCell.querySelector('.semantic-theme-value');
 
-    colorThumbnail.style.backgroundColor = value;
-    pillText.textContent = value;
+    colorThumbnail.style.backgroundColor = primitiveData.primitiveValue;
+    pillText.textContent = primitiveData.primitiveName;
 
     return true;
+  }
+
+  updateLinkedPrimitives({ primitiveId, updatedFields }){
+    const linkedPrimitives = this.tableBody.querySelectorAll('[linked-primitive]');
+    linkedPrimitives.forEach(cell => {
+      const cellPrimitiveId = cell.getAttribute('linked-primitive');
+      if (cellPrimitiveId === primitiveId) {
+      const colorThumbnail = cell.querySelector('.semantic-color-thumbnail');
+      const pillText = cell.querySelector('.semantic-theme-value');
+
+      if (updatedFields.primitiveValue) {
+        colorThumbnail.style.backgroundColor = updatedFields.primitiveValue;
+      }
+
+      if (updatedFields.primitiveName) {
+        pillText.textContent = updatedFields.primitiveName;
+      }
+      }
+    });
   }
 
   // Delete a specific row
@@ -329,7 +374,11 @@ class SemanticTable {
   
     // 3. Add a new <td> to every existing row before the edit cell
     this.tableBody.querySelectorAll('.item-row').forEach(row => {
-      const newCell = this.#createValueCell({ theme: themeName }); // Ensure this returns a proper <td>
+      const newCell = this.#createValueCell({ 
+        theme: themeName,
+        semanticId: row.id
+      
+      }); // Ensure this returns a proper <td>
       row.insertBefore(newCell, row.lastElementChild);
 
       if (animation) {
