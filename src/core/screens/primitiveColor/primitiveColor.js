@@ -20,7 +20,7 @@ export async function InitializePrimitivesScreen() {
     noPrimitiveScreen = document.getElementById("no-primitives-screen");
   }
 
-  if (cacheManager.projects.activeProjectName !== document.getElementById("color-screen-project-name").innerText.trim()) {
+  if (cacheManager.projects.activeProjectName() !== document.getElementById("color-screen-project-name").innerText.trim()) {
     isPrimitiveDataInitialized = false;
   }
 
@@ -28,33 +28,31 @@ export async function InitializePrimitivesScreen() {
 
 export async function populatePrimitiveData(){
 
-  if (!isPrimitiveDataInitialized) {
+  if (!isPrimitiveDataInitialized) return console.log("[INFO] Semantic data already intialized");
 
-    const primitiveData = await DatabaseManager.primitives.getAllByProject({
-      projectId: cacheManager.projects.activeProjectId
-    });
-  
-    primitiveTable.deleteAllRows();
-    primitiveData.forEach((primitive) => {
-      
-      const { primitiveId, primitiveName, primitiveValue } = primitive;
-      primitiveTable.addRow({ 
-        primitiveId: primitiveId, 
-        primitiveName: primitiveName, 
-        primitiveValue: primitiveValue
-      });
-  
-    });
-  
-    if (primitiveData.length === 0) {
-      showNoPrimitivesScreen();
-    } else {
-      showPrimitivesTable();
-    }
+  const primitiveData = await DatabaseManager.primitives.getAllByProject({
+    projectId: cacheManager.projects.activeProjectId
+  });
 
-    isPrimitiveDataInitialized = true;
+  primitiveTable.deleteAllRows();
+  primitiveData.forEach((primitive) => {
     
+    const { primitiveId, primitiveName, primitiveValue } = primitive;
+    primitiveTable.addRow({ 
+      primitiveId: primitiveId, 
+      primitiveName: primitiveName, 
+      primitiveValue: primitiveValue
+    });
+
+  });
+
+  if (primitiveData.length === 0) {
+    showNoPrimitivesScreen();
+  } else {
+    showPrimitivesTable();
   }
+
+  isPrimitiveDataInitialized = true;
   
 }
 

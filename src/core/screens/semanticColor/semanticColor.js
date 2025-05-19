@@ -24,7 +24,7 @@ export async function InitializeSemanticScreen() {
     });
   }
 
-  if (cacheManager.projects.activeProjectName !== document.getElementById("color-screen-project-name").innerText.trim()) {
+  if (cacheManager.projects.activeProjectName() !== document.getElementById("color-screen-project-name").innerText.trim()) {
     isSemanticDataInitialized = false;
   }
 
@@ -32,44 +32,42 @@ export async function InitializeSemanticScreen() {
 
 export async function populateSemanticData(){
 
-  if (!isSemanticDataInitialized) {
+  if (isSemanticDataInitialized) return console.log("[INFO] Semantic data already intialized");
 
-    const semanticData = await DatabaseManager.semantics.getAll({
-      projectId: cacheManager.projects.activeProjectId,
-      doCache: true
+  const semanticData = await DatabaseManager.semantics.getAll({
+    projectId: cacheManager.projects.activeProjectId,
+    doCache: true
+  });
+
+  semanticTable.deleteAllRows();
+  semanticTable.deleteAllThemeColumns();
+
+  const themes = cacheManager.semantics.theme().getAll();
+    
+  themes.forEach((theme) => {
+    semanticTable.addThemeColumn({
+      themeName: theme
+    });
+  });
+
+  if (semanticData.length > 0) {
+
+    semanticData.forEach((semantic) => {
+      semanticTable.addRow({
+        semanticId: semantic.semanticId,
+        semanticName: semantic.semanticName,
+        themeValues: semantic.themeValues,
+        animation: true
+      })
     });
 
-    semanticTable.deleteAllRows();
-    semanticTable.deleteAllThemeColumns();
+    showSemanticTable();
 
-    const themes = cacheManager.semantics.theme().getAll();
-      
-    themes.forEach((theme) => {
-      semanticTable.addThemeColumn({
-        themeName: theme
-      });
-    });
-
-    if (semanticData.length > 0) {
-
-      semanticData.forEach((semantic) => {
-        semanticTable.addRow({
-          semanticId: semantic.semanticId,
-          semanticName: semantic.semanticName,
-          themeValues: semantic.themeValues,
-          animation: true
-        })
-      });
-
-      showSemanticTable();
-
-    } else{
-      showNoSemanticScreen();
-    }
-    
-    isSemanticDataInitialized = true;
-    
+  } else{
+    showNoSemanticScreen();
   }
+  
+  isSemanticDataInitialized = true;
   
 }
 
