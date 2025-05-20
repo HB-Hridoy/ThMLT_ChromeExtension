@@ -27,8 +27,6 @@ class LinkPrimitiveModal {
 
     primitivesLinkManager.render(cacheManager.primitives.getAll());
 
-    screenManager.bottomNavigationBar(false);
-
     this.modal.show();
 
     if (this.listenersAdded) return;

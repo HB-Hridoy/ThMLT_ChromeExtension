@@ -14,6 +14,8 @@ let projectManagementOptionsContainer;
 export async function showProjectManagementScreen() {
   await screenManager.switchScreen(screens.PROJECT_MANAGEMENT);
 
+  screenManager.bottomNavigationBar(false);
+
   document.getElementById("pm-project-name").innerText = cacheManager.projects.activeProjectName();
 
   if (listenersAdded) return;
@@ -23,6 +25,7 @@ export async function showProjectManagementScreen() {
 
   projectManagementBackButton.addEventListener("click", async () => {
     await screenManager.switchScreen(screens.HOME);
+    screenManager.bottomNavigationBar(true);
   });
 
   projectManagementOptionsContainer.addEventListener("click", async (e)=>{
