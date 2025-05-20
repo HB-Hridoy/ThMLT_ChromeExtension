@@ -11,9 +11,9 @@ const screens = {
     id: "tools-screen",
     path: "src/core/screens/tools/tools.html",
   },
-  FONT: {
-    id: "font-management-screen",
-    path: "src/core/screens/font/fontManagement.html",
+  FONTS_MANAGEMENT: {
+    id: "fonts-management-screen",
+    path: "src/core/screens/font/fontsManagement.html",
   },
   COLOR_MANAGEMENT: {
     id: "color-management-screen",
