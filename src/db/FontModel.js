@@ -1,197 +1,136 @@
 import DatabaseModel from "./DatabaseModel.js";
+import cacheManager from "../utils/cache/cacheManager.js";
 
-class FontModel extends DatabaseModel {
+class FontModel extends DatabaseModel{
   constructor() {
     super();
-    this.log("[INFO] FontModel initialized");
+    console.log("[DB] [INFO] FontModel initialized");
   }
 
-  async create({ projectId, fontTag, fontName, orderIndex } = {}) {
-    if (!projectId) this.log("projectId is required", true);
-
-    await this.ready;
-
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["fonts"], "readwrite");
-      const store = transaction.objectStore("fonts");
-
-      const addRequest = store.add({
-        projectId,
-        fontTag,
-        fontName,
-        orderIndex: orderIndex ?? 0,
-        deleted: false,
-        deletedAt: null,
-      });
-
-      addRequest.onsuccess = () => {
-        this.log(`[SUCCESS] Added font: ${fontName}`);
-        resolve(`Added font: ${fontName}`);
-      };
-
-      addRequest.onerror = (event) => {
-        this.log(`[ERROR] Failed to add font: ${event.target.error}`, true);
-        reject(`Failed to add font: ${event.target.error}`);
-      };
-    });
-  }
-
-  async get({ projectId, fontName } = {}) {
-    if (!projectId || !fontName) {
-      this.log("[ERROR] projectId and fontName are required.", true);
-      return Promise.reject("projectId and fontName are required.");
-    }
-
-    await this.ready;
-
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["fonts"], "readonly");
-      const store = transaction.objectStore("fonts");
-      const index = store.index("projectId_fontName");
-      const request = index.get([projectId, fontName]);
-
-      request.onsuccess = () => {
-        const font = request.result;
-        if (font && !font.deleted) {
-          resolve(font);
-        } else {
-          this.log("[ERROR] Font not found or deleted", true);
-          reject("Font not found or deleted");
-        }
-      };
-
-      request.onerror = (event) => {
-        this.log("[ERROR] Error retrieving font", true);
-        reject(event.target.error);
-      };
-    });
-  }
-
-  async getAll({ projectId } = {}) {
+  async create({ projectId, fontName, fontValue, orderIndex = 0 } = {}) {
     if (!projectId) {
-      this.log("[ERROR] projectId is required.", true);
-      return Promise.reject("projectId is required.");
+      console.error("[DB] projectId is required");
+      throw new Error("projectId is required");
     }
 
-    await this.ready;
+    const newFontData = {
+                          projectId,
+                          fontName,
+                          fontValue,
+                          orderIndex
+                        };
 
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["fonts"], "readonly");
-      const store = transaction.objectStore("fonts");
-      const index = store.index("projectId");
-      const request = index.getAll(projectId);
+    try {
+      const fontId = await this.db.fonts.add(newFontData);
 
-      request.onsuccess = () => {
-        const fonts = request.result.filter(f => !f.deleted);
-        resolve(fonts);
-      };
+      newFontData.fontId = fontId;
 
-      request.onerror = (event) => {
-        this.log("[ERROR] Error retrieving fonts", true);
-        reject(event.target.error);
-      };
-    });
-  }
-
-  async update({ 
-    projectId, 
-    fontTag, 
-    newFontTag = this.SKIP,
-    newFontName = this.SKIP,
-    newOrderIndex = this.SKIP
-  } = {}) {
-    if (!projectId || !fontTag) {
-      this.log("[ERROR] projectId and fontTag are required.", true);
-      return Promise.reject("projectId and fontTag are required.");
+      cacheManager.fonts.add({ fontData: newFontData});
+      
+      console.log(`[DB] [SUCCESS] Added font: ${fontName}`);
+      return fontId;
+    } catch (error) {
+      console.error(`[DB] Failed to add font: ${error.message}`);
     }
-  
-    await this.ready;
-  
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["fonts"], "readwrite");
-      const store = transaction.objectStore("fonts");
-      const index = store.index("projectId_fontTag");
-      const getRequest = index.get([projectId, fontTag]);
-  
-      getRequest.onsuccess = () => {
-        const existingFont = getRequest.result;
-  
-        if (!existingFont || existingFont.deleted) {
-          this.log("[ERROR] Font not found or already deleted", true);
-          return reject("Font not found or already deleted");
-        }
-  
-        // Use sanitizeForUpdate to filter valid fields
-        const sanitizedUpdates = this.sanitizeForUpdate({
-          fontTag: newFontTag,
-          fontName: newFontName,
-          orderIndex: newOrderIndex,
-        });
-  
-        const updatedFont = { ...existingFont, ...sanitizedUpdates };
-  
-        const putRequest = store.put(updatedFont);
-  
-        putRequest.onsuccess = () => {
-          this.log(`[SUCCESS] Font updated: ${fontTag}`);
-          resolve("Font updated successfully");
-        };
-  
-        putRequest.onerror = (event) => {
-          this.log("[ERROR] Error updating font", true);
-          reject(event.target.error);
-        };
-      };
-  
-      getRequest.onerror = (event) => {
-        this.log("[ERROR] Failed to retrieve font for update", true);
-        reject(event.target.error);
-      };
-    });
   }
-  
-  async delete({ projectId, fontName } = {}) {
-    if (!projectId || !fontName) {
-      this.log("[ERROR] projectId and fontName are required.", true);
-      return Promise.reject("projectId and fontName are required.");
+
+  async get({ projectId, fontId } = {}) {
+    if (!projectId || !fontId) {
+      console.error("[DB] projectId and fontId are required.");
     }
 
-    await this.ready;
-
-    return new Promise((resolve, reject) => {
-      const transaction = this.db.transaction(["fonts"], "readwrite");
-      const store = transaction.objectStore("fonts");
-      const index = store.index("projectId_fontName");
-      const getRequest = index.get([projectId, fontName]);
-
-      getRequest.onsuccess = () => {
-        const fontRecord = getRequest.result;
-
-        if (!fontRecord || fontRecord.deleted) {
-          this.log("[ERROR] Font not found or already deleted", true);
-          return reject("Font not found or already deleted");
-        }
-
-        // Soft delete
-        fontRecord.deleted = true;
-        fontRecord.deletedAt = Date.now();
-
-        const putRequest = store.put(fontRecord);
-
-        putRequest.onsuccess = () => resolve("Font deleted (soft) successfully");
-
-        putRequest.onerror = (event) => {
-          this.log("[ERROR] Failed to mark font as deleted", true);
-          reject(event.target.error);
-        };
-      };
-
-      getRequest.onerror = (event) => {
-        this.log("[ERROR] Failed to retrieve font for deletion", true);
-        reject(event.target.error);
-      };
-    });
+    try {
+      const font = await this.db.fonts
+        .where(["projectId", "fontId"])
+        .equals([projectId, fontId])
+        .first();
+      
+      if (!font) {
+        console.error(`[DB] Font not found. Font id - ${fontId}`);
+      }
+      
+      return font;
+    } catch (error) {
+      console.error("[DB] Error retrieving font:", error);
+    }
   }
+
+  async getAll({ projectId }) {
+    if (!projectId) {
+      console.error("[DB] projectId is required.");
+    }
+
+    try {
+      const fontsData = await this.db.fonts
+        .where("projectId")
+        .equals(projectId)
+        .toArray();
+      
+      cacheManager.fonts.addBulk({ fontsDataArray: fontsData });
+
+      return fontsData;
+    } catch (error) {
+      console.error("[DB] Error retrieving fonts:", error);
+    }
+  }
+
+  async update({ fontId, updatedFields }) {
+    if (!fontId || typeof updatedFields !== "object") {
+      console.error("[DB] Both fontId and updatedFields are required.");
+      return;
+    }
+  
+    const numericFontId = Number(fontId);
+  
+    if (isNaN(numericFontId)) {
+      console.error(`[DB] Invalid fontId: ${fontId}`);
+      return;
+    }
+  
+    try {
+      const updatedCount = await this.db.fonts.update(numericFontId, {
+        ...updatedFields
+      });
+  
+      if (updatedCount === 0) {
+        console.warn(`[DB] No font found with ID: ${numericFontId}`);
+      } else {
+        cacheManager.fonts.update({ fontId: numericFontId, updatedFields });
+        console.log(`[DB] [SUCCESS] Updated font with ID: ${numericFontId}`);
+      }
+  
+      return updatedCount;
+    } catch (error) {
+      console.error(`[DB] Failed to update font with ID: ${numericFontId}`, error);
+    }
+  }
+  
+
+  
+  async delete({ fontId }) {
+    if (!fontId) {
+      console.error("[DB] fontId is required.");
+      return;
+    }
+  
+    const numericFontId = Number(fontId);
+    if (isNaN(numericFontId)) {
+      console.error("[DB] Invalid fontId:", fontId);
+      return;
+    }
+  
+    try {
+      await this.db.fonts.delete(numericFontId);
+
+      console.log(`[DB] [SUCCESS] Deleted font: ${cacheManager.fonts.getName({ fontId: numericFontId })}`);
+      cacheManager.fonts.delete({ fontId: numericFontId });
+  
+      return "Font delete attempted";
+    } catch (error) {
+      console.error("[DB] Failed to delete font:", error);
+    }
+  }
+  
 }
 
 export default FontModel;
