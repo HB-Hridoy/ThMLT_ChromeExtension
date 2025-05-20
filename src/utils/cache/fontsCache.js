@@ -96,6 +96,10 @@ export default class FontsCache{
   }
 
   update({ fontId, newFontName, newFontValue}) {
+  isEmpty() {
+    return this.fontsMap.size === 0;
+  }
+
     fontId = Number(fontId);
     const fontData = this.fontsMap.get(fontId);
     if (!fontData) return console.error(`[CACHE] Font with ID ${fontId} not found for updating`);
