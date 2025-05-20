@@ -28,7 +28,7 @@ export async function InitializePrimitivesScreen() {
 
 export async function populatePrimitiveData(){
 
-  if (!isPrimitiveDataInitialized) return console.log("[INFO] Semantic data already intialized");
+  if (isPrimitiveDataInitialized) return console.log("[INFO] Semantic data already intialized");
 
   const primitiveData = await DatabaseManager.primitives.getAllByProject({
     projectId: cacheManager.projects.activeProjectId

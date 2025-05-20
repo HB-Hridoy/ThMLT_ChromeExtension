@@ -17,6 +17,14 @@
     display: inline-flex;
 }
 
+.font-edit-button {
+    display: none;
+}
+
+.font-row:hover .font-edit-button {
+    display: inline-flex;
+}
+
 
 .highlight-update-row {
     animation: highlightFadeOut 1.5s ease-in-out;

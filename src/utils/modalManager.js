@@ -30,6 +30,10 @@ export const MODALS = {
   LINK_PRIMITIVE: {
     id: "link-primitive-modal",
     path: "src/core/modals/linkPrimitiveModal.html"
+  },
+  FONT: {
+    id: "font-modal",
+    path: "src/core/modals/fontModal.html"
   }
   
 };

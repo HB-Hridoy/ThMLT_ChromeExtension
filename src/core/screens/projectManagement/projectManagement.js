@@ -4,6 +4,7 @@ import { components } from "../../../utils/components.js";
 import { screenManager, screens } from "../../../utils/screenManager.js";
 import { alertManager } from "../../../utils/alertsManager.js";
 import { showColorManagementScreen, showPrimitivesTab } from "../color/colorManagement.js";
+import { showFontsManagementScreen } from "../font/fontsManagement.js";
 
 let listenersAdded = false;
 
@@ -34,14 +35,11 @@ export async function showProjectManagementScreen() {
       
 
     }
-    // else if (target.closest("#pm-fonts")) {
-    //   document.getElementById("project-name-fonts-screen").innerText = CacheOperations.activeProject;
+    else if (target.closest("#pm-fonts")) {
 
-    //   currentFontsRowId = 1;
-    //   getAllFonts(CacheOperations.activeProject);
-    //   ScreenManager.showFontsScreen();
+      await showFontsManagementScreen();
 
-    // }
+    }
     // else if (target.closest("#pm-translations")) {
     //   const statusError = document.getElementById("translation-status-error");
     //   const statusImported = document.getElementById("translation-status-imported");
