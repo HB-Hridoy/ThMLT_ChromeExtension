@@ -1,7 +1,6 @@
 
 export default class FontsCache{
   constructor(){
-    super();
     this.fontsMap = new Map();
     this.nameMap = new Map();
   }
@@ -95,32 +94,32 @@ export default class FontsCache{
     return this.nameMap.has(fontName);
   }
 
-  update({ fontId, newFontName, newFontValue}) {
   isEmpty() {
     return this.fontsMap.size === 0;
   }
 
+  update({ fontId, updatedFields}) {
     fontId = Number(fontId);
     const fontData = this.fontsMap.get(fontId);
     if (!fontData) return console.error(`[CACHE] Font with ID ${fontId} not found for updating`);
 
-    if (fontName) {
+    if (updatedFields.fontName) {
 
       const oldPrimitiveName = fontData.fontName;
 
       this.nameMap.delete(fontData.fontName);
-      fontData.fontName = fontName;
-      this.nameMap.set(fontName, fontData);
+      fontData.fontName = updatedFields.fontName;
+      this.nameMap.set(updatedFields.fontName, fontData);
 
-      console.log(`[CACHE] [SUCCESS] Renamed font: ${oldPrimitiveName} → ${newFontName}`);
+      console.log(`[CACHE] [SUCCESS] Renamed font: ${oldPrimitiveName} → ${updatedFields.fontName}`);
     }
 
-    if (newFontValue) {
+    if (updatedFields.fontValue) {
       const oldFontValue = fontData.fontValue;
 
-      fontData.fontValue = newFontValue;
+      fontData.fontValue = updatedFields.fontValue;
 
-      console.log(`[CACHE] [SUCCESS] Font value updated: ${oldFontValue} → ${newFontValue}`);
+      console.log(`[CACHE] [SUCCESS] Font value updated: ${oldFontValue} → ${updatedFields.fontValue}`);
       
     }
 
