@@ -1,6 +1,7 @@
 import { linkPrimitiveModal } from "../core/modals/linkPrimitiveModal.js";
 import { semanticModal } from "../core/modals/semanticColorModal.js";
 import { themeModal } from "../core/modals/themeModal.js";
+import { throttledUpdateSemanticOrder } from "../core/screens/semanticColor/semanticColor.js";
 import cacheManager from "./cache/cacheManager.js";
 
 class SemanticTable {
@@ -312,6 +313,20 @@ class SemanticTable {
     return rows;
   }
 
+  getOrderIndexes() {
+    const rows = this.tableBody.querySelectorAll("tr");
+    const orderIndexes = [];
+  
+    rows.forEach((row) => {
+      const semanticId = row.getAttribute("id");
+      const orderIndex = parseInt(row.getAttribute("order-index"), 10);
+  
+      orderIndexes.push({ semanticId: Number(semanticId), orderIndex });
+    });
+  
+    return orderIndexes;
+  }
+
   addThemeColumn({ themeName, animation = false } = {}) {
     if (!themeName) return;
   
@@ -574,6 +589,8 @@ function makeRowDraggable({ row }) {
       
       row.classList.remove('dragging');
       row.querySelector('td:first-child').style.removeProperty('background-color');
+
+      throttledUpdateSemanticOrder();
 
     });
   }

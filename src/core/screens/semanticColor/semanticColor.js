@@ -5,6 +5,7 @@ import DatabaseManager from "../../../db/DatabaseManager.js";
 import { screenManager, COLOR_TABS } from "../../../utils/screenManager.js";
 import { semanticTable } from "../../../utils/semanticTable.js";
 import { themeModal } from "../../modals/themeModal.js";
+import { throttle } from "../../sidepanel.js";
 
 let init = false;
 let semanticTableScreen = null;
@@ -86,3 +87,10 @@ export function showNoSemanticScreen(){
   }
   
 }
+
+export const throttledUpdateSemanticOrder = throttle(async () => {
+  const updatedSemanticOrders = semanticTable.getOrderIndexes();
+  await DatabaseManager.semantics.updateOrderIndexes({
+    updatedSemanticOrders
+  });
+}, 1500);
