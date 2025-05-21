@@ -45,3 +45,28 @@ export function throttle(fn, limit) {
   };
 }
 
+export function calculateNewOrderIndex(prevIndex, nextIndex) {
+  if (prevIndex === null && nextIndex === null) return 1000; 
+
+  if (prevIndex === null) {
+    const distanceToNext = nextIndex - 1000;
+
+    if (distanceToNext <= 0) {
+      const midIndex = Math.floor(nextIndex / 2);
+      if (midIndex <= 1) throw new Error('No gap to insert');
+      return midIndex;
+    }
+
+    return distanceToNext; 
+  }         
+
+  if (nextIndex === null) return prevIndex + 1000;        
+
+  const gapBetween = nextIndex - prevIndex;
+  if (gapBetween <= 1) throw new Error('No gap to insert');
+
+  return prevIndex + Math.floor(gapBetween / 2);
+}
+
+
+
