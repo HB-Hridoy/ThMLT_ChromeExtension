@@ -38,11 +38,12 @@ export async function populatePrimitiveData(){
   primitiveTable.deleteAllRows();
   primitiveData.forEach((primitive) => {
     
-    const { primitiveId, primitiveName, primitiveValue } = primitive;
+    const { primitiveId, primitiveName, primitiveValue, orderIndex } = primitive;
     primitiveTable.addRow({ 
       primitiveId: primitiveId, 
       primitiveName: primitiveName, 
-      primitiveValue: primitiveValue
+      primitiveValue: primitiveValue,
+      orderIndex
     });
 
   });
@@ -72,10 +73,3 @@ export function showNoPrimitivesScreen(){
   }
   
 }
-
-export const throttledUpdatePrimitiveOrder = throttle(async () => {
-  const updatedPrimitiveOrders = primitiveTable.getOrderIndexes();
-  await DatabaseManager.primitives.updateOrderIndexes({
-    updatedPrimitiveOrders
-  });
-}, 1000);
