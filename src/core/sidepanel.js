@@ -23,3 +23,25 @@ export function replaceClass(element, prefix, newClass) {
   
   element.classList.add(newClass); // Add new class
 }
+
+export function throttle(fn, limit) {
+  let lastCall = 0;
+  let pendingCall = null;
+
+  return function (...args) {
+    const now = Date.now();
+
+    if (now - lastCall >= limit) {
+      lastCall = now;
+      fn.apply(this, args);
+    } else {
+      // If a call is attempted during throttle delay, store the latest args
+      clearTimeout(pendingCall);
+      pendingCall = setTimeout(() => {
+        lastCall = Date.now();
+        fn.apply(this, args);
+      }, limit - (now - lastCall));
+    }
+  };
+}
+
