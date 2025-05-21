@@ -149,6 +149,20 @@ class PrimitiveTable {
     });
     return allRows;
   }
+
+  getOrderIndexes() {
+    const rows = this.tableBody.querySelectorAll("tr");
+    const orderIndexes = [];
+  
+    rows.forEach((row) => {
+      const primitiveId = row.getAttribute("id");
+      const orderIndex = parseInt(row.getAttribute("order-index"), 10);
+  
+      orderIndexes.push({ primitiveId: Number(primitiveId), orderIndex });
+    });
+  
+    return orderIndexes;
+  }
 }
 
 function makePrimitiveRowDraggable(row) {
