@@ -290,7 +290,7 @@ async function handleActionButtonClick() {
         projectId: cacheManager.projects.activeProjectId,
         fontName,
         fontValue,
-        orderIndex: fontTableManager.currentRowId
+        orderIndex: fontTableManager.getNextOrderIndex()
       };
       const fontId = await DatabaseManager.fonts.create(newFontData);
 
@@ -298,6 +298,7 @@ async function handleActionButtonClick() {
         fontId,
         fontName: newFontData.fontName,
         fontValue: newFontData.fontValue,
+        orderIndex: newFontData.orderIndex,
         animation: true
       });
 

@@ -5,6 +5,8 @@ class FontModel extends DatabaseModel{
   constructor() {
     super();
     console.log("[DB] [INFO] FontModel initialized");
+
+    this.table = this.db.fonts;
   }
 
   async create({ projectId, fontName, fontValue, orderIndex = 0 } = {}) {
@@ -106,6 +108,29 @@ class FontModel extends DatabaseModel{
   }
   
 
+  async updateOrderIndexes({ updatedFontsOrders }) {
+
+    if (!updatedFontsOrders) {
+      console.error("[DB] updatedFontsOrders are required");
+    }
+    const primaryKey = this.table.schema.primKey.name;
+  
+    await this.db.transaction('rw', this.table, async () => {
+      const existingRecords = await this.table.bulkGet(updatedFontsOrders.map(d => d[primaryKey]));
+  
+      const updatedRecords = existingRecords.map((record, i) => {
+        const update = updatedFontsOrders[i];
+        if (!record || update[primaryKey] !== record[primaryKey]) return null;
+  
+        return {
+          ...record,
+          orderIndex: update.orderIndex
+        };
+      }).filter(Boolean); // remove nulls
+  
+      await this.table.bulkPut(updatedRecords);
+    });
+  }
   
   async delete({ fontId }) {
     if (!fontId) {
