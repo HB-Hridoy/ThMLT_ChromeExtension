@@ -1,5 +1,8 @@
 
 import { fontModal } from "../core/modals/fontModal.js";
+import { calculateNewOrderIndex } from "../core/sidepanel.js";
+import DatabaseManager from "../db/DatabaseManager.js";
+
 class FontTableManager {
   constructor() {
     this.currentRowId = 1;
@@ -26,7 +29,7 @@ class FontTableManager {
     });
   }
 
-  addRow({ fontId = 0,  fontName = "Unknown", fontValue = "#ffffff", animation = false} = {}){
+  addRow({ fontId = 0,  fontName = "Unknown", fontValue = "#ffffff", orderIndex, animation = false} = {}){
     
     const nameTd = `<td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap w-2/4">
                         <div class="flex items-center w-full">
@@ -57,7 +60,7 @@ class FontTableManager {
     </td>
                     `;
   
-    const newRow = ` <tr id="${fontId}" order-index="${this.currentRowId}" draggable="true" class="font-row bg-white border-b cursor-grab active:cursor-grabbing hover:bg-gray-50">
+    const newRow = ` <tr id="${fontId}" order-index="${orderIndex}" draggable="true" class="font-row bg-white border-b cursor-grab active:cursor-grabbing hover:bg-gray-50">
                         ${nameTd}
                         ${valueTd}
                       </tr>
@@ -151,6 +154,66 @@ class FontTableManager {
     });
     return allRows;
   }
+
+  getNextOrderIndex() {
+    const rows = this.tableBody.querySelectorAll('tr[order-index]');
+    if (rows.length === 0) return 1000;
+  
+    const lastOrderIndex = Array.from(rows)
+      .map(row => parseInt(row.getAttribute('order-index'), 10))
+      .reduce((max, val) => val > max ? val : max, 0);
+  
+    return lastOrderIndex + 1000;
+  }
+
+  getNewOrderIndex(row) {
+    
+    const rows = Array.from(this.tableBody.querySelectorAll('tr'));
+  
+    // Find index of the target row in the sorted list
+    const index = rows.indexOf(row);
+  
+    // Find previous and next order indexes
+    const prevOrderIndex = index > 0 
+      ? parseInt(rows[index - 1].getAttribute('order-index'), 10) 
+      : null;
+  
+    const nextOrderIndex = index < rows.length - 1 
+      ? parseInt(rows[index + 1].getAttribute('order-index'), 10) 
+      : null;
+  
+    // Calculate and return new order index
+    const newOrderIndex = calculateNewOrderIndex(prevOrderIndex, nextOrderIndex);
+  
+    return newOrderIndex;
+  }
+  
+
+  rebalanceOrderIndexes() {
+    let order = 1000;
+    const gap = 1000;
+
+    const rows = this.tableBody.querySelectorAll('tr');
+  
+    rows.forEach(row => {
+      row.setAttribute('order-index', order);
+      order += gap;
+    });
+  }
+
+  getOrderIndexes() {
+    const rows = this.tableBody.querySelectorAll("tr");
+    const orderIndexes = [];
+  
+    rows.forEach((row) => {
+      const fontId = row.getAttribute("id");
+      const orderIndex = parseInt(row.getAttribute("order-index"), 10);
+  
+      orderIndexes.push({ fontId: Number(fontId), orderIndex });
+    });
+  
+    return orderIndexes;
+  }
 }
 
 function makeFontRowDraggable(row) {
@@ -190,21 +253,39 @@ function makeFontRowDraggable(row) {
   row.addEventListener('drop', function (e) {
     e.preventDefault();
 
-    const rows = Array.from(row.parentElement.querySelectorAll('tr'));
-
-    // Update the order-index for all rows
-    rows.forEach((row, index) => {
-      row.setAttribute('order-index', index + 1); // Start from 1
-    });
-
     row.classList.remove('dragging'); 
 
   });
 
   // Drag End
-  row.addEventListener('dragend', function () {
+  row.addEventListener('dragend', async function () {
     
     row.classList.remove('dragging');
+
+    try {
+      const newOrderIndex = fontTableManager.getNewOrderIndex(row);
+      
+      await DatabaseManager.fonts.update({
+        fontId: row.id,
+        updatedFields: {
+          orderIndex: newOrderIndex
+        }
+      });
+
+      row.setAttribute('order-index', newOrderIndex);
+    } catch (e) {
+
+      // If gap not found, rebalance entire semantic table
+      console.warn('[FONTS TABLE] Rebalancing required', e);
+      fontTableManager.rebalanceOrderIndexes();
+      
+      DatabaseManager.fonts.updateOrderIndexes({
+        updatedFontsOrders: fontTableManager.getOrderIndexes()
+      })
+      .then(()=>{
+        console.log(console.log('[FONTS TABLE] Rebalancing successful'));
+      });
+    }
 
   });
 }

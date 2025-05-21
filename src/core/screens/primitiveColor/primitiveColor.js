@@ -5,6 +5,7 @@ import DatabaseManager from "../../../db/DatabaseManager.js";
 import { primitiveTable } from "../../../utils/primitiveTable.js";
 import { primitiveModal } from "../../modals/primitiveColorModal.js";
 import { screenManager, screens, COLOR_TABS } from "../../../utils/screenManager.js";
+import { throttle } from "../../sidepanel.js";
 
 let init = false;
 let primitiveTableScreen = null;
@@ -37,11 +38,12 @@ export async function populatePrimitiveData(){
   primitiveTable.deleteAllRows();
   primitiveData.forEach((primitive) => {
     
-    const { primitiveId, primitiveName, primitiveValue } = primitive;
+    const { primitiveId, primitiveName, primitiveValue, orderIndex } = primitive;
     primitiveTable.addRow({ 
       primitiveId: primitiveId, 
       primitiveName: primitiveName, 
-      primitiveValue: primitiveValue
+      primitiveValue: primitiveValue,
+      orderIndex
     });
 
   });

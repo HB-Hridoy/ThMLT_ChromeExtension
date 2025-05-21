@@ -231,13 +231,14 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
         const newSemantic = {
           projectId: cacheManager.projects.activeProjectId,
           semanticName: semanticName,
-          orderIndex: semanticTable.currentRowId
+          orderIndex: semanticTable.getNextOrderIndex()
         };
         const semanticId = await DatabaseManager.semantics.create(newSemantic);
 
         semanticTable.addRow({
           semanticId,
           semanticName: newSemantic.semanticName,
+          orderIndex: newSemantic.orderIndex,
           animation: true
         })
   

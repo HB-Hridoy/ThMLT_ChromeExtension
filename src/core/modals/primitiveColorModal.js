@@ -301,7 +301,7 @@ async function handleActionButtonClick() {
         projectId: cacheManager.projects.activeProjectId,
         primitiveName: primitiveName,
         primitiveValue: primitiveValue,
-        orderIndex: primitiveTable.currentRowId
+        orderIndex: primitiveTable.getNextOrderIndex()
       };
       const primitiveId = await DatabaseManager.primitives.create(newPrimitive);
 
@@ -309,6 +309,7 @@ async function handleActionButtonClick() {
         primitiveId: primitiveId,
         primitiveName: newPrimitive.primitiveName, 
         primitiveValue: newPrimitive.primitiveValue,
+        orderIndex: newPrimitive.orderIndex,
         animation: true
       });
       primitiveModal.hide();

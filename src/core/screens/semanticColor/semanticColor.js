@@ -5,6 +5,7 @@ import DatabaseManager from "../../../db/DatabaseManager.js";
 import { screenManager, COLOR_TABS } from "../../../utils/screenManager.js";
 import { semanticTable } from "../../../utils/semanticTable.js";
 import { themeModal } from "../../modals/themeModal.js";
+import { throttle } from "../../sidepanel.js";
 
 let init = false;
 let semanticTableScreen = null;
@@ -56,6 +57,7 @@ export async function populateSemanticData(){
       semanticTable.addRow({
         semanticId: semantic.semanticId,
         semanticName: semantic.semanticName,
+        orderIndex:semantic.orderIndex,
         themeValues: semantic.themeValues,
         animation: true
       })

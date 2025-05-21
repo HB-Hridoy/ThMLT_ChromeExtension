@@ -53,8 +53,8 @@ import { fontTableManager } from "../../../utils/fontsTableManager.js";
 
     fontTableManager.deleteAllRows();
 
-    fontsData.forEach(({ fontId, fontName, fontValue }) => {
-      fontTableManager.addRow({ fontId, fontName, fontValue });
+    fontsData.forEach(({ fontId, fontName, fontValue, orderIndex }) => {
+      fontTableManager.addRow({ fontId, fontName, fontValue, orderIndex });
     });
 
     fontsData.length === 0 ? showNoFontsScreen() : showFontsScreen();

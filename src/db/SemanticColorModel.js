@@ -202,6 +202,35 @@ class SemanticColorModel extends DatabaseModel {
     
     return true;
   }
+
+  /**
+   * Update order index of table
+   * @param {Object} params - The parameters
+   * @param {Array} params.updatedSemanticOrders - Updated primitive order as [{semanticId, orderIndex}]
+   */
+  async updateOrderIndexes({ updatedSemanticOrders }) {
+
+    if (!updatedSemanticOrders) {
+      console.error("[DB] updatedSemanticOrders are required");
+    }
+    const primaryKey = this.table.schema.primKey.name;
+  
+    await this.db.transaction('rw', this.table, async () => {
+      const existingRecords = await this.table.bulkGet(updatedSemanticOrders.map(d => d[primaryKey]));
+  
+      const updatedRecords = existingRecords.map((record, i) => {
+        const update = updatedSemanticOrders[i];
+        if (!record || update[primaryKey] !== record[primaryKey]) return null;
+  
+        return {
+          ...record,
+          orderIndex: update.orderIndex
+        };
+      }).filter(Boolean); // remove nulls
+  
+      await this.table.bulkPut(updatedRecords);
+    });
+  }
   
   /**
    * Delete a semantic color

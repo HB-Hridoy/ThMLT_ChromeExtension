@@ -1,7 +1,10 @@
 import { linkPrimitiveModal } from "../core/modals/linkPrimitiveModal.js";
 import { semanticModal } from "../core/modals/semanticColorModal.js";
 import { themeModal } from "../core/modals/themeModal.js";
+import { calculateNewOrderIndex } from "../core/sidepanel.js";
+import DatabaseManager from "../db/DatabaseManager.js";
 import cacheManager from "./cache/cacheManager.js";
+
 
 class SemanticTable {
   constructor() {
@@ -40,32 +43,15 @@ class SemanticTable {
     });
     
   }
-
-  // Update order-index for all rows
-  updateRowIndexes() {
-    const rows = Array.from(this.tableBody.querySelectorAll('.item-row'));
-    rows.forEach((row, index) => {
-      row.setAttribute('order-index', index + 1);
-    });
-  }
-
-  // Initialize event listeners
-  initializeEventListeners() {
-    // Add theme button listener
-    const addThemeButton = this.thead.querySelector('.add-theme-button');
-    if (addThemeButton) {
-      addThemeButton.addEventListener('click', this.addThemeColumn.bind(this));
-    }
-  }
-
+  
   // Add a new row to the table
-  addRow({ semanticId, semanticName, themeValues , animation = false }) {
+  addRow({ semanticId, semanticName, orderIndex, themeValues , animation = false }) {
     // Create a new row element
     const newRow = document.createElement('tr');
     newRow.classList.add('item-row');
     newRow.id = semanticId;
     newRow.setAttribute('draggable', 'true');
-    newRow.setAttribute('order-index', this.tableBody.children.length + 1);
+    newRow.setAttribute('order-index', orderIndex);
 
     // Create name cell
     const nameCell = this.#createNameCell(semanticName);
@@ -148,8 +134,6 @@ class SemanticTable {
     const cell = document.createElement('td');
     cell.classList.add('semantic-value-cell');
     cell.setAttribute('theme-mode', theme);
-
-    console.log(primitiveData);
 
     if (primitiveData.primitiveName !==this.defaultValue){
       cell.setAttribute('linked-primitive', primitiveData.primitiveId)
@@ -290,7 +274,6 @@ class SemanticTable {
       setTimeout(() => {
         if (document.body.contains(row)) {
           row.remove();
-          this.updateRowIndexes();
         }
       }, 1000);
     }
@@ -310,6 +293,71 @@ class SemanticTable {
       rows[id] = rowData;
     });
     return rows;
+  }
+
+  getOrderIndexes() {
+    const rows = this.tableBody.querySelectorAll("tr");
+    const orderIndexes = [];
+  
+    rows.forEach((row) => {
+      const semanticId = row.getAttribute("id");
+      const orderIndex = parseInt(row.getAttribute("order-index"), 10);
+  
+      orderIndexes.push({ semanticId: Number(semanticId), orderIndex });
+    });
+  
+    return orderIndexes;
+  }
+
+  getNextOrderIndex() {
+    const rows = this.tableBody.querySelectorAll('tr[order-index]');
+    if (rows.length === 0) return 1000;
+  
+    const lastOrderIndex = Array.from(rows)
+      .map(row => parseInt(row.getAttribute('order-index'), 10))
+      .reduce((max, val) => val > max ? val : max, 0);
+  
+    return lastOrderIndex + 1000;
+  }
+
+  getNewOrderIndex(row) {
+    // Collect and sort rows based on their order-index
+    const rows = Array.from(this.tableBody.querySelectorAll('tr'));
+    
+  
+    // Find index of the target row in the sorted list
+    const index = rows.indexOf(row);
+  
+    // Find previous and next order indexes
+    const prevOrderIndex = index > 0 
+      ? parseInt(rows[index - 1].getAttribute('order-index'), 10) 
+      : null;
+  
+    const nextOrderIndex = index < rows.length - 1 
+      ? parseInt(rows[index + 1].getAttribute('order-index'), 10) 
+      : null;
+  
+    // Calculate and return new order index
+    const newOrderIndex = calculateNewOrderIndex(prevOrderIndex, nextOrderIndex);
+
+    console.log('prevOrderIndex', prevOrderIndex);
+  console.log('nextOrderIndex', nextOrderIndex);
+  console.log('newOrderIndex', newOrderIndex);
+  
+    return newOrderIndex;
+  }
+  
+
+  rebalanceOrderIndexes() {
+    let order = 1000;
+    const gap = 1000;
+
+    const rows = this.tableBody.querySelectorAll('tr');
+  
+    rows.forEach(row => {
+      row.setAttribute('order-index', order);
+      order += gap;
+    });
   }
 
   addThemeColumn({ themeName, animation = false } = {}) {
@@ -558,22 +606,39 @@ function makeRowDraggable({ row }) {
     row.addEventListener('drop', function (e) {
       e.preventDefault();
 
-      const rows = Array.from(row.parentElement.querySelectorAll('tr'));
-  
-      // Update the order-index for all rows
-      rows.forEach((row, index) => {
-        row.setAttribute('order-index', index + 1); // Start from 1
-      });
-  
       row.classList.remove('dragging'); 
       row.querySelector('td:first-child').style.removeProperty('background-color');
     });
   
     // Drag End
-    row.addEventListener('dragend', function () {
+    row.addEventListener('dragend', async function () {
       
       row.classList.remove('dragging');
       row.querySelector('td:first-child').style.removeProperty('background-color');
+
+      // Calculate new orderIndex for dragged row
+      try {
+        const newOrderIndex = semanticTable.getNewOrderIndex(row);
+        
+        await DatabaseManager.semantics.update({
+          semanticId: row.id,
+          newOrderIndex
+        });
+
+        row.setAttribute('order-index', newOrderIndex);
+      } catch (e) {
+
+        // If gap not found, rebalance entire semantic table
+        console.warn('[SEMANTIC TABLE] Rebalancing required', e);
+        semanticTable.rebalanceOrderIndexes();
+        
+        DatabaseManager.semantics.updateOrderIndexes({
+          updatedSemanticOrders: semanticTable.getOrderIndexes()
+        })
+        .then(()=>{
+          console.log(console.log('[SEMANTIC TABLE] Rebalancing successful'));
+        });
+      }
 
     });
   }
