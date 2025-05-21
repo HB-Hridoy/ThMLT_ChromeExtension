@@ -57,6 +57,7 @@ export async function populateSemanticData(){
       semanticTable.addRow({
         semanticId: semantic.semanticId,
         semanticName: semantic.semanticName,
+        orderIndex:semantic.orderIndex,
         themeValues: semantic.themeValues,
         animation: true
       })
@@ -87,10 +88,3 @@ export function showNoSemanticScreen(){
   }
   
 }
-
-export const throttledUpdateSemanticOrder = throttle(async () => {
-  const updatedSemanticOrders = semanticTable.getOrderIndexes();
-  await DatabaseManager.semantics.updateOrderIndexes({
-    updatedSemanticOrders
-  });
-}, 1500);
