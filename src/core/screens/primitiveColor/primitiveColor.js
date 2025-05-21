@@ -5,6 +5,7 @@ import DatabaseManager from "../../../db/DatabaseManager.js";
 import { primitiveTable } from "../../../utils/primitiveTable.js";
 import { primitiveModal } from "../../modals/primitiveColorModal.js";
 import { screenManager, screens, COLOR_TABS } from "../../../utils/screenManager.js";
+import { throttle } from "../../sidepanel.js";
 
 let init = false;
 let primitiveTableScreen = null;
@@ -71,3 +72,10 @@ export function showNoPrimitivesScreen(){
   }
   
 }
+
+export const throttledUpdatePrimitiveOrder = throttle(async () => {
+  const updatedPrimitiveOrders = primitiveTable.getOrderIndexes();
+  await DatabaseManager.primitives.updateOrderIndexes({
+    updatedPrimitiveOrders
+  });
+}, 1000);

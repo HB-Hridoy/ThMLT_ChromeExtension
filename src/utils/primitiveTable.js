@@ -1,5 +1,7 @@
 
 import { primitiveModal } from "../core/modals/primitiveColorModal.js";
+import { throttledUpdatePrimitiveOrder } from "../core/screens/primitiveColor/primitiveColor.js";
+import DatabaseManager from "../db/DatabaseManager.js";
 class PrimitiveTable {
   constructor() {
     this.currentRowId = 1;
@@ -214,29 +216,12 @@ function makePrimitiveRowDraggable(row) {
   });
 
   // Drag End
-  row.addEventListener('dragend', function () {
+  row.addEventListener('dragend', async function () {
     
     row.classList.remove('dragging');
 
-    // Update Order Indexes in DB
-
-    // const rows = this.tableBody.querySelectorAll('tr');
-
-    // try {
-    //   rows.forEach(async (row, index) => {
-    //     const primitiveName = row.querySelector("#primitive-name").textContent.trim();
-    //     const newOrderIndex = index + 1;
-        
-    //     await updatePrimitive(CacheOperations.activeProject, primitiveName, "@default", "@default", newOrderIndex, false);
-    //   });
-
-    //   console.log(...Logger.multiLog(
-    //     ["[INFO]", Logger.Types.INFO, Logger.Formats.BOLD],
-    //     ["Updated primitive table order index"]
-    //   ));
-    // } catch (error) {
-    //   console.error(error); 
-    // }
+    throttledUpdatePrimitiveOrder();
+    
   });
 }
 const primitiveTable = new PrimitiveTable();
