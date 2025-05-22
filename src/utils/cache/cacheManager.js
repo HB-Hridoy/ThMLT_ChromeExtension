@@ -2,6 +2,7 @@ import ProjectCache from './projectCache.js';
 import PrimitiveCache from './primitiveCache.js';
 import SemanticCache from './semanticCache.js';
 import FontsCache from './fontsCache.js';
+import TranslationsCache from './translationCache.js';
 
 class CacheManager {
   constructor() {
@@ -9,6 +10,7 @@ class CacheManager {
     this.primitives = new PrimitiveCache();
     this.semantics = new SemanticCache();
     this.fonts = new FontsCache();
+    this.translations = new TranslationsCache();
   }
 
   clearAll() {
@@ -16,6 +18,7 @@ class CacheManager {
     this.primitives.clear();
     this.semantics.clear();
     this.fonts.clear();
+    this.translations.clear();
   }
 }
 
