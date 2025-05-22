@@ -208,28 +208,37 @@ class SemanticColorModel extends DatabaseModel {
    * @param {Object} params - The parameters
    * @param {Array} params.updatedSemanticOrders - Updated primitive order as [{semanticId, orderIndex}]
    */
-  async updateOrderIndexes({ updatedSemanticOrders }) {
+  async updateOrderIndexes({ projectId, updatedSemanticOrders }) {
 
-    if (!updatedSemanticOrders) {
-      console.error("[DB] updatedSemanticOrders are required");
+    if (!projectId || !updatedSemanticOrders) {
+      console.error("[DB] Both projectId and updatedSemanticOrders are required");
+      return;
     }
+  
     const primaryKey = this.table.schema.primKey.name;
   
     await this.db.transaction('rw', this.table, async () => {
-      const existingRecords = await this.table.bulkGet(updatedSemanticOrders.map(d => d[primaryKey]));
+      
+      const projectRecords = await this.table
+        .where('projectId')
+        .equals(projectId)
+        .toArray();
   
-      const updatedRecords = existingRecords.map((record, i) => {
-        const update = updatedSemanticOrders[i];
-        if (!record || update[primaryKey] !== record[primaryKey]) return null;
+      const recordMap = new Map(projectRecords.map(record => [record[primaryKey], record]));
+  
+      const updatedRecords = updatedSemanticOrders.map(update => {
+        const existing = recordMap.get(update[primaryKey]);
+        if (!existing) return null;
   
         return {
-          ...record,
+          ...existing,
           orderIndex: update.orderIndex
         };
       }).filter(Boolean); // remove nulls
   
       await this.table.bulkPut(updatedRecords);
     });
+    
   }
   
   /**

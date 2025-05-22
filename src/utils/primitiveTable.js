@@ -2,6 +2,7 @@
 import { primitiveModal } from "../core/modals/primitiveColorModal.js";
 import DatabaseManager from "../db/DatabaseManager.js";
 import { calculateNewOrderIndex } from "../core/sidepanel.js";
+import cacheManager from "./cache/cacheManager.js";
 class PrimitiveTable {
   constructor() {
     this.currentRowId = 1;
@@ -277,10 +278,11 @@ function makePrimitiveRowDraggable(row) {
       primitiveTable.rebalanceOrderIndexes();
       
       DatabaseManager.primitives.updateOrderIndexes({
+        projectId: cacheManager.projects.activeProjectId,
         updatedPrimitiveOrders: primitiveTable.getOrderIndexes()
       })
       .then(()=>{
-        console.log(console.log('[PRIMITIVE TABLE] Rebalancing successful'));
+        console.log('[PRIMITIVE TABLE] Rebalancing successful');
       });
     }
     
