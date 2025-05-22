@@ -11,7 +11,7 @@ class DatabaseModel {
         primitiveColors: "++primitiveId, projectId, primitiveName, orderIndex",
         semanticColors: "++semanticId, projectId, semanticName, orderIndex",
         fonts: "++fontId, projectId, fontName, orderIndex",
-        translations: "++translationId, projectId, defaultLanguage, translationData",
+        translations: "++translationId, projectId, translationData",
       });
 
       sharedDB.open().catch((error) => {

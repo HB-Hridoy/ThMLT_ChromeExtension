@@ -1,99 +1,61 @@
+import cacheManager from "../utils/cache/cacheManager.js";
+import DatabaseModel from "./DatabaseModel.js";
 
-import DatabaseModel  from "./DatabaseModel.js";
-
-class TranslationModel extends DatabaseModel{
-  constructor(){
+class TranslationModel extends DatabaseModel {
+  constructor() {
     super();
-    this.log("[INFO] TranslationModel initialized");
+    console.log("[DB] [INFO] TranslationModel initialized");
+    this.table = this.db.translations;
   }
 
-  async create({projectId, translationJson}={}){
-    if (!projectId) this.log("projectId is required", true);
+  // 1. Add new translation entry
+  async add({ projectId, translationData }) {
+    await this.table.add({ projectId, translationData });
+    cacheManager.translations.add({ translationData });
+  }
 
-    this.ready;
+  // 2. Get all translations for a project
+  async get({ projectId }) {
+    const translationData = await this.table
+                                      .where("projectId")
+                                      .equals(projectId)
+    cacheManager.translations.add({ translationData });
 
-    return new Promise((resolve, reject) => {
-      
-      let transaction = this.db.transaction(["translations"], "readwrite");
-      let store = transaction.objectStore("translations");
-      let index = store.index("projectId");
-      let getRequest = index.get(projectId);
-      
-      getRequest.onsuccess = function() {
-        let existingData = getRequest.result;
-        if (existingData) {
-          // Update existing record
-          existingData.defaultLanguage = translationJson.DefaultLanguage;
-          existingData.translationData = translationJson;
-          let updateRequest = store.put(existingData);
-          
-          updateRequest.onsuccess = function() {
-            
-              this.log(`[SUCCESS] Updated translation for project: ${projectId}`, true);
-              resolve("Translation updated successfully");
-          };
-          
-          updateRequest.onerror = function() {
-            this.log("Error updating translation", updateRequest.error, true);
-            reject("Error updating translation");
-          };
-        } else {
-          // Add new record
-          let data = {
-            projectId: projectId,
-            defaultLanguage: translationJson.DefaultLanguage,
-            translationData: translationJson,
-            deleted: false,
-            deletedAt: null 
-          };
-          
-          let addRequest = store.add(data);
-          
-          addRequest.onsuccess = function() {
-            this.log(`[SUCCESS] Added translation for project: ${projectId}`, true);
-            resolve("Translation added successfully");
-          };
-          
-          addRequest.onerror = function() {
-            console.error("Error adding translation", addRequest.error);
-            reject("Error adding translation");
-          };
-        }
-      }
-    }); 
+    return translationData;
 
   }
 
-  async getAll({projectId}={}){
-    if (!projectId) this.log("projectId is required", true);
+  // 3. Check if any translation exists for the given projectId
+  async hasTranslationForProject({ projectId }) {
+    const count = await this.table
+      .where("projectId")
+      .equals(projectId)
+      .count();
+    const hasTranslation =  count > 0;
+    cacheManager.translations.hasTranslation({ hasTranslation });
 
-    this.ready;
-
-    return new Promise((resolve, reject) => {
-      
-      let transaction = db.transaction(["translations"], "readonly");
-      let store = transaction.objectStore("translations");
-      let index = store.index("projectId");
-      let getRequest = index.get(projectId);
-      
-      getRequest.onsuccess = function() {
-        if (getRequest.result) {
-          const translationData = getRequest.result.translationData;
-          resolve(translationData);
-        } else {
-          this.log("No translation found for project", true);
-          reject("No translation found for project");
-        }
-      };
-      
-      getRequest.onerror = function() {
-        this.log("Error retrieving translation", getRequest.error, true);
-        reject("Error retrieving translation");
-      };
-    }); 
-
+    return hasTranslation;
   }
 
+  // 4. Update translations for a project (updates all matching records)
+  async update({ projectId, translationData }) {
+    const updates = await this.table
+      .where("projectId")
+      .equals(projectId)
+      .modify({ translationData });
+
+    console.log(updates);
+    
+    return updates; // number of rows modified
+  }
+
+  // 5. Delete all translations for a project
+  async delete({ projectId }) {
+    return await this.table
+      .where("projectId")
+      .equals(projectId)
+      .delete();
+  }
 }
 
 export default TranslationModel;
