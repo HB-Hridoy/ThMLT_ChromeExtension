@@ -2,7 +2,13 @@
   "ProjectName": "exTest",
   "Author": "Hridoy",
   "Version": "1.0",
-  "SupportedLanguages": ["en", "bn", "es", "fr", "de"],
+  "SupportedLanguages": [
+    "en",
+    "bn",
+    "es",
+    "fr",
+    "de"
+  ],
   "DefaultLanguage": "en",
   "Translations": {
     "home": {
