@@ -36,9 +36,10 @@ export async function showHomeScreen() {
         
         cacheManager.projects.activeProjectId = projectCard.getAttribute("project-id");
 
-         cacheManager.projects.get(cacheManager.projects.activeProjectId).themeModes.forEach((theme) =>{
+        cacheManager.projects.get(cacheManager.projects.activeProjectId).themeModes.forEach((theme) =>{
           cacheManager.semantics.theme().add({ themeName: theme });
-         });
+        });
+
         console.log(`[INFO] Active project ID set to: ${cacheManager.projects.activeProjectId}`);
         
       } else {
@@ -46,16 +47,6 @@ export async function showHomeScreen() {
       }
       await showProjectManagementScreen();
 
-      // try {
-      //   const statusError = document.getElementById("translation-status-error");
-      //   const statusImported = document.getElementById("translation-status-imported");
-
-      //   const isTranslationsAvailable = await isTranslationDataAvailable(CacheOperations.activeProject);
-      //   statusError.classList.toggle("hidden", isTranslationsAvailable);
-      //   statusImported.classList.toggle("hidden", !isTranslationsAvailable);
-      // } catch (error) {
-      //   console.error("Error checking translation data availability:", error);
-      // }
     }
   });
 
