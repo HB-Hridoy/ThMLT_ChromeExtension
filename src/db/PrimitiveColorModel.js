@@ -85,22 +85,29 @@ class PrimitiveColorModel extends DatabaseModel {
     }
   }
 
-  async updateOrderIndexes({ updatedPrimitiveOrders }) {
-
-    if (!updatedPrimitiveOrders) {
-      console.error("[DB] updatedPrimitiveOrders are required");
+  async updateOrderIndexes({ projectId, updatedPrimitiveOrders }) {
+    if (!projectId || !updatedPrimitiveOrders) {
+      console.error("[DB] Both projectId and updatedPrimitiveOrders are required");
+      return;
     }
+  
     const primaryKey = this.table.schema.primKey.name;
   
     await this.db.transaction('rw', this.table, async () => {
-      const existingRecords = await this.table.bulkGet(updatedPrimitiveOrders.map(d => d[primaryKey]));
+      
+      const projectRecords = await this.table
+        .where('projectId')
+        .equals(projectId)
+        .toArray();
   
-      const updatedRecords = existingRecords.map((record, i) => {
-        const update = updatedPrimitiveOrders[i];
-        if (!record || update[primaryKey] !== record[primaryKey]) return null;
+      const recordMap = new Map(projectRecords.map(record => [record[primaryKey], record]));
+  
+      const updatedRecords = updatedPrimitiveOrders.map(update => {
+        const existing = recordMap.get(update[primaryKey]);
+        if (!existing) return null;
   
         return {
-          ...record,
+          ...existing,
           orderIndex: update.orderIndex
         };
       }).filter(Boolean); // remove nulls
@@ -108,6 +115,7 @@ class PrimitiveColorModel extends DatabaseModel {
       await this.table.bulkPut(updatedRecords);
     });
   }
+  
 
   // Delete (hard delete)
   async delete({ id }) {

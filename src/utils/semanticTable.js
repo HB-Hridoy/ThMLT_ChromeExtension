@@ -633,10 +633,11 @@ function makeRowDraggable({ row }) {
         semanticTable.rebalanceOrderIndexes();
         
         DatabaseManager.semantics.updateOrderIndexes({
+          projectId: cacheManager.projects.activeProjectId,
           updatedSemanticOrders: semanticTable.getOrderIndexes()
         })
         .then(()=>{
-          console.log(console.log('[SEMANTIC TABLE] Rebalancing successful'));
+          console.log('[SEMANTIC TABLE] Rebalancing successful');
         });
       }
 

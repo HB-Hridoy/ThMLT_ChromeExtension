@@ -2,6 +2,7 @@
 import { fontModal } from "../core/modals/fontModal.js";
 import { calculateNewOrderIndex } from "../core/sidepanel.js";
 import DatabaseManager from "../db/DatabaseManager.js";
+import cacheManager from "./cache/cacheManager.js";
 
 class FontTableManager {
   constructor() {
@@ -280,10 +281,11 @@ function makeFontRowDraggable(row) {
       fontTableManager.rebalanceOrderIndexes();
       
       DatabaseManager.fonts.updateOrderIndexes({
+        projectId: cacheManager.projects.activeProjectId,
         updatedFontsOrders: fontTableManager.getOrderIndexes()
       })
       .then(()=>{
-        console.log(console.log('[FONTS TABLE] Rebalancing successful'));
+        console.log('[FONTS TABLE] Rebalancing successful');
       });
     }
 
