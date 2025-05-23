@@ -12,12 +12,12 @@ export default class TranslationsCache{
     this.#hasTranslation = true;
   }
 
-  hasTranslation({ hasTranslation }){
-    if (hasTranslation !== undefined) {
-      this.#hasTranslation  = hasTranslation;
-      return hasTranslation;
-    }
+  hasTranslation() {
     return this.#hasTranslation;
+  }
+  
+  setHasTranslation({ hasTranslation }) {
+    this.#hasTranslation = hasTranslation;
   }
 
   clear(){
