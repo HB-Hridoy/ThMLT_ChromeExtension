@@ -4,8 +4,10 @@ import cacheManager from "../../../utils/cache/cacheManager.js";
 import DatabaseManager from "../../../db/DatabaseManager.js";
 import { screenManager, screens} from "../../../utils/screenManager.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
-import { addProjectCard, deleteProjectCard, updateProjectCard } from "../home/home.js";
+import { addProjectCard, deleteProjectCard, showHomeScreen, updateProjectCard } from "../home/home.js";
 import { replaceClass } from "../../sidepanel.js";
+import sessionManager from "../../../utils/sessionManager.js";
+import { showColorManagementScreen } from "../color/colorManagement.js";
 
 let listenersAdded = false;
 
@@ -32,6 +34,8 @@ let projectDeleteInput;
 export async function showProjectSettingsScreen() {
   try {
     await screenManager.switchScreen(screens.PROJECT_SETTINGS);
+
+    await sessionManager.set(sessionManager.DATA.SCREEN, screens.PROJECT_SETTINGS.id);
 
     projectSettingsTitle = document.getElementById("project-name-settings-screen");
     projectSettingsTitle.textContent = cacheManager.projects.activeProjectName();
@@ -68,8 +72,7 @@ export async function showProjectSettingsScreen() {
   // ========== EVENT LISTENERS BEGIN ===========//
 
   document.getElementById("project-settings-back-button").addEventListener("click", async function(){
-    await screenManager.switchScreen(screens.HOME);
-    screenManager.bottomNavigationBar(true);
+    showColorManagementScreen();
   });
 
   colorThemesDataDownloadButton.addEventListener("click", async ()=>{
@@ -287,8 +290,8 @@ async function handleProjectDuplicateButton() {
         lastModified: newProjectData.lastModified
       });
 
-      await screenManager.switchScreen(screens.HOME);
-      screenManager.bottomNavigationBar(true);
+      await showHomeScreen();
+      sessionManager.clear();
       
     } catch (error) {
       console.error("[Settings] Error duplicating project:", error);
@@ -348,8 +351,8 @@ async function handleRenameProjectButton() {
       projectName: projectRenameInput.value.trim()
     });
 
-    await screenManager.switchScreen(screens.HOME);
-    screenManager.bottomNavigationBar(true);
+    await showHomeScreen();
+    sessionManager.clear();
 
     updateProjectCard({
       projectId: cacheManager.projects.activeProjectId,
@@ -376,8 +379,8 @@ async function handleProjectDeleteButton(){
         projectId: cacheManager.projects.activeProjectId
       })
 
-      await screenManager.switchScreen(screens.HOME);
-      screenManager.bottomNavigationBar(true);
+      await showHomeScreen();
+      sessionManager.clear();
 
       deleteProjectCard({
         projectId: cacheManager.projects.activeProjectId

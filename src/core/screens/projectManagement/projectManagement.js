@@ -8,6 +8,8 @@ import { showFontsManagementScreen } from "../font/fontsManagement.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
 import { showMessageModal } from "../../modals/messageModal.js";
 import { showProjectSettingsScreen } from "../projectSettings/projectSettings.js";
+import sessionManager from "../../../utils/sessionManager.js";
+import { showHomeScreen } from "../home/home.js";
 
 let listenersAdded = false;
 
@@ -19,6 +21,9 @@ let translationStatusImported;
 
 export async function showProjectManagementScreen() {
   await screenManager.switchScreen(screens.PROJECT_MANAGEMENT);
+
+  await sessionManager.set(sessionManager.DATA.PROJECT_ID, cacheManager.projects.activeProjectId);
+  await sessionManager.set(sessionManager.DATA.SCREEN, screens.PROJECT_MANAGEMENT.id);
 
   screenManager.bottomNavigationBar(false);
 
@@ -46,8 +51,8 @@ export async function showProjectManagementScreen() {
   translationStatusImported = document.getElementById("translation-status-imported");
 
   projectManagementBackButton.addEventListener("click", async () => {
-    await screenManager.switchScreen(screens.HOME);
-    screenManager.bottomNavigationBar(true);
+    showHomeScreen();
+    sessionManager.clear();
   });
 
   document.getElementById("open-project-settings").addEventListener('click', ()=>{

@@ -7,6 +7,7 @@
   import { semanticModal } from "../../modals/semanticColorModal.js";
   import { semanticTable } from "../../../utils/semanticTable.js";
 import { InitializeSemanticScreen, populateSemanticData } from "../semanticColor/semanticColor.js";
+import sessionManager from "../../../utils/sessionManager.js";
 
   let listenersAdded = false;
 
@@ -17,6 +18,9 @@ import { InitializeSemanticScreen, populateSemanticData } from "../semanticColor
 
   export async function showColorManagementScreen() {
     await screenManager.switchScreen(screens.COLOR_MANAGEMENT);
+
+    await sessionManager.set(sessionManager.DATA.SCREEN, screens.COLOR_MANAGEMENT.id);
+
     await InitializePrimitivesScreen();
     await InitializeSemanticScreen();
 
@@ -79,12 +83,14 @@ import { InitializeSemanticScreen, populateSemanticData } from "../semanticColor
   export async function showPrimitivesTab(){
 
     SwitchTabs(TABS.PRIMITIVE);
+    await sessionManager.set(sessionManager.DATA.COLOR_TAB, COLOR_TABS.PRIMITIVES.id);
 
   }
 
   export async function showSemanticTab(){
 
     SwitchTabs(TABS.SEMANTIC);
+    await sessionManager.set(sessionManager.DATA.COLOR_TAB, COLOR_TABS.SEMANTIC.id);
 
   }
   

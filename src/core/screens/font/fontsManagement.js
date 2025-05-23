@@ -5,6 +5,7 @@
   import { screenManager, screens} from "../../../utils/screenManager.js";
   import { fontModal } from "../../modals/fontModal.js";
 import { fontTableManager } from "../../../utils/fontsTableManager.js";
+import sessionManager from "../../../utils/sessionManager.js";
 
   let init = false;
   let fontsTableScreen = null;
@@ -16,6 +17,9 @@ import { fontTableManager } from "../../../utils/fontsTableManager.js";
   // Exported Entry Point
   export async function showFontsManagementScreen() {
     await screenManager.switchScreen(screens.FONTS_MANAGEMENT);
+
+    await sessionManager.set(sessionManager.DATA.SCREEN, screens.FONTS_MANAGEMENT.id);
+
     await initializeFontsScreen();
     await populateFontsData();
 

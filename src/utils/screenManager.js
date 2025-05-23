@@ -1,4 +1,5 @@
 import { loadHtmlFragment } from "./components.js";
+import sessionManager from "./sessionManager.js";
 
 const bottomNavBar = document.getElementById("bottom-nav-bar");
 
