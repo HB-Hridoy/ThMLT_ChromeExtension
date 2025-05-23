@@ -15,6 +15,8 @@ let projectsContainer;
 export async function showHomeScreen() {
   await screenManager.switchScreen(screens.HOME);
 
+  screenManager.bottomNavigationBar(true);
+
   if (listenersAdded) return;
 
   // ===== GLOBAL VARIABLE BEGIN ===== //
