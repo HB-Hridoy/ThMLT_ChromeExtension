@@ -127,33 +127,78 @@ class ProjectModel extends DatabaseModel {
     });
   }
 
-  // Soft delete a project
-  async delete({ projectId } = {}) {
-    if (!projectId) this.log("projectId is required", true);
-
-    await this.ready;
-    this.log(`[INFO] Soft-deleting project ${projectId}...`);
-
-    return new Promise(async (resolve, reject) => {
-      try {
-        const record = await this.db.projects.get(projectId);
-        if (!record) reject("Project not found");
-
-        record.deleted = true;
-        record.deletedAt = new Date().toISOString(); // timestamp of deletion
-        record.lastModified = Date.now();
-
-        await this.db.projects.put(record);
-
-        cacheManager.projects.delete(projectId);
-
-        this.log(`[INFO] Project ${projectId} soft-deleted`);
-        resolve(`Project ${projectId} soft-deleted`);
-      } catch (error) {
-        this.log("Error soft-deleting project", true);
-        reject("Error soft-deleting project");
+  async deleteProject({ projectId, hardDelete = false }) {
+    try {
+      // Get the original project
+      const project = await this.db.projects.get(projectId);
+      if (!project) {
+        throw new Error(`Project with ID ${projectId} not found`);
       }
-    });
+  
+      if (hardDelete) {
+        // Hard delete: permanently remove project and all related data
+        await this.db.transaction('rw', [db.projects, db.primitiveColors, db.semanticColors, db.fonts, db.translations], async () => {
+          // Delete all related data
+          await this.db.primitiveColors.where('projectId').equals(projectId).delete();
+          await this.db.semanticColors.where('projectId').equals(projectId).delete();
+          await this.db.fonts.where('projectId').equals(projectId).delete();
+          await this.db.translations.where('projectId').equals(projectId).delete();
+          
+          // Delete the project itself
+          await this.db.projects.delete(projectId);
+        });
+  
+        return {
+          success: true,
+          message: `Project "${project.projectName}" and all related data permanently deleted`
+        };
+  
+      } else {
+        // Soft delete: mark as deleted
+        await this.db.projects.update(projectId, {
+          deleted: true,
+          deletedAt: new Date(),
+          lastModified: new Date()
+        });
+  
+        console.log(`[DB] Project "${project.projectName}" marked as deleted`);
+        
+        return true;
+      }
+  
+    } catch (error) {
+      console.error('Error deleting project:', error);
+    }
+  }
+  
+  // Optional: Function to restore a soft-deleted project
+  async restoreProject({ projectId }) {
+    try {
+      const project = await this.db.projects.get(projectId);
+      if (!project) {
+        throw new Error(`Project with ID ${projectId} not found`);
+      }
+  
+      if (!project.deleted) {
+
+        console.log(`[DB] Project "${project.projectName}" is not deleted`);
+        
+        return false;
+      }
+  
+      await this.db.projects.update(projectId, {
+        deleted: false,
+        deletedAt: null,
+        lastModified: new Date()
+      });
+  
+      console.log(`[DB] Project "${project.projectName}" restored successfully`);
+      
+      return true;
+  
+    } catch (error) {
+      console.error('[DB] Error restoring project:', error);
+    }
   }
 
   // Add a theme mode to a project
