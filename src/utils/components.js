@@ -28,16 +28,16 @@ class components {
     )}" class="project-card visible max-w-[calc(100%-1rem)] p-6 mb-4 mx-4 bg-gray-50 border border-gray-200 rounded-lg shadow hover:bg-gray-200">
 
               <div>
-                <h5 class="mb-2 text-sm font-bold tracking-tight text-gray-900">${this.escapeHtml(
+                <h5 class="project-name mb-2 text-sm font-bold tracking-tight text-gray-900">${this.escapeHtml(
                   projectName
                 )}</h5>
-                <p class="text-xs font-normal text-gray-700">Author: ${this.escapeHtml(
+                <p class="project-author text-xs font-normal text-gray-700">Author: ${this.escapeHtml(
                   author
                 )}</p>
-                <p class="text-xs font-normal text-gray-700">Version: ${this.escapeHtml(
+                <p class="project-version text-xs font-normal text-gray-700">Version: ${this.escapeHtml(
                   version
                 )}</p>
-                 <p class="text-xs font-normal text-gray-700">Last Modified: ${this.escapeHtml(
+                 <p class="project-last-modified text-xs font-normal text-gray-700">Last Modified: ${this.escapeHtml(
                    lastModified
                  )}</p>
               </div> 

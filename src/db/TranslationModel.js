@@ -32,7 +32,7 @@ class TranslationModel extends DatabaseModel {
       .equals(projectId)
       .count();
     const hasTranslation =  count > 0;
-    cacheManager.translations.hasTranslation({ hasTranslation });
+    cacheManager.translations.setHasTranslation({ hasTranslation });
 
     return hasTranslation;
   }
@@ -55,6 +55,26 @@ class TranslationModel extends DatabaseModel {
       .where("projectId")
       .equals(projectId)
       .delete();
+  }
+
+  // 2. Get all translations for a project
+  async get({ projectId }) {
+    if (!projectId) {
+      throw new Error("projectId is required");
+    }
+
+    const translationData = await this.table
+      .where("projectId")
+      .equals(projectId)
+      .first()
+
+    if (!translationData || translationData.length === 0) {
+      console.warn(`No translations found for projectId: ${projectId}`);
+      return "";
+    }
+
+    cacheManager.translations.add({ translationData });
+    return translationData;
   }
 }
 

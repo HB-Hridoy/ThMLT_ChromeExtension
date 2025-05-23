@@ -76,6 +76,50 @@ export function addProjectCard({
   projectsContainer.insertAdjacentHTML("beforeend", projectCard);
 }
 
+export function updateProjectCard({
+  projectId,
+  projectName,
+  author,
+  version,
+  lastModified,
+} = {}) {
+  const projectCard = projectsContainer.querySelector(`.project-card[project-id="${projectId}"]`);
+  if (!projectCard) {
+    console.error(`[HOME] Project card with ID "${projectId}" not found.`);
+    return;
+  }
+
+  // Update only if the value is not undefined
+  if (projectName !== undefined) {
+    projectCard.querySelector(".project-name").textContent = projectName;
+  }
+  if (author !== undefined) {
+    projectCard.querySelector(".project-author").textContent = author;
+  }
+  if (version !== undefined) {
+    projectCard.querySelector(".project-version").textContent = version;
+  }
+  if (lastModified !== undefined) {
+    const timestamp = new Date(lastModified).toLocaleString();
+    projectCard.querySelector(".project-last-modified").textContent = timestamp;
+  }
+
+  console.log(`[HOME] Project card with ID "${projectId}" updated successfully.`);
+}
+
+export function deleteProjectCard({ projectId }) {
+  const projectCard = projectsContainer.querySelector(`.project-card[project-id="${projectId}"]`);
+  if (!projectCard) {
+    console.error(`[HOME] Project card with ID "${projectId}" not found.`);
+    return;
+  }
+
+  // Remove the project card from the DOM
+  projectCard.remove();
+
+  console.log(`[HOME] Project card with ID "${projectId}" deleted successfully.`);
+}
+
 function validateJsonStructure(data) {
   const errors = [];
 
