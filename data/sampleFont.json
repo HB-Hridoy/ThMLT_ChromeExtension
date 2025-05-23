@@ -1,11 +1,9 @@
 {
-  "ProjectName": "here put project name",
-  "Author": "here put author name",
-  "Version": "here put version name",
-  "Fonts":{
-    "fontTag":{
-      "shortFontTag": "shortFontTag",
-      "fontName": "fontName"
-    }
+  "ProjectName": "test-51",
+  "Author": "hridoy",
+  "Version": "1.0",
+  "Fonts": {
+    "regular": "regular.ttf",
+    "bold": "bold.ttf"
   }
 }

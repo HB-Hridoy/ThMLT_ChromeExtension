@@ -25,7 +25,7 @@ const screens = {
   },
   PROJECT_SETTINGS: {
     id: "project-settings-screen",
-    path: "src/core/screens/projectManagement/projectManagement.html",
+    path: "src/core/screens/projectSettings/projectSettings.html",
   },
 };
 

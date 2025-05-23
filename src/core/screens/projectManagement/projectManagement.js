@@ -7,6 +7,7 @@ import { showColorManagementScreen, showPrimitivesTab } from "../color/colorMana
 import { showFontsManagementScreen } from "../font/fontsManagement.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
 import { showMessageModal } from "../../modals/messageModal.js";
+import { showProjectSettingsScreen } from "../projectSettings/projectSettings.js";
 
 let listenersAdded = false;
 
@@ -47,6 +48,10 @@ export async function showProjectManagementScreen() {
   projectManagementBackButton.addEventListener("click", async () => {
     await screenManager.switchScreen(screens.HOME);
     screenManager.bottomNavigationBar(true);
+  });
+
+  document.getElementById("open-project-settings").addEventListener('click', ()=>{
+    showProjectSettingsScreen();
   });
 
   projectManagementOptionsContainer.addEventListener("click", async (e)=>{

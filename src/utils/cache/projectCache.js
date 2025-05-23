@@ -67,7 +67,7 @@ export default class ProjectCache extends BaseCache {
       ...updates,
       lastModified: Date.now(),
     };
-    this.log(`Updated project ${projectId}:`, this.projects[index]);
+    console.log(`Updated project ${projectId}:`, this.projects[index]);
     return this.projects[index];
   }
 
