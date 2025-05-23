@@ -1,5 +1,6 @@
 import { showHomeScreen, addProjectCard } from "./screens/home/home.js";
 import DatabaseManager from "../db/DatabaseManager.js";
+import sessionManager from "../utils/sessionManager.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   try {
@@ -10,6 +11,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     for (const project of projects) {
       addProjectCard(project);
     }
+
+    sessionManager.restoreSession();
   } catch (error) {
     console.error(error);
   }

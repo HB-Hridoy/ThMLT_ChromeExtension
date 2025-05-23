@@ -6,6 +6,8 @@ import { screenManager, screens} from "../../../utils/screenManager.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
 import { addProjectCard, deleteProjectCard, showHomeScreen, updateProjectCard } from "../home/home.js";
 import { replaceClass } from "../../sidepanel.js";
+import sessionManager from "../../../utils/sessionManager.js";
+import { showColorManagementScreen } from "../color/colorManagement.js";
 
 let listenersAdded = false;
 
@@ -32,6 +34,8 @@ let projectDeleteInput;
 export async function showProjectSettingsScreen() {
   try {
     await screenManager.switchScreen(screens.PROJECT_SETTINGS);
+
+    await sessionManager.set(sessionManager.DATA.SCREEN, screens.PROJECT_SETTINGS.id);
 
     projectSettingsTitle = document.getElementById("project-name-settings-screen");
     projectSettingsTitle.textContent = cacheManager.projects.activeProjectName();
@@ -68,8 +72,7 @@ export async function showProjectSettingsScreen() {
   // ========== EVENT LISTENERS BEGIN ===========//
 
   document.getElementById("project-settings-back-button").addEventListener("click", async function(){
-    await screenManager.switchScreen(screens.HOME);
-    screenManager.bottomNavigationBar(true);
+    showColorManagementScreen();
   });
 
   colorThemesDataDownloadButton.addEventListener("click", async ()=>{
