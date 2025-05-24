@@ -3,7 +3,9 @@
   "name": "ThMLT Color Theme Editor",
   "version": "1.0",
   "description": "",
-  "host_permissions": ["https://ai2.appinventor.mit.edu/*"],
+  "host_permissions": [
+    "https://ai2.appinventor.mit.edu/*"
+  ],
   "icons": {
     "16": "public/assets/icons/icon-16.png",
     "48": "public/assets/icons/icon-48.png",
@@ -19,15 +21,22 @@
   "side_panel": {
     "default_path": "src/sidepanel/sidepanel.html"
   },
-  "permissions": ["sidePanel","storage","scripting", "activeTab"],
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
   "web_accessible_resources": [
     {
       "resources": [
         "src/content/inject/BlockyManipulator.js",
         "src/content/inject/textFormatterModal.html",
-        "src/content/inject/textFormatterModal.css"
+        "src/content/inject/thmlt-content-script"
       ],
-      "matches": ["https://ai2.appinventor.mit.edu/*"]
+      "matches": [
+        "https://ai2.appinventor.mit.edu/*"
+      ]
     },
     {
       "resources": [
@@ -37,15 +46,20 @@
         "src/db/*.js",
         "src/utils/*.js"
       ],
-      "matches": ["<all_urls>"]
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "content_scripts": [
     {
-      "matches": ["https://ai2.appinventor.mit.edu/*"],
-      "js": ["src/content/thmlt-ai2-content-script.js"],
+      "matches": [
+        "https://ai2.appinventor.mit.edu/*"
+      ],
+      "js": [
+        "src/content/thmlt-ai2-content-script.js"
+      ],
       "run_at": "document_end"
     }
   ]
-  
 }
