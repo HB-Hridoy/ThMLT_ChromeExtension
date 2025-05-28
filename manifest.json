@@ -32,7 +32,8 @@
       "resources": [
         "src/content/inject/BlockyManipulator.js",
         "src/content/inject/textFormatterModal.html",
-        "src/content/inject/thmlt-content-script"
+        "src/content/inject/linkProjectModal.html",
+        "src/content/inject/thmlt-content-script.css"
       ],
       "matches": [
         "https://ai2.appinventor.mit.edu/*"
@@ -57,7 +58,7 @@
         "https://ai2.appinventor.mit.edu/*"
       ],
       "js": [
-        "src/content/thmlt-ai2-content-script.js"
+        "dist/content/thmlt-ai2-content-script.js"
       ],
       "run_at": "document_end"
     }
