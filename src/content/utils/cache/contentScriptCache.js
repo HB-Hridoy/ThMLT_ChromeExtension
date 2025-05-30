@@ -11,7 +11,7 @@ export class ContentScriptCacheManager {
     this.fontCache = new BaseCache("font", "fontId");
     this.translationCache = new BaseCache("translation", "translationId");
 
-    this.#selectedProjectId = {};
+    this.#selectedProjectId = "";
   }
 
   #selectedProjectId;

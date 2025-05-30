@@ -1,5 +1,5 @@
 
-import { ElementWatcher } from "../../../utils/ElementWatcher.js";
+import { ElementWatcher } from '../../utils/ElementWatcher.js'
 
 export const elementWatcher = new ElementWatcher({
   debug: true,

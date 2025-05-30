@@ -1,12 +1,14 @@
-let sharedDB = null;
 
 class DatabaseModel {
-  constructor() {
-    // Ensure shared DB instance only
-    if (!sharedDB) {
-      sharedDB = new Dexie("ThMLT_DB");
 
-      sharedDB.version(1).stores({
+  // Private static property to hold the shared Dexie instance
+  static _sharedDB = null;
+
+  // Static getter to return (or initialize) the shared Dexie instance
+  static get sharedDB() {
+    if (!this._sharedDB) {
+      this._sharedDB = new Dexie("ThMLT_DB");
+      this._sharedDB.version(1).stores({
         projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
         primitiveColors: "++primitiveId, projectId, primitiveName, orderIndex",
         semanticColors: "++semanticId, projectId, semanticName, orderIndex",
@@ -14,13 +16,17 @@ class DatabaseModel {
         translations: "++translationId, projectId, translationData",
       });
 
-      sharedDB.open().catch((error) => {
-        console.error("Failed to open Dexie database:", error);
-      });
+      this._sharedDB.open().catch((error) =>
+        console.error("Failed to open Dexie DB:", error)
+      );
     }
+    return this._sharedDB;
+  }
 
-    this.db = sharedDB; // Inject shared DB
-    this.debug = true;
+  constructor() {
+    // Every model instance shares the same DB instance
+    this.db = DatabaseModel.sharedDB;
+    this.debug = false;
     this.SKIP = "@skip";
   }
 

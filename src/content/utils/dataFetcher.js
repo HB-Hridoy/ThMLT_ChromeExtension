@@ -1,6 +1,5 @@
 
-
-import { sendMessage } from "./messageClient.js";
+import { sendMessage } from "../content-script.js";
 import { contentScriptCache } from "./cache/contentScriptCache.js";
 
 class DataFetcher {

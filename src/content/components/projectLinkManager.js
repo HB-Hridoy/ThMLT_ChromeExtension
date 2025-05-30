@@ -1,5 +1,5 @@
 
-import { sendMessage } from "../utils/messageClient.js";
+import { sendMessage } from "../content-script.js";
 import { contentScriptCache } from "../utils/cache/contentScriptCache.js";
 import { fetcher } from "../utils/dataFetcher.js";
 import { projectLinkModal } from "./projectLinkModal.js";
@@ -191,7 +191,6 @@ class ProjectsLinkManager {
 
     li.addEventListener('click', async ()=>{
       const projectId = li.querySelector(".project-card").getAttribute("project-id");
-      console.log(projectId);
 
       const response = await sendMessage({
         action: "SESSION_STORAGE:SET",
