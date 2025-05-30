@@ -6,7 +6,7 @@ export default defineConfig({
     target: 'es2022', // ensures top-level await support and modern syntax
     rollupOptions: {
       input: {
-        'thmlt-ai2-content-script': 'src/content/thmlt-ai2-content-script.js',
+        'thmlt-ai2-content-script': 'src/content/content-script.js',
       },
       output: {
         entryFileNames: 'content/[name].js',
