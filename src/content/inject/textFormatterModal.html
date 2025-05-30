@@ -1,104 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="textFormatterModal.css">
-    <title>Text Formatter popup</title>
-</head>
-<body>
-    
-
+<template id="textFormatterModalTemplate">
+    <div id="text-formatter-modal-overlay"></div>
     <div id="textFormatterModal">
-        
-         <div id="textFormatterNavTabs" class="textFormatterNavTabs">
-                
-                <div id="translation-tab" isTabSelected="true" tfTabindex="1" class="textFormatterNavTabSelected">Translation</div>
-            
-                <div id="font-tab" isTabSelected="false" tfTabindex="2" class="textFormatterNavTab">Font</div>
-            
-                <div id="color-tab" isTabSelected="false" tfTabindex="3" class="textFormatterNavTab">Color</div>
-            
+
+        <div id="textFormatterNavTabs" class="textFormatterNavTabs">
+            <div id="translation-tab" isTabSelected="true" tfTabindex="1" class="textFormatterNavTabSelected">
+                Translation</div>
+            <div id="font-tab" isTabSelected="false" tfTabindex="2" class="textFormatterNavTab">Font</div>
+            <div id="color-tab" isTabSelected="false" tfTabindex="3" class="textFormatterNavTab">Color</div>
         </div>
-            
-            <div class="screensContainerParent">
-                <div class="screensContainer" style="display: block;">
-                    <div>
-                        <div id="formattedText">Please select a translation, font, and color.</div>
-                    </div>
-                    <div id="translation-screen" >
 
-                        <div class="searchTranslationParent">
-                            <svg width="1rem" height="1rem" style="color:var(--gray-500) ;"  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
-                            <input 
-                                class="searchTranslationInput"
-                                placeholder="Search Translation...">
-                            </input>
-                        </div>
-                        <table id="translationTable" class="tableWrapper">
-                            <thead>
+        <div class="screensContainerParent">
+            <div class="screensContainer" style="display: block;">
+                <div>
+                    <div id="text-formatter-modal-formatted-text">Please select a translation, font, and color.</div>
+                </div>
+
+                <!-- Translation Screen -->
+                <div id="translation-screen">
+                    <div class="text-formatter-modal-translation-search-input-parent">
+                        <svg width="1rem" height="1rem" style="color: var(--gray-500);" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                        </svg>
+                        <input class="text-formatter-modal-translation-search-input"
+                            placeholder="Search Translation..." />
+                    </div>
+
+                    <table id="text-formatter-modal-translations-table" class="tableWrapper">
+                        <thead>
                             <tr>
                                 <th>Key</th>
-                                <th id="defaultlanguage">Translation (en)</th>
+                                <th id="text-formatter-modal-translations-table-default-language">Translation (en)</th>
                             </tr>
-                            </thead>
-                            <tbody class="translationTableBody">    
-                            </tbody>
-                        </table>
+                        </thead>
+                        <tbody class="text-formatter-modal-translations-table-body"></tbody>
+                    </table>
+                </div>
 
-                        
-                        
-
-                    </div>
-                    <div id="font-screen" style="display: none;">
-                        <table id="fontTable" class="tableWrapper">
-                            <thead>
+                <!-- Font Screen -->
+                <div id="font-screen" style="display: none;">
+                    <table id="text-formatter-modal-fonts-table" class="tableWrapper">
+                        <thead>
                             <tr>
-                                <th>Key</th>
                                 <th>Font Name</th>
+                                <th>Font Value</th>
                             </tr>
-                            </thead>
-                            <tbody class="fontTableBody">    
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="color-screen" style="display: none;">
-                        <div class="searchColorParent">
-                            <svg width="1rem" height="1rem" style="color:var(--gray-500) ;"  aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
-                            <input 
-                                class="searchColorInput"
-                                placeholder="Search Color...">
-                            </input>
-                        </div>
+                        </thead>
+                        <tbody class="text-formatter-modal-fonts-table-body"></tbody>
+                    </table>
+                </div>
 
-                        <table id="colorTable" class="tableWrapper">
-                            <thead>
+                <!-- Color Screen -->
+                <div id="color-screen" style="display: none;">
+                    <div class="text-formatter-modal-color-search-input-parent">
+                        <svg width="1rem" height="1rem" style="color: var(--gray-500);" aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                        </svg>
+                        <input class="text-formatter-modal-color-search-input" placeholder="Search Color..." />
+                    </div>
+
+                    <table id="text-formatter-modal-colors-table" class="tableWrapper">
+                        <thead>
                             <tr>
                                 <th>Semantic Name</th>
-                                <th class="themeModeText">Light Theme</th>
+                                <th class="text-formatter-modal-color-theme-mode">Light Theme</th>
                             </tr>
-                            </thead>
-                            <tbody class="colorTableBody">    
-                            </tbody>
-                        </table>
-                    </div>
+                        </thead>
+                        <tbody class="text-formatter-modal-colors-table-body"></tbody>
+                    </table>
                 </div>
             </div>
-        
-        <div class="popupButtonsParent">
-            <div id="closeFormatterPopup" class="buttonRed" style="width: 40%;">
-                Close
-            </div>
-            <div id="applyFormattedText" class="buttonBlue disabled"style="width: 40%;">
-                Apply
-            </div>
         </div>
-    </div>
-<script src="textFormatterPopup.js"></script>
-</body>
 
-</html>
+        <div class="text-formatter-modal-buttons-parent">
+            <div id="hide-text-formatter-modal" class="buttonRed" style="width: 40%;">Close</div>
+            <div id="text-formatter-modal-apply-button" class="buttonBlue disabled" style="width: 40%;">Apply</div>
+        </div>
+
+    </div>
+</template>
