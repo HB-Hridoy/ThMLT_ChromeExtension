@@ -1,17 +1,22 @@
 
 import { loadHtmlFragment } from "../../utils/components.js";
+import AppContext from "../services/appContext.js";
 
-export class ProjectsLinkModal {
-  constructor(shadowRoot){
+class ProjectLinkModal {
+  constructor(){
 
-    this._shadowRoot = shadowRoot;
+    this._shadowRoot = null;
     this._linkProjectModalElement = null;
 
     this._listenersAdded = false;
+    this._initialized = false;
   }
 
   async init(){
+    if (this._initialized) return console.log(`[PROJECT LINK MODAL] Already intialized`);
+    
     try {
+      this._shadowRoot = AppContext.getShadowRoot();
       // Get the HTML content as text
       const htmlContent = await loadHtmlFragment('src/content/inject/linkProjectModal.html');
 
@@ -32,19 +37,32 @@ export class ProjectsLinkModal {
 
         console.log("Link project modal created inside Shadow DOM");
 
-        if (this._listenersAdded) return;
-
-        this._shadowRoot.getElementById("hide-link-project-modal").addEventListener("click", ()=>{
-          this.hide();
-        });
-
       } else {
         console.error("Element #link-project-modal not found in source HTML");
       }
       tempDiv.remove();
+
+      this._addEventListeners();
+
+      console.log(`[PROJECT LINK MODAL] Intialized successfully`);
     } catch (error) {
       console.error('Error fetching source HTML:', error);
     }
+  }
+
+  _addEventListeners(){
+    if (this._listenersAdded) return;
+
+    console.log(`[PROJECT LINK MODAL] Adding event listeners`);
+    
+    this._shadowRoot.getElementById("hide-link-project-modal").addEventListener("click", ()=>{
+      this.hide();
+    });
+
+    console.log(`[PROJECT LINK MODAL] Event listeners added`);
+
+    this._listenersAdded = true
+
   }
 
   show(){
@@ -59,5 +77,8 @@ export class ProjectsLinkModal {
     console.log("Link project modal hidden");
   }
 }
+
+const projectLinkModal = new ProjectLinkModal();
+export { projectLinkModal };
 
 
