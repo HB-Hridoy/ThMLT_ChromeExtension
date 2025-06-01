@@ -21,6 +21,17 @@ class TextFormatterModal {
     this._applyFormattedTextButton = null;
     this._activeSearchInput = null;
 
+    this._translationTable = null;
+    this._translationsSearchInputParent = null;
+    this._noTranslationScreen = null;
+
+    this._fontsTable = null;
+    this._noFontsScreen = null;
+
+    this._colorsTable = null;
+    this._colorsSearchInputParent = null;
+    this._noColorsScreen = null;
+
     this._isModalOpen = false;
 
     this._listenersAdded = false;
@@ -100,6 +111,19 @@ class TextFormatterModal {
     this._formattedTextElement = this._shadowRoot.getElementById("text-formatter-modal-formatted-text");
     this._applyFormattedTextButton = this._shadowRoot.getElementById("text-formatter-modal-apply-button");
 
+    this._translationTable = this._shadowRoot.getElementById("text-formatter-modal-translations-table");
+    this._translationsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input-parent");
+    this._noTranslationScreen = this._shadowRoot.querySelector(".no-translations-screen");
+
+    this._fontsTable = this._shadowRoot.getElementById("text-formatter-modal-fonts-table");
+    this._noFontsScreen = this._shadowRoot.querySelector(".no-fonts-screen");
+
+    this._colorsTable = this._shadowRoot.getElementById("text-formatter-modal-colors-table");
+    this._colorsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input-parent")
+    this._noColorsScreen = this._shadowRoot.querySelector(".no-colors-screen");
+
+
+
     // ========== GLOBAL VARIABLES END ========== //
 
     // ========== EVENT LISTENERS BEGIN ========== //
@@ -144,30 +168,41 @@ class TextFormatterModal {
     });
 
     // ========== EVENT LISTENERS END ========== //
-
     console.log(`[TEXT FORMATTER MODAL] Event listeners added`);
   }
 
   show(){
 
-    this._colorTableManager.setSelectedRow(null);
-
     this._formattedTextElement.textContent = "Please select a translation, font, and color.";
     this._applyFormattedTextButton.classList.toggle("disabled", true);
 
     const primitivesData = contentScriptCache.primitiveCache.getAll();
-    const semanticsdata = contentScriptCache.semanticCache.getAll();
+    const semanticsData = contentScriptCache.semanticCache.getAll();
 
-    this._colorTableManager.render(semanticsdata, primitivesData, "Light");
+    if (primitivesData.length > 0 && semanticsData.length > 0) {
+      this._colorTableManager.render(semanticsData, primitivesData, "Light");
+      this.setFontsScreenVisibility(true);
+    } else {
+      this.setColorsScreenVisibility(false);
+    }
 
     const fontsData = contentScriptCache.fontCache.getAll();
-    this._fontsTableManager.render(fontsData);
 
+    if (fontsData.length > 0) {
+      this._fontsTableManager.render(fontsData);
+      this.setFontsScreenVisibility(true);
+    } else {
+      this.setFontsScreenVisibility(false);
+    }
 
-    const translationsData = contentScriptCache.translationCache.get({ id:1 }).translationData;
-    // console.log(translationsData);
-    
-    this._translationsTableManager.render(translationsData);
+    const translationsData = contentScriptCache.translationCache.get({ id: 1 });
+
+    if (translationsData !== null) {
+      this.setTranslationScreenVisibility(true);
+      this._translationsTableManager.render(translationsData.translationData);
+    } else {
+      this.setTranslationScreenVisibility(false);
+    }
 
     this._tabManager.switchToTab("translation-tab");
 
@@ -226,6 +261,40 @@ class TextFormatterModal {
       // Trigger input and change events
       textArea.dispatchEvent(new Event("input", { bubbles: true }));
       textArea.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  }
+
+  setTranslationScreenVisibility(show){
+    if (show) {
+      this._translationsSearchInputParent.style.display = 'flex';
+      this._noTranslationScreen.style.display = 'none';
+      this._translationTable.style.display = "block";
+    } else {
+      this._translationsSearchInputParent.style.display = 'none';
+      this._noTranslationScreen.style.display = 'flex';
+      this._translationTable.style.display = "none";
+    }
+  }
+
+  setFontsScreenVisibility(show){
+    if (show) {
+      this._noFontsScreen.style.display = 'none';
+      this._fontsTable.style.display = "block";
+    } else {
+      this._noFontsScreen.style.display = 'flex';
+      this._fontsTable.style.display = "none";
+    }
+  }
+
+  setColorsScreenVisibility(show){
+    if (show) {
+      this._colorsSearchInputParent.style.display = 'flex';
+      this._noColorsScreen.style.display = 'none';
+      this._colorsTable.style.display = "block";
+    } else {
+      this._colorsSearchInputParent.style.display = 'none';
+      this._noColorsScreen.style.display = 'flex';
+      this._colorsTable.style.display = "none";
     }
   }
 

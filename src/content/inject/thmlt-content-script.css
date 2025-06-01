@@ -48,7 +48,7 @@ div {
 }
 
 /* The overlay covering the whole page */
-#textFormatterModalOverlay {
+#text-formatter-modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -288,6 +288,47 @@ div {
     min-width: 300px;
     cursor: pointer;
 }
+
+.no-translations-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 412px;
+    min-height: 412px;
+    max-height: 412px;
+    width: 100%;
+}
+
+.no-fonts-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 412px;
+    min-height: 412px;
+    max-height: 412px;
+    width: 100%;
+}
+
+.no-colors-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 412px;
+    min-height: 412px;
+    max-height: 412px;
+    width: 100%;
+}
+
+.content {
+    text-align: center;
+}
+
+.content p:first-of-type {
+    font-weight: bold;
+    font-size: 25px;
+}
+
+
 
 .text-formatter-modal-translations-table-body {
     display: block;
