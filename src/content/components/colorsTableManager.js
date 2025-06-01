@@ -176,6 +176,13 @@ export class ColorsTableManager {
    * Main render method - handles both initial render and updates
    */
   render(semantics, primitives, defaultTheme = 'Light') {
+
+    this._domElements.forEach(row => {
+      if (row) {
+        row.style.display = "";
+      }
+    });
+    
     // Update primitives lookup
     this.updatePrimitives(primitives);
     
@@ -194,6 +201,21 @@ export class ColorsTableManager {
     // Otherwise, do differential update
     this.updateRender(sortedSemantics, defaultTheme);
   }
+
+  searchRender(query) {
+    const lowerSearchText = query.trim().toLowerCase();
+  
+    this._domElements.forEach((row, semanticId) => {
+      const semantic = this._currentData.get(semanticId);
+  
+      if (!semantic || !row) return;
+  
+      const matches = lowerSearchText === "" || semantic.semanticName.toLowerCase().includes(lowerSearchText);
+  
+      row.style.display = matches ? "" : "none";
+    });
+  }
+  
 
   /**
    * Initial render when table is empty

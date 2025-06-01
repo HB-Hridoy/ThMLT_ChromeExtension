@@ -5,6 +5,7 @@ import AppContext from "../services/appContext.js";
 import { activeAI2TextArea } from "../content-script.js";
 import { FontsTableManager } from "./fontTableManager.js";
 import { TranslationsTableManager } from "./translationsTableManager.js";
+import { debounce } from '../../utils/debounce.js'
 
 class TextFormatterModal {
 
@@ -23,6 +24,7 @@ class TextFormatterModal {
 
     this._translationTable = null;
     this._translationsSearchInputParent = null;
+    this._translationsSearchInput = null;
     this._noTranslationScreen = null;
 
     this._fontsTable = null;
@@ -30,6 +32,7 @@ class TextFormatterModal {
 
     this._colorsTable = null;
     this._colorsSearchInputParent = null;
+    this._colorsSearchInput = null;
     this._noColorsScreen = null;
 
     this._isModalOpen = false;
@@ -113,13 +116,15 @@ class TextFormatterModal {
 
     this._translationTable = this._shadowRoot.getElementById("text-formatter-modal-translations-table");
     this._translationsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input-parent");
+    this._translationsSearchInput = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input");
     this._noTranslationScreen = this._shadowRoot.querySelector(".no-translations-screen");
 
     this._fontsTable = this._shadowRoot.getElementById("text-formatter-modal-fonts-table");
     this._noFontsScreen = this._shadowRoot.querySelector(".no-fonts-screen");
 
     this._colorsTable = this._shadowRoot.getElementById("text-formatter-modal-colors-table");
-    this._colorsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input-parent")
+    this._colorsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input-parent");
+    this._colorsSearchInput = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input");
     this._noColorsScreen = this._shadowRoot.querySelector(".no-colors-screen");
 
 
@@ -143,10 +148,9 @@ class TextFormatterModal {
     });
 
     // Disable AI2 Keyboard shortcuts while modal is open or any infput focused
-    ['.text-formatter-modal-translation-search-input', '.text-formatter-modal-color-search-input'].forEach(selector => {
-      const inputElement = this._shadowRoot.querySelector(selector);
+    [this._translationsSearchInput, this._colorsSearchInput].forEach(inputElement => {
       inputElement.addEventListener('focus', () => {
-      this._activeSearchInput = inputElement;
+        this._activeSearchInput = inputElement;
       });
     });
 
@@ -164,8 +168,17 @@ class TextFormatterModal {
           }, 0);
         }
       }
-        
     });
+
+    this._translationsSearchInput.addEventListener('input', debounce(() => {
+      this._translationsTableManager.searchRender(this._translationsSearchInput.value);
+    }, 300));
+    
+
+    this._colorsSearchInput.addEventListener('input', debounce((e) => {
+      this._colorTableManager.searchRender(this._colorsSearchInput.value);
+    }, 300));
+
 
     // ========== EVENT LISTENERS END ========== //
     console.log(`[TEXT FORMATTER MODAL] Event listeners added`);
@@ -206,8 +219,7 @@ class TextFormatterModal {
 
     this._tabManager.switchToTab("translation-tab");
 
-    ['.text-formatter-modal-translation-search-input', '.text-formatter-modal-color-search-input'].forEach(selector => {
-      const inputElement = this._shadowRoot.querySelector(selector);
+    [this._translationsSearchInput, this._colorsSearchInput].forEach(inputElement => {
       inputElement.value = ""; // Clear the input value
     });
 
