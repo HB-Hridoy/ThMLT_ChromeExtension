@@ -35,6 +35,11 @@ export class TranslationsTableManager {
    * @param {string} defaultLanguage - Default language for translation values
    */
   render(translations, defaultLanguage = 'en') {
+
+    this.currentRows.forEach(row => {
+      row.style.display = '';
+    });
+    
     const transformedTranslations = transformTranslations(translations, "tempProjectId");
     const originalDefaultLanguage = translations.DefaultLanguage;
 
@@ -71,6 +76,26 @@ export class TranslationsTableManager {
     this._updateRender(newTranslationsMap, sortedTranslations, defaultLanguage, languageChanged);
     this._updateInternalState(newTranslationsMap, defaultLanguage);
   }
+
+  /**
+   * Filters and renders the translation rows based on search input
+   * @param {string} query - Search string to filter translation names and values
+   */
+  searchRender(query) {
+    const lowerQuery = query.trim().toLowerCase();
+
+    this.currentRows.forEach((row, id) => {
+      const translation = this.currentTranslations.get(id);
+      if (!translation) return;
+
+      const name = (translation.translationName || '').toLowerCase();
+      const value = (this._getTranslationValue(translation, this.currentDefaultLanguage) || '').toLowerCase();
+
+      const matches = name.includes(lowerQuery) || value.includes(lowerQuery);
+      row.style.display = matches ? '' : 'none';
+    });
+  }
+
 
   /**
    * Initial render when table body is empty

@@ -162,6 +162,11 @@ class ColorsTableManager {
    * Main render method - handles both initial render and updates
    */
   render(semantics, primitives, defaultTheme = "Light") {
+    this._domElements.forEach((row) => {
+      if (row) {
+        row.style.display = "";
+      }
+    });
     this.updatePrimitives(primitives);
     this._currentTheme = defaultTheme;
     const sortedSemantics = [...semantics].sort((a, b) => a.orderIndex - b.orderIndex);
@@ -170,6 +175,15 @@ class ColorsTableManager {
       return;
     }
     this.updateRender(sortedSemantics, defaultTheme);
+  }
+  searchRender(query) {
+    const lowerSearchText = query.trim().toLowerCase();
+    this._domElements.forEach((row, semanticId) => {
+      const semantic = this._currentData.get(semanticId);
+      if (!semantic || !row) return;
+      const matches = lowerSearchText === "" || semantic.semanticName.toLowerCase().includes(lowerSearchText);
+      row.style.display = matches ? "" : "none";
+    });
   }
   /**
    * Initial render when table is empty
@@ -617,6 +631,9 @@ class TranslationsTableManager {
    * @param {string} defaultLanguage - Default language for translation values
    */
   render(translations, defaultLanguage = "en") {
+    this.currentRows.forEach((row) => {
+      row.style.display = "";
+    });
     const transformedTranslations = transformTranslations(translations, "tempProjectId");
     const originalDefaultLanguage = translations.DefaultLanguage;
     console.log(originalDefaultLanguage);
@@ -638,6 +655,21 @@ class TranslationsTableManager {
     }
     this._updateRender(newTranslationsMap, sortedTranslations, defaultLanguage, languageChanged);
     this._updateInternalState(newTranslationsMap, defaultLanguage);
+  }
+  /**
+   * Filters and renders the translation rows based on search input
+   * @param {string} query - Search string to filter translation names and values
+   */
+  searchRender(query) {
+    const lowerQuery = query.trim().toLowerCase();
+    this.currentRows.forEach((row, id) => {
+      const translation = this.currentTranslations.get(id);
+      if (!translation) return;
+      const name = (translation.translationName || "").toLowerCase();
+      const value = (this._getTranslationValue(translation, this.currentDefaultLanguage) || "").toLowerCase();
+      const matches = name.includes(lowerQuery) || value.includes(lowerQuery);
+      row.style.display = matches ? "" : "none";
+    });
   }
   /**
    * Initial render when table body is empty
@@ -890,6 +922,13 @@ function transformTranslations(data, projectId) {
   }
   return result;
 }
+function debounce(fn, delay = 300) {
+  let timer = null;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
 class TextFormatterModal {
   constructor() {
     this._shadowRoot = null;
@@ -903,11 +942,13 @@ class TextFormatterModal {
     this._activeSearchInput = null;
     this._translationTable = null;
     this._translationsSearchInputParent = null;
+    this._translationsSearchInput = null;
     this._noTranslationScreen = null;
     this._fontsTable = null;
     this._noFontsScreen = null;
     this._colorsTable = null;
     this._colorsSearchInputParent = null;
+    this._colorsSearchInput = null;
     this._noColorsScreen = null;
     this._isModalOpen = false;
     this._listenersAdded = false;
@@ -959,11 +1000,13 @@ class TextFormatterModal {
     this._applyFormattedTextButton = this._shadowRoot.getElementById("text-formatter-modal-apply-button");
     this._translationTable = this._shadowRoot.getElementById("text-formatter-modal-translations-table");
     this._translationsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input-parent");
+    this._translationsSearchInput = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input");
     this._noTranslationScreen = this._shadowRoot.querySelector(".no-translations-screen");
     this._fontsTable = this._shadowRoot.getElementById("text-formatter-modal-fonts-table");
     this._noFontsScreen = this._shadowRoot.querySelector(".no-fonts-screen");
     this._colorsTable = this._shadowRoot.getElementById("text-formatter-modal-colors-table");
     this._colorsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input-parent");
+    this._colorsSearchInput = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input");
     this._noColorsScreen = this._shadowRoot.querySelector(".no-colors-screen");
     this._shadowRoot.getElementById("hide-text-formatter-modal").addEventListener("click", () => {
       this.hide();
@@ -975,8 +1018,7 @@ class TextFormatterModal {
     this._shadowRoot.getElementById("textFormatterNavTabs").addEventListener("click", (e) => {
       this._tabManager.switchToTab(e.target.id);
     });
-    [".text-formatter-modal-translation-search-input", ".text-formatter-modal-color-search-input"].forEach((selector) => {
-      const inputElement = this._shadowRoot.querySelector(selector);
+    [this._translationsSearchInput, this._colorsSearchInput].forEach((inputElement) => {
       inputElement.addEventListener("focus", () => {
         this._activeSearchInput = inputElement;
       });
@@ -991,6 +1033,12 @@ class TextFormatterModal {
         }
       }
     });
+    this._translationsSearchInput.addEventListener("input", debounce(() => {
+      this._translationsTableManager.searchRender(this._translationsSearchInput.value);
+    }, 300));
+    this._colorsSearchInput.addEventListener("input", debounce((e) => {
+      this._colorTableManager.searchRender(this._colorsSearchInput.value);
+    }, 300));
     console.log(`[TEXT FORMATTER MODAL] Event listeners added`);
   }
   show() {
@@ -1019,8 +1067,7 @@ class TextFormatterModal {
       this.setTranslationScreenVisibility(false);
     }
     this._tabManager.switchToTab("translation-tab");
-    [".text-formatter-modal-translation-search-input", ".text-formatter-modal-color-search-input"].forEach((selector) => {
-      const inputElement = this._shadowRoot.querySelector(selector);
+    [this._translationsSearchInput, this._colorsSearchInput].forEach((inputElement) => {
       inputElement.value = "";
     });
     this._shadowRoot.getElementById("text-formatter-modal-overlay").style.display = "block";
