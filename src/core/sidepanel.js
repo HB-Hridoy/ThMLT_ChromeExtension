@@ -1,12 +1,15 @@
 import { showHomeScreen, addProjectCard } from "./screens/home/home.js";
-import DatabaseManager from "../db/DatabaseManager.js";
 import sessionManager from "../utils/sessionManager.js";
 
-document.addEventListener("DOMContentLoaded", async () => {
+import { getDatabaseManager } from "../db/DatabaseManager.js";
+
+(async () => {
+  const db = await getDatabaseManager();
+
   try {
     await showHomeScreen();
 
-    const projects = await DatabaseManager.projects.getAll();
+    const projects = await db.projects.getAll();
 
     for (const project of projects) {
       addProjectCard(project);
@@ -16,7 +19,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error(error);
   }
-});
+
+})();
+
 
 export function replaceClass(element, prefix, newClass) {
   element.className = element.className

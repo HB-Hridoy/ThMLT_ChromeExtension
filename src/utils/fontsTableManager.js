@@ -1,11 +1,12 @@
 
 import { fontModal } from "../core/modals/fontModal.js";
 import { calculateNewOrderIndex } from "../core/sidepanel.js";
-import DatabaseManager from "../db/DatabaseManager.js";
 import cacheManager from "./cache/cacheManager.js";
+import { getDatabaseManager } from "../db/DatabaseManager.js";
 
 class FontTableManager {
   constructor() {
+    this.db = null;
     this.currentRowId = 1;
     this.table = null;
     this.tableBody = null;
@@ -28,6 +29,10 @@ class FontTableManager {
       childList: true,
       subtree: true,
     });
+  }
+
+  async init(){
+    if (!this.db) this.db = await getDatabaseManager();
   }
 
   addRow({ fontId = 0,  fontName = "Unknown", fontValue = "#ffffff", orderIndex, animation = false} = {}){
@@ -89,7 +94,7 @@ class FontTableManager {
 
       fontModal.show({
         mode: fontModal.modes.EDIT,
-        fontId,
+        fontId: fontId,
         currentFontName: addedRow.querySelector("#font-name").textContent.trim(),
         currentFontValue: addedRow.querySelector("#font-value").textContent.trim()
       });
@@ -266,7 +271,7 @@ function makeFontRowDraggable(row) {
     try {
       const newOrderIndex = fontTableManager.getNewOrderIndex(row);
       
-      await DatabaseManager.fonts.update({
+      await fontTableManager.db.fonts.update({
         fontId: row.id,
         updatedFields: {
           orderIndex: newOrderIndex
@@ -280,7 +285,7 @@ function makeFontRowDraggable(row) {
       console.warn('[FONTS TABLE] Rebalancing required', e);
       fontTableManager.rebalanceOrderIndexes();
       
-      DatabaseManager.fonts.updateOrderIndexes({
+      fontTableManager.db.fonts.updateOrderIndexes({
         projectId: cacheManager.projects.activeProjectId,
         updatedFontsOrders: fontTableManager.getOrderIndexes()
       })

@@ -1,18 +1,25 @@
 
 
 import cacheManager from "../../../utils/cache/cacheManager.js";
-import DatabaseManager from "../../../db/DatabaseManager.js";
 import { screenManager, COLOR_TABS } from "../../../utils/screenManager.js";
 import { semanticTable } from "../../../utils/semanticTable.js";
 import { themeModal } from "../../modals/themeModal.js";
-import { throttle } from "../../sidepanel.js";
+import { getDatabaseManager } from "../../../db/DatabaseManager.js";
 
 let init = false;
 let semanticTableScreen = null;
 let noSemanticScreen = null;
 let isSemanticDataInitialized = false;
 
+let db = null;
+
 export async function InitializeSemanticScreen() {
+
+  if (!db) {
+    db = await getDatabaseManager();
+  }
+
+  semanticTable.init();
 
   await screenManager.loadTab(COLOR_TABS.SEMANTIC);
 
@@ -35,7 +42,7 @@ export async function populateSemanticData(){
 
   if (isSemanticDataInitialized) return console.log("[INFO] Semantic data already intialized");
 
-  const semanticData = await DatabaseManager.semantics.getAll({
+  const semanticData = await db.semantics.getAll({
     projectId: cacheManager.projects.activeProjectId,
     doCache: true
   });

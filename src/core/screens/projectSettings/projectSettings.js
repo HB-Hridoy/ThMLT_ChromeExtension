@@ -1,13 +1,13 @@
 
 
 import cacheManager from "../../../utils/cache/cacheManager.js";
-import DatabaseManager from "../../../db/DatabaseManager.js";
 import { screenManager, screens} from "../../../utils/screenManager.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
 import { addProjectCard, deleteProjectCard, showHomeScreen, updateProjectCard } from "../home/home.js";
 import { replaceClass } from "../../sidepanel.js";
 import sessionManager from "../../../utils/sessionManager.js";
 import { showColorManagementScreen } from "../color/colorManagement.js";
+import { getDatabaseManager } from "../../../db/DatabaseManager.js";
 
 let listenersAdded = false;
 
@@ -31,7 +31,12 @@ let projectRenameInputError;
 let projectDeleteButton;
 let projectDeleteInput;
 
+let db = null;
+
 export async function showProjectSettingsScreen() {
+  if (!db) {
+    db = await getDatabaseManager();
+  }
   try {
     await screenManager.switchScreen(screens.PROJECT_SETTINGS);
 
@@ -147,7 +152,7 @@ function restoreDefaults() {
 
 async function handleColorDataDownloadButton(){
   try {
-    const colorData = await DatabaseManager.projects.exportColorData({
+    const colorData = await db.projects.exportColorData({
       projectId: cacheManager.projects.activeProjectId
     });
 
@@ -172,7 +177,7 @@ async function handleColorDataDownloadButton(){
 
 async function handleColorDataCopyButton(){
   try {
-    const colorData = await DatabaseManager.projects.exportColorData({
+    const colorData = await db.projects.exportColorData({
       projectId: cacheManager.projects.activeProjectId
     });
     await navigator.clipboard.writeText(colorData);
@@ -183,7 +188,7 @@ async function handleColorDataCopyButton(){
 
 async function handleFontDataDownloadButton(){
   try {
-    const fontsData = await DatabaseManager.projects.exportFontData({
+    const fontsData = await db.projects.exportFontData({
       projectId: cacheManager.projects.activeProjectId
     });
 
@@ -208,7 +213,7 @@ async function handleFontDataDownloadButton(){
 
 async function handleFontDataCopyButton(){
   try {
-    const fontsData = await DatabaseManager.projects.exportFontData({
+    const fontsData = await db.projects.exportFontData({
       projectId: cacheManager.projects.activeProjectId
     });
 
@@ -221,7 +226,7 @@ async function handleFontDataCopyButton(){
 async function handleTranslationDataDownloadButton(){
   try {
     if (cacheManager.translations.hasTranslation()) {
-      const translationData = await DatabaseManager.translations.get({
+      const translationData = await db.translations.get({
         projectId: cacheManager.projects.activeProjectId
       });
 
@@ -250,7 +255,7 @@ async function handleTranslationDataCopyButton(){
   try {
     
     if (cacheManager.translations.hasTranslation()) {
-      const translationData = await DatabaseManager.translations.get({
+      const translationData = await db.translations.get({
         projectId: cacheManager.projects.activeProjectId
       });
 
@@ -275,7 +280,7 @@ async function handleProjectDuplicateButton() {
 
   if (confirmed) {
     try {
-      const newProjectData = await DatabaseManager.projects.duplicateProject({
+      const newProjectData = await db.projects.duplicateProject({
         projectId: cacheManager.projects.activeProjectId
       });
 
@@ -346,7 +351,7 @@ async function handleProjectRenameInputChange(e) {
 async function handleRenameProjectButton() {
 
   try {
-    await DatabaseManager.projects.update({
+    await db.projects.update({
       projectId: cacheManager.projects.activeProjectId,
       projectName: projectRenameInput.value.trim()
     });
@@ -375,7 +380,7 @@ async function handleProjectDeleteButton(){
 
   if (confirmed) {
     try {
-      await DatabaseManager.projects.deleteProject({
+      await db.projects.deleteProject({
         projectId: cacheManager.projects.activeProjectId
       })
 

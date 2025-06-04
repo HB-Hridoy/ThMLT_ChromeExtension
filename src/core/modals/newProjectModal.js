@@ -1,14 +1,11 @@
 
-  import DatabaseManager from '../../db/DatabaseManager.js';
   import { modalManager, MODALS } from '../../utils/modalManager.js';
-  import { semanticTable } from '../../utils/semanticTable.js';
   import cacheManager from '../../utils/cache/cacheManager.js';
   import { replaceClass } from '../sidepanel.js';
-  import { confirmationModal } from '../modals/confirmationModal.js'
-  import { showNoPrimitivesScreen, showPrimitivesTable } from '../screens/primitiveColor/primitiveColor.js';
   import { showMessageModal } from './messageModal.js';
   import { addProjectCard } from '../screens/home/home.js';
   import { screenManager } from '../../utils/screenManager.js';
+  import { getDatabaseManager } from '../../db/DatabaseManager.js';
   let projectModalElement = null;
 
   let projectNameInput = null;
@@ -18,11 +15,17 @@
 
   class ProjectModal{
     constructor(){
+      this.db = null;
       this.modal = null;
       this.listenersAdded = false;
     }
 
     async show() {
+
+      if (!this.db) {
+      this.db = await getDatabaseManager(); // ✅ Wait here
+    }
+
       if (!this.modal){
   
         this.modal = await modalManager.register(MODALS.PROJECT);
@@ -146,7 +149,7 @@
     } 
 
     try {
-      const projectData = DatabaseManager.projects.create({
+      const projectData = projectModal.db.projects.create({
         projectName,
         author,
         version
@@ -160,7 +163,6 @@
         lastModified: projectData.lastModified
       });
     } catch (error) {
-      alert(error); // Error message
       console.error(error); // Log the error message
     }
     

@@ -1,8 +1,5 @@
 import cacheManager from "../../../utils/cache/cacheManager.js";
-import DatabaseManager from "../../../db/DatabaseManager.js";
-import { components } from "../../../utils/components.js";
 import { screenManager, screens } from "../../../utils/screenManager.js";
-import { alertManager } from "../../../utils/alertsManager.js";
 import { showColorManagementScreen, showPrimitivesTab } from "../color/colorManagement.js";
 import { showFontsManagementScreen } from "../font/fontsManagement.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
@@ -10,6 +7,7 @@ import { showMessageModal } from "../../modals/messageModal.js";
 import { showProjectSettingsScreen } from "../projectSettings/projectSettings.js";
 import sessionManager from "../../../utils/sessionManager.js";
 import { showHomeScreen } from "../home/home.js";
+import { getDatabaseManager } from "../../../db/DatabaseManager.js";
 
 let listenersAdded = false;
 
@@ -19,7 +17,13 @@ let projectManagementOptionsContainer;
 let translationStatusError;
 let translationStatusImported;
 
+let db = null;
+
 export async function showProjectManagementScreen() {
+
+  if (!db) {
+    db = await getDatabaseManager();
+  }
   await screenManager.switchScreen(screens.PROJECT_MANAGEMENT);
 
   await sessionManager.set(sessionManager.DATA.PROJECT_ID, cacheManager.projects.activeProjectId);
@@ -33,7 +37,7 @@ export async function showProjectManagementScreen() {
     const statusError = document.getElementById("translation-status-error");
     const statusImported = document.getElementById("translation-status-imported");
 
-    const hasTranslation = await DatabaseManager.translations.hasTranslationForProject({ 
+    const hasTranslation = await db.translations.hasTranslationForProject({ 
       projectId: cacheManager.projects.activeProjectId 
     })
     statusError.classList.toggle("hidden", hasTranslation);
@@ -94,7 +98,7 @@ export async function showProjectManagementScreen() {
         try {
           const translationJson = await getTranslationFile();
 
-          DatabaseManager.translations.add({
+          db.translations.add({
             projectId: cacheManager.projects.activeProjectId,
             translationData: translationJson
           });

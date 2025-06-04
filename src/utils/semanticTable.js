@@ -2,12 +2,14 @@ import { linkPrimitiveModal } from "../core/modals/linkPrimitiveModal.js";
 import { semanticModal } from "../core/modals/semanticColorModal.js";
 import { themeModal } from "../core/modals/themeModal.js";
 import { calculateNewOrderIndex } from "../core/sidepanel.js";
-import DatabaseManager from "../db/DatabaseManager.js";
 import cacheManager from "./cache/cacheManager.js";
+import { getDatabaseManager } from "../db/DatabaseManager.js";
 
 
 class SemanticTable {
   constructor() {
+
+    this.db = null;
     this.defaultValue = "Link Primitive";
     this.currentRowId = 1;
     this.table = null;
@@ -42,6 +44,10 @@ class SemanticTable {
       subtree: true,
     });
     
+  }
+
+  async init(){
+    if (!this.db) this.db = await getDatabaseManager();
   }
   
   // Add a new row to the table
@@ -620,7 +626,7 @@ function makeRowDraggable({ row }) {
       try {
         const newOrderIndex = semanticTable.getNewOrderIndex(row);
         
-        await DatabaseManager.semantics.update({
+        await semanticTable.db.semantics.update({
           semanticId: row.id,
           newOrderIndex
         });
@@ -632,7 +638,7 @@ function makeRowDraggable({ row }) {
         console.warn('[SEMANTIC TABLE] Rebalancing required', e);
         semanticTable.rebalanceOrderIndexes();
         
-        DatabaseManager.semantics.updateOrderIndexes({
+        semanticTable.db.semantics.updateOrderIndexes({
           projectId: cacheManager.projects.activeProjectId,
           updatedSemanticOrders: semanticTable.getOrderIndexes()
         })
