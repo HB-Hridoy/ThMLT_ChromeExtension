@@ -1046,21 +1046,22 @@ class TextFormatterModal {
     this._applyFormattedTextButton.classList.toggle("disabled", true);
     const primitivesData = contentScriptCache.primitiveCache.getAll();
     const semanticsData = contentScriptCache.semanticCache.getAll();
-    if (primitivesData.length > 0 && semanticsData.length > 0) {
+    if (Array.isArray(semanticsData) && semanticsData.length > 0) {
       this._colorTableManager.render(semanticsData, primitivesData, "Light");
-      this.setFontsScreenVisibility(true);
+      this.setColorsScreenVisibility(true);
     } else {
       this.setColorsScreenVisibility(false);
     }
     const fontsData = contentScriptCache.fontCache.getAll();
-    if (fontsData.length > 0) {
+    if (Array.isArray(fontsData) && fontsData.length > 0) {
       this._fontsTableManager.render(fontsData);
       this.setFontsScreenVisibility(true);
     } else {
       this.setFontsScreenVisibility(false);
     }
-    const translationsData = contentScriptCache.translationCache.get({ id: 1 });
-    if (translationsData !== null) {
+    const allTranslations = contentScriptCache.translationCache.getAll();
+    if (Array.isArray(allTranslations) && allTranslations.length > 0) {
+      const translationsData = allTranslations[0];
       this.setTranslationScreenVisibility(true);
       this._translationsTableManager.render(translationsData.translationData);
     } else {

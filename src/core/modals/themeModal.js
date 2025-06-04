@@ -1,11 +1,11 @@
-import DatabaseManager from '../../db/DatabaseManager.js';
+
 import { modalManager, MODALS } from '../../utils/modalManager.js';
 import { semanticTable } from '../../utils/semanticTable.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
 import { replaceClass } from '../sidepanel.js';
-import { confirmationModal } from '../modals/confirmationModal.js'
-import { showNoPrimitivesScreen, showPrimitivesTable } from '../screens/primitiveColor/primitiveColor.js';
-import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColor/semanticColor.js';
+import { confirmationModal } from '../modals/confirmationModal.js';
+import { showSemanticTable } from '../screens/semanticColor/semanticColor.js';
+import { getDatabaseManager } from '../../db/DatabaseManager.js';
 
 let themeModalElement = null;
 
@@ -22,6 +22,7 @@ let actionButton = null;
 
 class ThemeModal{
   constructor(){
+    this.db = null;
     this.modal = null;
     this.listenersAdded = false;
     this.modes = {
@@ -33,6 +34,9 @@ class ThemeModal{
   }
 
   async show(mode, editValues = { themeName: "Unkonown" }) {
+    if (!this.db) {
+      this.db = await getDatabaseManager(); // ✅ Wait here
+    }
     if (!this.modal){
 
       this.modal = await modalManager.register(MODALS.THEME);
@@ -248,7 +252,7 @@ async function handleDeleteButtonClick() {
 
   if (confirmed) {
     try {
-      await DatabaseManager.semantics.deleteTheme({
+      await themeModal.db.semantics.deleteTheme({
         projectId: cacheManager.projects.activeProjectId,
         theme: themeName
       })
@@ -269,7 +273,7 @@ async function handleActionButtonClick() {
     const themeName = themeNameInput.value.trim();
 
     try {
-      await DatabaseManager.semantics.addTheme({
+      await themeModal.db.semantics.addTheme({
         projectId: cacheManager.projects.activeProjectId,
         theme: themeName
       });
@@ -299,7 +303,7 @@ async function handleActionButtonClick() {
     try {
 
       if (newThemeName !== oldThemeName) {
-        await DatabaseManager.semantics.renameTheme({
+        await themeModal.db.semantics.renameTheme({
           projectId: cacheManager.projects.activeProjectId,
           oldTheme: oldThemeName,
           newTheme: newThemeName
@@ -313,7 +317,7 @@ async function handleActionButtonClick() {
       }
 
       if (defaultThemeCheckbox.checked) {
-        await DatabaseManager.projects.setDefaultThemeMode({
+        await themeModal.db.projects.setDefaultThemeMode({
           projectId: cacheManager.projects.activeProjectId,
           themeMode: newThemeName !== oldThemeName ? newThemeName : oldThemeName
         });

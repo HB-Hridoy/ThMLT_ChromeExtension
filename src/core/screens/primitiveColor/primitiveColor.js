@@ -1,18 +1,25 @@
 
-
 import cacheManager from "../../../utils/cache/cacheManager.js";
-import DatabaseManager from "../../../db/DatabaseManager.js";
 import { primitiveTable } from "../../../utils/primitiveTable.js";
-import { primitiveModal } from "../../modals/primitiveColorModal.js";
-import { screenManager, screens, COLOR_TABS } from "../../../utils/screenManager.js";
-import { throttle } from "../../sidepanel.js";
+import { screenManager, COLOR_TABS } from "../../../utils/screenManager.js";
+import { getDatabaseManager } from "../../../db/DatabaseManager.js";
 
 let init = false;
 let primitiveTableScreen = null;
 let noPrimitiveScreen = null;
 let isPrimitiveDataInitialized = false;
 
+let db = null;
+
 export async function InitializePrimitivesScreen() {
+
+  await primitiveTable.init();
+
+  if (!db) {
+    db = await getDatabaseManager();
+    console.log(db);
+    
+  }
 
   await screenManager.loadTab(COLOR_TABS.PRIMITIVES);
 
@@ -31,7 +38,7 @@ export async function populatePrimitiveData(){
 
   if (isPrimitiveDataInitialized) return console.log("[INFO] Semantic data already intialized");
 
-  const primitiveData = await DatabaseManager.primitives.getAllByProject({
+  const primitiveData = await db.primitives.getAllByProject({
     projectId: cacheManager.projects.activeProjectId
   });
 

@@ -1,21 +1,21 @@
-import cacheManager from "../utils/cache/cacheManager.js";
-import DatabaseModel from "./DatabaseModel.js";
+import { BaseModel } from './BaseModel.js';
+import cacheManager from '../../utils/cache/cacheManager.js';
 
-class TranslationModel extends DatabaseModel {
+export class TranslationModel extends BaseModel {
   constructor() {
-    super();
-    console.log("[DB] [INFO] TranslationModel initialized");
-    this.table = this.db.translations;
+    super('translations');
   }
 
   // 1. Add new translation entry
   async add({ projectId, translationData }) {
+    
     await this.table.add({ projectId, translationData });
     cacheManager.translations.add({ translationData });
   }
 
   // 2. Get all translations for a project
   async get({ projectId }) {
+    
     const translationData = await this.table
                                       .where("projectId")
                                       .equals(projectId)
@@ -27,6 +27,7 @@ class TranslationModel extends DatabaseModel {
 
   // 3. Check if any translation exists for the given projectId
   async hasTranslationForProject({ projectId }) {
+    
     const count = await this.table
       .where("projectId")
       .equals(projectId)
@@ -39,6 +40,7 @@ class TranslationModel extends DatabaseModel {
 
   // 4. Update translations for a project (updates all matching records)
   async update({ projectId, translationData }) {
+    
     const updates = await this.table
       .where("projectId")
       .equals(projectId)
@@ -51,6 +53,7 @@ class TranslationModel extends DatabaseModel {
 
   // 5. Delete all translations for a project
   async delete({ projectId }) {
+    
     return await this.table
       .where("projectId")
       .equals(projectId)
@@ -59,6 +62,7 @@ class TranslationModel extends DatabaseModel {
 
   // 2. Get all translations for a project
   async get({ projectId }) {
+    
     if (!projectId) {
       throw new Error("projectId is required");
     }
@@ -78,4 +82,3 @@ class TranslationModel extends DatabaseModel {
   }
 }
 
-export default TranslationModel;

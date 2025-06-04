@@ -1,4 +1,4 @@
-import DatabaseManager from '../../db/DatabaseManager.js';
+
 import { modalManager, MODALS } from '../../utils/modalManager.js';
 import { primitiveTable } from '../../utils/primitiveTable.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
@@ -6,6 +6,7 @@ import { replaceClass } from '../sidepanel.js';
 import { confirmationModal } from '../modals/confirmationModal.js'
 import { showNoPrimitivesScreen, showPrimitivesTable } from '../screens/primitiveColor/primitiveColor.js';
 import { semanticTable } from '../../utils/semanticTable.js';
+import { getDatabaseManager } from '../../db/DatabaseManager.js';
 
 let primitiveModalElement = null;
 
@@ -23,6 +24,7 @@ let pickrInstance = null;
 
 class PrimitiveModal {
   constructor() {
+    this.db = null;
     this.modal = null;
     this.listenersAdded = false;
     this.modes = {
@@ -33,6 +35,11 @@ class PrimitiveModal {
   }
 
   async show(mode, editValues) {
+
+    if (!this.db) {
+      this.db = await getDatabaseManager(); // ✅ Wait here
+    }
+
     if (!this.modal){
 
       this.modal = await modalManager.register(MODALS.PRIMITIVE_MODAL);
@@ -273,7 +280,7 @@ async function handleDeleteButtonClick() {
 
   if (confirmed) {
     try {
-      await DatabaseManager.primitives.delete({
+      await primitiveModal.db.primitives.delete({
         id: primitiveId
       });
       primitiveTable.deleteRow(primitiveId);
@@ -303,7 +310,7 @@ async function handleActionButtonClick() {
         primitiveValue: primitiveValue,
         orderIndex: primitiveTable.getNextOrderIndex()
       };
-      const primitiveId = await DatabaseManager.primitives.create(newPrimitive);
+      const primitiveId = await primitiveModal.db.primitives.create(newPrimitive);
 
       primitiveTable.addRow({
         primitiveId: primitiveId,
@@ -346,7 +353,7 @@ async function handleActionButtonClick() {
       }
       
       
-      await DatabaseManager.primitives.update({
+      await primitiveModal.db.primitives.update({
         id: primitiveId,
         updatedFields: updatedFields
       });

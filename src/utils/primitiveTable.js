@@ -1,10 +1,12 @@
 
 import { primitiveModal } from "../core/modals/primitiveColorModal.js";
-import DatabaseManager from "../db/DatabaseManager.js";
 import { calculateNewOrderIndex } from "../core/sidepanel.js";
 import cacheManager from "./cache/cacheManager.js";
+import { getDatabaseManager } from "../db/DatabaseManager.js";
+
 class PrimitiveTable {
   constructor() {
+    this.db = null;
     this.currentRowId = 1;
     this.table = null;
     this.tableBody = null;
@@ -27,6 +29,10 @@ class PrimitiveTable {
       childList: true,
       subtree: true,
     });
+  }
+
+  async init() {
+    if (!this.db) this.db = await getDatabaseManager();
   }
 
   addRow({ primitiveId = 0,  primitiveName = "Unknown", primitiveValue = "#ffffff", orderIndex, animation = false} = {}){
@@ -263,7 +269,7 @@ function makePrimitiveRowDraggable(row) {
     try {
       const newOrderIndex = primitiveTable.getNewOrderIndex(row);
       
-      await DatabaseManager.primitives.update({
+      await primitiveTable.db.primitives.update({
         id: row.id,
         updatedFields: {
           orderIndex: newOrderIndex
@@ -277,7 +283,7 @@ function makePrimitiveRowDraggable(row) {
       console.warn('[PRIMITIVE TABLE] Rebalancing required', e);
       primitiveTable.rebalanceOrderIndexes();
       
-      DatabaseManager.primitives.updateOrderIndexes({
+      primitiveTable.db.primitives.updateOrderIndexes({
         projectId: cacheManager.projects.activeProjectId,
         updatedPrimitiveOrders: primitiveTable.getOrderIndexes()
       })

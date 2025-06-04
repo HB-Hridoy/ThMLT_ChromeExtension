@@ -1,26 +1,24 @@
-import DatabaseModel from "./DatabaseModel.js";
-import cacheManager from "../utils/cache/cacheManager.js";
-import { semanticTable } from "../utils/semanticTable.js";
+import { BaseModel } from './BaseModel.js';
+import cacheManager from '../../utils/cache/cacheManager.js';
 
-class ProjectModel extends DatabaseModel {
+export class ProjectModel extends BaseModel {
   constructor() {
-    super(); // Call the constructor of DatabaseModel
-    this.log("[INFO] ProjectModel initialized");
+    super('projects');
   }
 
   // Create a new project
   async create({ projectName, author, version } = {}) {
-    if (!projectName) this.log("projectName is required", true);
+    if (!projectName) console.error("projectName is required");
 
     return new Promise(async (resolve, reject) => {
       try {
-        const existingProject = await this.db.projects
+        const existingProject = await this.table
           .where("projectName")
           .equals(projectName)
           .first();
 
         if (existingProject) {
-          this.log("Project already exists", true);
+          console.error("Project already exists");
           reject("Project already exists");
         }
 
@@ -36,14 +34,14 @@ class ProjectModel extends DatabaseModel {
           deletedAt: 0,
         };
 
-        await this.db.projects.add(projectData);
+        await this.table.add(projectData);
 
         cacheManager.projects.add(projectData)
-        this.log(`[SUCCESS] Project ${projectName} created`);
+        console.log(`[SUCCESS] Project ${projectName} created`);
 
         resolve(projectData);
       } catch (error) {
-        this.log(error, true);
+        console.error(error);
         reject("Error creating project");
       }
     });
@@ -51,28 +49,30 @@ class ProjectModel extends DatabaseModel {
 
   // Get a specific project by projectId
   async get({ projectId } = {}) {
-    if (!projectId) this.log("projectId is required", true);
+    if (!projectId) console.error("projectId is required");
 
-    await this.ready;
-    this.log("[INFO] Getting project...");
+    
+    console.log("[INFO] Getting project...");
 
     return new Promise(async (resolve, reject) => {
       try {
-        const result = await this.db.projects.get(projectId);
+        const result = await this.table.get(projectId);
         if (!result || result.deleted) resolve(null); // hide deleted entries
         resolve(result);
       } catch (error) {
-        this.log("Error getting project", true);
+        console.error("Error getting project");
         reject("Error getting project");
       }
     });
   }
 
   async getAll() {
-    this.log("[INFO] Getting all projects...");
+    console.log("[INFO] Getting all projects...");
+
+    
 
     try {
-      const result = await this.db.projects
+      const result = await this.table
         .where("deleted")
         .equals(0)
         .toArray();
@@ -80,12 +80,12 @@ class ProjectModel extends DatabaseModel {
       // Sort in memory by lastModified (newest first)
       const sorted = result.sort((a, b) => b.lastModified - a.lastModified);
 
-      this.log("[SUCCESS] Got all projects!");
+      console.log("[SUCCESS] Got all projects!");
 
       cacheManager.projects.addBulk(sorted);
       return sorted;
     } catch (error) {
-      this.log("Error getting projects", true);
+      console.error("Error getting projects");
       throw error;
     }
   }
@@ -97,13 +97,13 @@ class ProjectModel extends DatabaseModel {
     author = this.SKIP,
     version = this.SKIP,
   } = {}) {
-    if (!projectId) this.log("projectId is required", true);
+    if (!projectId) console.error("projectId is required");
 
-    await this.ready;
+    
 
     return new Promise(async (resolve, reject) => {
       try {
-        const record = await this.db.projects.get(projectId);
+        const record = await this.table.get(projectId);
         if (!record) reject("Project not found");
 
         const updatedRecord = {
@@ -115,23 +115,24 @@ class ProjectModel extends DatabaseModel {
           lastModified: Date.now(),
         };
 
-        await this.db.projects.put(updatedRecord);
+        await this.table.put(updatedRecord);
 
         cacheManager.projects.update(projectId, updatedRecord);
 
-        this.log(`[SUCCESS] Project ${projectId} updated`);
+        console.log(`[SUCCESS] Project ${projectId} updated`);
         resolve(updatedRecord);
       } catch (error) {
-        this.log("Error updating project", true);
+        console.error("Error updating project");
         reject("Error updating project");
       }
     });
   }
 
   async deleteProject({ projectId, hardDelete = false }) {
+    
     try {
       // Get the original project
-      const project = await this.db.projects.get(projectId);
+      const project = await this.table.get(projectId);
       if (!project) {
         throw new Error(`Project with ID ${projectId} not found`);
       }
@@ -146,7 +147,7 @@ class ProjectModel extends DatabaseModel {
           await this.db.translations.where('projectId').equals(projectId).delete();
           
           // Delete the project itself
-          await this.db.projects.delete(projectId);
+          await this.table.delete(projectId);
         });
   
         return {
@@ -156,7 +157,7 @@ class ProjectModel extends DatabaseModel {
   
       } else {
         // Soft delete: mark as deleted
-        await this.db.projects.update(projectId, {
+        await this.table.update(projectId, {
           deleted: true,
           deletedAt: new Date(),
           lastModified: new Date()
@@ -174,8 +175,9 @@ class ProjectModel extends DatabaseModel {
   
   // Optional: Function to restore a soft-deleted project
   async restoreProject({ projectId }) {
+    
     try {
-      const project = await this.db.projects.get(projectId);
+      const project = await this.table.get(projectId);
       if (!project) {
         throw new Error(`Project with ID ${projectId} not found`);
       }
@@ -187,7 +189,7 @@ class ProjectModel extends DatabaseModel {
         return false;
       }
   
-      await this.db.projects.update(projectId, {
+      await this.table.update(projectId, {
         deleted: false,
         deletedAt: null,
         lastModified: new Date()
@@ -206,19 +208,19 @@ class ProjectModel extends DatabaseModel {
   async addThemeMode({ projectId, themeMode } = {}) {
     this.#validateProjectThemeInput(projectId, themeMode);
 
-    await this.ready;
+    
 
-    const record = await this.db.projects.get(projectId);
+    const record = await this.table.get(projectId);
     if (!record) throw new Error("Project not found");
 
     if (!record.themeModes.includes(themeMode)) {
       record.themeModes.push(themeMode);
       record.lastModified = Date.now();
 
-      await this.db.projects.put(record);
+      await this.table.put(record);
       cacheManager.semantics.theme().add({ themeName: themeMode });
 
-      this.log(`[SUCCESS] Theme mode "${themeMode}" added to project ${projectId}`);
+      console.log(`[SUCCESS] Theme mode "${themeMode}" added to project ${projectId}`);
     }
 
     return record;
@@ -228,9 +230,9 @@ class ProjectModel extends DatabaseModel {
   async deleteThemeMode({ projectId, themeMode } = {}) {
     this.#validateProjectThemeInput(projectId, themeMode);
 
-    await this.ready;
+    
 
-    const record = await this.db.projects.get(projectId);
+    const record = await this.table.get(projectId);
     if (!record) throw new Error("Project not found");
 
     const index = record.themeModes.indexOf(themeMode);
@@ -239,10 +241,10 @@ class ProjectModel extends DatabaseModel {
     record.themeModes.splice(index, 1);
     record.lastModified = Date.now();
 
-    await this.db.projects.put(record);
+    await this.table.put(record);
     cacheManager.semantics.theme().delete({ themeName: themeMode });
 
-    this.log(`[SUCCESS] Theme mode "${themeMode}" deleted from project ${projectId}`);
+    console.log(`[SUCCESS] Theme mode "${themeMode}" deleted from project ${projectId}`);
     return record;
   }
 
@@ -251,9 +253,9 @@ class ProjectModel extends DatabaseModel {
     this.#validateProjectThemeInput(projectId, oldThemeMode, "oldThemeMode");
     this.#validateProjectThemeInput(projectId, newThemeMode, "newThemeMode");
 
-    await this.ready;
+    
 
-    const record = await this.db.projects.get(projectId);
+    const record = await this.table.get(projectId);
     if (!record) throw new Error("Project not found");
 
     const index = record.themeModes.indexOf(oldThemeMode);
@@ -266,13 +268,13 @@ class ProjectModel extends DatabaseModel {
       record.defaultThemeMode = newThemeMode;
     }
 
-    await this.db.projects.put(record);
+    await this.table.put(record);
     cacheManager.semantics.theme().rename({
       oldThemeName: oldThemeMode,
       newThemeName: newThemeMode
     });
 
-    this.log(`[SUCCESS] Theme mode "${oldThemeMode}" renamed to "${newThemeMode}" in project ${projectId}`);
+    console.log(`[SUCCESS] Theme mode "${oldThemeMode}" renamed to "${newThemeMode}" in project ${projectId}`);
     return record;
   }
 
@@ -287,7 +289,9 @@ class ProjectModel extends DatabaseModel {
   async setDefaultThemeMode({ projectId, themeMode } = {}) {
     this.#validateProjectThemeInput(projectId, themeMode);
 
-    const record = await this.db.projects.get(projectId);
+    
+
+    const record = await this.table.get(projectId);
     if (!record) throw new Error("Project not found");
 
     if (!record.themeModes.includes(themeMode)) {
@@ -297,18 +301,19 @@ class ProjectModel extends DatabaseModel {
     record.defaultThemeMode = themeMode;
     record.lastModified = Date.now();
 
-    await this.db.projects.put(record);
+    await this.table.put(record);
 
     cacheManager.semantics.theme().defaultThemeMode = themeMode;
 
-    this.log(`[SUCCESS] Default theme mode set to "${themeMode}" for project ${projectId}`);
+    console.log(`[SUCCESS] Default theme mode set to "${themeMode}" for project ${projectId}`);
     return record;
   }
 
   async duplicateProject({ projectId }) {
+    
     try {
       // Get the original project
-      const originalProject = await this.db.projects.get(projectId);
+      const originalProject = await this.table.get(projectId);
       if (!originalProject) {
         throw new Error(`[DB] Project with ID ${projectId} not found`);
       }
@@ -335,7 +340,7 @@ class ProjectModel extends DatabaseModel {
       };
 
 
-      await this.db.projects.add(newProject);
+      await this.table.add(newProject);
       const projectData = newProject;
 
       cacheManager.projects.add(projectData);
@@ -429,9 +434,10 @@ class ProjectModel extends DatabaseModel {
   }
 
   async exportColorData({ projectId }) {
+    
     try {
       // Query the project
-      const project = await this.db.projects.where('projectId').equals(projectId).first();
+      const project = await this.table.where('projectId').equals(projectId).first();
   
       // Return null if project not found
       if (!project) {
@@ -518,9 +524,10 @@ class ProjectModel extends DatabaseModel {
   }
 
   async exportFontData({ projectId }) {
+    
     try {
       // Query the project
-      const project = await this.db.projects.where('projectId').equals(projectId).first();
+      const project = await this.table.where('projectId').equals(projectId).first();
       
       // Return null if project not found
       if (!project) {
@@ -560,5 +567,3 @@ class ProjectModel extends DatabaseModel {
   }
 
 }
-
-export default ProjectModel;
