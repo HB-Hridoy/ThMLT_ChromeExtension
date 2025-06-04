@@ -1,19 +1,15 @@
 import Dexie from 'dexie';
-import ThMLT_DB_Schema from './schema.js';
+// import ThMLT_DB_Schema from './schema.js';
 
 class ThMLTDatabase extends Dexie {
   constructor() {
     super('ThMLTDatabase');
-    
-    // Define schema
-    this.version(ThMLT_DB_Schema.version).stores(ThMLT_DB_Schema.stores);
-    
-    // Define table references
-    this.projects = this.table('projects');
-    this.primitiveColors = this.table('primitiveColors');
-    this.semanticColors = this.table('semanticColors');
-    this.fonts = this.table('fonts');
-    this.translations = this.table('translations');
+
+    this.projects = null;
+    this.primitiveColors = null;
+    this.semanticColors = null;
+    this.fonts = null;
+    this.translations = null;
   }
 }
 
@@ -47,7 +43,14 @@ class DatabaseManager {
       
       // Open database (Dexie handles the connection automatically)
       await this.db.open();
-      
+
+      // Assign table references on the db instance
+      this.db.projects = this.db.table('projects');
+      this.db.primitiveColors = this.db.table('primitiveColors');
+      this.db.semanticColors = this.db.table('semanticColors');
+      this.db.fonts = this.db.table('fonts');
+      this.db.translations = this.db.table('translations');
+            
       this.initialized = true;
       console.log('DatabaseManager initialized successfully');
       return this;

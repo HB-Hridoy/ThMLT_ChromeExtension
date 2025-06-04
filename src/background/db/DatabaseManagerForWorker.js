@@ -3093,25 +3093,14 @@ const {
   add,
   remove
 } = Dexie;
-const ThMLT_DB_Schema = {
-  version: 1,
-  stores: {
-    projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
-    primitiveColors: "++primitiveId, projectId, primitiveName, orderIndex",
-    semanticColors: "++semanticId, projectId, semanticName, orderIndex",
-    fonts: "++fontId, projectId, fontName, orderIndex",
-    translations: "++translationId, projectId, translationData"
-  }
-};
 class ThMLTDatabase extends Dexie {
   constructor() {
     super("ThMLTDatabase");
-    this.version(ThMLT_DB_Schema.version).stores(ThMLT_DB_Schema.stores);
-    this.projects = this.table("projects");
-    this.primitiveColors = this.table("primitiveColors");
-    this.semanticColors = this.table("semanticColors");
-    this.fonts = this.table("fonts");
-    this.translations = this.table("translations");
+    this.projects = null;
+    this.primitiveColors = null;
+    this.semanticColors = null;
+    this.fonts = null;
+    this.translations = null;
   }
 }
 class DatabaseManager {
@@ -3134,6 +3123,11 @@ class DatabaseManager {
     try {
       this.db = new ThMLTDatabase();
       await this.db.open();
+      this.db.projects = this.db.table("projects");
+      this.db.primitiveColors = this.db.table("primitiveColors");
+      this.db.semanticColors = this.db.table("semanticColors");
+      this.db.fonts = this.db.table("fonts");
+      this.db.translations = this.db.table("translations");
       this.initialized = true;
       console.log("DatabaseManager initialized successfully");
       return this;
