@@ -1,11 +1,11 @@
-  import DatabaseManager from '../../db/DatabaseManager.js';
+
   import { modalManager, MODALS } from '../../utils/modalManager.js';
   import { semanticTable } from '../../utils/semanticTable.js';
   import cacheManager from '../../utils/cache/cacheManager.js';
   import { replaceClass } from '../sidepanel.js';
   import { confirmationModal } from '../modals/confirmationModal.js'
-  import { showNoPrimitivesScreen, showPrimitivesTable } from '../screens/primitiveColor/primitiveColor.js';
-import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColor/semanticColor.js';
+  import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColor/semanticColor.js';
+  import { getDatabaseManager } from '../../db/DatabaseManager.js';
  
   let semanticModalElement = null;
 
@@ -19,6 +19,7 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
 
   class SemanticModal{
     constructor(){
+      this.db = null;
       this.modal = null;
       this.listenersAdded = false;
       this.modes = {
@@ -30,6 +31,11 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
     }
 
     async show(mode, editValues = { semanticId: 0, semanticName: "Unkonown" }) {
+
+      if (!this.db) {
+        this.db = await getDatabaseManager(); // ✅ Wait here
+      }
+
       if (!this.modal){
   
         this.modal = await modalManager.register(MODALS.SEMANTIC);
@@ -205,7 +211,7 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
   
     if (confirmed) {
       try {
-        await DatabaseManager.semantics.delete({
+        await semanticModal.db.semantics.delete({
           semanticId: semanticId
         });
         semanticTable.deleteRow({ 
@@ -233,7 +239,7 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
           semanticName: semanticName,
           orderIndex: semanticTable.getNextOrderIndex()
         };
-        const semanticId = await DatabaseManager.semantics.create(newSemantic);
+        const semanticId = await semanticModal.db.semantics.create(newSemantic);
 
         semanticTable.addRow({
           semanticId,
@@ -262,7 +268,7 @@ import { showNoSemanticScreen, showSemanticTable } from '../screens/semanticColo
       try {
   
         if (newSemanticName !== oldSemanticName) {
-          await DatabaseManager.semantics.update({
+          await semanticModal.db.semantics.update({
             semanticId,
             newSemanticName
           });

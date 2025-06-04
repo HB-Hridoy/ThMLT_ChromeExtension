@@ -1,13 +1,19 @@
-import DatabaseModel from '../../../dist/DatabaseModelForWorker.js'
+import { getServiceWorkerDBManager } from "../db/DatabaseManagerForWorker.js";
 
-const dbModel = new DatabaseModel();
+let db = null;
 
 export async function handleProjectsDataFetch(message) {
 
   console.log("[PROJECT HANDLER] Getting all projects...");
   
   try {
-    const result = await dbModel.db.projects
+
+    if (!db){
+      db = await getServiceWorkerDBManager();
+    }
+    await db.ensureReady();
+
+    const result = await db.projects
       .where("deleted")
       .equals(0)
       .toArray();
@@ -21,12 +27,12 @@ export async function handleProjectsDataFetch(message) {
       console.info("[PROJECT HANDLER] Projects fetched successfully:", sortedProjectsData.length);
       return { success: true, data: sortedProjectsData };
     } else {
-      console.info("[PROJECT HANDLER] No projects data found for projectId:", projectId);
-      return { success: false, error: "No projects data available" };
+      console.info("[PROJECT HANDLER] No projects available");
+      return { success: false, error: "No projects available" };
     }
 
   } catch (error) {
-    console.log("[PROJECT HANDLER] Error getting projects");
+    console.log("[PROJECT HANDLER] Error getting projects", error);
     return { success: false, error: "Error getting projects"};
   }
 }

@@ -1,11 +1,10 @@
 
   import cacheManager from "../../../utils/cache/cacheManager.js";
-  import DatabaseManager from "../../../db/DatabaseManager.js";
-  import { primitiveModal } from "../../modals/primitiveColorModal.js";
   import { screenManager, screens} from "../../../utils/screenManager.js";
   import { fontModal } from "../../modals/fontModal.js";
-import { fontTableManager } from "../../../utils/fontsTableManager.js";
-import sessionManager from "../../../utils/sessionManager.js";
+  import { fontTableManager } from "../../../utils/fontsTableManager.js";
+  import sessionManager from "../../../utils/sessionManager.js";
+  import { getDatabaseManager } from "../../../db/DatabaseManager.js";
 
   let init = false;
   let fontsTableScreen = null;
@@ -14,8 +13,18 @@ import sessionManager from "../../../utils/sessionManager.js";
 
   let listenersAdded = false;
 
+
+  let db = null;
+
   // Exported Entry Point
   export async function showFontsManagementScreen() {
+
+    await fontTableManager.init();
+    
+    if (!db) {
+      db = await getDatabaseManager();
+    }
+
     await screenManager.switchScreen(screens.FONTS_MANAGEMENT);
 
     await sessionManager.set(sessionManager.DATA.SCREEN, screens.FONTS_MANAGEMENT.id);
@@ -53,7 +62,7 @@ import sessionManager from "../../../utils/sessionManager.js";
     }
 
     const projectId = cacheManager.projects.activeProjectId;
-    const fontsData = await DatabaseManager.fonts.getAll({ projectId });
+    const fontsData = await db.fonts.getAll({ projectId });
 
     fontTableManager.deleteAllRows();
 

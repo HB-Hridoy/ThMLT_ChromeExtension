@@ -1,11 +1,9 @@
-import DatabaseManager from '../../db/DatabaseManager.js';
+
 import { modalManager, MODALS } from '../../utils/modalManager.js';
-import { primitiveTable } from '../../utils/primitiveTable.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
 import { replaceClass } from '../sidepanel.js';
-import { confirmationModal } from '../modals/confirmationModal.js'
-import { showNoPrimitivesScreen, showPrimitivesTable } from '../screens/primitiveColor/primitiveColor.js';
-import { semanticTable } from '../../utils/semanticTable.js';
+import { getDatabaseManager } from '../../db/DatabaseManager.js';
+import { confirmationModal } from '../modals/confirmationModal.js';
 import { fontTableManager } from '../../utils/fontsTableManager.js';
 import { showFontsScreen, showNoFontsScreen } from '../screens/font/fontsManagement.js';
 
@@ -24,6 +22,7 @@ let actionButton = null;
 
 class FontModal {
   constructor() {
+    this.db = null;
     this.modal = null;
     this.listenersAdded = false;
     this.modes = {
@@ -34,11 +33,16 @@ class FontModal {
   }
 
   async show({ mode, fontId, currentFontName, currentFontValue }) {
+
+    if (!this.db) {
+      this.db = await getDatabaseManager();
+    }
+
     if (!this.modal){
 
       this.modal = await modalManager.register(MODALS.FONT);
     }
-    this.setMode({ mode, currentFontName, currentFontValue });
+    this.setMode({ mode, fontId, currentFontName, currentFontValue });
     this.modal.show();
 
     if (this.listenersAdded) return;
@@ -266,7 +270,7 @@ async function handleDeleteButtonClick() {
 
   if (confirmed) {
     try {
-      await DatabaseManager.fonts.delete({ fontId });
+      await fontModal.db.fonts.delete({ fontId });
 
       if(cacheManager.fonts.isEmpty()){
         showNoFontsScreen();
@@ -292,7 +296,7 @@ async function handleActionButtonClick() {
         fontValue,
         orderIndex: fontTableManager.getNextOrderIndex()
       };
-      const fontId = await DatabaseManager.fonts.create(newFontData);
+      const fontId = await fontModal.db.fonts.create(newFontData);
 
       fontTableManager.addRow({
         fontId,
@@ -331,7 +335,7 @@ async function handleActionButtonClick() {
         updatedFields.fontValue = newFontValue;
       }
       
-      await DatabaseManager.fonts.update({
+      await fontModal.db.fonts.update({
         fontId: fontId,
         updatedFields: updatedFields
       });

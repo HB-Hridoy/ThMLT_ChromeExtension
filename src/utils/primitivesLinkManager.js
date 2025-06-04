@@ -1,8 +1,8 @@
 import { linkPrimitiveModal } from "../core/modals/linkPrimitiveModal.js";
-import DatabaseManager from "../db/DatabaseManager.js";
 import cacheManager from "./cache/cacheManager.js";
 import { MODALS } from "./modalManager.js";
 import { semanticTable } from "./semanticTable.js";
+import { getDatabaseManager } from "../db/DatabaseManager.js";
 
 /**
  * PrimitivesLinkManager Class
@@ -18,6 +18,7 @@ import { semanticTable } from "./semanticTable.js";
 class PrimitivesLinkManager {
   constructor() {
 
+    this.db = null;
     this.container = null;
 
     const observer = new MutationObserver((mutationsList, observerInstance) => {
@@ -37,6 +38,10 @@ class PrimitivesLinkManager {
       childList: true,
       subtree: true,
     });
+  }
+
+  async init(){
+    if (!this.db) this.db = await getDatabaseManager();
   }
 
   /**
@@ -170,7 +175,7 @@ class PrimitivesLinkManager {
       const primitiveId = listItem.getAttribute("primitiveId");
       const primitiveData = cacheManager.primitives.getById(primitiveId);
 
-      await DatabaseManager.semantics.updateThemeValue({
+      await this.db.semantics.updateThemeValue({
         semanticId,
         theme,
         value: primitiveId

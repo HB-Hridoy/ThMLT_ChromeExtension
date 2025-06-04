@@ -1,15 +1,13 @@
 
-import DatabaseModel from "./DatabaseModel.js";
-import { semanticTable } from "../utils/semanticTable.js";
-import  cacheManager from "../utils/cache/cacheManager.js";
-import DatabaseManager from "./DatabaseManager.js";
+import { BaseModel } from './BaseModel.js';
+import cacheManager from '../../utils/cache/cacheManager.js';
+import { semanticTable } from "../../utils/semanticTable.js";
 
-class SemanticColorModel extends DatabaseModel {
-  constructor() {
-    super();
-    console.log("[INFO] SemanticColorModel initialized");
+export class SemanticColorModel extends BaseModel {
+  constructor(databaseManager) {
+    super('semanticColors');
+    this.dbm = databaseManager;
     this.SKIP = Symbol('SKIP');
-    this.table = this.db.semanticColors;
   }
 
   /**
@@ -31,7 +29,7 @@ class SemanticColorModel extends DatabaseModel {
     if (!semanticName) {
       throw new Error("Semantic name is required");
     }
-    
+
     // Get all themes from cache manager
     const themes = cacheManager.semantics.theme().getAll();
     
@@ -74,6 +72,7 @@ class SemanticColorModel extends DatabaseModel {
     if (!semanticId) {
       throw new Error("Semantic ID is required");
     }
+    
     semanticId = Number(semanticId);
 
     const semanticColor = await this.table.get(semanticId);
@@ -93,6 +92,8 @@ class SemanticColorModel extends DatabaseModel {
     if (!projectId) {
       throw new Error("Project ID is required");
     }
+
+    
     
     const semanticColors = await this.table
       .where({ projectId })
@@ -125,6 +126,8 @@ class SemanticColorModel extends DatabaseModel {
     if (!semanticId) {
       throw new Error("Semantic ID is required");
     }
+
+    
     semanticId = Number(semanticId);
     
     // Get the current semantic color
@@ -177,6 +180,7 @@ class SemanticColorModel extends DatabaseModel {
       throw new Error("Theme ID is required");
     }
     
+    
     // Get the current semantic color
     const semanticColor = await this.get({ semanticId });
     
@@ -214,6 +218,8 @@ class SemanticColorModel extends DatabaseModel {
       console.error("[DB] Both projectId and updatedSemanticOrders are required");
       return;
     }
+
+    
   
     const primaryKey = this.table.schema.primKey.name;
   
@@ -253,6 +259,8 @@ class SemanticColorModel extends DatabaseModel {
     if (!semanticId) {
       throw new Error("Semantic ID is required");
     }
+
+    
     semanticId = Number(semanticId);
     
     // Delete from the database
@@ -281,6 +289,8 @@ async addTheme({ projectId, theme } = {}) {
     throw new Error("Theme ID is required");
   }
 
+  
+
   const semanticColors = await this.getAll({ projectId });
 
   // Concurrently update all entries where theme is missing
@@ -296,7 +306,7 @@ async addTheme({ projectId, theme } = {}) {
 
   await Promise.all(updates);
 
-  await DatabaseManager.projects.addThemeMode({
+  await this.dbm.projects.addThemeMode({
     projectId,
     themeMode: theme
   });
@@ -322,6 +332,8 @@ async deleteTheme({ projectId, theme } = {}) {
     throw new Error("Theme ID is required");
   }
 
+  
+
   const semanticColors = await this.getAll({ projectId });
 
   const updates = semanticColors
@@ -337,7 +349,7 @@ async deleteTheme({ projectId, theme } = {}) {
 
   await Promise.all(updates);
 
-  await DatabaseManager.projects.deleteThemeMode({
+  await this.dbm.projects.deleteThemeMode({
     projectId,
     themeMode: theme
   });
@@ -364,6 +376,8 @@ async renameTheme({ projectId, oldTheme, newTheme } = {}) {
     throw new Error("Both oldTheme and newTheme are required");
   }
 
+  
+
   const semanticColors = await this.getAll({ projectId });
 
   // Concurrently update all entries where the old theme exists
@@ -381,7 +395,7 @@ async renameTheme({ projectId, oldTheme, newTheme } = {}) {
 
   await Promise.all(updates);
 
-  await DatabaseManager.projects.renameThemeMode({
+  await this.dbm.projects.renameThemeMode({
     projectId,
     oldThemeMode: oldTheme,
     newThemeMode: newTheme
@@ -392,5 +406,3 @@ async renameTheme({ projectId, oldTheme, newTheme } = {}) {
 
 
 }
-
-export default SemanticColorModel;

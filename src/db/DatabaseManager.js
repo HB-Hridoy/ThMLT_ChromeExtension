@@ -1,36 +1,59 @@
-import DatabaseModel from "./DatabaseModel.js";
-import ProjectModel from "./ProjectModel.js";
-import PrimitiveColorModel from "./PrimitiveColorModel.js";
-import SemanticColorModel from "./SemanticColorModel.js";
-import FontModel from "./FontModel.js";
-import TranslationModel from "./TranslationModel.js";
-import cacheManager from "../utils/cache/cacheManager.js";
+import { ProjectModel } from './models/ProjectModel.js';
+import { FontModel } from './models/FontModel.js';
+import { PrimitiveColorModel } from './models/PrimitiveColorModel.js';
+import { SemanticColorModel } from './models/SemanticColorModel.js';
+import { TranslationModel } from './models/TranslationModel.js';
+import { getDatabase } from './instance.js';
+import cacheManager from '../utils/cache/cacheManager.js';
 
-
-
-class DatabaseManager {
+export class DatabaseManager {
   constructor() {
-    this.projects = new ProjectModel();
-    this.primitives = new PrimitiveColorModel();
-    this.semantics = new SemanticColorModel();
-    this.fonts = new FontModel();
-    this.translations = new TranslationModel();
+    this.db = getDatabase();
+    this.initialized = false;
+    
+    // Initialize models - these will be available as properties
+    this.projects = null;
+    this.fonts = null;
+    this.primitives = null;
+    this.semantics = null;
+    this.translations = null;
+  }
 
-    // Listen to Dexie DB changes globally here
-    DatabaseModel.sharedDB.on("changes", async (changes) => {
-      const ai2SelectedProjectId = await getAI2SelectedProjectId();
-      const activeProjectId = cacheManager.projects.activeProjectId;
+  async initialize() {
+    if (this.initialized) return this;
 
-      console.log(ai2SelectedProjectId);
-      console.log(activeProjectId);
+    try {
+      // Initialize all model instances
+      this.projects = new ProjectModel();
+      this.fonts = new FontModel();
+      this.primitives = new PrimitiveColorModel();
+      this.semantics = new SemanticColorModel(this);
+      this.translations = new TranslationModel();
+
+      // Wait for database to be ready
+      await this.db.open();
+
+      // Listen to Dexie DB changes globally here
+      this.db.on("changes", async (changes) => {
+        const ai2SelectedProjectId = await getAI2SelectedProjectId();
+        const activeProjectId = cacheManager.projects.activeProjectId;
+
+        console.log(ai2SelectedProjectId);
+        console.log(activeProjectId);
+        
+        // Call handleChanges only once if condition is met
+        if ( ai2SelectedProjectId === activeProjectId ) {
+          this.handleChanges(changes);
+        }
+      });
       
-      
-
-      // Call handleChanges only once if condition is met
-      if ( ai2SelectedProjectId === activeProjectId ) {
-        this.handleChanges(changes);
-      }
-    });
+      this.initialized = true;
+      console.log('DatabaseManager initialized successfully');
+      return this;
+    } catch (error) {
+      console.error('Error initializing DatabaseManager:', error);
+      throw error;
+    }
   }
 
   handleChanges(changes) {
@@ -74,6 +97,25 @@ class DatabaseManager {
   }
 }
 
+// =============================================================================
+//  SINGLETON DATABASE MANAGER
+// =============================================================================
+
+// Create singleton instance
+let managerInstance = null;
+
+export async function getDatabaseManager() {
+  if (!managerInstance) {
+    managerInstance = new DatabaseManager();
+    await managerInstance.initialize();
+  }
+  return managerInstance;
+}
+
+// =============================================================================
+//  PRIVATE METHODS
+// =============================================================================
+
 function getPrimaryKeyName(table) {
   switch (table) {
     case "projects": return "projectId";
@@ -114,6 +156,3 @@ function applyModifications(target, mods) {
 
   return result;
 }
-
-
-export default new DatabaseManager();

@@ -1,6 +1,6 @@
-import DatabaseModel from '../../../dist/DatabaseModelForWorker.js'
+import { getServiceWorkerDBManager } from "../db/DatabaseManagerForWorker.js";
 
-const dbModel = new DatabaseModel();
+let db = null;
 
 export async function handleFontsDataFetch(message) {
 
@@ -11,7 +11,13 @@ export async function handleFontsDataFetch(message) {
   }
   
   try {
-    const fontsData =  await dbModel.db.fonts
+
+    if (!db){
+      db = await getServiceWorkerDBManager();
+    }
+    await db.ensureReady();
+
+    const fontsData =  await db.fonts
       .where("projectId")
       .equals(projectId)
       .toArray();

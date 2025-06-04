@@ -1,12 +1,9 @@
-import DatabaseModel from "./DatabaseModel.js";
-import cacheManager from "../utils/cache/cacheManager.js";
+import { BaseModel } from './BaseModel.js';
+import cacheManager from '../../utils/cache/cacheManager.js';
 
-class FontModel extends DatabaseModel{
+export class FontModel extends BaseModel{
   constructor() {
-    super();
-    console.log("[DB] [INFO] FontModel initialized");
-
-    this.table = this.db.fonts;
+    super('fonts');
   }
 
   async create({ projectId, fontName, fontValue, orderIndex = 0 } = {}) {
@@ -14,6 +11,8 @@ class FontModel extends DatabaseModel{
       console.error("[DB] projectId is required");
       throw new Error("projectId is required");
     }
+
+    
 
     const newFontData = {
                           projectId,
@@ -23,7 +22,7 @@ class FontModel extends DatabaseModel{
                         };
 
     try {
-      const fontId = await this.db.fonts.add(newFontData);
+      const fontId = await this.table.add(newFontData);
 
       newFontData.fontId = fontId;
 
@@ -41,8 +40,10 @@ class FontModel extends DatabaseModel{
       console.error("[DB] projectId and fontId are required.");
     }
 
+    
+
     try {
-      const font = await this.db.fonts
+      const font = await this.table
         .where(["projectId", "fontId"])
         .equals([projectId, fontId])
         .first();
@@ -62,8 +63,10 @@ class FontModel extends DatabaseModel{
       console.error("[DB] projectId is required.");
     }
 
+    
+
     try {
-      const fontsData = await this.db.fonts
+      const fontsData = await this.table
         .where("projectId")
         .equals(projectId)
         .toArray();
@@ -81,6 +84,8 @@ class FontModel extends DatabaseModel{
       console.error("[DB] Both fontId and updatedFields are required.");
       return;
     }
+
+    
   
     const numericFontId = Number(fontId);
   
@@ -90,7 +95,7 @@ class FontModel extends DatabaseModel{
     }
   
     try {
-      const updatedCount = await this.db.fonts.update(numericFontId, {
+      const updatedCount = await this.table.update(numericFontId, {
         ...updatedFields
       });
   
@@ -114,6 +119,8 @@ class FontModel extends DatabaseModel{
       console.error("[DB] Both projectId and updatedFontsOrders are required");
       return;
     }
+
+    
   
     const primaryKey = this.table.schema.primKey.name;
   
@@ -146,6 +153,8 @@ class FontModel extends DatabaseModel{
       console.error("[DB] fontId is required.");
       return;
     }
+
+    
   
     const numericFontId = Number(fontId);
     if (isNaN(numericFontId)) {
@@ -154,7 +163,7 @@ class FontModel extends DatabaseModel{
     }
   
     try {
-      await this.db.fonts.delete(numericFontId);
+      await this.table.delete(numericFontId);
 
       console.log(`[DB] [SUCCESS] Deleted font: ${cacheManager.fonts.getName({ fontId: numericFontId })}`);
       cacheManager.fonts.delete({ fontId: numericFontId });
@@ -167,4 +176,3 @@ class FontModel extends DatabaseModel{
   
 }
 
-export default FontModel;
