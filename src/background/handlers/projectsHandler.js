@@ -27,8 +27,8 @@ export async function handleProjectsDataFetch(message) {
       console.info("[PROJECT HANDLER] Projects fetched successfully:", sortedProjectsData.length);
       return { success: true, data: sortedProjectsData };
     } else {
-      console.info("[PROJECT HANDLER] No projects data found for projectId:", projectId);
-      return { success: false, error: "No projects data available" };
+      console.info("[PROJECT HANDLER] No projects available");
+      return { success: false, error: "No projects available" };
     }
 
   } catch (error) {
