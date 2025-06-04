@@ -1,6 +1,6 @@
-import DatabaseModel from '../../../dist/DatabaseModelForWorker.js'
+import { getServiceWorkerDBManager } from "../db/DatabaseManagerForWorker.js";
 
-const dbModel = new DatabaseModel();
+let db = null;
 
 export async function handleSemanticsDataFetch(message) {
 
@@ -11,7 +11,13 @@ export async function handleSemanticsDataFetch(message) {
   }
   
   try {
-    const semanticsColorsData =  await dbModel.db.semanticColors
+
+    if (!db){
+      db = await getServiceWorkerDBManager();
+    }
+    await db.ensureReady();
+
+    const semanticsColorsData =  await db.semanticColors
       .where("projectId")
       .equals(projectId)
       .sortBy("orderIndex");

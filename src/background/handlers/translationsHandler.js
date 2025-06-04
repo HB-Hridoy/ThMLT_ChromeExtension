@@ -1,6 +1,6 @@
-import DatabaseModel from '../../../dist/DatabaseModelForWorker.js'
+import { getServiceWorkerDBManager } from "../db/DatabaseManagerForWorker.js";
 
-const dbModel = new DatabaseModel();
+let db = null;
 
 export async function handleTranslationsDataFetch(message) {
   const { projectId } = message;
@@ -11,7 +11,13 @@ export async function handleTranslationsDataFetch(message) {
   }
 
   try {
-    const translations = await dbModel.db.translations
+
+    if (!db){
+      db = await getServiceWorkerDBManager();
+    }
+    await db.ensureReady();
+
+    const translations = await db.translations
       .where("projectId")
       .equals(projectId)
       .toArray();

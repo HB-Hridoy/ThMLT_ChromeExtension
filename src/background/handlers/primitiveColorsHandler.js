@@ -1,6 +1,6 @@
-import DatabaseModel from '../../../dist/DatabaseModelForWorker.js'
+import { getServiceWorkerDBManager } from "../db/DatabaseManagerForWorker.js";
 
-const dbModel = new DatabaseModel();
+let db = null;
 
 export async function handlePrimitivesDataFetch(message) {
 
@@ -11,7 +11,13 @@ export async function handlePrimitivesDataFetch(message) {
   }
   
   try {
-    const primitiveColorsData =  await dbModel.db.primitiveColors
+
+    if (!db){
+      db = await getServiceWorkerDBManager();
+    }
+    await db.ensureReady();
+
+    const primitiveColorsData =  await db.primitiveColors
                               .where("projectId")
                               .equals(projectId)
                               .sortBy("orderIndex");

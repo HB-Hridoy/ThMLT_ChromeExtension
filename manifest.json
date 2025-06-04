@@ -45,7 +45,9 @@
         "src/core/*",
         "src/styles/*.css",
         "src/db/*.js",
-        "src/utils/*.js"
+        "src/utils/*.js",
+        "src/background/handlers/*.js",
+        "src/background/db/*.js"
       ],
       "matches": [
         "<all_urls>"

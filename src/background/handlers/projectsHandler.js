@@ -1,13 +1,19 @@
-import DatabaseModel from '../../../dist/DatabaseModelForWorker.js'
+import { getServiceWorkerDBManager } from "../db/DatabaseManagerForWorker.js";
 
-const dbModel = new DatabaseModel();
+let db = null;
 
 export async function handleProjectsDataFetch(message) {
 
   console.log("[PROJECT HANDLER] Getting all projects...");
   
   try {
-    const result = await dbModel.db.projects
+
+    if (!db){
+      db = await getServiceWorkerDBManager();
+    }
+    await db.ensureReady();
+
+    const result = await db.projects
       .where("deleted")
       .equals(0)
       .toArray();
@@ -26,7 +32,7 @@ export async function handleProjectsDataFetch(message) {
     }
 
   } catch (error) {
-    console.log("[PROJECT HANDLER] Error getting projects");
+    console.log("[PROJECT HANDLER] Error getting projects", error);
     return { success: false, error: "Error getting projects"};
   }
 }
