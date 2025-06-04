@@ -90,18 +90,26 @@ export async function showProjectManagementScreen() {
         });
 
         if (confirmed) {
-          importTranslations();
+          importTranslations(true);
         }
       }
 
-      async function importTranslations() {
+      async function importTranslations(update = false) {
         try {
           const translationJson = await getTranslationFile();
 
-          db.translations.add({
-            projectId: cacheManager.projects.activeProjectId,
-            translationData: translationJson
-          });
+          if (update){
+            db.translations.update({
+              projectId: cacheManager.projects.activeProjectId,
+              translationData: translationJson
+            });
+          } else {
+            db.translations.add({
+              projectId: cacheManager.projects.activeProjectId,
+              translationData: translationJson
+            });
+          }
+          
 
           translationStatusError.classList.toggle("hidden", true);
           translationStatusImported.classList.toggle("hidden", false);
