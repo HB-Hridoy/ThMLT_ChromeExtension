@@ -158,11 +158,12 @@ class ScreenManager {
 
   bottomNavigationBar(show){
 
-    if (show) {
-      bottomNavBar.classList.replace("hidden", "visible");
-    } else {
-      bottomNavBar.classList.replace("visible", "hidden");
-    }
+    // if (show) {
+    //   bottomNavBar.classList.replace("hidden", "visible");
+    // } else {
+    //   bottomNavBar.classList.replace("visible", "hidden");
+    // }
+    bottomNavBar.classList.toggle("hidden", true);
 
 
   }
