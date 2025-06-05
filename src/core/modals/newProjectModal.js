@@ -149,7 +149,7 @@
     } 
 
     try {
-      const projectData = projectModal.db.projects.create({
+      const projectData = await projectModal.db.projects.create({
         projectName,
         author,
         version

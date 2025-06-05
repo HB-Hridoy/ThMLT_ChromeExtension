@@ -6,45 +6,39 @@ export class ProjectModel extends BaseModel {
     super('projects');
   }
 
-  // Create a new project
   async create({ projectName, author, version } = {}) {
-    if (!projectName) console.error("projectName is required");
+    if (!projectName) {
+      throw new Error("projectName is required");
+    }
 
-    return new Promise(async (resolve, reject) => {
-      try {
-        const existingProject = await this.table
-          .where("projectName")
-          .equals(projectName)
-          .first();
+    const existingProject = await this.table
+      .where("projectName")
+      .equals(projectName)
+      .first();
 
-        if (existingProject) {
-          console.error("Project already exists");
-          reject("Project already exists");
-        }
+    if (existingProject) {
+      throw new Error("Project already exists");
+    }
 
-        const projectData = {
-          projectId: crypto.randomUUID(),
-          projectName,
-          author,
-          version,
-          defaultThemeMode: "Light",
-          themeModes: ["Light", "Dark"],
-          lastModified: Date.now(),
-          deleted: 0,
-          deletedAt: 0,
-        };
+    const newProjectId = crypto.randomUUID();
 
-        await this.table.add(projectData);
+    const projectData = {
+      projectId: newProjectId,
+      projectName,
+      author,
+      version,
+      defaultThemeMode: "Light",
+      themeModes: ["Light", "Dark"],
+      lastModified: Date.now(),
+      deleted: 0,
+      deletedAt: 0,
+    };
 
-        cacheManager.projects.add(projectData)
-        console.log(`[SUCCESS] Project ${projectName} created`);
-
-        resolve(projectData);
-      } catch (error) {
-        console.error(error);
-        reject("Error creating project");
-      }
-    });
+    await this.table.add(projectData);
+    cacheManager.projects.add(projectData);
+    
+    console.log(`[SUCCESS] Project ${projectName} created`);
+    return projectData;
   }
 
   // Get a specific project by projectId
@@ -158,6 +152,7 @@ export class ProjectModel extends BaseModel {
       } else {
         // Soft delete: mark as deleted
         await this.table.update(projectId, {
+          projectName: `${project.projectName} (deleted)`,
           deleted: true,
           deletedAt: new Date(),
           lastModified: new Date()

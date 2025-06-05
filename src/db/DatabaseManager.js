@@ -38,11 +38,7 @@ export class DatabaseManager {
         const ai2SelectedProjectId = await getAI2SelectedProjectId();
         const activeProjectId = cacheManager.projects.activeProjectId;
 
-        console.log(ai2SelectedProjectId);
-        console.log(activeProjectId);
-        
-        // Call handleChanges only once if condition is met
-        if ( ai2SelectedProjectId === activeProjectId ) {
+        if (ai2SelectedProjectId === activeProjectId) {
           this.handleChanges(changes);
         }
       });
@@ -83,8 +79,7 @@ export class DatabaseManager {
       };
 
       console.log(message);
-      
-  
+    
       // Send to only App Inventor tab(s)
       chrome.tabs.query({ url: "*://ai2.appinventor.mit.edu/*" }, (tabs) => {
         for (const tab of tabs) {

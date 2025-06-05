@@ -52,15 +52,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
   });
 
-  const toolbarWatcherId = elementWatcher.addElement({
-    selector: '.ya-Toolbar',
-    onFound: (element) => {
-      createTestButton(element);
+  // const toolbarWatcherId = elementWatcher.addElement({
+  //   selector: '.ya-Toolbar',
+  //   onFound: (element) => {
+  //     createTestButton(element);
 
-      // Remove watcher after found and processed
-      elementWatcher.removeElement(toolbarWatcherId);
-    }
-  });
+  //     // Remove watcher after found and processed
+  //     elementWatcher.removeElement(toolbarWatcherId);
+  //   }
+  // });
 
 function createTestButton(toolBarElement) {
   

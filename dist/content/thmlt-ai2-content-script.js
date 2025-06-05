@@ -1848,48 +1848,6 @@ elementWatcher.addElement({
     }
   }
 });
-const toolbarWatcherId = elementWatcher.addElement({
-  selector: ".ya-Toolbar",
-  onFound: (element) => {
-    createTestButton(element);
-    elementWatcher.removeElement(toolbarWatcherId);
-  }
-});
-function createTestButton(toolBarElement) {
-  const thmltTestButton = document.createElement("div");
-  thmltTestButton.setAttribute("thmltTestButtonDiv", "true");
-  thmltTestButton.id = "thmltTestButtonDiv";
-  thmltTestButton.innerHTML = `
-          <div id="thmltTestButton" style="
-                                                      position: relative;
-                                                      display: flex;
-                                                      align-items: center;
-                                                      justify-content: center;
-                                                      gap: 5px;
-                                                      padding: 4px 10px;
-                                                      transition: background 0.2s, opacity 0.1s;
-                                                      color: #444;
-                                                      font-family: 'Poppins', Helvetica, Arial, sans-serif;
-                                                      font-weight: 500;
-                                                      font-size: 1.06em;
-                                                      white-space: nowrap;
-                                                      background-color: #a5cf47;
-                                                      border: 1px solid #444;
-                                                      border-radius: 4px;
-                                                      background-image: unset;
-                                                      text-shadow: unset;
-                                                      box-shadow: 1px 1px;
-                                                      cursor: pointer;
-          ">
-          <div style="font-size: 0.75rem">ThMLT Test</div>
-          </div>
-        `;
-  toolBarElement.querySelector(".left").appendChild(thmltTestButton);
-  console.log("Test Button creation successfull");
-  thmltTestButton.addEventListener("click", async (e) => {
-    handleTextFormatterButtonClick();
-  });
-}
 function createEditTextWithThmltModalButton() {
   const propertiesPanelTable = document.querySelector("table.ode-PropertiesPanel");
   if (propertiesPanelTable) {
