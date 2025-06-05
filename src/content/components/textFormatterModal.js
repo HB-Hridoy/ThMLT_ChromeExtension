@@ -229,6 +229,17 @@ class TextFormatterModal {
     this._shadowRoot.getElementById('text-formatter-modal-overlay').style.display = 'block';
     this._textFormatterModalElement.style.display = 'block';
 
+    if (activeAI2TextArea) {
+      const oldTextChunks = this.parseFormattedText(activeAI2TextArea.value.trim());
+      console.log(`text area found. creating chunks`);
+      
+
+      if (oldTextChunks.translation && oldTextChunks.font && oldTextChunks.color){
+        this._formattedTextElement.textContent = `${oldTextChunks.translation}, ${oldTextChunks.font}, ${oldTextChunks.color}`
+      }
+
+    }
+
     console.log("Text formatter modal opened");
     
   }
@@ -270,13 +281,33 @@ class TextFormatterModal {
   #applyFormattedTextToAI2TextArea() {
     const textArea = activeAI2TextArea;
     if (textArea) {
-                
-      textArea.value = this._formattedTextElement.textContent;
+      const remainingText = this.parseFormattedText(textArea.value.trim()).remainingText;
+      textArea.value = `[${this._formattedTextElement.textContent}]${remainingText}`;
       // Trigger input and change events
       textArea.dispatchEvent(new Event("input", { bubbles: true }));
       textArea.dispatchEvent(new Event("change", { bubbles: true }));
     }
   }
+
+  parseFormattedText(text) {
+    const regex = /^\[([^\[\],]+),([^\[\],]+),([^\[\],]+)\](.*)?$/;
+    const match = text.match(regex);
+
+    if (!match) {
+      return {
+        remainingText: text
+      };
+    }
+
+    return {
+      translation: match[1],
+      font: match[2],
+      color: match[3],
+      remainingText: (match[4] || '').trim()
+    };
+  }
+
+
 
   setTranslationScreenVisibility(show){
     if (show) {
