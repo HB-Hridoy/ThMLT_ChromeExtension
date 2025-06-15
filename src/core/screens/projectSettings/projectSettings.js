@@ -8,6 +8,7 @@ import { replaceClass } from "../../sidepanel.js";
 import sessionManager from "../../../utils/sessionManager.js";
 import { showColorManagementScreen } from "../color/colorManagement.js";
 import { getDatabaseManager } from "../../../db/DatabaseManager.js";
+import { showProjectManagementScreen } from "../projectManagement/projectManagement.js";
 
 let listenersAdded = false;
 
@@ -77,7 +78,7 @@ export async function showProjectSettingsScreen() {
   // ========== EVENT LISTENERS BEGIN ===========//
 
   document.getElementById("project-settings-back-button").addEventListener("click", async function(){
-    showColorManagementScreen();
+    showProjectManagementScreen();
   });
 
   colorThemesDataDownloadButton.addEventListener("click", async ()=>{
