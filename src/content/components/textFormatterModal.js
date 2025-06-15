@@ -191,9 +191,15 @@ class TextFormatterModal {
 
     const primitivesData = contentScriptCache.primitiveCache.getAll();
     const semanticsData = contentScriptCache.semanticCache.getAll();
+    const defaultThemeMode = contentScriptCache.projectCache.get({
+      id: contentScriptCache.getSelectedProjectId()
+    }).defaultThemeMode;
+
+    console.log(defaultThemeMode);
+    
 
     if (Array.isArray(semanticsData) && semanticsData.length > 0) {
-      this._colorTableManager.render(semanticsData, primitivesData, "Light");
+      this._colorTableManager.render(semanticsData, primitivesData, defaultThemeMode);
       this.setColorsScreenVisibility(true);
     } else {
       this.setColorsScreenVisibility(false);

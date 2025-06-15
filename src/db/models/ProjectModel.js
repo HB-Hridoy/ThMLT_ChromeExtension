@@ -1,5 +1,6 @@
 import { BaseModel } from './BaseModel.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
+import { semanticTable } from '../../utils/semanticTable.js';
 
 export class ProjectModel extends BaseModel {
   constructor() {

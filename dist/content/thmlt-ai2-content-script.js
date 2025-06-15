@@ -68,7 +68,7 @@ class ColorsTableManager {
   getThemeValue(semantic, theme) {
     const themeRef = semantic.themeValues[theme];
     const primitiveId = parseInt(themeRef);
-    if (!isNaN(primitiveId) && this._primitivesMap.has(primitiveId)) {
+    if (this._primitivesMap.has(primitiveId)) {
       return this._primitivesMap.get(primitiveId).primitiveValue;
     }
     return themeRef || "#000000";
@@ -1046,8 +1046,12 @@ class TextFormatterModal {
     this._applyFormattedTextButton.classList.toggle("disabled", true);
     const primitivesData = contentScriptCache.primitiveCache.getAll();
     const semanticsData = contentScriptCache.semanticCache.getAll();
+    const defaultThemeMode = contentScriptCache.projectCache.get({
+      id: contentScriptCache.getSelectedProjectId()
+    }).defaultThemeMode;
+    console.log(defaultThemeMode);
     if (Array.isArray(semanticsData) && semanticsData.length > 0) {
-      this._colorTableManager.render(semanticsData, primitivesData, "Light");
+      this._colorTableManager.render(semanticsData, primitivesData, defaultThemeMode);
       this.setColorsScreenVisibility(true);
     } else {
       this.setColorsScreenVisibility(false);

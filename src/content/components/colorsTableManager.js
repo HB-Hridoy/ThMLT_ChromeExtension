@@ -49,7 +49,7 @@ export class ColorsTableManager {
     
     // If it's a primitive ID (number), look up the primitive
     const primitiveId = parseInt(themeRef);
-    if (!isNaN(primitiveId) && this._primitivesMap.has(primitiveId)) {
+    if (this._primitivesMap.has(primitiveId)) {
       return this._primitivesMap.get(primitiveId).primitiveValue;
     }
     
