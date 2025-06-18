@@ -44,6 +44,12 @@ class SessionManager {
   
     if (projectId && screen) {
       console.log("[SESSION] Restoring previous session.");
+
+      if (!cacheManager.projects.isExist(projectId)){
+        console.log("[SESSION] Project not found cancel session resotre.");
+        return;
+      }
+      
       cacheManager.projects.activeProjectId = projectId;
   
       cacheManager.projects.get(projectId).themeModes.forEach((theme) => {

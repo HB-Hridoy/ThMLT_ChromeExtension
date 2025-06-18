@@ -2,7 +2,7 @@ import ThMLT_DB_Schema from './schema.js';
 
 class ThMLTDatabase extends window.Dexie {
   constructor() {
-    super('ThMLTDatabase');
+    super('ThMLTDatabase-Alpha2');
     
     // Define schema
     this.version(ThMLT_DB_Schema.version).stores(ThMLT_DB_Schema.stores);
