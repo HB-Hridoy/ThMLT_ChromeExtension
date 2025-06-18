@@ -5,7 +5,10 @@ class ThMLTDatabase extends window.Dexie {
     super('ThMLTDatabase-Alpha2');
     
     // Define schema
-    this.version(ThMLT_DB_Schema.version).stores(ThMLT_DB_Schema.stores);
+    this.version(ThMLT_DB_Schema.version).stores(ThMLT_DB_Schema.stores)
+    .upgrade(tx => {
+      
+    });
     
     // Define table references
     this.projects = this.table('projects');

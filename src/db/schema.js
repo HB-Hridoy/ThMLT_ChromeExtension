@@ -1,10 +1,11 @@
 const ThMLT_DB_Schema = {
-  version: 1,
+  version: 2,
   stores: {
     projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",
     primitiveColors: "++primitiveId, projectId, primitiveName, orderIndex",
     semanticColors: "++semanticId, projectId, semanticName, orderIndex",
     fonts: "++fontId, projectId, fontName, orderIndex",
+    typography: "++typographyId, projectId, typographyName, orderIndex",
     translations: "++translationId, projectId, translationData",
   }
 };
