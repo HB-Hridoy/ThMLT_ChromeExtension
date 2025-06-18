@@ -1,28 +1,16 @@
-.CodeMirror {
-    height: 100%;
-    width: 100%;
-    font-size: 12px;
-    line-height: 1.4;
+/* Visual feedback for the dragging row */
+.dragging {
+  /* cursor: grabbing !important; */
+  opacity: 0.5;
+  background-color: rgb(225 239 254);
+  transition: opacity 0.2s ease;
 }
 
-.CodeMirror-gutters {
-    width: 40px;
-    height: 100%;
+.semantic-table-cell-dragging {
+  background-color: rgb(225 239 254);
+  min-height: 40px;
+  display: flex;
+  align-items: stretch;
+  border: 1px solid #e5e6e7;
+  border-collapse: collapse;
 }
-  /* Visual feedback for the dragging row */
-  .dragging {
-    /* cursor: grabbing !important; */
-    opacity: 0.5; 
-    background-color: rgb(225 239 254);
-    transition: opacity 0.2s ease;
-  }
-
-  .semantic-table-cell-dragging {
-    background-color: rgb(225 239 254);
-    min-height: 40px;
-    display: flex;
-    align-items: stretch;
-    border: 1px solid #e5e6e7;
-    border-collapse: collapse;
-}
-  

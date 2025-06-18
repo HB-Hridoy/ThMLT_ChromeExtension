@@ -1,0 +1,82 @@
+<div id="semantic-screen" class="hidden p-3 rounded-lg bg-gray-50 dark:bg-gray-800 h-full max-w-full">
+
+    <div id="semantic-table-container" class="semantic-table-container">
+        <table id="semantic-table" class="semantic-table">
+            <colgroup>
+                <col class="semantic-col-name" />
+                <col class="semantic-col-theme" span="3" />
+                <col class="semantic-col-edit" />
+            </colgroup>
+            <thead>
+                <tr class="semantic-header-row">
+                    <th class="semantic-name-column sticky-left">Name</th>
+                    <th class="semantic-theme-header active-theme" data-theme="Light">Light</th>
+                    <th class="semantic-theme-header" data-theme="dark">dark</th>
+                    <th class="semantic-theme-header" data-theme="darkest">darkest</th>
+                    <th class="semantic-add-theme-cell sticky-right flex justify-center items-center">
+                        <div
+                            class="add-theme-button text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 items-center h-6 w-6 cursor-pointer">
+                            <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5v14m8-7h-2m0 0h-2m2 0v2m0-2v-2M3 11h6m-6 4h6m11 4H4c-.55228 0-1-.4477-1-1V6c0-.55228.44772-1 1-1h16c.5523 0 1 .44772 1 1v12c0 .5523-.4477 1-1 1Z" />
+                            </svg>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="1" order-index="1" draggable="true" class="item-row">
+                    <td class="semantic-name-cell sticky-left">
+                        <div class="semantic-name-container">
+                            <div class="semantic-row-icon">
+                                <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path fill="currentColor" fill-rule="evenodd"
+                                        d="M16.95 7.05a6.97 6.97 0 0 1 2.005 4.15c.2 1.75-1.36 2.8-2.73 2.8H15a1 1 0 0 0-1 1v1.225c0 1.37-1.05 2.93-2.8 2.73A7 7 0 1 1 16.95 7.05m1.01 4.264c.112.97-.759 1.686-1.735 1.686H15a2 2 0 0 0-2 2v1.225c0 .976-.715 1.847-1.686 1.736a6 6 0 1 1 6.647-6.646M13 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-3.134 2.5a1 1 0 1 0-1.732-1 1 1 0 0 0 1.732 1m5.634.366a1 1 0 1 1-1-1.732 1 1 0 0 1 1 1.732M8.134 14.5a1 1 0 1 0 1.732-1 1 1 0 0 0-1.732 1"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="semantic-name">surface-primary</div>
+                        </div>
+                    </td>
+                    <td class="semantic-value-cell" theme-mode="Light">
+                        <div class="semantic-value-container">
+                            <div class="semantic-color-thumbnail" style="background-color: #ffffff"></div>
+                            <div class="semantic-theme-value">Click to link color</div>
+                        </div>
+                    </td>
+                    <td class="semantic-value-cell" theme-mod="dark">
+                        <div class="semantic-value-container">
+                            <div class="semantic-color-thumbnail" style="background-color: rgb(22,22,27)"></div>
+                            <div class="semantic-theme-value">Click to link color</div>
+                        </div>
+                    </td>
+                    <td class="semantic-value-cell" theme-mod="darkest">
+                        <div class="semantic-value-container">
+                            <div class="semantic-color-thumbnail" style="background-color: rgb(22,22,27)"></div>
+                            <div class="semantic-theme-value">Click to link color</div>
+                        </div>
+                    </td>
+                    <td class="semantic-edit-cell sticky-right">
+                        <div class="edit-button">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <path stroke="#6b7280" stroke-linecap="round" stroke-width="2"
+                                    d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2">
+                                </path>
+                            </svg>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="no-semantic-screen" class="hidden w-full pt-16 p-4 text-center bg-white">
+        <h5 class="mb-2 text-3xl font-bold text-gray-900 ">No semantics found</h5>
+        <p class="mb-5 text-base text-gray-500 sm:text-lg">Create new to continue.</p>
+        <div class="items-center justify-center space-y-4 sm:flex sm:space-y-0 sm:space-x-4 rtl:space-x-reverse">
+        </div>
+
+        <div class="h-24"></div>
+    </div>

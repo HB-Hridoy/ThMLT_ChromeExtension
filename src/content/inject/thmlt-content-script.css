@@ -1,0 +1,537 @@
+:root {
+    all: initial;
+    font-family: "Poppins", Helvetica, sans-serif;
+    --white: #fff;
+
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+
+    --blue-50: #eff6ff;
+    --blue-100: #dbe4ff;
+    --blue-200: #bfdbfe;
+    --blue-300: #93c5fd;
+    --blue-400: #60a5fa;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+    --blue-700: #1d4ed8;
+    --blue-800: #1e40af;
+    --blue-900: #1e3a8a;
+
+    --red-50: #fef2f2;
+    --red-100: #fee2e2;
+    --red-200: #fecaca;
+    --red-300: #fca5a5;
+    --red-400: #f87171;
+    --red-500: #f87171;
+    --red-600: #ef4444;
+    --red-700: #dc2626;
+    --red-800: #b91c1c;
+    --red-900: #7f1d1d;
+}
+
+div {
+    all: unset;
+    /* Resets all styles, including unicode-bidi */
+}
+
+
+.width-full {
+    width: 100%;
+}
+
+/* The overlay covering the whole page */
+#text-formatter-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent background */
+    z-index: 999;
+    /* Make sure overlay is above other content */
+    display: none;
+    /* Initially hidden */
+}
+
+#textFormatterModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* This is fine for initial centering */
+    background-color: var(--white);
+    box-shadow: 5px 5px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    width: 700px;
+    height: 500px;
+    border: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+    display: none;
+    /* Make it a flex container */
+    flex-direction: column;
+    /* Stack children vertically */
+}
+
+#text-formatter-modal-formatted-text {
+    font-size: 10px;
+    color: var(--white);
+    background-color: var(--red-700);
+    padding: 5px;
+    border-radius: 5px;
+    margin: 8px 8px 0 8px;
+}
+
+.screensContainerParent {
+    flex: 1;
+    /* Takes full available space inside #textFormatterPopup */
+    display: flex;
+    flex-direction: column;
+    /* Ensures children expand properly */
+}
+
+.screensContainer {
+    flex: 1;
+    /* Fills the remaining space inside .screensContainerParent */
+    border-top: 1px solid var(--gray-200);
+    overflow: hidden;
+}
+
+.text-formatter-modal-buttons-parent {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.buttonRed {
+    color: var(--white);
+    background-color: var(--red-700);
+    font-weight: 500;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    text-align: center;
+}
+
+.buttonRed:hover {
+    background-color: var(--red-800);
+}
+
+.buttonBlue {
+    color: var(--white);
+    background-color: var(--blue-700);
+    font-weight: 500;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    text-align: center;
+}
+
+.buttonBlue.disabled {
+    background-color: var(--gray-700);
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+
+.buttonBlue:hover {
+    background-color: var(--blue-800);
+}
+
+
+
+.textFormatterNavTabs {
+    display: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: center;
+    color: var(--gray-500);
+    border-left: 1px solid var(--gray-200);
+    border-right: 1px solid var(--gray-200);
+    border-radius: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .textFormatterNavTabs {
+        display: flex;
+    }
+}
+
+.textFormatterNavTab {
+    display: inline-block;
+    width: 33.3%;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    background-color: var(--gray-50);
+    color: var(--gray-500);
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.textFormatterNavTabSelected {
+    display: inline-block;
+    width: 33.3%;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    background-color: var(--blue-700);
+    color: var(--white);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.textFormatterNavTab:hover {
+    background-color: var(--gray-100);
+}
+
+.text-formatter-modal-color-search-input-parent,
+.text-formatter-modal-translation-search-input-parent {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 20px;
+    margin: 8px;
+    font-size: 12px;
+    color: var(--gray-900);
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    background-color: var(--gray-50);
+}
+
+.text-formatter-modal-color-search-input,
+.text-formatter-modal-translation-search-input {
+    color: var(--gray-500);
+    font-size: 12px;
+    background-color: transparent;
+    padding-left: 8px;
+    border: 0;
+    flex: 1;
+    outline: none;
+    box-shadow: none;
+}
+
+
+
+/*//////////////////////////////////////////////////////////////////
+[tableWrapper]*/
+.tableWrapper {
+    table-layout: fixed;
+    border-collapse: separate;
+    /* Change from collapse to separate */
+    border-spacing: 0;
+    /* Remove extra spacing */
+    width: 680px;
+    margin: 10px 10px 10px 10px;
+    border-radius: 10px;
+    /* Rounds the entire table */
+    overflow: hidden;
+    /* Ensures child elements don’t overflow */
+    color: var(--white);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tableWrapper thead {
+    font-size: 14px;
+    background-color: var(--blue-500);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tableWrapper th,
+.tableWrapper td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Round only the top corners of the table */
+.tableWrapper thead tr:first-child th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.tableWrapper thead tr:first-child th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Round only the bottom corners of the last row */
+.tableWrapper tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+.tableWrapper tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+.tableWrapper td {
+    color: var(--gray-500);
+    font-size: 12px;
+    min-width: 300px;
+    cursor: pointer;
+}
+
+.no-translations-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 412px;
+    min-height: 412px;
+    max-height: 412px;
+    width: 100%;
+}
+
+.no-fonts-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 412px;
+    min-height: 412px;
+    max-height: 412px;
+    width: 100%;
+}
+
+.no-colors-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    height: 412px;
+    min-height: 412px;
+    max-height: 412px;
+    width: 100%;
+}
+
+.content {
+    text-align: center;
+}
+
+.content p:first-of-type {
+    font-weight: bold;
+    font-size: 25px;
+}
+
+
+
+.text-formatter-modal-translations-table-body {
+    display: block;
+    height: 308px;
+    min-height: 308px;
+    max-height: 308px;
+    overflow-y: scroll;
+    width: 100%;
+}
+
+.text-formatter-modal-fonts-table-body {
+    display: block;
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+    overflow-y: scroll;
+    width: 100%;
+}
+
+.text-formatter-modal-colors-table-body {
+    display: block;
+    height: 308px;
+    min-height: 308px;
+    max-height: 308px;
+    overflow-y: scroll;
+    width: 100%;
+}
+
+
+
+.tableWrapper thead,
+.tableWrapper tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.highlight {
+    background-color: var(--blue-200);
+    /* Change to any highlight color */
+    transition: background-color 0.3s ease-in-out;
+}
+
+.semantic-value-cell {
+    display: flex;
+    align-items: center;
+}
+
+.semantic-value-thumbnail {
+    height: 13px;
+    width: 13px;
+    border-radius: 3px;
+    margin-right: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    /* Stronger shadow */
+}
+
+/* Modal overlay */
+#link-project-modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 50;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+}
+
+.modal-content {
+    width: 50%;
+    max-width: 28rem;
+    height: 80%;
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    height: 80vh;
+}
+
+/* Modal header */
+.modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background-color: white;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+/* Modal title */
+.modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* Close button */
+#hide-link-project-modal {
+    color: #9ca3af;
+    background-color: transparent;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    height: 2rem;
+    width: 2rem;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+#hide-link-project-modal:hover {
+    background-color: #e5e7eb;
+    color: #111827;
+}
+
+/* Close button icon */
+#hide-link-project-modal svg {
+    width: 0.75rem;
+    height: 0.75rem;
+}
+
+/* Modal body */
+.modal-body {
+    height: calc(80vh - 73px);
+    /* already good */
+    padding: 1rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-body-content {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* important for preventing overflow */
+}
+
+#select-project-modal-projects-container {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    /* required so it doesn’t overflow when flexed */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+
+#select-project-modal-projects-container>li {
+    margin-bottom: 0.75rem;
+}
+
+#select-project-modal-projects-container>li:last-child {
+    margin-bottom: 0;
+}
+
+/* Project card styles */
+.project-card {
+    display: flex;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.project-card:hover {
+    background-color: #e5e7eb;
+}
+
+/* Project name */
+.project-name {
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #111827;
+    margin-top: 0;
+}
+
+/* Project details */
+.project-author,
+.project-version,
+.project-last-modified {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #374151;
+    margin: 0;
+}
