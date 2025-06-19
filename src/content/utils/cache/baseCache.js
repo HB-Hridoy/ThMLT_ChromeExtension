@@ -58,9 +58,20 @@ export default class BaseCache {
     return deleted;
   }
 
-  isExist({ id }) {
+  isExist({ id, name }) {
+  if (id !== undefined) {
     return this.#items.some((item) => item[this.#idField] === id);
   }
+
+  if (name !== undefined) {
+    const nameField = `${this.#type}Name`;
+    return this.#items.some((item) => item[nameField] === name);
+  }
+
+  console.warn(`[CACHE] [WARN] isExist called without 'id' or 'name'.`);
+  return false;
+}
+
 
   existName({ name, nameField }) {
     return this.#items.some((item) => item[nameField] === name);
