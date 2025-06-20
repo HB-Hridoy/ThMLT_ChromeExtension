@@ -35,80 +35,103 @@ class TypographyTableManager {
     if (!this.db) this.db = await getDatabaseManager();
   }
 
-  addRow({ typographyId = 0,  typographyName = "Unknown", linkedFont = "Unknown", orderIndex, animation = false} = {}){
-    
-    const nameTd = `<td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap w-2/4">
-                        <div class="flex items-center w-full">
-                          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="m10.5785 19 4.2979-10.92966c.0369-.09379.1674-.09379.2042 0L19.3785 19m-8.8 0H9.47851m1.09999 0h1.65m7.15 0h-1.65m1.65 0h1.1m-7.7-3.9846h4.4M3 16l1.56685-3.9846m0 0 2.73102-6.94506c.03688-.09379.16738-.09379.20426 0l2.50367 6.94506H4.56685Z" />
-                          </svg>
-                          <p id="typography-name" class="text-xs text-gray-500 ml-2 w-full">${typographyName}</p>
-                          
-                        </div>
-                      </td>
-                    `;
+addRow({ 
+  typographyId, 
+  typographyName, 
+  linkedFont, 
+  fontSize, 
+  lineHeight, 
+  letterSpacing, 
+  orderIndex, 
+  animation = false 
+} = {}) {
 
-    const linkedFontTd = `
-    <td class="px-6 py-3 w-2/4">
-      <div class="w-full flex items-center relative">
-        <p id="linked-font" class="flex-1 text-xs mr-2">${linkedFont}</p>
-  
+  const resolvedFont = linkedFont === "0"
+        ? "default"
+        : cacheManager.fonts.getName({ fontId: linkedFont }) || "unknown";
+
+  const nameTd = `
+    <td class="px-6 py-3 font-medium text-gray-900 whitespace-nowrap w-2/4">
+      <div class="flex items-center w-full">
+        <svg class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="m10.5785 19 4.2979-10.92966c.0369-.09379.1674-.09379.2042 0L19.3785 19m-8.8 0H9.47851m1.09999 0h1.65m7.15 0h-1.65m1.65 0h1.1m-7.7-3.9846h4.4M3 16l1.56685-3.9846m0 0 2.73102-6.94506c.03688-.09379.16738-.09379.20426 0l2.50367 6.94506H4.56685Z" />
+        </svg>
+        <p id="typography-name" class="text-xs text-gray-600 ml-2 w-full truncate">${typographyName}</p>
+      </div>
+    </td>
+  `;
+
+  const pill = (label, value, id) => `
+    <div class="text-xs font-medium bg-gray-100 text-gray-700 px-2 py-1 rounded-md w-fit mb-1">
+      <span class="text-gray-500">${label}:</span> <span class="font-bold" id="${id}">${value}</span>
+    </div>
+  `;
+
+
+  const typographyPropertiesTd = `
+    <td class="px-6 py-3 w-2/4 align-top">
+      <div class="flex justify-between items-start">
+        <div class="flex flex-col">
+          ${pill("Font", resolvedFont, `pill-font-${typographyId}`)}
+          ${pill("Size", fontSize, `pill-size-${typographyId}`)}
+          ${pill("Line Height", lineHeight, `pill-line-height-${typographyId}`)}
+          ${pill("Letter Spacing", letterSpacing, `pill-letter-spacing-${typographyId}`)}
+        </div>
         <button id="typography-edit-button-${typographyId}" 
-          class="typography-edit-button hidden text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 items-center ml-2 transition-all duration-150">
+          class="typography-edit-button hidden text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 ml-2 transition-all duration-150">
           <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path stroke="#ffffff" stroke-linecap="round" stroke-width="2"
+            <path stroke="currentColor" stroke-linecap="round" stroke-width="2"
               d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
           </svg>
           <span class="sr-only">Edit</span>
         </button>
       </div>
     </td>
-                    `;
-  
-    const newRow = ` <tr id="${typographyId}" order-index="${orderIndex}" draggable="true" class="font-row bg-white border-b cursor-grab active:cursor-grabbing hover:bg-gray-50">
-                        ${nameTd}
-                        ${linkedFontTd}
-                      </tr>
-                    `;
-    
-    this.tableBody.insertAdjacentHTML("beforeend", newRow);
-                      
-    
-    // Make the new row draggable
-    const addedRow = this.tableBody.lastElementChild;
-    makeFontRowDraggable(addedRow);
+  `;
 
-    if (animation) {
-      addedRow.classList.add("highlight-added-row");
-      setTimeout(() => {
-        addedRow.classList.remove("highlight-added-row");
-      }, 500);
-    }
-    
 
-    this.currentRowId++;
+  const newRow = `
+    <tr id="${typographyId}" order-index="${orderIndex}" draggable="true" class="typography-row bg-white border-b cursor-grab active:cursor-grabbing hover:bg-gray-50">
+      ${nameTd}
+      ${typographyPropertiesTd}
+    </tr>
+  `;
 
-    document.querySelector(`#typography-edit-button-${typographyId}`).addEventListener("click", (e) => {
-      e.stopPropagation();
+  this.tableBody.insertAdjacentHTML("beforeend", newRow);
 
-      const typography = cacheManager.typography.get({
-        id: typographyId
-      });
+  const addedRow = this.tableBody.lastElementChild;
+  makeFontRowDraggable(addedRow);
 
-      typographyModal.show({
-        mode: typographyModal.modes.EDIT,
-        typographyId: typographyId,
-        currentTypographyName: typography.typographyName,
-        currentLinkedFont: typography.linkedFont,
-        currentFontSize: typography.fontSize,
-        currentLineHeight: typography.lineHeight,
-        currentLetterSpacing: typography.letterSpacing
-      });
-
-    });
-    
+  if (animation) {
+    addedRow.classList.add("highlight-added-row");
+    setTimeout(() => {
+      addedRow.classList.remove("highlight-added-row");
+    }, 500);
   }
+
+  this.currentRowId++;
+
+  document.querySelector(`#typography-edit-button-${typographyId}`)?.addEventListener("click", (e) => {
+    e.stopPropagation();
+
+    const typography = cacheManager.typography.get({ id: typographyId });
+
+    console.log(JSON.stringify(typography, null, 2));
+    
+
+    typographyModal.show({
+      mode: typographyModal.modes.EDIT,
+      typographyId,
+      currentTypographyName: typography.typographyName,
+      currentLinkedFont: typography.linkedFont,
+      currentFontSize: typography.fontSize,
+      currentLineHeight: typography.lineHeight,
+      currentLetterSpacing: typography.letterSpacing
+    });
+  });
+}
+
 
   getRow({ typographyId }){
     const row = this.table.querySelector(`tr[id="${typographyId}"]`);
