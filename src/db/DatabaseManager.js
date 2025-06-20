@@ -15,7 +15,7 @@ export class DatabaseManager {
     // Initialize models - these will be available as properties
     this.projects = null;
     this.fonts = null;
-    this.typographies = null;
+    this.typography = null;
     this.primitives = null;
     this.semantics = null;
     this.translations = null;
@@ -28,7 +28,7 @@ export class DatabaseManager {
       // Initialize all model instances
       this.projects = new ProjectModel();
       this.fonts = new FontModel();
-      this.typographies = new TypographyModel();
+      this.typography = new TypographyModel();
       this.primitives = new PrimitiveColorModel();
       this.semantics = new SemanticColorModel(this);
       this.translations = new TranslationModel();

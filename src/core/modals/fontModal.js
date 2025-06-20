@@ -5,7 +5,7 @@ import { replaceClass } from '../sidepanel.js';
 import { getDatabaseManager } from '../../db/DatabaseManager.js';
 import { confirmationModal } from '../modals/confirmationModal.js';
 import { fontTableManager } from '../../utils/fontsTableManager.js';
-import { showFontsScreen, showNoFontsScreen } from '../screens/font/fontsManagement.js';
+import { showFontsScreen, showNoFontsScreen } from '../screens/typography/typographyManagement.js';
 
 let fontModalElement = null;
 

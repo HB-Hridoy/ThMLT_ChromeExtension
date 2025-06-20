@@ -17,6 +17,14 @@
     display: inline-flex;
 }
 
+.typography-edit-button {
+    display: none;
+}
+
+.typography-row:hover .typography-edit-button {
+    display: inline-flex;
+}
+
 .font-edit-button {
     display: none;
 }

@@ -1,13 +1,13 @@
 import cacheManager from "../../../utils/cache/cacheManager.js";
 import { screenManager, screens } from "../../../utils/screenManager.js";
 import { showColorManagementScreen, showPrimitivesTab } from "../color/colorManagement.js";
-import { showFontsManagementScreen } from "../font/fontsManagement.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
 import { showMessageModal } from "../../modals/messageModal.js";
 import { showProjectSettingsScreen } from "../projectSettings/projectSettings.js";
 import sessionManager from "../../../utils/sessionManager.js";
 import { showHomeScreen } from "../home/home.js";
 import { getDatabaseManager } from "../../../db/DatabaseManager.js";
+import { showTypographyManagementScreen } from "../typography/typographyManagement.js";
 
 let listenersAdded = false;
 
@@ -73,9 +73,9 @@ export async function showProjectManagementScreen() {
       
 
     }
-    else if (target.closest("#pm-fonts")) {
+    else if (target.closest("#pm-typography")) {
 
-      await showFontsManagementScreen();
+      await showTypographyManagementScreen();
 
     }
     else if (target.closest("#pm-translations")) {
