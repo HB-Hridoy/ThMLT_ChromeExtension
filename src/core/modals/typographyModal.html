@@ -1,0 +1,98 @@
+<div id="typography-modal" tabindex="-1"
+  class="hidden  overflow-y-auto overflow-x-hidden fixed inset-0 z-50 justify-center items-center w-full h-[calc(100%-1rem)] max-h-full">
+  <div class="relative p-4 w-full max-w-md max-h-full">
+    <!-- Modal content -->
+    <div class="relative bg-white rounded-lg shadow ">
+      <!-- Modal header -->
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t ">
+        <h3 id="typography-modal-title" class="text-xl font-semibold text-gray-900 ">
+          Add new typography
+        </h3>
+        <button id="hide-typography-modal" type="button"
+          class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+          <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+      </div>
+      <!-- Modal body -->
+      <div class="p-4 md:p-5">
+        <div class="space-y-4">
+          <div>
+            <label class="block mb-1 text-sm font-medium text-gray-900">Typography Name</label>
+            <label id="typography-modal-name-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+            <input id="typography-modal-name-input" autocomplete="off" type="text" placeholder="e.g., Heading Large"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" />
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium text-gray-900">Linked Font</label>
+            <label id="typography-modal-linked-font-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+            <div class="flex items-center">
+
+              <input id="typography-modal-linked-font-input" autocomplete="off" type="text" disabled
+                placeholder="e.g., OpenSans-Regular.ttf"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+
+              <button id="typography-modal-linked-font-button"
+                class="visible text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-md text-sm p-1 ml-2 transition-all duration-150">
+                <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.213 9.787a3.391 3.391 0 0 0-4.795 0l-3.425 3.426a3.39 3.39 0 0 0 4.795 4.794l.321-.304m-.321-4.49a3.39 3.39 0 0 0 4.795 0l3.424-3.426a3.39 3.39 0 0 0-4.794-4.795l-1.028.961" />
+                </svg>
+                <span class="sr-only">Edit</span>
+              </button>
+            </div>
+
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium text-gray-900">Font Size</label>
+            <label id="typography-modal-font-size-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+            <label id="typography-modal-font-size-input-discalimer" class="hidden text-xs text-blue-500 mb-1">
+              Using the default value. Custom formatting will not be applied during final rendering.
+            </label>
+            <input id="typography-modal-font-size-input" autocomplete="off" type="number" value="0"
+              placeholder="e.g., 16 (in pixels)"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" />
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium text-gray-900">Line Height</label>
+            <label id="typography-modal-line-height-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+            <label id="typography-modal-line-height-input-discalimer" class="hidden text-xs text-blue-500 mb-1">
+              Using the default value. Custom formatting will not be applied during final rendering.
+            </label>
+            <input id="typography-modal-line-height-input" autocomplete="off" type="number" value="0"
+              placeholder="e.g., 24 (in pixels)"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" />
+          </div>
+
+          <div>
+            <label class="block mb-1 text-sm font-medium text-gray-900">Letter Spacing</label>
+            <label id="typography-modal-letter-spacing-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+            <label id="typography-modal-letter-spacing-input-discalimer" class="hidden text-xs text-blue-500 mb-1">
+              Using the default value. Custom formatting will not be applied during final rendering.
+            </label>
+            <input id="typography-modal-letter-spacing-input" autocomplete="off" type="number" value="0"
+              placeholder="e.g., 0.5 (in pixels)"
+              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" />
+          </div>
+
+          <div id="typography-details-errors" class="hidden text-sm font-medium text-red-500"></div>
+
+          <div class="flex justify-center items-center">
+            <button id="typography-modal-delete-button"
+              class="hidden w-full text-white bg-red-700 hover:bg-red-800  font-medium rounded-lg text-sm px-5 py-2.5 mr-1 text-center ">Delete</button>
+            <button id="typography-modal-action-button" disabled
+              class="visible w-full text-white bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-sm px-5 py-2.5 ml-1 text-center">Action
+              Button</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
