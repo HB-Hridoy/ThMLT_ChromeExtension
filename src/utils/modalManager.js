@@ -34,7 +34,16 @@ export const MODALS = {
   FONT: {
     id: "font-modal",
     path: "src/core/modals/fontModal.html"
+  },
+  TYPOGRAPHY: {
+    id: "typography-modal",
+    path: "src/core/modals/typographyModal.html"
+  },
+  FONT_LINK: {
+    id: "font-link-modal",
+    path: "src/core/modals/fontLinkModal.html"
   }
+
   
 };
 
