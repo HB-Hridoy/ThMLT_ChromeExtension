@@ -32,6 +32,41 @@ export function replaceClass(element, prefix, newClass) {
   element.classList.add(newClass); // Add new class
 }
 
+export function debounce(fn, delay = 300, options = { leading: false, trailing: true }) {
+  let timer;
+  let lastInvokeTime = 0;
+
+  const { leading, trailing } = options;
+
+  function invokeFunction(context, args) {
+    fn.apply(context, args);
+    lastInvokeTime = Date.now();
+  }
+
+  return function (...args) {
+    const now = Date.now();
+    const timeElapsed = now - lastInvokeTime;
+
+    // Leading edge: Execute immediately if 'leading' is true and the delay has passed.
+    if (leading && timeElapsed >= delay) {
+      invokeFunction(this, args);
+    }
+
+    // Cancel previous call if necessary.
+    clearTimeout(timer);
+
+    // Trailing edge: Call after the delay if 'trailing' is true.
+    if (trailing) {
+      timer = setTimeout(() => {
+        const timeRemaining = delay - timeElapsed;
+        if (timeRemaining <= 0) {
+          invokeFunction(this, args);
+        }
+      }, timeElapsed < delay ? delay - timeElapsed : 0);
+    }
+  };
+}
+
 export function throttle(fn, limit) {
   let lastCall = 0;
   let pendingCall = null;
