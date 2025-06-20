@@ -1,5 +1,6 @@
 import { ProjectModel } from './models/ProjectModel.js';
 import { FontModel } from './models/FontModel.js';
+import { TypographyModel } from './models/TypographyModel.js';
 import { PrimitiveColorModel } from './models/PrimitiveColorModel.js';
 import { SemanticColorModel } from './models/SemanticColorModel.js';
 import { TranslationModel } from './models/TranslationModel.js';
@@ -14,6 +15,7 @@ export class DatabaseManager {
     // Initialize models - these will be available as properties
     this.projects = null;
     this.fonts = null;
+    this.typography = null;
     this.primitives = null;
     this.semantics = null;
     this.translations = null;
@@ -26,6 +28,7 @@ export class DatabaseManager {
       // Initialize all model instances
       this.projects = new ProjectModel();
       this.fonts = new FontModel();
+      this.typography = new TypographyModel();
       this.primitives = new PrimitiveColorModel();
       this.semantics = new SemanticColorModel(this);
       this.translations = new TranslationModel();
@@ -117,6 +120,7 @@ function getPrimaryKeyName(table) {
     case "primitiveColors": return "primitiveId";
     case "semanticColors": return "semanticId";
     case "fonts": return "fontId";
+    case "typography": return "typographyId";
     case "translations": return "translationId";
     default: return "id"; // Fallback
   }

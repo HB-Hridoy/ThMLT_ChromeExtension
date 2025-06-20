@@ -16,6 +16,10 @@ const screens = {
     id: "fonts-management-screen",
     path: "src/core/screens/font/fontsManagement.html",
   },
+  TYPOGRAPHY_MANAGEMENT: {
+    id: "typography-management-screen",
+    path: "src/core/screens/typography/typographyManagement.html",
+  },
   COLOR_MANAGEMENT: {
     id: "color-management-screen",
     path: "src/core/screens/color/colorManagement.html",

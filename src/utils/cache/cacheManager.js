@@ -3,6 +3,7 @@ import PrimitiveCache from './primitiveCache.js';
 import SemanticCache from './semanticCache.js';
 import FontsCache from './fontsCache.js';
 import TranslationsCache from './translationCache.js';
+import BaseCache from '../../content/utils/cache/baseCache.js';
 
 class CacheManager {
   constructor() {
@@ -10,6 +11,7 @@ class CacheManager {
     this.primitives = new PrimitiveCache();
     this.semantics = new SemanticCache();
     this.fonts = new FontsCache();
+    this.typography = new BaseCache("typography", "typographyId");
     this.translations = new TranslationsCache();
   }
 

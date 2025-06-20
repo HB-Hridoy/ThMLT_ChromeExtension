@@ -5,7 +5,7 @@ import { COLOR_TABS, screens } from "./screenManager.js";
 import { showProjectManagementScreen } from "../core/screens/projectManagement/projectManagement.js";
 import { showProjectSettingsScreen } from "../core/screens/projectSettings/projectSettings.js";
 import { showColorManagementScreen } from "../core/screens/color/colorManagement.js";
-import { showFontsManagementScreen } from "../core/screens/font/fontsManagement.js";
+import { showTypographyManagementScreen } from "../core/screens/typography/typographyManagement.js";
 
 class SessionManager {
 
@@ -88,10 +88,10 @@ class SessionManager {
           }
           break;
 
-        case screens.FONTS_MANAGEMENT.id:
+        case screens.TYPOGRAPHY_MANAGEMENT.id:
           console.log("[SESSION] => Restoring: Fonts Management Screen");
           await showProjectManagementScreen();
-          await showFontsManagementScreen();
+          await showTypographyManagementScreen();
           break;
 
         default:
