@@ -143,22 +143,49 @@ addRow({
     return null;
   }
 
-  updateRow({ typographyId, typographyName, linkedFont } = {}) {
+  updateRow({ typographyId, typographyName, linkedFont, fontSize, lineHeight, letterSpacing } = {}) {
     const row = this.table.querySelector(`tr[id="${typographyId}"]`);
-    if (row) {
-      
-      if (typographyName !== undefined) row.querySelector("#typography-name").textContent = typographyName;
-      
-      if (linkedFont !== undefined) row.querySelector("#linked-font").textContent = linkedFont;
-  
-      // Add highlight class
-      row.classList.add("highlight-update-row");
-  
-      setTimeout(() => {
-        row.classList.remove("highlight-update-row");
-      }, 1500);
+    if (!row) return;
+
+    if (typographyName !== undefined) {
+      const nameElement = row.querySelector("#typography-name");
+      if (nameElement) nameElement.textContent = typographyName;
     }
+
+    if (linkedFont !== undefined) {
+
+      const resolvedFont = linkedFont === "0"
+        ? "default"
+        : cacheManager.fonts.getName({ fontId: linkedFont }) || "unknown";
+
+      const el = document.getElementById(`pill-font-${typographyId}`);
+      if (el) el.textContent = resolvedFont;
+    }
+
+
+
+    if (fontSize !== undefined) {
+      const el = document.getElementById(`pill-size-${typographyId}`);
+      if (el) el.textContent = fontSize;
+    }
+
+    if (lineHeight !== undefined) {
+      const el = document.getElementById(`pill-line-height-${typographyId}`);
+      if (el) el.textContent = lineHeight;
+    }
+
+    if (letterSpacing !== undefined) {
+      const el = document.getElementById(`pill-letter-spacing-${typographyId}`);
+      if (el) el.textContent = letterSpacing;
+    }
+
+    row.classList.add("highlight-update-row");
+    setTimeout(() => {
+      row.classList.remove("highlight-update-row");
+    }, 1500);
   }
+
+
   
   deleteRow({ typographyId }) {
     const row = this.table.querySelector(`tr[id="${typographyId}"]`);
@@ -303,9 +330,7 @@ function makeFontRowDraggable(row) {
       
       await typographyTableManager.db.typography.update({
         typographyId: row.id,
-        updatedFields: {
-          orderIndex: newOrderIndex
-        }
+        orderIndex: newOrderIndex
       });
 
       row.setAttribute('order-index', newOrderIndex);
@@ -317,7 +342,7 @@ function makeFontRowDraggable(row) {
       
       typographyTableManager.db.typography.updateOrderIndexes({
         projectId: cacheManager.projects.activeProjectId,
-        updatedFontsOrders: typographyTableManager.getOrderIndexes()
+        updatedTypographyOrders: typographyTableManager.getOrderIndexes()
       })
       .then(()=>{
         console.log('[TYPOGRAPHY TABLE] Rebalancing successful');
