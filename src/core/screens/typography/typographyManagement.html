@@ -20,19 +20,18 @@
         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M5 12h14m-7 7V5" />
       </svg>
-      <p id="colors-add-button-text">Add Font</p>
+      <p id="typography-management-add-button-text">Add Font</p>
     </button>
   </div>
 
   <div class=" border-b border-blue-200 dark:border-gray-700">
-    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="colors-tab">
+    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
       <li class="me-2">
-        <button class="inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white" id="fonts-tab"
-          color-tab-target="fonts-screen" color-tab-selected="true">Fonts</button>
+        <button class="inline-block p-2 border-b-2 rounded-t-lg border-blue-300 bg-blue-600 text-white"
+          id="fonts-tab">Fonts</button>
       </li>
       <li class="me-2">
-        <button class="inline-block p-2 hover:text-blue-600 " id="typography" color-tab-target="typography-screen"
-          color-tab-selected="false">Typography</button>
+        <button class="inline-block p-2 hover:text-blue-600 " id="typography-tab">Typography</button>
       </li>
     </ul>
   </div>
@@ -67,7 +66,7 @@
       </div>
 
     </div>
-    <div id="typography-screen" class="visible h-full p-3 rounded-lg bg-gray-50">
+    <div id="typography-screen" class="hidden h-full p-3 rounded-lg bg-gray-50">
 
       <div id="typography-table-container" class="relative overflow-x-auto">
         <table id="typography-table" class="w-full text-sm text-left ">
@@ -75,6 +74,9 @@
             <tr>
               <th scope="col" class="sticky z-10 px-6 py-3">
                 Typography Name
+              </th>
+              <th scope="col" class="sticky z-10 px-6 py-3">
+                Properties
               </th>
             </tr>
           </thead>
