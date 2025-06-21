@@ -187,6 +187,22 @@ addRow({
     }, 1500);
   }
 
+  updateLinkedFonts({ linkedFontId }){
+    const linkedFonts = this.tableBody.querySelectorAll('[linked-font]');
+    linkedFonts.forEach(cell => {
+      const spanLinkedFontId = cell.getAttribute('linked-font');
+      if (spanLinkedFontId === linkedFontId) {
+
+        const resolvedFont = linkedFontId === "0"
+        ? "default"
+        : cacheManager.fonts.getName({ fontId: linkedFontId }) || "unknown";
+
+        cell.textContent = resolvedFont;
+      
+      }
+    });
+  }
+
 
   
   deleteRow({ typographyId }) {
