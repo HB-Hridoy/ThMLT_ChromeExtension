@@ -6,6 +6,7 @@ import { getDatabaseManager } from '../../db/DatabaseManager.js';
 import { confirmationModal } from '../modals/confirmationModal.js';
 import { fontTableManager } from '../../utils/fontsTableManager.js';
 import { showFontsScreen, showNoFontsScreen } from '../screens/typography/typographyManagement.js';
+import { typographyTableManager } from '../../utils/typographyTableManager.js';
 
 let fontModalElement = null;
 
@@ -344,6 +345,10 @@ async function handleActionButtonClick() {
         fontId,
         fontName: updatedFields.fontName,
         fontValue: updatedFields.fontValue
+      });
+
+      typographyTableManager.updateLinkedFonts({
+        linkedFontId: fontId
       });
 
       fontModal.hide();
