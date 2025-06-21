@@ -73,7 +73,9 @@ addRow({
     <td class="px-6 py-3 w-2/4 align-top">
       <div class="flex justify-between items-start">
         <div class="flex flex-col">
-          ${pill("Font", resolvedFont, `pill-font-${typographyId}`)}
+          <div class="text-xs font-medium bg-gray-100 text-gray-700 px-2 py-1 rounded-md w-fit mb-1">
+            <span class="text-gray-500">Font :</span> <span class="font-bold" linked-font = "${linkedFont}" id="pill-font-${typographyId}">${resolvedFont}</span>
+          </div>
           ${pill("Size", fontSize, `pill-size-${typographyId}`)}
           ${pill("Line Height", lineHeight, `pill-line-height-${typographyId}`)}
           ${pill("Letter Spacing", letterSpacing, `pill-letter-spacing-${typographyId}`)}
