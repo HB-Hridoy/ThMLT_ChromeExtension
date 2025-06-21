@@ -351,17 +351,17 @@ export class ProjectModel extends BaseModel {
         }));
 
         // Extract original IDs before deleting them
-        const originalIds = newPrimitiveColors.map(color => color.primitiveId);
+        const originalPrimitiveIds = newPrimitiveColors.map(color => color.primitiveId);
 
         // Remove original IDs so Dexie generates new ones
         newPrimitiveColors.forEach(color => delete color.primitiveId);
 
         // Insert into DB and get new IDs
-        const newIds = await this.db.primitiveColors.bulkAdd(newPrimitiveColors, { allKeys: true });
+        const newPrimitiveIds = await this.db.primitiveColors.bulkAdd(newPrimitiveColors, { allKeys: true });
 
         //  Map originalId -> newId
-        originalIds.forEach((originalId, index) => {
-          primitiveIdMigrationMap[originalId] = newIds[index];
+        originalPrimitiveIds.forEach((originalId, index) => {
+          primitiveIdMigrationMap[originalId] = newPrimitiveIds[index];
         });
       }
   
