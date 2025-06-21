@@ -351,17 +351,17 @@ export class ProjectModel extends BaseModel {
         }));
 
         // Extract original IDs before deleting them
-        const originalIds = newPrimitiveColors.map(color => color.primitiveId);
+        const originalPrimitiveIds = newPrimitiveColors.map(color => color.primitiveId);
 
         // Remove original IDs so Dexie generates new ones
         newPrimitiveColors.forEach(color => delete color.primitiveId);
 
         // Insert into DB and get new IDs
-        const newIds = await this.db.primitiveColors.bulkAdd(newPrimitiveColors, { allKeys: true });
+        const newPrimitiveIds = await this.db.primitiveColors.bulkAdd(newPrimitiveColors, { allKeys: true });
 
         //  Map originalId -> newId
-        originalIds.forEach((originalId, index) => {
-          primitiveIdMigrationMap[originalId] = newIds[index];
+        originalPrimitiveIds.forEach((originalId, index) => {
+          primitiveIdMigrationMap[originalId] = newPrimitiveIds[index];
         });
       }
   
@@ -393,16 +393,58 @@ export class ProjectModel extends BaseModel {
 
   
       // Duplicate fonts
+      const fontIdMigrationMap = {}
       const fonts = await this.db.fonts.where('projectId').equals(projectId).toArray();
       if (fonts.length > 0) {
         const newFonts = fonts.map(font => ({
           ...font,
           projectId: newProjectId
         }));
+
+        // Extract original IDs before deleting them
+        const originalFontIds = newFonts.map(fontData => fontData.fontId);
+
         // Remove original IDs so new ones are generated
         newFonts.forEach(font => delete font.fontId);
-        await this.db.fonts.bulkAdd(newFonts);
+
+        // Insert into DB and get new IDs
+        const newFontIds = await this.db.fonts.bulkAdd(newFonts, { allKeys: true });
+
+        //  Map originalId -> newId
+        originalFontIds.forEach((originalId, index) => {
+          fontIdMigrationMap[originalId] = newFontIds[index];
+        });
       }
+
+      // Duplicate Typography
+      const typographies = await this.db.typography.where('projectId').equals(projectId).toArray();
+      if (typographies.length > 0) {
+        const newTypographies = typographies.map(typography => ({
+          ...typography,
+          projectId: newProjectId
+        }));
+
+        // Remove original IDs and update linkedFont to point to new fontId
+        newTypographies.forEach(typography => {
+          delete typography.typographyId;
+
+          const oldLinkedFontId = typography.linkedFont;
+          const newLinkedFontId = fontIdMigrationMap[oldLinkedFontId];
+
+          // Only replace if a mapping exists
+          if (newLinkedFontId !== undefined) {
+            typography.linkedFont = newLinkedFontId;
+          } else {
+            // Optionally log or handle unmapped font
+            console.warn(`No migration mapping found for linkedFont ID: ${oldLinkedFontId}`);
+          }
+        });
+
+        // Insert into DB and get new IDs
+        const newTypographyIds = await this.db.typography.bulkAdd(newTypographies);
+      }
+
+
   
       // Duplicate translations
       const translations = await this.db.translations.where('projectId').equals(projectId).toArray();
