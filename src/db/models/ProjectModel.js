@@ -616,4 +616,175 @@ export class ProjectModel extends BaseModel {
     }
   }
 
+  async importColorData({ jsonData, projectId }) {
+    if (typeof jsonData !== 'string') {
+      throw new TypeError(`Expected jsonData to be a string, but received ${typeof jsonData}`);
+    }
+
+    try {
+      const parsed = JSON.parse(jsonData);
+
+      // Validate the exact structure that your export function creates
+      const requiredFields = ['Modes', 'DefaultMode', 'Primitives', 'Semantic'];
+      const missingFields = requiredFields.filter(field => !(field in parsed));
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Invalid color data format. Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Validate Modes is an array
+      if (!Array.isArray(parsed.Modes)) {
+        throw new Error("Invalid color data format: 'Modes' must be an array.");
+      }
+
+      // Validate Modes array is not empty
+      if (parsed.Modes.length === 0) {
+        throw new Error("Invalid color data format: 'Modes' array cannot be empty.");
+      }
+
+      // Validate DefaultMode exists and is in Modes array
+      if (!parsed.DefaultMode || !parsed.Modes.includes(parsed.DefaultMode)) {
+        throw new Error("Invalid color data format: 'DefaultMode' must be one of the values in 'Modes' array.");
+      }
+
+      // Validate Primitives is an object
+      if (!parsed.Primitives || typeof parsed.Primitives !== 'object' || Array.isArray(parsed.Primitives)) {
+        throw new Error("Invalid color data format: 'Primitives' must be an object.");
+      }
+
+      // Validate Semantic structure
+      if (!parsed.Semantic || typeof parsed.Semantic !== 'object' || Array.isArray(parsed.Semantic)) {
+        throw new Error("Invalid color data format: 'Semantic' must be an object.");
+      }
+
+      // Validate that Semantic has objects for each mode in Modes
+      for (const mode of parsed.Modes) {
+        if (!parsed.Semantic[mode] || typeof parsed.Semantic[mode] !== 'object' || Array.isArray(parsed.Semantic[mode])) {
+          throw new Error(`Invalid color data format: 'Semantic.${mode}' must be an object.`);
+        }
+      }
+
+      // Validate that all semantic colors reference valid primitives or default values
+      const primitiveNames = Object.keys(parsed.Primitives);
+      for (const mode of parsed.Modes) {
+        for (const [semanticName, primitiveRef] of Object.entries(parsed.Semantic[mode])) {
+          if (primitiveRef !== semanticTable.defaultValue && !primitiveNames.includes(primitiveRef)) {
+            throw new Error(`Invalid color data: Semantic color '${semanticName}' in mode '${mode}' references unknown primitive '${primitiveRef}'.`);
+          }
+        }
+      }
+
+      const { Modes, DefaultMode, Primitives, Semantic } = parsed;
+
+      // Check if project exists
+      const existingProject = await this.table.where('projectId').equals(projectId).first();
+      if (!existingProject) {
+        throw new Error(`Project with ID "${projectId}" does not exist.`);
+      }
+
+      // Insert or update project metadata
+      await this.table.put({
+        ...existingProject,
+        themeModes: Modes,
+        defaultThemeMode: DefaultMode
+      });
+
+      cacheManager.projects.update(projectId, {
+        themeModes: Modes,
+        defaultThemeMode: DefaultMode
+      });
+
+      cacheManager.primitives.clear();
+      cacheManager.semantics.clear();
+
+      cacheManager.semantics.theme().clear();
+      Modes.forEach(mode => {
+        cacheManager.semantics.theme().add({ themeName: mode });
+      });
+      cacheManager.semantics.theme().defaultThemeMode = DefaultMode;
+
+      // Clear existing primitives & semantic colors for this project
+      await this.db.primitiveColors.where('projectId').equals(projectId).delete();
+      await this.db.semanticColors.where('projectId').equals(projectId).delete();
+
+      // Insert primitives
+      const primitiveNameToIdMap = {};
+      const primitiveEntries = Object.entries(Primitives);
+      
+      for (let i = 0; i < primitiveEntries.length; i++) {
+        const [primitiveName, primitiveValue] = primitiveEntries[i];
+        const orderIndex = i + 1000; 
+        
+        let primitive = {
+          projectId,
+          primitiveName,
+          primitiveValue,
+          orderIndex: orderIndex
+        };
+        
+        const primitiveId = await this.db.primitiveColors.add(primitive);
+        primitiveNameToIdMap[primitiveName] = primitiveId;
+
+        primitive.primitiveId = primitiveId; // Add the generated ID to the object
+
+        // cacheManager.primitives.add(primitive);
+      }
+
+      // Get all unique semantic color names across all modes
+      let allSemanticNames = new Set();
+      for (const mode of Modes) {
+        Object.keys(Semantic[mode]).forEach(name => allSemanticNames.add(name));
+      }
+
+      // Insert semantic colors
+      let semanticIndex = 0;
+      for (const semanticName of allSemanticNames) {
+        let themeValues = {};
+
+        for (const mode of Modes) {
+          const primitiveRef = Semantic[mode][semanticName];
+          
+          if (primitiveRef === undefined) {
+            // If semantic color doesn't exist in this mode, use default value
+            themeValues[mode] = semanticTable.defaultValue;
+          } else if (primitiveRef === semanticTable.defaultValue) {
+            themeValues[mode] = semanticTable.defaultValue;
+          } else {
+            const primitiveId = primitiveNameToIdMap[primitiveRef];
+            if (primitiveId === undefined) {
+              throw new Error(`Unknown primitive name "${primitiveRef}" for semantic color "${semanticName}" in mode "${mode}".`);
+            }
+            themeValues[mode] = primitiveId;
+          }
+        }
+
+        let semanticColor = {
+          projectId,
+          semanticName,
+          themeValues,
+          orderIndex: semanticIndex + 1000,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        const newSemanticId = await this.db.semanticColors.add(semanticColor);
+
+        semanticColor.semanticId = newSemanticId; // Add the generated ID to the object
+
+        // cacheManager.semantics.add(semanticColor);
+
+      }
+
+      setPrimitiveDataInitialized(false);
+      setSemanticDataInitialized(false);
+
+      return { success: true, message: "Color data imported successfully." };
+
+      
+    } catch (error) {
+      console.error("Error importing color data:", error);
+      throw error;
+    }
+  }
+
 }
