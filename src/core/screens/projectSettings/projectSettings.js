@@ -86,10 +86,11 @@ export async function showProjectSettingsScreen() {
 
   projectDuplicateButton = document.getElementById("duplicate-project-button");
 
+  projectDeleteButton = document.getElementById("project-delete-action-button");
+  projectDeleteInput = document.getElementById("project-delete-name-input");
+
     // ** Project Details ** //
 
-  projectDeleteButton = document.getElementById("delete-project-button");
-  projectDeleteInput = document.getElementById("delete-project-input");
   projectDetailsNameInput = document.getElementById("project-details-name-input");
   projectDetailsNameInputError = document.getElementById("project-details-name-input-error");
 
@@ -363,10 +364,45 @@ async function handleProjectDuplicateButton() {
 
 }
 
+async function handleProjectDeleteButton(){
+
+  const projectName = cacheManager.projects.activeProjectName();
+
+  const confirmed = await confirmationModal.confirm({
+    message: `Are you sure you want to delete the project "${projectName}"?`,
+    confirmButtonText: "Yes, Delete"
+  });
+
+  if (confirmed) {
+    try {
+      await db.projects.deleteProject({
+        projectId: cacheManager.projects.activeProjectId
+      })
+
+      await showHomeScreen();
+      sessionManager.clear();
+
+      deleteProjectCard({
+        projectId: cacheManager.projects.activeProjectId
+      })
+      
+    } catch (error) {
+      console.error("[Settings] Error deleting project:", error);
+    }
+  }
+}
+
+function handleProjectDeleteInputChange(e) {
   const inputValue = e.target.value.trim();
 
-  const nameRegex = /^[a-zA-Z0-9_-]+$/;
-  let errorMessage = "";
+  if (inputValue !== cacheManager.projects.activeProjectName()) {
+    
+    setButtonState(projectDeleteButton, false, "gray", "red");
+  }else{
+    setButtonState(projectDeleteButton, true, "gray", "red");
+  }
+}
+
 function openPage(pageElement) {
   const pages = [homePage, detailsPage, duplicationPage, deletionPage];
 
@@ -483,51 +519,25 @@ async function handleProjectDetailsUpdateButton(){
     console.error(error);
   }
 
-async function handleProjectDeleteButton(){
-
-  const projectName = cacheManager.projects.activeProjectName();
-
-  const confirmed = await confirmationModal.confirm({
-    message: `Are you sure you want to delete the project "${projectName}"?`,
-    confirmButtonText: "Yes, Delete"
-  });
-
-  if (confirmed) {
-    try {
-      await db.projects.deleteProject({
-        projectId: cacheManager.projects.activeProjectId
-      })
-
-      await showHomeScreen();
-      sessionManager.clear();
-
-      deleteProjectCard({
-        projectId: cacheManager.projects.activeProjectId
-      })
-      
-    } catch (error) {
-      console.error("[Settings] Error deleting project:", error);
-    }
-  }
 }
 
-function handleProjectDeleteInputChange(e) {
-  const inputValue = e.target.value.trim();
+
+  const confirmed = await confirmationModal.confirm({
+  });
+
+  if (!confirmed) return;
+
+
+      
+    }
+}
+
 async function handleTypographyImport() {
   const confirmed = await confirmationModal.confirm({
     message: "Importing typography will overwrite the existing typography. Are you sure you want to continue?",
     confirmButtonText: "Yes, Import"
   });
 
-  if (inputValue !== cacheManager.projects.activeProjectName()) {
-    replaceClass(projectDeleteButton, "bg-", "bg-gray-500");
-    replaceClass(projectDeleteButton, "hover:bg-","hover:bg-gray-600");
-    projectDeleteButton.disabled = true;
-  }else{
-    replaceClass(projectDeleteButton, "bg-", "bg-red-700");
-    replaceClass(projectDeleteButton, "hover:bg-", "hover:bg-red-800");
-    projectDeleteButton.disabled = false;
-  }
   if (!confirmed) return;
 
   const input = document.createElement("input");
