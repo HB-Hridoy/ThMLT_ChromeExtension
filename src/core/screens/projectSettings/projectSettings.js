@@ -15,13 +15,13 @@ let listenersAdded = false;
 let projectSettingsTitle;
 
 
-let fontsDataDownloadButton;
-let fontsDataCopyButton;
 let downloadColorsButton;
 let copyColorsButton;
 
 let translationDataDownloadButton;
 let translationDataCopyButton;
+let downloadTypographyButton;
+let copyTypographyButton;
 
 let projectDuplicateButton;
 
@@ -60,8 +60,8 @@ export async function showProjectSettingsScreen() {
   downloadColorsButton = document.getElementById("download-colors");
   copyColorsButton = document.getElementById("copy-colors");
 
-  fontsDataDownloadButton = document.getElementById("fonts-data-download-button");
-  fontsDataCopyButton = document.getElementById("fonts-data-copy-button");
+  downloadTypographyButton = document.getElementById("download-typography");
+  copyTypographyButton = document.getElementById("copy-typography");
 
   translationDataDownloadButton = document.getElementById("translation-data-download-button");
   translationDataCopyButton = document.getElementById("translation-data-copy-button");
@@ -92,14 +92,16 @@ export async function showProjectSettingsScreen() {
     handleColorsDataDownload();
   });
   
-  fontsDataDownloadButton.addEventListener("click", async ()=>{
-    handleFontDataDownloadButton();
   copyColorsButton.addEventListener("click", async ()=>{
     handleColorsDataCopy();
   });
   
-  fontsDataCopyButton.addEventListener("click", async ()=>{
-    handleFontDataCopyButton();
+  downloadTypographyButton.addEventListener("click", async ()=>{
+    handleTypopgraphyDataDownload();
+  });
+  
+  copyTypographyButton.addEventListener("click", async ()=>{
+    handleTypopgraphyDataCopy();
   });
   
   translationDataDownloadButton.addEventListener("click", async ()=>{
