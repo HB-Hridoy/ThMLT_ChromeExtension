@@ -49,6 +49,9 @@ let importColorThemesButton;
 let importTypographyButton;
 let importTranslationsButton;
 
+let translationStatusError;
+let translationStatusImported;
+
 let db = null;
 
 export async function showProjectSettingsScreen() {
@@ -57,17 +60,23 @@ export async function showProjectSettingsScreen() {
   }
   try {
     await screenManager.switchScreen(screens.PROJECT_SETTINGS);
+    addEventListeners();
 
     await sessionManager.set(sessionManager.DATA.SCREEN, screens.PROJECT_SETTINGS.id);
 
     projectSettingsTitle = document.getElementById("project-name-settings-screen");
     projectSettingsTitle.textContent = cacheManager.projects.activeProjectName();
+    document.getElementById("deletion-project-name").textContent = cacheManager.projects.activeProjectName();
 
     restoreDefaults();
   } catch (error) {
+    console.log(error);
+    
   }
   
+}
 
+function addEventListeners(){
   if (listenersAdded) return;
 
   // ========== GLOBAL VARIABLE BEGIN ===========//
@@ -117,6 +126,8 @@ export async function showProjectSettingsScreen() {
   importTypographyButton = document.getElementById("import-typography-button");
   importTranslationsButton = document.getElementById("import-translations-button");
 
+  translationStatusError = document.getElementById("translation-status-error");
+  translationStatusImported = document.getElementById("translation-status-imported");
 
   // ========== GLOBAL VARIABLE END ===========//
 
@@ -207,6 +218,8 @@ export async function showProjectSettingsScreen() {
     handleProjectDuplication(projectDuplicateInput.value.trim());
   });
 
+  // ** Project Deletion Event Listeners ** //
+
   projectDeleteButton.addEventListener("click", async ()=>{
     handleProjectDeleteButton();
   });
@@ -239,15 +252,12 @@ function restoreDefaults() {
   projectDeleteInput.value = "";
   projectDeleteInput.style.borderColor = "";
 
-  replaceClass(projectDeleteButton, "bg-", "bg-gray-500");
-  replaceClass(projectDeleteButton, "hover:bg-", "hover:bg-gray-600");
 function validateProjectDetailsForm() {
   const hasError =
     !projectDetailsNameInputError.classList.contains("hidden") ||
     !projectDetailsAuthorInputError.classList.contains("hidden") ||
     !projectDetailsVersionInputError.classList.contains("hidden");
 
-  projectDeleteButton.disabled = true;
   const allFilled =
     projectDetailsNameInput.value.trim().length > 0 &&
     projectDetailsAuthorInput.value.trim().length > 0 &&
