@@ -436,12 +436,17 @@ function handleProjectDuplicateInput() {
   }
 }
 
-async function handleRenameProjectButton() {
+async function handleProjectDetailsUpdateButton(){
+  const projectName = projectDetailsNameInput.value.trim();
+  const author = projectDetailsAuthorInput.value.trim();
+  const version = projectDetailsVersionInput.value.trim();
 
   try {
     await db.projects.update({
       projectId: cacheManager.projects.activeProjectId,
-      projectName: projectRenameInput.value.trim()
+      projectName: projectName,
+      author: author,
+      version: version
     });
 
     await showHomeScreen();
@@ -449,13 +454,14 @@ async function handleRenameProjectButton() {
 
     updateProjectCard({
       projectId: cacheManager.projects.activeProjectId,
-      projectName: projectRenameInput.value.trim()
+      projectName: projectName,
+      author: author,
+      version: version,
+      lastModified: new Date().toISOString()
     });
   } catch (error) {
     console.error(error);
   }
-  
-}
 
 async function handleProjectDeleteButton(){
 
