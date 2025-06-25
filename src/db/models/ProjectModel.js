@@ -787,4 +787,71 @@ export class ProjectModel extends BaseModel {
     }
   }
 
+  async exportTypographyData({ projectId }) {
+    try {
+      // Query the project
+      const project = await this.table.where('projectId').equals(projectId).first();
+      if (!project) return null;
+
+      // Fetch Fonts
+      const fontsData = await this.db.fonts
+        .where('projectId')
+        .equals(projectId)
+        .toArray();
+
+      // Sort fonts by orderIndex
+      fontsData.sort((a, b) => a.orderIndex - b.orderIndex);
+
+      // Build fonts object and ID->name map
+      const fonts = {};
+      const fontIdNameMap = {};
+      fontsData.forEach(({ fontId, fontName, fontValue }) => {
+        fonts[fontName] = fontValue;
+        fontIdNameMap[fontId] = fontName;
+      });
+
+      // Fetch Typographies
+      const typographiesData = await this.db.typography
+        .where('projectId')
+        .equals(projectId)
+        .toArray();
+
+      // Sort by orderIndex
+      typographiesData.sort((a, b) => a.orderIndex - b.orderIndex);
+
+      // Transform typographies: { typographyName: { fontSize, ... } }
+      const typographies = {};
+      typographiesData.forEach(typography => {
+        const {
+          typographyName,
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          linkedFont
+        } = typography;
+
+        typographies[typographyName] = {
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          linkedFont: fontIdNameMap[linkedFont] || `UnknownFont(${linkedFont})`
+        };
+      });
+
+      // Assemble export data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        ProjectName: project.projectName,
+        Author: project.author,
+        Version: project.version,
+        Fonts: fonts,
+        Typographies: typographies
+      };
+
+      return JSON.stringify(exportData, null, 2);
+    } catch (error) {
+      console.error('Error exporting font data:', error);
+      throw error;
+    }
+  }
 }
