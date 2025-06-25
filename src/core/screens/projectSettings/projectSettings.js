@@ -412,10 +412,27 @@ function handleProjectDetailsNameInputChange(e) {
   if (!inputValue || inputValue === cacheManager.projects.activeProjectName()) {
     projectRenameInputError.classList.add("hidden");
     projectRenameInput.style.borderColor = "";
+function handleProjectDuplicateInput() {
+  const inputValue = projectDuplicateInput.value.trim();
+  let errorMessage = "";
 
-    replaceClass(projectRenameButton, "bg-", "bg-gray-500");
-    replaceClass(projectRenameButton, "hover:bg-", "hover:bg-gray-600");
-    projectRenameButton.disabled = true;
+  if (inputValue.length < 3) {
+    errorMessage = "Project name must be at least 3 characters long.";
+  } else if (/^\d+$/.test(inputValue)) {
+    errorMessage = "Project name cannot consist of only numbers.";
+  } else if (cacheManager.projects.existProjectName(inputValue)) {
+    errorMessage = "Project name already exists!";
+  }
+
+  if (errorMessage) {
+    projectDuplicateInputError.textContent = errorMessage;
+    projectDuplicateInputError.classList.remove("hidden");
+    projectDuplicateInput.style.borderColor = "red";
+    setButtonState(projectDuplicateButton, false);
+  } else {
+    projectDuplicateInputError.classList.add("hidden");
+    projectDuplicateInput.style.borderColor = "";
+    setButtonState(projectDuplicateButton, true);
   }
 }
 
