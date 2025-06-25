@@ -14,11 +14,11 @@ let listenersAdded = false;
 
 let projectSettingsTitle;
 
-let colorThemesDataDownloadButton;
-let colorThemesDataCopyButton;
 
 let fontsDataDownloadButton;
 let fontsDataCopyButton;
+let downloadColorsButton;
+let copyColorsButton;
 
 let translationDataDownloadButton;
 let translationDataCopyButton;
@@ -57,6 +57,8 @@ export async function showProjectSettingsScreen() {
 
   colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
   colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
+  downloadColorsButton = document.getElementById("download-colors");
+  copyColorsButton = document.getElementById("copy-colors");
 
   fontsDataDownloadButton = document.getElementById("fonts-data-download-button");
   fontsDataCopyButton = document.getElementById("fonts-data-copy-button");
@@ -81,16 +83,19 @@ export async function showProjectSettingsScreen() {
     showProjectManagementScreen();
   });
 
-  colorThemesDataDownloadButton.addEventListener("click", async ()=>{
-    handleColorDataDownloadButton();
   });
   
-  colorThemesDataCopyButton.addEventListener("click", async ()=>{
-    handleColorDataCopyButton();
+
+
+
+  downloadColorsButton.addEventListener("click", async ()=>{
+    handleColorsDataDownload();
   });
   
   fontsDataDownloadButton.addEventListener("click", async ()=>{
     handleFontDataDownloadButton();
+  copyColorsButton.addEventListener("click", async ()=>{
+    handleColorsDataCopy();
   });
   
   fontsDataCopyButton.addEventListener("click", async ()=>{
