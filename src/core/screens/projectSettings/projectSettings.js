@@ -25,7 +25,6 @@ let copyColorsButton;
 let downloadTypographyButton;
 let copyTypographyButton;
 
-let projectDuplicateButton;
 let downloadsTranslationsButton;
 let copyTranslationsButton;
 
@@ -38,6 +37,10 @@ let projectDetailsVersionInputError;
 
 let projectDetailsUpdateButton;
 
+let projectDuplicateInput;
+let projectDuplicateInputError;
+
+let projectDuplicateButton;
 
 let projectDeleteButton;
 let projectDeleteInput;
@@ -98,6 +101,12 @@ export async function showProjectSettingsScreen() {
 
   projectDetailsUpdateButton = document.getElementById("project-details-action-button");
 
+    // ** Project Duplication ** //
+
+  projectDuplicateInput = document.getElementById("project-duplicate-name-input");
+  projectDuplicateInputError = document.getElementById("project-duplicate-name-input-error");
+  projectDuplicateButton = document.getElementById("project-duplicate-action-button");
+
 
   // ========== GLOBAL VARIABLE END ===========//
 
@@ -105,6 +114,10 @@ export async function showProjectSettingsScreen() {
 
   document.getElementById("project-settings-back-button").addEventListener("click", async function(){
     showProjectManagementScreen();
+  });
+
+  document.getElementById("general-project-duplication").addEventListener("click", function(){
+    openPage(duplicationPage);
   });
 
   });
@@ -143,8 +156,6 @@ export async function showProjectSettingsScreen() {
     handleProjectDetailsNameInputChange(e);
   });
 
-  projectDuplicateButton.addEventListener("click", async () => {
-    handleProjectDuplicateButton();
   projectDetailsAuthorInput.addEventListener("input", (e) => {
     handleProjectDetailsAuthorInputChange(e);
   });
@@ -156,7 +167,17 @@ export async function showProjectSettingsScreen() {
   projectDetailsUpdateButton.addEventListener("click", async () => {
     handleProjectDetailsUpdateButton();
   });
+
+
+  // ** Project Duplicate Event Listeners ** //
   
+  projectDuplicateInput.addEventListener("input", (e) => {
+    handleProjectDuplicateInput(e);
+
+  });
+
+  projectDuplicateButton.addEventListener("click", async () => {
+    handleProjectDuplication(projectDuplicateInput.value.trim());
   });
 
   projectDeleteButton.addEventListener("click", async ()=>{
