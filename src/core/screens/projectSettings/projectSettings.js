@@ -29,9 +29,15 @@ let projectDuplicateButton;
 let downloadsTranslationsButton;
 let copyTranslationsButton;
 
-let projectRenameButton;
-let projectRenameInput;
-let projectRenameInputError;
+let projectDetailsNameInput;
+let projectDetailsNameInputError;
+let projectDetailsAuthorInput;
+let projectDetailsAuthorInputError;
+let projectDetailsVersionInput;
+let projectDetailsVersionInputError;
+
+let projectDetailsUpdateButton;
+
 
 let projectDeleteButton;
 let projectDeleteInput;
@@ -77,12 +83,21 @@ export async function showProjectSettingsScreen() {
 
   projectDuplicateButton = document.getElementById("duplicate-project-button");
 
-  projectRenameButton = document.getElementById("rename-project-button");
-  projectRenameInput = document.getElementById("rename-project-input");
-  projectRenameInputError = document.getElementById("rename-project-input-error");
+    // ** Project Details ** //
 
   projectDeleteButton = document.getElementById("delete-project-button");
   projectDeleteInput = document.getElementById("delete-project-input");
+  projectDetailsNameInput = document.getElementById("project-details-name-input");
+  projectDetailsNameInputError = document.getElementById("project-details-name-input-error");
+
+  projectDetailsAuthorInput = document.getElementById("project-details-author-input");
+  projectDetailsAuthorInputError = document.getElementById("project-details-author-input-error");
+
+  projectDetailsVersionInput = document.getElementById("project-details-version-input");
+  projectDetailsVersionInputError = document.getElementById("project-details-version-input-error");
+
+  projectDetailsUpdateButton = document.getElementById("project-details-action-button");
+
 
   // ========== GLOBAL VARIABLE END ===========//
 
@@ -120,17 +135,28 @@ export async function showProjectSettingsScreen() {
   copyTranslationsButton.addEventListener("click", async ()=>{
     handleTranslationsDataCopy();
   });
+  
+  
+      // ** Project Details Event Listeners ** //
+
+  projectDetailsNameInput.addEventListener("input", (e) => {
+    handleProjectDetailsNameInputChange(e);
+  });
 
   projectDuplicateButton.addEventListener("click", async () => {
     handleProjectDuplicateButton();
+  projectDetailsAuthorInput.addEventListener("input", (e) => {
+    handleProjectDetailsAuthorInputChange(e);
   });
 
-  projectRenameInput.addEventListener("input", (e)=> {
-    handleProjectRenameInputChange(e);
+  projectDetailsVersionInput.addEventListener("input", (e) => {
+    handleProjectDetailsVersionInputChange(e);
+  });
+
+  projectDetailsUpdateButton.addEventListener("click", async () => {
+    handleProjectDetailsUpdateButton();
   });
   
-  projectRenameButton.addEventListener("click", async ()=>{
-    handleRenameProjectButton();
   });
 
   projectDeleteButton.addEventListener("click", async ()=>{
@@ -148,14 +174,8 @@ export async function showProjectSettingsScreen() {
 }
 
 function restoreDefaults() {
-  projectRenameInput.value = cacheManager.projects.activeProjectName();
-  projectRenameInput.style.borderColor = "";
-  projectRenameInputError.classList.add("hidden");
 
-  replaceClass(projectRenameButton, "bg-", "bg-gray-500");
-  replaceClass(projectRenameButton, "hover:bg-", "hover:bg-gray-600");
 
-  projectRenameButton.disabled = true;  
 
   projectDeleteInput.value = "";
   projectDeleteInput.style.borderColor = "";
@@ -322,7 +342,6 @@ async function handleProjectDuplicateButton() {
 
 }
 
-async function handleProjectRenameInputChange(e) {
   const inputValue = e.target.value.trim();
 
   const nameRegex = /^[a-zA-Z0-9_-]+$/;
