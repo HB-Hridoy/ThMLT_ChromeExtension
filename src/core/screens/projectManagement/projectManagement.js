@@ -94,35 +94,6 @@ export async function showProjectManagementScreen() {
         }
       }
 
-      async function importTranslations(update = false) {
-        try {
-          const translationJson = await getTranslationFile();
-
-          if (update){
-            db.translations.update({
-              projectId: cacheManager.projects.activeProjectId,
-              translationData: translationJson
-            });
-          } else {
-            db.translations.add({
-              projectId: cacheManager.projects.activeProjectId,
-              translationData: translationJson
-            });
-          }
-          
-
-          translationStatusError.classList.toggle("hidden", true);
-          translationStatusImported.classList.toggle("hidden", false);
-
-        } catch (error) {
-          
-          showMessageModal({
-            title: "Invalid Translations JSON",
-            message: error,
-          });
-        }
-      };
-
       function getTranslationFile() {
         return new Promise((resolve, reject) => {
   
@@ -200,3 +171,37 @@ export async function showProjectManagementScreen() {
   // end of the listeners
   listenersAdded = true;
 }
+
+export async function importTranslations(update = false) {
+  try {
+    const translationJson = await getTranslationFile();
+
+    if (update){
+      db.translations.update({
+        projectId: cacheManager.projects.activeProjectId,
+        translationData: translationJson
+      });
+    } else {
+      db.translations.add({
+        projectId: cacheManager.projects.activeProjectId,
+        translationData: translationJson
+      });
+    }
+    
+    showMessageModal({
+      title: "Translations Imported",
+      message: "Translations have been successfully imported.", 
+    });
+
+    translationStatusError.classList.toggle("hidden", true);
+    translationStatusImported.classList.toggle("hidden", false);
+
+  } catch (error) {
+    
+    showMessageModal({
+      title: "Invalid Translations JSON",
+      message: error,
+    });
+  }
+};
+
