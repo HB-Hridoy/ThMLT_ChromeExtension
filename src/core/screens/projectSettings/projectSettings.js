@@ -136,6 +136,8 @@ export async function showProjectSettingsScreen() {
     openPage(duplicationPage);
   });
 
+  document.getElementById("general-project-deletion").addEventListener("click", function(){
+    openPage(deletionPage);
   });
   
 
