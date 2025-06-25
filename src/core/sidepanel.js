@@ -111,5 +111,18 @@ export function calculateNewOrderIndex(prevIndex, nextIndex) {
   return prevIndex + Math.floor(gapBetween / 2);
 }
 
+export function setButtonState(buttonElement, isEnabled, disabledColor = "gray", enabledColor = "blue") {
+  if (isEnabled) {
+    replaceClass(buttonElement, "bg-", `bg-${enabledColor}-700`);
+    replaceClass(buttonElement, "hover:bg-", `hover:bg-${enabledColor}-800`);
+    buttonElement.disabled = false;
+  } else {
+    replaceClass(buttonElement, "bg-", `bg-${disabledColor}-500`);
+    replaceClass(buttonElement, "hover:bg-", `hover:bg-${disabledColor}-600`);
+    buttonElement.disabled = true;
+  }
+}
+
+
 
 

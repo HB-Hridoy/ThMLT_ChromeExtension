@@ -17,6 +17,9 @@
   let typographyManagementAddButtonText = null;
 
   let isDataInitialized = false;
+  export function setIsTypographyScreeenDataInitialized(value){
+    isDataInitialized = value;
+  }
 
   let projectNameElement = null;
 

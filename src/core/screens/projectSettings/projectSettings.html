@@ -15,184 +15,251 @@
     </div>
   </div>
   <!-- body -->
-  <div class="p-4 md:p-5">
-    <ol class="relative border-s border-gray-200  ms-3.5 mb-4 md:mb-5">
-      <li class="mb-10 ms-8">
-        <span
-          class="absolute flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full -start-3.5 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-600">
-          <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path fill="currentColor" fill-rule="evenodd"
-              d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z"
-              clip-rule="evenodd" />
+
+
+  <div id="project-settings-home-page" class="space-y-6 p-6">
+    <!-- General Section -->
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 tracking-tight">General</h2>
+
+      <div class="divide-y divide-gray-200 rounded-xl overflow-hidden border border-gray-200">
+        <!-- Item -->
+        <div id="general-project-details"
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition">
+          <span class="text-sm text-gray-700 group-hover:text-gray-900 font-medium">Project Details</span>
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" stroke="currentColor"
+            stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
+        </div>
 
-        </span>
-        <h3 class="flex items-start mb-1 text-lg font-semibold text-gray-900 ">Color Themes <span
-            class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300 ms-3">JSON</span>
-        </h3>
-
-        <button id="project-data-copy-button" type="button"
-          class="p-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 ">
-
-          <svg class="w-3 h-3 me-1.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd"
-              d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z"
-              clip-rule="evenodd" />
-            <path fill-rule="evenodd"
-              d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z"
-              clip-rule="evenodd" />
+        <div id="general-project-duplication"
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition">
+          <span class="text-sm text-gray-700 group-hover:text-gray-900 font-medium">Project Duplication</span>
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" stroke="currentColor"
+            stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
-          Copy
-        </button>
+        </div>
 
-        <button id="project-data-download-button" type="button"
-          class="p-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 ">
-          <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-            viewBox="0 0 20 20">
-            <path
-              d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z" />
-            <path
-              d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" />
+        <div id="general-project-deletion"
+          class="group flex items-center justify-between px-4 py-3 bg-red-200 hover:bg-red-400 transition">
+          <span class="text-sm text-red-700 group-hover:text-red-800 font-medium">Project Deletation</span>
+          <svg class="w-4 h-4 text-red-500 group-hover:text-red-700 transition" fill="none" stroke="currentColor"
+            stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
           </svg>
-          Download
-        </button>
-      </li>
-      <li class="mb-10 ms-8">
-        <span
-          class="absolute flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full -start-3.5 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-600">
-          <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path fill="currentColor" fill-rule="evenodd"
-              d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z"
-              clip-rule="evenodd" />
-          </svg>
-
-        </span>
-        <h3 class="flex items-start mb-1 text-lg font-semibold text-gray-900 ">Fonts <span
-            class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300 ms-3">JSON</span>
-        </h3>
-
-        <button id="fonts-data-copy-button" type="button"
-          class="p-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 ">
-
-          <svg class="w-3 h-3 me-1.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd"
-              d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z"
-              clip-rule="evenodd" />
-            <path fill-rule="evenodd"
-              d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z"
-              clip-rule="evenodd" />
-          </svg>
-          Copy
-        </button>
-
-        <button id="fonts-data-download-button" type="button"
-          class="p-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 ">
-          <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-            viewBox="0 0 20 20">
-            <path
-              d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z" />
-            <path
-              d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" />
-          </svg>
-          Download
-        </button>
-      </li>
-      <li class="mb-10 ms-8">
-        <span
-          class="absolute flex items-center justify-center w-6 h-6 bg-gray-100 rounded-full -start-3.5 ring-8 ring-white dark:ring-gray-700 dark:bg-gray-600">
-          <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path fill="currentColor" fill-rule="evenodd"
-              d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z"
-              clip-rule="evenodd" />
-          </svg>
-
-        </span>
-        <h3 class="flex items-start mb-1 text-lg font-semibold text-gray-900 ">Translations <span
-            class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-sm dark:bg-blue-900 dark:text-blue-300 ms-3">JSON</span>
-        </h3>
-
-        <button id="translation-data-copy-button" type="button"
-          class="p-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 ">
-
-          <svg class="w-3 h-3 me-1.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-            <path fill-rule="evenodd"
-              d="M18 3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1V9a4 4 0 0 0-4-4h-3a1.99 1.99 0 0 0-1 .267V5a2 2 0 0 1 2-2h7Z"
-              clip-rule="evenodd" />
-            <path fill-rule="evenodd"
-              d="M8 7.054V11H4.2a2 2 0 0 1 .281-.432l2.46-2.87A2 2 0 0 1 8 7.054ZM10 7v4a2 2 0 0 1-2 2H4v6a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z"
-              clip-rule="evenodd" />
-          </svg>
-          Copy
-        </button>
-
-        <button id="translation-data-download-button" type="button"
-          class="p-2 inline-flex items-center text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 ">
-          <svg class="w-3 h-3 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-            viewBox="0 0 20 20">
-            <path
-              d="M14.707 7.793a1 1 0 0 0-1.414 0L11 10.086V1.5a1 1 0 0 0-2 0v8.586L6.707 7.793a1 1 0 1 0-1.414 1.414l4 4a1 1 0 0 0 1.416 0l4-4a1 1 0 0 0-.002-1.414Z" />
-            <path
-              d="M18 12h-2.55l-2.975 2.975a3.5 3.5 0 0 1-4.95 0L4.55 12H2a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2Zm-3 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" />
-          </svg>
-          Download
-        </button>
-      </li>
-
-    </ol>
-
-    <button id="duplicate-project-button"
-      class="flex items-center text-white bg-blue-700 hover:bg-blue-800  font-medium rounded-lg text-sm px-4 py-2 mb-3">
-      <svg class="w-5 h-5 text-white me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-        fill="currentColor" viewBox="0 0 24 24">
-        <path fill-rule="evenodd"
-          d="M6 5a2 2 0 0 1 2-2h4.157a2 2 0 0 1 1.656.879L15.249 6H19a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2v-5a3 3 0 0 0-3-3h-3.22l-1.14-1.682A3 3 0 0 0 9.157 6H6V5Z"
-          clip-rule="evenodd" />
-        <path fill-rule="evenodd"
-          d="M3 9a2 2 0 0 1 2-2h4.157a2 2 0 0 1 1.656.879L12.249 10H3V9Zm0 3v7a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-7H3Z"
-          clip-rule="evenodd" />
-      </svg>
-      Duplicate Project
-    </button>
-
-    <label class="block mb-2 text-sm font-medium text-gray-900 ">Rename Project</label>
-    <label id="rename-project-input-error" class="hidden text-xs text-red-500 mb-1"></label>
-    <div class="relative mb-2">
-      <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-        <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-          viewBox="0 0 24 24">
-          <path fill-rule="evenodd"
-            d="M11.32 6.176H5c-1.105 0-2 .949-2 2.118v10.588C3 20.052 3.895 21 5 21h11c1.105 0 2-.948 2-2.118v-7.75l-3.914 4.144A2.46 2.46 0 0 1 12.81 16l-2.681.568c-1.75.37-3.292-1.263-2.942-3.115l.536-2.839c.097-.512.335-.983.684-1.352l2.914-3.086Z"
-            clip-rule="evenodd" />
-          <path fill-rule="evenodd"
-            d="M19.846 4.318a2.148 2.148 0 0 0-.437-.692 2.014 2.014 0 0 0-.654-.463 1.92 1.92 0 0 0-1.544 0 2.014 2.014 0 0 0-.654.463l-.546.578 2.852 3.02.546-.579a2.14 2.14 0 0 0 .437-.692 2.244 2.244 0 0 0 0-1.635ZM17.45 8.721 14.597 5.7 9.82 10.76a.54.54 0 0 0-.137.27l-.536 2.84c-.07.37.239.696.588.622l2.682-.567a.492.492 0 0 0 .255-.145l4.778-5.06Z"
-            clip-rule="evenodd" />
-        </svg>
-
+        </div>
       </div>
-      <input id="rename-project-input"
-        class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 "
-        placeholder="Give your project a new name..." />
-      <button id="rename-project-button" disabled
-        class="text-white absolute end-2.5 bottom-2.5 bg-gray-500 hover:bg-gray-600  font-medium rounded-lg text-sm px-4 py-2">Rename</button>
-    </div>
+    </section>
 
-    <label class="block mb-2 text-sm font-medium text-gray-900 ">Delete Project</label>
-    <div class="relative">
-      <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-        <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-          <path fill="currrentColor" fill-rule="evenodd"
-            d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z"
-            clip-rule="evenodd" />
-        </svg>
+    <!-- Export Section -->
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 tracking-tight">Export</h2>
+
+      <div class="divide-y divide-gray-200 rounded-xl overflow-hidden border border-gray-200">
+        <!-- Colors -->
+        <div
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition cursor-pointer">
+          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Colors</span>
+          <div class="flex gap-2">
+            <button id="copy-colors" aria-label="Copy Colors"
+              class="p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 transition" type="button">
+              <svg class="w-3.5 h-3.5 text-gray-700 group-hover:text-gray-900" fill="none" stroke="currentColor"
+                stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M16 8h2a2 2 0 012 2v8a2 2 0 01-2 2h-8a2 2 0 01-2-2v-2" />
+              </svg>
+            </button>
+
+            <button id="download-colors" aria-label="Download Colors"
+              class="p-1.5 rounded-md bg-blue-600 hover:bg-blue-700 transition" type="button">
+              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="1.5"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition cursor-pointer">
+          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Typography</span>
+          <div class="flex gap-2">
+            <button id="copy-typography" aria-label="Copy Typography"
+              class="p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 transition" type="button">
+              <svg class="w-3.5 h-3.5 text-gray-700 group-hover:text-gray-900" fill="none" stroke="currentColor"
+                stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M16 8h2a2 2 0 012 2v8a2 2 0 01-2 2h-8a2 2 0 01-2-2v-2" />
+              </svg>
+            </button>
+
+            <button id="download-typography" aria-label="Download Typography"
+              class="p-1.5 rounded-md bg-blue-600 hover:bg-blue-700 transition" type="button">
+              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="1.5"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Translations -->
+        <div
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition cursor-pointer">
+          <span class="text-sm font-medium text-gray-700 group-hover:text-gray-900">Translations</span>
+          <div class="flex gap-2">
+            <button id="copy-translations" aria-label="Copy Translations"
+              class="p-1.5 rounded-md bg-gray-100 hover:bg-gray-200 transition" type="button">
+              <svg class="w-3.5 h-3.5 text-gray-700 group-hover:text-gray-900" fill="none" stroke="currentColor"
+                stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2M16 8h2a2 2 0 012 2v8a2 2 0 01-2 2h-8a2 2 0 01-2-2v-2" />
+              </svg>
+            </button>
+
+            <button id="download-translations" aria-label="Download Translations"
+              class="p-1.5 rounded-md bg-blue-600 hover:bg-blue-700 transition" type="button">
+              <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="1.5"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4" />
+              </svg>
+            </button>
+          </div>
+        </div>
       </div>
-      <input id="delete-project-input"
-        class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 "
-        placeholder="Type project name to delete" />
-      <button id="delete-project-button" disabled
-        class="text-white absolute end-2.5 bottom-2.5 bg-gray-500 hover:bg-gray-600  font-medium rounded-lg text-sm px-4 py-2">Delete</button>
-    </div>
+    </section>
+
+    <!-- Import Section -->
+    <section>
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 tracking-tight">Import</h2>
+
+      <div class="divide-y divide-gray-200 rounded-xl overflow-hidden border border-gray-200">
+        <!-- Item -->
+        <div id="import-color-themes-button"
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition">
+          <span class="text-sm text-gray-700 group-hover:text-gray-900 font-medium">Color Themes</span>
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" stroke="currentColor"
+            stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+        <div id="import-typography-button"
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition">
+          <span class="text-sm text-gray-700 group-hover:text-gray-900 font-medium">Typography</span>
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" stroke="currentColor"
+            stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+        <div id="import-translations-button"
+          class="group flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 transition">
+          <span class="text-sm text-gray-700 group-hover:text-gray-900 font-medium">Translations</span>
+          <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition" fill="none" stroke="currentColor"
+            stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </section>
 
 
 
   </div>
+
+  <div id="project-settings-details-page" class="hidden p-4 md:p-5">
+    <div class="grid gap-4 mb-4 grid-cols-2">
+      <div class="col-span-2">
+        <label for="project-details-name-input" class="block mb-2 text-sm font-medium text-gray-900 ">Project
+          name</label>
+        <label id="project-details-name-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+        <input type="text" name="project-details-name-input" id="project-details-name-input"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 dark:bg-gray-600  "
+          placeholder="Type Project name" required="">
+      </div>
+      <div class="col-span-2 sm:col-span-1">
+        <label for="project-details-author-input" class="block mb-2 text-sm font-medium text-gray-900 ">Author</label>
+        <label id="project-details-author-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+        <input type="text" name="project-details-author-input" id="project-details-author-input"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 dark:bg-gray-600  "
+          placeholder="Type Author Name" required="">
+      </div>
+      <div class="col-span-2 sm:col-span-1">
+        <label for="project-details-version-input" class="block mb-2 text-sm font-medium text-gray-900 ">Version</label>
+        <label id="project-details-version-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+        <input type="text" name="project-details-version-input" id="project-details-version-input"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 dark:bg-gray-600  "
+          placeholder="Type Version Name" required="">
+      </div>
+    </div>
+    <button id="project-details-action-button"
+      class="text-white inline-flex items-center bg-gray-500 hover:bg-gray-600   font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+      disabled>
+      <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <path fill-rule="evenodd"
+          d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd">
+        </path>
+      </svg>
+      Save Changes
+    </button>
+
+  </div>
+
+  <div id="project-settings-duplication-page" class="hidden p-4 md:p-5">
+    <div class="grid gap-4 mb-4 grid-cols-2">
+      <div class="col-span-2">
+        <label for="project-duplicate-name-input" class="block mb-2 text-sm font-medium text-gray-900 ">New Project
+          Name</label>
+        <label id="project-duplicate-name-input-error" class="hidden text-xs text-red-500 mb-1"></label>
+        <input type="text" name="project-duplicate-name-input" id="project-duplicate-name-input"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg  block w-full p-2.5 dark:bg-gray-600  "
+          placeholder="Type New Project name" required="">
+      </div>
+    </div>
+    <button id="project-duplicate-action-button"
+      class="text-white inline-flex items-center bg-gray-500 hover:bg-gray-600   font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+      disabled>
+      Duplicate Project
+    </button>
+
+  </div>
+
+  <div id="project-settings-deletion-page" class="hidden p-4 md:p-5">
+    <div class="grid gap-4 mb-4 grid-cols-2">
+      <div class="col-span-2">
+        <label for="project-delete-name-input" class="block mb-2 text-sm font-medium text-gray-900">
+          Project Name
+        </label>
+
+        <!-- Disclaimer message -->
+        <p id="project-delete-disclaimer" class="mb-2 text-xs text-gray-700">
+          To confirm deletion, please type
+          <strong id="deletion-project-name" class="inline-block bg-red-200 text-red-600 px-2 py-0.5 rounded">
+            <!-- Project name will be inserted here -->
+          </strong>
+          below. This action is irreversible.
+        </p>
+
+
+        <input type="text" name="project-delete-name-input" id="project-delete-name-input"
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-600"
+          placeholder="Type project name to confirm deletion" required="">
+      </div>
+    </div>
+
+    <button id="project-delete-action-button"
+      class="text-white inline-flex items-center bg-gray-500 hover:bg-gray-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+      disabled>
+      Delete Project
+    </button>
+  </div>
+
+
 </div>

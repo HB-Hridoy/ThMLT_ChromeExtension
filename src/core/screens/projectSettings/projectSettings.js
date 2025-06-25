@@ -4,33 +4,53 @@ import cacheManager from "../../../utils/cache/cacheManager.js";
 import { screenManager, screens} from "../../../utils/screenManager.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
 import { addProjectCard, deleteProjectCard, showHomeScreen, updateProjectCard } from "../home/home.js";
-import { replaceClass } from "../../sidepanel.js";
+import { setButtonState } from "../../sidepanel.js";
 import sessionManager from "../../../utils/sessionManager.js";
-import { showColorManagementScreen } from "../color/colorManagement.js";
 import { getDatabaseManager } from "../../../db/DatabaseManager.js";
-import { showProjectManagementScreen } from "../projectManagement/projectManagement.js";
+import { importTranslations, showProjectManagementScreen } from "../projectManagement/projectManagement.js";
+import { showMessageModal } from "../../modals/messageModal.js";
 
 let listenersAdded = false;
 
 let projectSettingsTitle;
 
-let colorThemesDataDownloadButton;
-let colorThemesDataCopyButton;
+let homePage = null;
+let detailsPage = null;
+let duplicationPage = null;
+let deletionPage = null;
 
-let fontsDataDownloadButton;
-let fontsDataCopyButton;
+let downloadColorsButton;
+let copyColorsButton;
 
-let translationDataDownloadButton;
-let translationDataCopyButton;
+let downloadTypographyButton;
+let copyTypographyButton;
+
+let downloadsTranslationsButton;
+let copyTranslationsButton;
+
+let projectDetailsNameInput;
+let projectDetailsNameInputError;
+let projectDetailsAuthorInput;
+let projectDetailsAuthorInputError;
+let projectDetailsVersionInput;
+let projectDetailsVersionInputError;
+
+let projectDetailsUpdateButton;
+
+let projectDuplicateInput;
+let projectDuplicateInputError;
 
 let projectDuplicateButton;
 
-let projectRenameButton;
-let projectRenameInput;
-let projectRenameInputError;
-
 let projectDeleteButton;
 let projectDeleteInput;
+
+let importColorThemesButton;
+let importTypographyButton;
+let importTranslationsButton;
+
+let translationStatusError;
+let translationStatusImported;
 
 let db = null;
 
@@ -40,82 +60,165 @@ export async function showProjectSettingsScreen() {
   }
   try {
     await screenManager.switchScreen(screens.PROJECT_SETTINGS);
+    addEventListeners();
 
     await sessionManager.set(sessionManager.DATA.SCREEN, screens.PROJECT_SETTINGS.id);
 
     projectSettingsTitle = document.getElementById("project-name-settings-screen");
     projectSettingsTitle.textContent = cacheManager.projects.activeProjectName();
+    document.getElementById("deletion-project-name").textContent = cacheManager.projects.activeProjectName();
 
     restoreDefaults();
   } catch (error) {
+    console.log(error);
+    
   }
   
+}
 
+function addEventListeners(){
   if (listenersAdded) return;
 
   // ========== GLOBAL VARIABLE BEGIN ===========//
 
-  colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
-  colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
+    // ** Project Settings Home ** //
 
-  fontsDataDownloadButton = document.getElementById("fonts-data-download-button");
-  fontsDataCopyButton = document.getElementById("fonts-data-copy-button");
+  homePage = document.getElementById("project-settings-home-page");
+  detailsPage = document.getElementById("project-settings-details-page");
+  duplicationPage = document.getElementById("project-settings-duplication-page");
+  deletionPage = document.getElementById("project-settings-deletion-page");
 
-  translationDataDownloadButton = document.getElementById("translation-data-download-button");
-  translationDataCopyButton = document.getElementById("translation-data-copy-button");
+  downloadColorsButton = document.getElementById("download-colors");
+  copyColorsButton = document.getElementById("copy-colors");
+
+  downloadTypographyButton = document.getElementById("download-typography");
+  copyTypographyButton = document.getElementById("copy-typography");
+
+  downloadsTranslationsButton = document.getElementById("download-translations");
+  copyTranslationsButton = document.getElementById("copy-translations");
 
   projectDuplicateButton = document.getElementById("duplicate-project-button");
 
-  projectRenameButton = document.getElementById("rename-project-button");
-  projectRenameInput = document.getElementById("rename-project-input");
-  projectRenameInputError = document.getElementById("rename-project-input-error");
+  projectDeleteButton = document.getElementById("project-delete-action-button");
+  projectDeleteInput = document.getElementById("project-delete-name-input");
 
-  projectDeleteButton = document.getElementById("delete-project-button");
-  projectDeleteInput = document.getElementById("delete-project-input");
+    // ** Project Details ** //
+
+  projectDetailsNameInput = document.getElementById("project-details-name-input");
+  projectDetailsNameInputError = document.getElementById("project-details-name-input-error");
+
+  projectDetailsAuthorInput = document.getElementById("project-details-author-input");
+  projectDetailsAuthorInputError = document.getElementById("project-details-author-input-error");
+
+  projectDetailsVersionInput = document.getElementById("project-details-version-input");
+  projectDetailsVersionInputError = document.getElementById("project-details-version-input-error");
+
+  projectDetailsUpdateButton = document.getElementById("project-details-action-button");
+
+    // ** Project Duplication ** //
+
+  projectDuplicateInput = document.getElementById("project-duplicate-name-input");
+  projectDuplicateInputError = document.getElementById("project-duplicate-name-input-error");
+  projectDuplicateButton = document.getElementById("project-duplicate-action-button");
+
+    // ** Import color themes ** //
+  importColorThemesButton = document.getElementById("import-color-themes-button");
+  importTypographyButton = document.getElementById("import-typography-button");
+  importTranslationsButton = document.getElementById("import-translations-button");
+
+  translationStatusError = document.getElementById("translation-status-error");
+  translationStatusImported = document.getElementById("translation-status-imported");
 
   // ========== GLOBAL VARIABLE END ===========//
 
   // ========== EVENT LISTENERS BEGIN ===========//
 
-  document.getElementById("project-settings-back-button").addEventListener("click", async function(){
-    showProjectManagementScreen();
+  document.getElementById("project-settings-back-button").addEventListener("click", async function() {
+    // Check if any of the subpages (details, duplication, deletion) are visible
+    if (
+      (detailsPage && !detailsPage.classList.contains("hidden")) ||
+      (duplicationPage && !duplicationPage.classList.contains("hidden")) ||
+      (deletionPage && !deletionPage.classList.contains("hidden"))
+    ) {
+      // If any subpage is visible, go back to the home page
+      openPage(homePage);
+    } else {
+      // Otherwise, go back to project management screen
+      showProjectManagementScreen();
+    }
   });
 
-  colorThemesDataDownloadButton.addEventListener("click", async ()=>{
-    handleColorDataDownloadButton();
+  document.getElementById("general-project-details").addEventListener("click", function(){
+    openPage(detailsPage);
+  });
+
+  document.getElementById("general-project-duplication").addEventListener("click", function(){
+    openPage(duplicationPage);
+  });
+
+  document.getElementById("general-project-deletion").addEventListener("click", function(){
+    openPage(deletionPage);
   });
   
-  colorThemesDataCopyButton.addEventListener("click", async ()=>{
-    handleColorDataCopyButton();
+
+
+
+  downloadColorsButton.addEventListener("click", async ()=>{
+    handleColorsDataDownload();
   });
   
-  fontsDataDownloadButton.addEventListener("click", async ()=>{
-    handleFontDataDownloadButton();
+  copyColorsButton.addEventListener("click", async ()=>{
+    handleColorsDataCopy();
   });
   
-  fontsDataCopyButton.addEventListener("click", async ()=>{
-    handleFontDataCopyButton();
+  downloadTypographyButton.addEventListener("click", async ()=>{
+    handleTypopgraphyDataDownload();
   });
   
-  translationDataDownloadButton.addEventListener("click", async ()=>{
-    handleTranslationDataDownloadButton();
+  copyTypographyButton.addEventListener("click", async ()=>{
+    handleTypopgraphyDataCopy();
   });
   
-  translationDataCopyButton.addEventListener("click", async ()=>{
-    handleTranslationDataCopyButton();
+  downloadsTranslationsButton.addEventListener("click", async ()=>{
+    handleTranslationsDataDownload();
+  });
+  
+  copyTranslationsButton.addEventListener("click", async ()=>{
+    handleTranslationsDataCopy();
+  });
+  
+  
+      // ** Project Details Event Listeners ** //
+
+  projectDetailsNameInput.addEventListener("input", (e) => {
+    handleProjectDetailsNameInputChange(e);
+  });
+
+  projectDetailsAuthorInput.addEventListener("input", (e) => {
+    handleProjectDetailsAuthorInputChange(e);
+  });
+
+  projectDetailsVersionInput.addEventListener("input", (e) => {
+    handleProjectDetailsVersionInputChange(e);
+  });
+
+  projectDetailsUpdateButton.addEventListener("click", async () => {
+    handleProjectDetailsUpdateButton();
+  });
+
+
+  // ** Project Duplicate Event Listeners ** //
+  
+  projectDuplicateInput.addEventListener("input", (e) => {
+    handleProjectDuplicateInput(e);
+
   });
 
   projectDuplicateButton.addEventListener("click", async () => {
-    handleProjectDuplicateButton();
+    handleProjectDuplication(projectDuplicateInput.value.trim());
   });
 
-  projectRenameInput.addEventListener("input", (e)=> {
-    handleProjectRenameInputChange(e);
-  });
-  
-  projectRenameButton.addEventListener("click", async ()=>{
-    handleRenameProjectButton();
-  });
+  // ** Project Deletion Event Listeners ** //
 
   projectDeleteButton.addEventListener("click", async ()=>{
     handleProjectDeleteButton();
@@ -126,32 +229,63 @@ export async function showProjectSettingsScreen() {
     
   });
 
+  importColorThemesButton.addEventListener("click", async () => {
+    await handleColorThemesImport();
+  });
+
+  importTypographyButton.addEventListener("click", async () => {
+    await handleTypographyImport();
+  });
+
+  importTranslationsButton.addEventListener("click", async () => {
+    await handleTranslationsImport();
+  });
   // ========== EVENT LISTENERS END ===========//
 
   listenersAdded = true;
 }
 
 function restoreDefaults() {
-  projectRenameInput.value = cacheManager.projects.activeProjectName();
-  projectRenameInput.style.borderColor = "";
-  projectRenameInputError.classList.add("hidden");
 
-  replaceClass(projectRenameButton, "bg-", "bg-gray-500");
-  replaceClass(projectRenameButton, "hover:bg-", "hover:bg-gray-600");
+  openPage(homePage);
 
-  projectRenameButton.disabled = true;  
+  const projectData = cacheManager.projects.get(cacheManager.projects.activeProjectId);
+
+  projectDetailsNameInput.value = projectData.projectName;
+  projectDetailsAuthorInput.value = projectData.author;
+  projectDetailsVersionInput.value = projectData.version;
+  projectDetailsNameInputError.classList.add("hidden");
+  projectDetailsAuthorInputError.classList.add("hidden");
+  projectDetailsVersionInputError.classList.add("hidden");
+  setButtonState(projectDetailsUpdateButton, false);
+
+  projectDuplicateInput.value = "";
+  projectDuplicateInputError.classList.add("hidden");
+  projectDuplicateInput.style.borderColor = "";
+  setButtonState(projectDuplicateButton, false);
 
   projectDeleteInput.value = "";
   projectDeleteInput.style.borderColor = "";
-
-  replaceClass(projectDeleteButton, "bg-", "bg-gray-500");
-  replaceClass(projectDeleteButton, "hover:bg-", "hover:bg-gray-600");
-
-  projectDeleteButton.disabled = true;
+  setButtonState(projectDeleteButton, false, "gray", "red");
 
 }
 
-async function handleColorDataDownloadButton(){
+function validateProjectDetailsForm() {
+  const hasError =
+    !projectDetailsNameInputError.classList.contains("hidden") ||
+    !projectDetailsAuthorInputError.classList.contains("hidden") ||
+    !projectDetailsVersionInputError.classList.contains("hidden");
+
+  const allFilled =
+    projectDetailsNameInput.value.trim().length > 0 &&
+    projectDetailsAuthorInput.value.trim().length > 0 &&
+    projectDetailsVersionInput.value.trim().length > 0;
+
+  setButtonState(projectDetailsUpdateButton, !hasError && allFilled);
+}
+
+
+async function handleColorsDataDownload(){
   try {
     const colorData = await db.projects.exportColorData({
       projectId: cacheManager.projects.activeProjectId
@@ -176,7 +310,7 @@ async function handleColorDataDownloadButton(){
   }
 }
 
-async function handleColorDataCopyButton(){
+async function handleColorsDataCopy(){
   try {
     const colorData = await db.projects.exportColorData({
       projectId: cacheManager.projects.activeProjectId
@@ -187,44 +321,44 @@ async function handleColorDataCopyButton(){
 }
 }
 
-async function handleFontDataDownloadButton(){
+async function handleTypopgraphyDataDownload(){
   try {
-    const fontsData = await db.projects.exportFontData({
+    const typographyData = await db.projects.exportTypographyData({
       projectId: cacheManager.projects.activeProjectId
     });
 
     // Trigger a download of the JSON file.
-    const blob = new Blob([fontsData], { type: "application/json" });
+    const blob = new Blob([typographyData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     // Use the project name as the filename.
-    a.download = `${cacheManager.projects.activeProjectName()}_fonts.json`;
+    a.download = `${cacheManager.projects.activeProjectName()}_typography.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log(`[SETTINGS] Fonts data for ${cacheManager.projects.activeProjectName()} downloaded successfully`);
+    console.log(`[SETTINGS] Typography data for ${cacheManager.projects.activeProjectName()} downloaded successfully`);
     
   } catch (err) {
-      console.error("[SETTINGS] Failed to download Fonts data", err);
+      console.error("[SETTINGS] Failed to download Typography data", err);
   }
 }
 
-async function handleFontDataCopyButton(){
+async function handleTypopgraphyDataCopy(){
   try {
-    const fontsData = await db.projects.exportFontData({
+    const typographyData = await db.projects.exportTypographyData({
       projectId: cacheManager.projects.activeProjectId
     });
 
-    await navigator.clipboard.writeText(fontsData);
-} catch (err) {
-    console.error("[SETTINGS] Failed to copy fonts data to clipboard", err);
-}
+    await navigator.clipboard.writeText(typographyData);
+  } catch (err) {
+      console.error("[SETTINGS] Failed to copy typography data to clipboard", err);
+  }
 }
 
-async function handleTranslationDataDownloadButton(){
+async function handleTranslationsDataDownload(){
   try {
     if (cacheManager.translations.hasTranslation()) {
       const translationData = await db.translations.get({
@@ -252,7 +386,7 @@ async function handleTranslationDataDownloadButton(){
   }
 }
 
-async function handleTranslationDataCopyButton(){
+async function handleTranslationsDataCopy(){
   try {
     
     if (cacheManager.translations.hasTranslation()) {
@@ -271,7 +405,7 @@ async function handleTranslationDataCopyButton(){
   }
 }
 
-async function handleProjectDuplicateButton() {
+async function handleProjectDuplication(newProjectName) {
   const projectName = cacheManager.projects.activeProjectName();
 
   const confirmed = await confirmationModal.confirm({
@@ -282,7 +416,8 @@ async function handleProjectDuplicateButton() {
   if (confirmed) {
     try {
       const newProjectData = await db.projects.duplicateProject({
-        projectId: cacheManager.projects.activeProjectId
+        projectId: cacheManager.projects.activeProjectId,
+        newProjectName: newProjectName
       });
 
       console.log(newProjectData);
@@ -304,70 +439,6 @@ async function handleProjectDuplicateButton() {
     }
   }
 
-}
-
-async function handleProjectRenameInputChange(e) {
-  const inputValue = e.target.value.trim();
-
-  const nameRegex = /^[a-zA-Z0-9_-]+$/;
-  let errorMessage = "";
-
-  if (inputValue.length < 3) {
-    errorMessage = "Project name must be at least 3 characters long.";
-  } else if (/^\d+$/.test(inputValue)) {
-    errorMessage = "Project name cannot consist of only numbers.";
-  } else if (cacheManager.projects.existProjectName(inputValue)) {
-    errorMessage = "Project name already exists!";
-  } else if (!nameRegex.test(inputValue)) {
-    errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
-  }
-
-  if (errorMessage) {
-    projectRenameInputError.innerHTML = errorMessage;
-    projectRenameInputError.classList.remove("hidden");
-    projectRenameInput.style.borderColor = "red";
-
-    replaceClass(projectRenameButton, "bg-", "bg-gray-500");
-    replaceClass(projectRenameButton, "hover:bg-", "hover:bg-gray-600");
-    projectRenameButton.disabled = true;
-  } else {
-    projectRenameInputError.classList.add("hidden");
-    projectRenameInput.style.borderColor = "";
-
-    replaceClass(projectRenameButton, "bg-", "bg-blue-700");
-    replaceClass(projectRenameButton, "hover:bg-", "hover:bg-blue-800");
-    projectRenameButton.disabled = false;
-  }
-
-  if (!inputValue || inputValue === cacheManager.projects.activeProjectName()) {
-    projectRenameInputError.classList.add("hidden");
-    projectRenameInput.style.borderColor = "";
-
-    replaceClass(projectRenameButton, "bg-", "bg-gray-500");
-    replaceClass(projectRenameButton, "hover:bg-", "hover:bg-gray-600");
-    projectRenameButton.disabled = true;
-  }
-}
-
-async function handleRenameProjectButton() {
-
-  try {
-    await db.projects.update({
-      projectId: cacheManager.projects.activeProjectId,
-      projectName: projectRenameInput.value.trim()
-    });
-
-    await showHomeScreen();
-    sessionManager.clear();
-
-    updateProjectCard({
-      projectId: cacheManager.projects.activeProjectId,
-      projectName: projectRenameInput.value.trim()
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  
 }
 
 async function handleProjectDeleteButton(){
@@ -402,13 +473,229 @@ function handleProjectDeleteInputChange(e) {
   const inputValue = e.target.value.trim();
 
   if (inputValue !== cacheManager.projects.activeProjectName()) {
-    replaceClass(projectDeleteButton, "bg-", "bg-gray-500");
-    replaceClass(projectDeleteButton, "hover:bg-","hover:bg-gray-600");
-    projectDeleteButton.disabled = true;
+    
+    setButtonState(projectDeleteButton, false, "gray", "red");
   }else{
-    replaceClass(projectDeleteButton, "bg-", "bg-red-700");
-    replaceClass(projectDeleteButton, "hover:bg-", "hover:bg-red-800");
-    projectDeleteButton.disabled = false;
+    setButtonState(projectDeleteButton, true, "gray", "red");
   }
 }
+
+function openPage(pageElement) {
+  const pages = [homePage, detailsPage, duplicationPage, deletionPage];
+
+  // Hide all pages
+  pages.forEach(page => {
+    if (page) page.classList.add("hidden");
+  });
+
+  // Show the requested page
+  if (pageElement) pageElement.classList.remove("hidden");
+}
+
+function handleProjectDetailsNameInputChange(e) {
+  const inputValue = e.target.value.trim();
+
+  if (inputValue.length < 3) {
+    projectDetailsNameInputError.textContent = "Project name must be at least 3 characters long.";
+    projectDetailsNameInputError.classList.remove("hidden");
+    projectDetailsNameInput.style.borderColor = "red";
+  } else if (/^\d+$/.test(inputValue)) {
+    projectDetailsNameInputError.textContent = "Project name cannot consist of only numbers.";
+    projectDetailsNameInputError.classList.remove("hidden");
+    projectDetailsNameInput.style.borderColor = "red";
+  } else if (cacheManager.projects.existProjectName(inputValue)) {
+    projectDetailsNameInputError.textContent = "Project name already exists!";
+    projectDetailsNameInputError.classList.remove("hidden");
+    projectDetailsNameInput.style.borderColor = "red";
+  } else {
+    projectDetailsNameInputError.classList.add("hidden");
+    projectDetailsNameInput.style.borderColor = "";
+  }
+
+  validateProjectDetailsForm(); // Re-check validity
+}
+
+function handleProjectDetailsAuthorInputChange(e) {
+  const inputValue = e.target.value.trim();
+
+  if (inputValue.length < 3) {
+    projectDetailsAuthorInputError.textContent = "Author name must be at least 3 characters long.";
+    projectDetailsAuthorInputError.classList.remove("hidden");
+    projectDetailsAuthorInput.style.borderColor = "red";
+  } else {
+    projectDetailsAuthorInputError.classList.add("hidden");
+    projectDetailsAuthorInput.style.borderColor = "";
+  }
+
+  validateProjectDetailsForm();
+}
+
+function handleProjectDetailsVersionInputChange(e) {
+  const inputValue = e.target.value.trim();
+
+  if (inputValue.length < 1) {
+    projectDetailsVersionInputError.textContent = "Version is required.";
+    projectDetailsVersionInputError.classList.remove("hidden");
+    projectDetailsVersionInput.style.borderColor = "red";
+  } else {
+    projectDetailsVersionInputError.classList.add("hidden");
+    projectDetailsVersionInput.style.borderColor = "";
+  }
+
+  validateProjectDetailsForm();
+}
+
+function handleProjectDuplicateInput() {
+  const inputValue = projectDuplicateInput.value.trim();
+  let errorMessage = "";
+
+  if (inputValue.length < 3) {
+    errorMessage = "Project name must be at least 3 characters long.";
+  } else if (/^\d+$/.test(inputValue)) {
+    errorMessage = "Project name cannot consist of only numbers.";
+  } else if (cacheManager.projects.existProjectName(inputValue)) {
+    errorMessage = "Project name already exists!";
+  }
+
+  if (errorMessage) {
+    projectDuplicateInputError.textContent = errorMessage;
+    projectDuplicateInputError.classList.remove("hidden");
+    projectDuplicateInput.style.borderColor = "red";
+    setButtonState(projectDuplicateButton, false);
+  } else {
+    projectDuplicateInputError.classList.add("hidden");
+    projectDuplicateInput.style.borderColor = "";
+    setButtonState(projectDuplicateButton, true);
+  }
+}
+
+async function handleProjectDetailsUpdateButton(){
+  const projectName = projectDetailsNameInput.value.trim();
+  const author = projectDetailsAuthorInput.value.trim();
+  const version = projectDetailsVersionInput.value.trim();
+
+  try {
+    await db.projects.update({
+      projectId: cacheManager.projects.activeProjectId,
+      projectName: projectName,
+      author: author,
+      version: version
+    });
+
+    await showHomeScreen();
+    sessionManager.clear();
+
+    updateProjectCard({
+      projectId: cacheManager.projects.activeProjectId,
+      projectName: projectName,
+      author: author,
+      version: version,
+      lastModified: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+}
+
+async function handleColorThemesImport() {
+
+  const confirmed = await confirmationModal.confirm({
+    message: "Importing color themes will overwrite the existing color themes. Are you sure you want to continue?",
+    confirmButtonText: "Yes, Import"
+  });
+
+  if (!confirmed) return;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const colorData = JSON.parse(text);
+      const importResult = await db.projects.importColorData({
+        projectId: cacheManager.projects.activeProjectId,
+        jsonData: JSON.stringify(colorData)
+      });
+
+      if (importResult.success){
+        console.log("[SETTINGS] Color themes imported successfully");
+        showMessageModal({
+          title: "Import Successful",
+          message: "Color themes have been imported successfully.",
+          buttonText: "OK"
+        })
+      }
+      
+      
+    } catch (err) {
+      console.error("[SETTINGS] Failed to import color themes", err);
+    }
+  };
+  input.click();
+  
+}
+
+async function handleTypographyImport() {
+  const confirmed = await confirmationModal.confirm({
+    message: "Importing typography will overwrite the existing typography. Are you sure you want to continue?",
+    confirmButtonText: "Yes, Import"
+  });
+
+  if (!confirmed) return;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      const typographyData = await file.text();
+      const result = await db.projects.importTypographyData({
+        projectId: cacheManager.projects.activeProjectId,
+        jsonData: typographyData
+      });
+      if (result.success) {
+        showMessageModal({
+          title: "Typography Import Successful",
+          message: result.message
+        });
+        console.log("[SETTINGS] Typography imported successfully");
+      } else {
+        showMessageModal({
+          title: "Typography Import Failed !!",
+          message: result.errors.join("\n")
+        });
+        console.error("[SETTINGS] Typography import failed", result.errors);
+      }
+      
+    } catch (err) {
+      console.error("[SETTINGS] Failed to import typography", err);
+    }
+  };
+  input.click();
+}
+
+async function handleTranslationsImport(){
+
+      if (translationStatusImported.classList.contains("hidden")) {
+        importTranslations();
+      } else {
+        
+        const confirmed = await confirmationModal.confirm({
+          message: "Importing translations will overwrite the existing translations. Are you sure you want to continue?",
+          confirmButtonText: "Yes, Update"
+        });
+
+        if (confirmed) {
+          importTranslations(true);
+        }
+      }
+
+    }
+
 

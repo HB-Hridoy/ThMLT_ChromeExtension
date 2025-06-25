@@ -93,110 +93,114 @@ export async function showProjectManagementScreen() {
           importTranslations(true);
         }
       }
-
-      async function importTranslations(update = false) {
-        try {
-          const translationJson = await getTranslationFile();
-
-          if (update){
-            db.translations.update({
-              projectId: cacheManager.projects.activeProjectId,
-              translationData: translationJson
-            });
-          } else {
-            db.translations.add({
-              projectId: cacheManager.projects.activeProjectId,
-              translationData: translationJson
-            });
-          }
-          
-
-          translationStatusError.classList.toggle("hidden", true);
-          translationStatusImported.classList.toggle("hidden", false);
-
-        } catch (error) {
-          
-          showMessageModal({
-            title: "Invalid Translations JSON",
-            message: error,
-          });
-        }
-      };
-
-      function getTranslationFile() {
-        return new Promise((resolve, reject) => {
-  
-          const input = document.createElement("input");
-          input.type = "file";
-          input.accept = "application/json"; // Only allow JSON files
-      
-          input.onchange = function(event) {
-              const file = event.target.files[0]; // Get selected file
-              if (!file) return;
-      
-              const reader = new FileReader();
-              reader.onload = function(e) {
-                  try {
-                      let jsonData = JSON.parse(e.target.result); // Parse JSON
-                      let errors = [];
-      
-                      // Validate SupportedLanguages and DefaultLanguage
-                      if (!jsonData.SupportedLanguages || !Array.isArray(jsonData.SupportedLanguages)) {
-                          errors.push("SupportedLanguages must be an array.");
-                          jsonData.SupportedLanguages = []; // Fix issue
-                      }
-      
-                      if (!jsonData.DefaultLanguage || !jsonData.SupportedLanguages.includes(jsonData.DefaultLanguage)) {
-                          errors.push("DefaultLanguage must be one of the SupportedLanguages.");
-                          jsonData.DefaultLanguage = jsonData.SupportedLanguages[0] || "en"; // Auto-fix
-                      }
-      
-                      if (!jsonData.Translations || typeof jsonData.Translations !== "object") {
-                          errors.push("Translations must be an object.");
-                          jsonData.Translations = {}; // Fix issue
-                      }
-      
-                      // Validate each translation entry
-                      for (const key in jsonData.Translations) {
-                          const value = jsonData.Translations[key];
-      
-                          if (typeof value === "string") {
-                              // Section Object (Valid)
-                          } else if (typeof value === "object") {
-                              // Translation Object - Check if all SupportedLanguages exist
-                              jsonData.SupportedLanguages.forEach(lang => {
-                                  if (!(lang in value)) {
-                                      errors.push(`Missing translation for '${key}' in language '${lang}'.`);
-                                      value[lang] = ""; // Auto-fix
-                                  }
-                              });
-                          } else {
-                              errors.push(`Invalid translation entry for '${key}'. Must be a string (section) or object (translation).`);
-                              delete jsonData.Translations[key]; // Remove invalid entry
-                          }
-                      }
-  
-                      if (errors.length === 0) {
-                        resolve(jsonData);
-                      } else {
-                        reject(errors.join("\n"));        
-                      }
-                  } catch (err) {
-                      console.error("Invalid JSON file:", err);
-                      reject("Invalid JSON file.");
-                  }
-              };
-      
-              reader.readAsText(file);
-          };
-      
-          input.click(); // Open file dialog
-        });
-        
-      }
     }
   });
 
   // end of the listeners
   listenersAdded = true;
+}
+
+export async function importTranslations(update = false) {
+  try {
+    const translationJson = await getTranslationFile();
+
+    if (update){
+      db.translations.update({
+        projectId: cacheManager.projects.activeProjectId,
+        translationData: translationJson
+      });
+    } else {
+      db.translations.add({
+        projectId: cacheManager.projects.activeProjectId,
+        translationData: translationJson
+      });
+    }
+    
+    showMessageModal({
+      title: "Translations Imported",
+      message: "Translations have been successfully imported.", 
+    });
+
+    translationStatusError.classList.toggle("hidden", true);
+    translationStatusImported.classList.toggle("hidden", false);
+
+  } catch (error) {
+    
+    showMessageModal({
+      title: "Invalid Translations JSON",
+      message: error,
+    });
+  }
+};
+
+export function getTranslationFile() {
+  return new Promise((resolve, reject) => {
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "application/json"; // Only allow JSON files
+
+    input.onchange = function(event) {
+        const file = event.target.files[0]; // Get selected file
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                let jsonData = JSON.parse(e.target.result); // Parse JSON
+                let errors = [];
+
+                // Validate SupportedLanguages and DefaultLanguage
+                if (!jsonData.SupportedLanguages || !Array.isArray(jsonData.SupportedLanguages)) {
+                    errors.push("SupportedLanguages must be an array.");
+                    jsonData.SupportedLanguages = []; // Fix issue
+                }
+
+                if (!jsonData.DefaultLanguage || !jsonData.SupportedLanguages.includes(jsonData.DefaultLanguage)) {
+                    errors.push("DefaultLanguage must be one of the SupportedLanguages.");
+                    jsonData.DefaultLanguage = jsonData.SupportedLanguages[0] || "en"; // Auto-fix
+                }
+
+                if (!jsonData.Translations || typeof jsonData.Translations !== "object") {
+                    errors.push("Translations must be an object.");
+                    jsonData.Translations = {}; // Fix issue
+                }
+
+                // Validate each translation entry
+                for (const key in jsonData.Translations) {
+                    const value = jsonData.Translations[key];
+
+                    if (typeof value === "string") {
+                        // Section Object (Valid)
+                    } else if (typeof value === "object") {
+                        // Translation Object - Check if all SupportedLanguages exist
+                        jsonData.SupportedLanguages.forEach(lang => {
+                            if (!(lang in value)) {
+                                errors.push(`Missing translation for '${key}' in language '${lang}'.`);
+                                value[lang] = ""; // Auto-fix
+                            }
+                        });
+                    } else {
+                        errors.push(`Invalid translation entry for '${key}'. Must be a string (section) or object (translation).`);
+                        delete jsonData.Translations[key]; // Remove invalid entry
+                    }
+                }
+
+                if (errors.length === 0) {
+                  resolve(jsonData);
+                } else {
+                  reject(errors.join("\n"));        
+                }
+            } catch (err) {
+                console.error("Invalid JSON file:", err);
+                reject("Invalid JSON file.");
+            }
+        };
+
+        reader.readAsText(file);
+    };
+
+    input.click(); // Open file dialog
+  });
+  
 }

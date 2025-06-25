@@ -1,6 +1,10 @@
 import { BaseModel } from './BaseModel.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
 import { semanticTable } from '../../utils/semanticTable.js';
+import { showHomeScreen } from '../../core/screens/home/home.js';
+import { isPrimitiveDataInitialized, setPrimitiveDataInitialized } from '../../core/screens/primitiveColor/primitiveColor.js';
+import { isSemanticDataInitialized, setSemanticDataInitialized } from '../../core/screens/semanticColor/semanticColor.js';
+import { setIsTypographyScreeenDataInitialized } from '../../core/screens/typography/typographyManagement.js';
 
 export class ProjectModel extends BaseModel {
   constructor() {
@@ -305,7 +309,7 @@ export class ProjectModel extends BaseModel {
     return record;
   }
 
-  async duplicateProject({ projectId }) {
+  async duplicateProject({ projectId, newProjectName }) {
     
     try {
       // Get the original project
@@ -313,18 +317,26 @@ export class ProjectModel extends BaseModel {
       if (!originalProject) {
         throw new Error(`[DB] Project with ID ${projectId} not found`);
       }
-  
-      // Create new project with _copy suffix and generate a new ID
-      const newProjectId = crypto.randomUUID();
 
-      let copyNameCounter = 1;
-      let proposedName = `${originalProject.projectName}_copy_${copyNameCounter}`;
+      const newProjectId = crypto.randomUUID();
+      let proposedName = newProjectName?.trim() || null;
       const allProjects = cacheManager.projects.getAll();
 
-      while (allProjects.some(project => project.projectName === proposedName)) {
-        copyNameCounter++;
+      // If no name provided, auto-generate one with incrementing suffix
+      if (!proposedName) {
+        let copyNameCounter = 1;
         proposedName = `${originalProject.projectName}_copy_${copyNameCounter}`;
+        while (allProjects.some(project => project.projectName === proposedName)) {
+          copyNameCounter++;
+          proposedName = `${originalProject.projectName}_copy_${copyNameCounter}`;
+        }
+      } else {
+        // Ensure user-provided name is unique
+        if (allProjects.some(project => project.projectName === proposedName)) {
+          throw new Error(`[DB] Project name "${proposedName}" already exists`);
+        }
       }
+      
 
       const newProject = {
         ...originalProject,
@@ -520,27 +532,27 @@ export class ProjectModel extends BaseModel {
       });
   
       // Populate semantic colors for each theme mode
-      semanticColors.forEach(semanticColor => {
-        Object.entries(semanticColor.themeValues).forEach(async ([themeMode, linkedPrimitive]) => {
+      for (const semanticColor of semanticColors) {
+        for (const [themeMode, linkedPrimitive] of Object.entries(semanticColor.themeValues)) {
           if (!semantic[themeMode]) {
             semantic[themeMode] = {};
           }
 
-          let linkedPrimitiveValue = ""
-          if (linkedPrimitive !== semanticTable.defaultValue){
+          let linkedPrimitiveValue = "";
+          if (linkedPrimitive !== semanticTable.defaultValue) {
             const linkedPrimitiveId = parseInt(linkedPrimitive, 10);
             linkedPrimitiveValue = primitiveNames[linkedPrimitiveId];
 
             console.log(`Linked primitive id - ${linkedPrimitiveId}`);
             console.log(`Linked primitive value - ${linkedPrimitiveValue}`);
-            
-            
-          } else{
+          } else {
             linkedPrimitiveValue = linkedPrimitive;
           }
+
           semantic[themeMode][semanticColor.semanticName] = linkedPrimitiveValue;
-        });
-      });
+        }
+      }
+
   
       // Assemble the final JSON object
       const exportData = {
@@ -601,6 +613,435 @@ export class ProjectModel extends BaseModel {
     } catch (error) {
       console.error('Error exporting font data:', error);
       throw error;
+    }
+  }
+
+  async importColorData({ jsonData, projectId }) {
+    if (typeof jsonData !== 'string') {
+      throw new TypeError(`Expected jsonData to be a string, but received ${typeof jsonData}`);
+    }
+
+    try {
+      const parsed = JSON.parse(jsonData);
+
+      // Validate the exact structure that your export function creates
+      const requiredFields = ['Modes', 'DefaultMode', 'Primitives', 'Semantic'];
+      const missingFields = requiredFields.filter(field => !(field in parsed));
+      
+      if (missingFields.length > 0) {
+        throw new Error(`Invalid color data format. Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // Validate Modes is an array
+      if (!Array.isArray(parsed.Modes)) {
+        throw new Error("Invalid color data format: 'Modes' must be an array.");
+      }
+
+      // Validate Modes array is not empty
+      if (parsed.Modes.length === 0) {
+        throw new Error("Invalid color data format: 'Modes' array cannot be empty.");
+      }
+
+      // Validate DefaultMode exists and is in Modes array
+      if (!parsed.DefaultMode || !parsed.Modes.includes(parsed.DefaultMode)) {
+        throw new Error("Invalid color data format: 'DefaultMode' must be one of the values in 'Modes' array.");
+      }
+
+      // Validate Primitives is an object
+      if (!parsed.Primitives || typeof parsed.Primitives !== 'object' || Array.isArray(parsed.Primitives)) {
+        throw new Error("Invalid color data format: 'Primitives' must be an object.");
+      }
+
+      // Validate Semantic structure
+      if (!parsed.Semantic || typeof parsed.Semantic !== 'object' || Array.isArray(parsed.Semantic)) {
+        throw new Error("Invalid color data format: 'Semantic' must be an object.");
+      }
+
+      // Validate that Semantic has objects for each mode in Modes
+      for (const mode of parsed.Modes) {
+        if (!parsed.Semantic[mode] || typeof parsed.Semantic[mode] !== 'object' || Array.isArray(parsed.Semantic[mode])) {
+          throw new Error(`Invalid color data format: 'Semantic.${mode}' must be an object.`);
+        }
+      }
+
+      // Validate that all semantic colors reference valid primitives or default values
+      const primitiveNames = Object.keys(parsed.Primitives);
+      for (const mode of parsed.Modes) {
+        for (const [semanticName, primitiveRef] of Object.entries(parsed.Semantic[mode])) {
+          if (primitiveRef !== semanticTable.defaultValue && !primitiveNames.includes(primitiveRef)) {
+            throw new Error(`Invalid color data: Semantic color '${semanticName}' in mode '${mode}' references unknown primitive '${primitiveRef}'.`);
+          }
+        }
+      }
+
+      const { Modes, DefaultMode, Primitives, Semantic } = parsed;
+
+      // Check if project exists
+      const existingProject = await this.table.where('projectId').equals(projectId).first();
+      if (!existingProject) {
+        throw new Error(`Project with ID "${projectId}" does not exist.`);
+      }
+
+      // Insert or update project metadata
+      await this.table.put({
+        ...existingProject,
+        themeModes: Modes,
+        defaultThemeMode: DefaultMode
+      });
+
+      cacheManager.projects.update(projectId, {
+        themeModes: Modes,
+        defaultThemeMode: DefaultMode
+      });
+
+      cacheManager.primitives.clear();
+      cacheManager.semantics.clear();
+
+      cacheManager.semantics.theme().clear();
+      Modes.forEach(mode => {
+        cacheManager.semantics.theme().add({ themeName: mode });
+      });
+      cacheManager.semantics.theme().defaultThemeMode = DefaultMode;
+
+      // Clear existing primitives & semantic colors for this project
+      await this.db.primitiveColors.where('projectId').equals(projectId).delete();
+      await this.db.semanticColors.where('projectId').equals(projectId).delete();
+
+      // Insert primitives
+      const primitiveNameToIdMap = {};
+      const primitiveEntries = Object.entries(Primitives);
+      
+      for (let i = 0; i < primitiveEntries.length; i++) {
+        const [primitiveName, primitiveValue] = primitiveEntries[i];
+        const orderIndex = i + 1000; 
+        
+        let primitive = {
+          projectId,
+          primitiveName,
+          primitiveValue,
+          orderIndex: orderIndex
+        };
+        
+        const primitiveId = await this.db.primitiveColors.add(primitive);
+        primitiveNameToIdMap[primitiveName] = primitiveId;
+
+        primitive.primitiveId = primitiveId; // Add the generated ID to the object
+
+        // cacheManager.primitives.add(primitive);
+      }
+
+      // Get all unique semantic color names across all modes
+      let allSemanticNames = new Set();
+      for (const mode of Modes) {
+        Object.keys(Semantic[mode]).forEach(name => allSemanticNames.add(name));
+      }
+
+      // Insert semantic colors
+      let semanticIndex = 0;
+      for (const semanticName of allSemanticNames) {
+        let themeValues = {};
+
+        for (const mode of Modes) {
+          const primitiveRef = Semantic[mode][semanticName];
+          
+          if (primitiveRef === undefined) {
+            // If semantic color doesn't exist in this mode, use default value
+            themeValues[mode] = semanticTable.defaultValue;
+          } else if (primitiveRef === semanticTable.defaultValue) {
+            themeValues[mode] = semanticTable.defaultValue;
+          } else {
+            const primitiveId = primitiveNameToIdMap[primitiveRef];
+            if (primitiveId === undefined) {
+              throw new Error(`Unknown primitive name "${primitiveRef}" for semantic color "${semanticName}" in mode "${mode}".`);
+            }
+            themeValues[mode] = primitiveId;
+          }
+        }
+
+        let semanticColor = {
+          projectId,
+          semanticName,
+          themeValues,
+          orderIndex: semanticIndex + 1000,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        const newSemanticId = await this.db.semanticColors.add(semanticColor);
+
+        semanticColor.semanticId = newSemanticId; // Add the generated ID to the object
+
+        // cacheManager.semantics.add(semanticColor);
+
+      }
+
+      setPrimitiveDataInitialized(false);
+      setSemanticDataInitialized(false);
+
+      return { success: true, message: "Color data imported successfully." };
+
+      
+    } catch (error) {
+      console.error("Error importing color data:", error);
+      throw error;
+    }
+  }
+
+  async exportTypographyData({ projectId }) {
+    try {
+      // Query the project
+      const project = await this.table.where('projectId').equals(projectId).first();
+      if (!project) return null;
+
+      // Fetch Fonts
+      const fontsData = await this.db.fonts
+        .where('projectId')
+        .equals(projectId)
+        .toArray();
+
+      // Sort fonts by orderIndex
+      fontsData.sort((a, b) => a.orderIndex - b.orderIndex);
+
+      // Build fonts object and ID->name map
+      const fonts = {};
+      const fontIdNameMap = {};
+      fontsData.forEach(({ fontId, fontName, fontValue }) => {
+        fonts[fontName] = fontValue;
+        fontIdNameMap[fontId] = fontName;
+      });
+
+      // Fetch Typographies
+      const typographiesData = await this.db.typography
+        .where('projectId')
+        .equals(projectId)
+        .toArray();
+
+      // Sort by orderIndex
+      typographiesData.sort((a, b) => a.orderIndex - b.orderIndex);
+
+      // Transform typographies: { typographyName: { fontSize, ... } }
+      const typographies = {};
+      typographiesData.forEach(typography => {
+        const {
+          typographyName,
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          linkedFont
+        } = typography;
+
+        typographies[typographyName] = {
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          linkedFont: fontIdNameMap[linkedFont] || `UnknownFont(${linkedFont})`
+        };
+      });
+
+      // Assemble export data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        ProjectName: project.projectName,
+        Author: project.author,
+        Version: project.version,
+        Fonts: fonts,
+        Typographies: typographies
+      };
+
+      return JSON.stringify(exportData, null, 2);
+    } catch (error) {
+      console.error('Error exporting font data:', error);
+      throw error;
+    }
+  }
+
+  async importTypographyData({ jsonData, projectId }) {
+    const errors = [];
+    
+    try {
+      // Parse and validate JSON
+      let data;
+      try {
+        data = JSON.parse(jsonData);
+      } catch (parseErr) {
+        errors.push("Invalid JSON format.");
+        return { success: false, errors };
+      }
+
+      // Validate top-level structure to match export format
+      const requiredFields = ['Fonts', 'Typographies'];
+      const missingFields = requiredFields.filter(field => !(field in data));
+      
+      if (missingFields.length > 0) {
+        errors.push(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // If critical fields are missing, return early
+      if (!data.Fonts || !data.Typographies) {
+        if (!data.Fonts) errors.push("Missing 'Fonts' field");
+        if (!data.Typographies) errors.push("Missing 'Typographies' field");
+        return { success: false, errors };
+      }
+
+      const { Fonts, Typographies } = data;
+
+      // Validate Fonts structure
+      if (typeof Fonts !== 'object' || Fonts === null || Array.isArray(Fonts)) {
+        errors.push("'Fonts' must be a non-null object.");
+      }
+
+      // Validate Typographies structure
+      if (typeof Typographies !== 'object' || Typographies === null || Array.isArray(Typographies)) {
+        errors.push("'Typographies' must be a non-null object.");
+      }
+
+      // If structure is invalid, return early
+      if (errors.length > 0) {
+        return { success: false, errors };
+      }
+
+      // Validate each font entry
+      for (const [fontName, fontValue] of Object.entries(Fonts)) {
+        if (typeof fontName !== 'string' || fontName.trim() === '') {
+          errors.push(`Invalid font name: "${fontName}"`);
+        }
+        if (typeof fontValue !== 'string' || fontValue.trim() === '') {
+          errors.push(`Invalid font value for "${fontName}"`);
+        }
+      }
+
+      // Validate each typography entry
+      const requiredTypographyProps = ['fontSize', 'lineHeight', 'letterSpacing', 'linkedFont'];
+      
+      for (const [typographyName, typography] of Object.entries(Typographies)) {
+        if (typeof typographyName !== 'string' || typographyName.trim() === '') {
+          errors.push(`Invalid typography name: "${typographyName}"`);
+          continue;
+        }
+
+        if (typeof typography !== 'object' || typography === null) {
+          errors.push(`Typography "${typographyName}" must be an object`);
+          continue;
+        }
+
+        // Check for required properties
+        const missingProps = requiredTypographyProps.filter(prop => !(prop in typography));
+        if (missingProps.length > 0) {
+          errors.push(`Typography "${typographyName}" missing properties: ${missingProps.join(', ')}`);
+        }
+
+        // Validate property types and values
+        const { fontSize, lineHeight, letterSpacing, linkedFont } = typography;
+
+        if (fontSize !== undefined && typeof fontSize !== 'string' && typeof fontSize !== 'number') {
+          errors.push(`Typography "${typographyName}": fontSize must be a string or number`);
+        }
+
+        if (lineHeight !== undefined && typeof lineHeight !== 'string' && typeof lineHeight !== 'number') {
+          errors.push(`Typography "${typographyName}": lineHeight must be a string or number`);
+        }
+
+        if (letterSpacing !== undefined && typeof letterSpacing !== 'string' && typeof letterSpacing !== 'number') {
+          errors.push(`Typography "${typographyName}": letterSpacing must be a string or number`);
+        }
+
+        if (linkedFont !== undefined && (typeof linkedFont !== 'string' || linkedFont.trim() === '')) {
+          errors.push(`Typography "${typographyName}": linkedFont must be a non-empty string`);
+        }
+
+        // Validate that linkedFont exists in the Fonts object
+        if (linkedFont && !(linkedFont in Fonts)) {
+          errors.push(`Typography "${typographyName}": linkedFont "${linkedFont}" not found in Fonts`);
+        }
+      }
+
+      // If there are validation errors, return them
+      if (errors.length > 0) {
+        return { success: false, errors };
+      }
+
+      // Clear existing fonts & typographies for this project
+      await this.db.fonts.where('projectId').equals(projectId).delete();
+      await this.db.typography.where('projectId').equals(projectId).delete();
+
+      // ----- Step 1: Import Fonts -----
+      const fontIdMap = {}; // fontName -> new fontId
+      let fontOrder = 1000;
+      const fontsToInsert = Object.entries(Fonts).map(([fontName, fontValue]) => ({
+        projectId: projectId,
+        fontName,
+        fontValue,
+        orderIndex: fontOrder += 1000
+      }));
+
+      try {
+        const newFontIds = await this.db.fonts.bulkAdd(fontsToInsert, { allKeys: true });
+        fontsToInsert.forEach((font, index) => {
+          fontIdMap[font.fontName] = newFontIds[index];
+        });
+      } catch (dbError) {
+        errors.push(`Database error while importing fonts: ${dbError.message}`);
+        return { success: false, errors };
+      }
+
+      // ----- Step 2: Import Typographies -----
+      let typographyOrder = 1000;
+      const now = new Date();
+      const typographiesToInsert = Object.entries(Typographies).map(([typographyName, t]) => {
+        const {
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          linkedFont
+        } = t;
+
+        const resolvedFontId = fontIdMap[linkedFont];
+        // This check is now redundant due to earlier validation, but keeping for safety
+        if (!resolvedFontId) {
+          errors.push(`linkedFont "${linkedFont}" not found in imported font list.`);
+          return null;
+        }
+
+        return {
+          projectId: projectId,
+          typographyName,
+          linkedFont: resolvedFontId,
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          orderIndex: typographyOrder += 1000,
+          createdAt: now,
+          updatedAt: now
+        };
+      }).filter(item => item !== null);
+
+      if (errors.length > 0) {
+        return { success: false, errors };
+      }
+
+      try {
+        await this.db.typography.bulkAdd(typographiesToInsert);
+      } catch (dbError) {
+        errors.push(`Database error while importing typographies: ${dbError.message}`);
+        return { success: false, errors };
+      }
+
+      setIsTypographyScreeenDataInitialized(false);
+      cacheManager.typography.clear();
+
+      // Success response
+      return {
+        success: true,
+        importedFonts: fontsToInsert.length,
+        importedTypographies: typographiesToInsert.length,
+        projectId: projectId,
+        message: `Successfully imported ${fontsToInsert.length} fonts and ${typographiesToInsert.length} typographies`
+      };
+
+    } catch (error) {
+      errors.push(`Unexpected error: ${error.message}`);
+      console.error("Error importing typography data:", error);
+      return { success: false, errors };
     }
   }
 
