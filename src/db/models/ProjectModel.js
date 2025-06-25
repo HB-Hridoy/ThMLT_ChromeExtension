@@ -854,4 +854,195 @@ export class ProjectModel extends BaseModel {
       throw error;
     }
   }
+
+  async importTypographyData({ jsonData, projectId }) {
+    const errors = [];
+    
+    try {
+      // Parse and validate JSON
+      let data;
+      try {
+        data = JSON.parse(jsonData);
+      } catch (parseErr) {
+        errors.push("Invalid JSON format.");
+        return { success: false, errors };
+      }
+
+      // Validate top-level structure to match export format
+      const requiredFields = ['Fonts', 'Typographies'];
+      const missingFields = requiredFields.filter(field => !(field in data));
+      
+      if (missingFields.length > 0) {
+        errors.push(`Missing required fields: ${missingFields.join(', ')}`);
+      }
+
+      // If critical fields are missing, return early
+      if (!data.Fonts || !data.Typographies) {
+        if (!data.Fonts) errors.push("Missing 'Fonts' field");
+        if (!data.Typographies) errors.push("Missing 'Typographies' field");
+        return { success: false, errors };
+      }
+
+      const { Fonts, Typographies } = data;
+
+      // Validate Fonts structure
+      if (typeof Fonts !== 'object' || Fonts === null || Array.isArray(Fonts)) {
+        errors.push("'Fonts' must be a non-null object.");
+      }
+
+      // Validate Typographies structure
+      if (typeof Typographies !== 'object' || Typographies === null || Array.isArray(Typographies)) {
+        errors.push("'Typographies' must be a non-null object.");
+      }
+
+      // If structure is invalid, return early
+      if (errors.length > 0) {
+        return { success: false, errors };
+      }
+
+      // Validate each font entry
+      for (const [fontName, fontValue] of Object.entries(Fonts)) {
+        if (typeof fontName !== 'string' || fontName.trim() === '') {
+          errors.push(`Invalid font name: "${fontName}"`);
+        }
+        if (typeof fontValue !== 'string' || fontValue.trim() === '') {
+          errors.push(`Invalid font value for "${fontName}"`);
+        }
+      }
+
+      // Validate each typography entry
+      const requiredTypographyProps = ['fontSize', 'lineHeight', 'letterSpacing', 'linkedFont'];
+      
+      for (const [typographyName, typography] of Object.entries(Typographies)) {
+        if (typeof typographyName !== 'string' || typographyName.trim() === '') {
+          errors.push(`Invalid typography name: "${typographyName}"`);
+          continue;
+        }
+
+        if (typeof typography !== 'object' || typography === null) {
+          errors.push(`Typography "${typographyName}" must be an object`);
+          continue;
+        }
+
+        // Check for required properties
+        const missingProps = requiredTypographyProps.filter(prop => !(prop in typography));
+        if (missingProps.length > 0) {
+          errors.push(`Typography "${typographyName}" missing properties: ${missingProps.join(', ')}`);
+        }
+
+        // Validate property types and values
+        const { fontSize, lineHeight, letterSpacing, linkedFont } = typography;
+
+        if (fontSize !== undefined && typeof fontSize !== 'string' && typeof fontSize !== 'number') {
+          errors.push(`Typography "${typographyName}": fontSize must be a string or number`);
+        }
+
+        if (lineHeight !== undefined && typeof lineHeight !== 'string' && typeof lineHeight !== 'number') {
+          errors.push(`Typography "${typographyName}": lineHeight must be a string or number`);
+        }
+
+        if (letterSpacing !== undefined && typeof letterSpacing !== 'string' && typeof letterSpacing !== 'number') {
+          errors.push(`Typography "${typographyName}": letterSpacing must be a string or number`);
+        }
+
+        if (linkedFont !== undefined && (typeof linkedFont !== 'string' || linkedFont.trim() === '')) {
+          errors.push(`Typography "${typographyName}": linkedFont must be a non-empty string`);
+        }
+
+        // Validate that linkedFont exists in the Fonts object
+        if (linkedFont && !(linkedFont in Fonts)) {
+          errors.push(`Typography "${typographyName}": linkedFont "${linkedFont}" not found in Fonts`);
+        }
+      }
+
+      // If there are validation errors, return them
+      if (errors.length > 0) {
+        return { success: false, errors };
+      }
+
+      // Clear existing fonts & typographies for this project
+      await this.db.fonts.where('projectId').equals(projectId).delete();
+      await this.db.typography.where('projectId').equals(projectId).delete();
+
+      // ----- Step 1: Import Fonts -----
+      const fontIdMap = {}; // fontName -> new fontId
+      let fontOrder = 1000;
+      const fontsToInsert = Object.entries(Fonts).map(([fontName, fontValue]) => ({
+        projectId: projectId,
+        fontName,
+        fontValue,
+        orderIndex: fontOrder += 1000
+      }));
+
+      try {
+        const newFontIds = await this.db.fonts.bulkAdd(fontsToInsert, { allKeys: true });
+        fontsToInsert.forEach((font, index) => {
+          fontIdMap[font.fontName] = newFontIds[index];
+        });
+      } catch (dbError) {
+        errors.push(`Database error while importing fonts: ${dbError.message}`);
+        return { success: false, errors };
+      }
+
+      // ----- Step 2: Import Typographies -----
+      let typographyOrder = 1000;
+      const now = new Date();
+      const typographiesToInsert = Object.entries(Typographies).map(([typographyName, t]) => {
+        const {
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          linkedFont
+        } = t;
+
+        const resolvedFontId = fontIdMap[linkedFont];
+        // This check is now redundant due to earlier validation, but keeping for safety
+        if (!resolvedFontId) {
+          errors.push(`linkedFont "${linkedFont}" not found in imported font list.`);
+          return null;
+        }
+
+        return {
+          projectId: projectId,
+          typographyName,
+          linkedFont: resolvedFontId,
+          fontSize,
+          lineHeight,
+          letterSpacing,
+          orderIndex: typographyOrder += 1000,
+          createdAt: now,
+          updatedAt: now
+        };
+      }).filter(item => item !== null);
+
+      if (errors.length > 0) {
+        return { success: false, errors };
+      }
+
+      try {
+        await this.db.typography.bulkAdd(typographiesToInsert);
+      } catch (dbError) {
+        errors.push(`Database error while importing typographies: ${dbError.message}`);
+        return { success: false, errors };
+      }
+
+      setIsTypographyScreeenDataInitialized(false);
+      cacheManager.typography.clear();
+
+      // Success response
+      return {
+        success: true,
+        importedFonts: fontsToInsert.length,
+        importedTypographies: typographiesToInsert.length,
+        projectId: projectId,
+        message: `Successfully imported ${fontsToInsert.length} fonts and ${typographiesToInsert.length} typographies`
+      };
+
+    } catch (error) {
+      errors.push(`Unexpected error: ${error.message}`);
+      console.error("Error importing typography data:", error);
+      return { success: false, errors };
+    }
+  }
+
 }
