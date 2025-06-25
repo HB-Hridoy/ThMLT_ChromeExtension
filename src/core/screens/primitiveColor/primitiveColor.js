@@ -7,7 +7,10 @@ import { getDatabaseManager } from "../../../db/DatabaseManager.js";
 let init = false;
 let primitiveTableScreen = null;
 let noPrimitiveScreen = null;
-let isPrimitiveDataInitialized = false;
+export let isPrimitiveDataInitialized = false;
+export function setPrimitiveDataInitialized(value) {
+  isPrimitiveDataInitialized = value;
+}
 
 let db = null;
 

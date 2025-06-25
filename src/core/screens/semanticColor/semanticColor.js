@@ -9,7 +9,10 @@ import { getDatabaseManager } from "../../../db/DatabaseManager.js";
 let init = false;
 let semanticTableScreen = null;
 let noSemanticScreen = null;
-let isSemanticDataInitialized = false;
+export let isSemanticDataInitialized = false;
+export function setSemanticDataInitialized(value) {
+  isSemanticDataInitialized = value;
+}
 
 let db = null;
 
