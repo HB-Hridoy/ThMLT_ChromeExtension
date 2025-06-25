@@ -407,6 +407,11 @@ async function handleProjectDeleteButton(){
 
 function handleProjectDeleteInputChange(e) {
   const inputValue = e.target.value.trim();
+async function handleTypographyImport() {
+  const confirmed = await confirmationModal.confirm({
+    message: "Importing typography will overwrite the existing typography. Are you sure you want to continue?",
+    confirmButtonText: "Yes, Import"
+  });
 
   if (inputValue !== cacheManager.projects.activeProjectName()) {
     replaceClass(projectDeleteButton, "bg-", "bg-gray-500");
@@ -417,6 +422,39 @@ function handleProjectDeleteInputChange(e) {
     replaceClass(projectDeleteButton, "hover:bg-", "hover:bg-red-800");
     projectDeleteButton.disabled = false;
   }
+  if (!confirmed) return;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      const typographyData = await file.text();
+      const result = await db.projects.importTypographyData({
+        projectId: cacheManager.projects.activeProjectId,
+        jsonData: typographyData
+      });
+      if (result.success) {
+        showMessageModal({
+          title: "Typography Import Successful",
+          message: result.message
+        });
+        console.log("[SETTINGS] Typography imported successfully");
+      } else {
+        showMessageModal({
+          title: "Typography Import Failed !!",
+          message: result.errors.join("\n")
+        });
+        console.error("[SETTINGS] Typography import failed", result.errors);
+      }
+      
+    } catch (err) {
+      console.error("[SETTINGS] Failed to import typography", err);
+    }
+  };
+  input.click();
 }
 
 async function handleTranslationsImport(){
