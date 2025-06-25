@@ -538,15 +538,45 @@ async function handleProjectDetailsUpdateButton(){
 
 }
 
+async function handleColorThemesImport() {
 
   const confirmed = await confirmationModal.confirm({
+    message: "Importing color themes will overwrite the existing color themes. Are you sure you want to continue?",
+    confirmButtonText: "Yes, Import"
   });
 
   if (!confirmed) return;
 
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,application/json";
+  input.onchange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const colorData = JSON.parse(text);
+      const importResult = await db.projects.importColorData({
+        projectId: cacheManager.projects.activeProjectId,
+        jsonData: JSON.stringify(colorData)
+      });
 
+      if (importResult.success){
+        console.log("[SETTINGS] Color themes imported successfully");
+        showMessageModal({
+          title: "Import Successful",
+          message: "Color themes have been imported successfully.",
+          buttonText: "OK"
+        })
+      }
       
+      
+    } catch (err) {
+      console.error("[SETTINGS] Failed to import color themes", err);
     }
+  };
+  input.click();
+  
 }
 
 async function handleTypographyImport() {
