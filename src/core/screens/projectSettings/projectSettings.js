@@ -327,7 +327,7 @@ async function handleTranslationDataDownloadButton(){
   }
 }
 
-async function handleTranslationDataCopyButton(){
+async function handleTranslationsDataCopy(){
   try {
     
     if (cacheManager.translations.hasTranslation()) {
