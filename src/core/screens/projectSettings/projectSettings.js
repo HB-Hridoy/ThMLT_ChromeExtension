@@ -247,10 +247,28 @@ function addEventListeners(){
 
 function restoreDefaults() {
 
+  openPage(homePage);
 
+  const projectData = cacheManager.projects.get(cacheManager.projects.activeProjectId);
+
+  projectDetailsNameInput.value = projectData.projectName;
+  projectDetailsAuthorInput.value = projectData.author;
+  projectDetailsVersionInput.value = projectData.version;
+  projectDetailsNameInputError.classList.add("hidden");
+  projectDetailsAuthorInputError.classList.add("hidden");
+  projectDetailsVersionInputError.classList.add("hidden");
+  setButtonState(projectDetailsUpdateButton, false);
+
+  projectDuplicateInput.value = "";
+  projectDuplicateInputError.classList.add("hidden");
+  projectDuplicateInput.style.borderColor = "";
+  setButtonState(projectDuplicateButton, false);
 
   projectDeleteInput.value = "";
   projectDeleteInput.style.borderColor = "";
+  setButtonState(projectDeleteButton, false, "gray", "red");
+
+}
 
 function validateProjectDetailsForm() {
   const hasError =
