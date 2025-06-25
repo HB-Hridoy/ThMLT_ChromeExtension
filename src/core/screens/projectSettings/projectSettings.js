@@ -262,41 +262,41 @@ async function handleColorDataCopyButton(){
 }
 }
 
-async function handleFontDataDownloadButton(){
+async function handleTypopgraphyDataDownload(){
   try {
-    const fontsData = await db.projects.exportFontData({
+    const typographyData = await db.projects.exportTypographyData({
       projectId: cacheManager.projects.activeProjectId
     });
 
     // Trigger a download of the JSON file.
-    const blob = new Blob([fontsData], { type: "application/json" });
+    const blob = new Blob([typographyData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     // Use the project name as the filename.
-    a.download = `${cacheManager.projects.activeProjectName()}_fonts.json`;
+    a.download = `${cacheManager.projects.activeProjectName()}_typography.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    console.log(`[SETTINGS] Fonts data for ${cacheManager.projects.activeProjectName()} downloaded successfully`);
+    console.log(`[SETTINGS] Typography data for ${cacheManager.projects.activeProjectName()} downloaded successfully`);
     
   } catch (err) {
-      console.error("[SETTINGS] Failed to download Fonts data", err);
+      console.error("[SETTINGS] Failed to download Typography data", err);
   }
 }
 
-async function handleFontDataCopyButton(){
+async function handleTypopgraphyDataCopy(){
   try {
-    const fontsData = await db.projects.exportFontData({
+    const typographyData = await db.projects.exportTypographyData({
       projectId: cacheManager.projects.activeProjectId
     });
 
-    await navigator.clipboard.writeText(fontsData);
-} catch (err) {
-    console.error("[SETTINGS] Failed to copy fonts data to clipboard", err);
-}
+    await navigator.clipboard.writeText(typographyData);
+  } catch (err) {
+      console.error("[SETTINGS] Failed to copy typography data to clipboard", err);
+  }
 }
 
 async function handleTranslationsDataDownload(){
