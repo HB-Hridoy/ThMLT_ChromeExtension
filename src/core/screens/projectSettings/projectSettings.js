@@ -383,19 +383,25 @@ function handleProjectDetailsNameInputChange(e) {
   const inputValue = e.target.value.trim();
 
   if (inputValue.length < 3) {
-    errorMessage = "Project name must be at least 3 characters long.";
+    projectDetailsNameInputError.textContent = "Project name must be at least 3 characters long.";
+    projectDetailsNameInputError.classList.remove("hidden");
+    projectDetailsNameInput.style.borderColor = "red";
   } else if (/^\d+$/.test(inputValue)) {
-    errorMessage = "Project name cannot consist of only numbers.";
+    projectDetailsNameInputError.textContent = "Project name cannot consist of only numbers.";
+    projectDetailsNameInputError.classList.remove("hidden");
+    projectDetailsNameInput.style.borderColor = "red";
   } else if (cacheManager.projects.existProjectName(inputValue)) {
-    errorMessage = "Project name already exists!";
-  } else if (!nameRegex.test(inputValue)) {
-    errorMessage = "Only letters, numbers, hyphens (-), and underscores (_) are allowed.";
+    projectDetailsNameInputError.textContent = "Project name already exists!";
+    projectDetailsNameInputError.classList.remove("hidden");
+    projectDetailsNameInput.style.borderColor = "red";
+  } else {
+    projectDetailsNameInputError.classList.add("hidden");
+    projectDetailsNameInput.style.borderColor = "";
   }
 
-  if (errorMessage) {
-    projectRenameInputError.innerHTML = errorMessage;
-    projectRenameInputError.classList.remove("hidden");
-    projectRenameInput.style.borderColor = "red";
+  validateProjectDetailsForm(); // Re-check validity
+}
+
 function handleProjectDetailsAuthorInputChange(e) {
   const inputValue = e.target.value.trim();
 
