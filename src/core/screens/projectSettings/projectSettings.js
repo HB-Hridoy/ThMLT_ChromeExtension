@@ -299,7 +299,7 @@ async function handleFontDataCopyButton(){
 }
 }
 
-async function handleTranslationDataDownloadButton(){
+async function handleTranslationsDataDownload(){
   try {
     if (cacheManager.translations.hasTranslation()) {
       const translationData = await db.translations.get({
