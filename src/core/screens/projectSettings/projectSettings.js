@@ -226,7 +226,8 @@ function restoreDefaults() {
 
 }
 
-async function handleColorDataDownloadButton(){
+
+async function handleColorsDataDownload(){
   try {
     const colorData = await db.projects.exportColorData({
       projectId: cacheManager.projects.activeProjectId
@@ -251,7 +252,7 @@ async function handleColorDataDownloadButton(){
   }
 }
 
-async function handleColorDataCopyButton(){
+async function handleColorsDataCopy(){
   try {
     const colorData = await db.projects.exportColorData({
       projectId: cacheManager.projects.activeProjectId
