@@ -113,8 +113,23 @@ export async function showProjectSettingsScreen() {
 
   // ========== EVENT LISTENERS BEGIN ===========//
 
-  document.getElementById("project-settings-back-button").addEventListener("click", async function(){
-    showProjectManagementScreen();
+  document.getElementById("project-settings-back-button").addEventListener("click", async function() {
+    // Check if any of the subpages (details, duplication, deletion) are visible
+    if (
+      (detailsPage && !detailsPage.classList.contains("hidden")) ||
+      (duplicationPage && !duplicationPage.classList.contains("hidden")) ||
+      (deletionPage && !deletionPage.classList.contains("hidden"))
+    ) {
+      // If any subpage is visible, go back to the home page
+      openPage(homePage);
+    } else {
+      // Otherwise, go back to project management screen
+      showProjectManagementScreen();
+    }
+  });
+
+  document.getElementById("general-project-details").addEventListener("click", function(){
+    openPage(detailsPage);
   });
 
   document.getElementById("general-project-duplication").addEventListener("click", function(){
