@@ -4,10 +4,10 @@ import cacheManager from "../../../utils/cache/cacheManager.js";
 import { screenManager, screens} from "../../../utils/screenManager.js";
 import { confirmationModal } from "../../modals/confirmationModal.js";
 import { addProjectCard, deleteProjectCard, showHomeScreen, updateProjectCard } from "../home/home.js";
-import { replaceClass, setButtonState } from "../../sidepanel.js";
+import { setButtonState } from "../../sidepanel.js";
 import sessionManager from "../../../utils/sessionManager.js";
 import { getDatabaseManager } from "../../../db/DatabaseManager.js";
-import { getTranslationFile, importTranslations, showProjectManagementScreen } from "../projectManagement/projectManagement.js";
+import { importTranslations, showProjectManagementScreen } from "../projectManagement/projectManagement.js";
 import { showMessageModal } from "../../modals/messageModal.js";
 
 let listenersAdded = false;
