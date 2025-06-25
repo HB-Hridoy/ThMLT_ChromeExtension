@@ -396,13 +396,21 @@ function handleProjectDetailsNameInputChange(e) {
     projectRenameInputError.innerHTML = errorMessage;
     projectRenameInputError.classList.remove("hidden");
     projectRenameInput.style.borderColor = "red";
+function handleProjectDetailsAuthorInputChange(e) {
+  const inputValue = e.target.value.trim();
 
-    replaceClass(projectRenameButton, "bg-", "bg-gray-500");
-    replaceClass(projectRenameButton, "hover:bg-", "hover:bg-gray-600");
-    projectRenameButton.disabled = true;
+  if (inputValue.length < 3) {
+    projectDetailsAuthorInputError.textContent = "Author name must be at least 3 characters long.";
+    projectDetailsAuthorInputError.classList.remove("hidden");
+    projectDetailsAuthorInput.style.borderColor = "red";
   } else {
-    projectRenameInputError.classList.add("hidden");
-    projectRenameInput.style.borderColor = "";
+    projectDetailsAuthorInputError.classList.add("hidden");
+    projectDetailsAuthorInput.style.borderColor = "";
+  }
+
+  validateProjectDetailsForm();
+}
+
 function handleProjectDetailsVersionInputChange(e) {
   const inputValue = e.target.value.trim();
 
