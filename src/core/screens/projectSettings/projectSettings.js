@@ -18,12 +18,12 @@ let projectSettingsTitle;
 let downloadColorsButton;
 let copyColorsButton;
 
-let translationDataDownloadButton;
-let translationDataCopyButton;
 let downloadTypographyButton;
 let copyTypographyButton;
 
 let projectDuplicateButton;
+let downloadsTranslationsButton;
+let copyTranslationsButton;
 
 let projectRenameButton;
 let projectRenameInput;
@@ -63,8 +63,8 @@ export async function showProjectSettingsScreen() {
   downloadTypographyButton = document.getElementById("download-typography");
   copyTypographyButton = document.getElementById("copy-typography");
 
-  translationDataDownloadButton = document.getElementById("translation-data-download-button");
-  translationDataCopyButton = document.getElementById("translation-data-copy-button");
+  downloadsTranslationsButton = document.getElementById("download-translations");
+  copyTranslationsButton = document.getElementById("copy-translations");
 
   projectDuplicateButton = document.getElementById("duplicate-project-button");
 
@@ -104,12 +104,12 @@ export async function showProjectSettingsScreen() {
     handleTypopgraphyDataCopy();
   });
   
-  translationDataDownloadButton.addEventListener("click", async ()=>{
-    handleTranslationDataDownloadButton();
+  downloadsTranslationsButton.addEventListener("click", async ()=>{
+    handleTranslationsDataDownload();
   });
   
-  translationDataCopyButton.addEventListener("click", async ()=>{
-    handleTranslationDataCopyButton();
+  copyTranslationsButton.addEventListener("click", async ()=>{
+    handleTranslationsDataCopy();
   });
 
   projectDuplicateButton.addEventListener("click", async () => {
