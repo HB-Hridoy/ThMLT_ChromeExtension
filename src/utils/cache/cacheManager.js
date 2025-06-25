@@ -21,6 +21,7 @@ class CacheManager {
     this.semantics.clear();
     this.fonts.clear();
     this.translations.clear();
+    this.typography.clear();
   }
 }
 
