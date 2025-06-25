@@ -327,6 +327,20 @@ async function handleProjectRenameInputChange(e) {
 
   const nameRegex = /^[a-zA-Z0-9_-]+$/;
   let errorMessage = "";
+function openPage(pageElement) {
+  const pages = [homePage, detailsPage, duplicationPage, deletionPage];
+
+  // Hide all pages
+  pages.forEach(page => {
+    if (page) page.classList.add("hidden");
+  });
+
+  // Show the requested page
+  if (pageElement) pageElement.classList.remove("hidden");
+}
+
+function handleProjectDetailsNameInputChange(e) {
+  const inputValue = e.target.value.trim();
 
   if (inputValue.length < 3) {
     errorMessage = "Project name must be at least 3 characters long.";
