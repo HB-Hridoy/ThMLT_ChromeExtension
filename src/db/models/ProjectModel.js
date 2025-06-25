@@ -309,7 +309,7 @@ export class ProjectModel extends BaseModel {
     return record;
   }
 
-  async duplicateProject({ projectId }) {
+  async duplicateProject({ projectId, newProjectName }) {
     
     try {
       // Get the original project
@@ -321,14 +321,25 @@ export class ProjectModel extends BaseModel {
       // Create new project with _copy suffix and generate a new ID
       const newProjectId = crypto.randomUUID();
 
-      let copyNameCounter = 1;
-      let proposedName = `${originalProject.projectName}_copy_${copyNameCounter}`;
+      const newProjectId = crypto.randomUUID();
+      let proposedName = newProjectName?.trim() || null;
       const allProjects = cacheManager.projects.getAll();
 
-      while (allProjects.some(project => project.projectName === proposedName)) {
-        copyNameCounter++;
+      // If no name provided, auto-generate one with incrementing suffix
+      if (!proposedName) {
+        let copyNameCounter = 1;
         proposedName = `${originalProject.projectName}_copy_${copyNameCounter}`;
+        while (allProjects.some(project => project.projectName === proposedName)) {
+          copyNameCounter++;
+          proposedName = `${originalProject.projectName}_copy_${copyNameCounter}`;
+        }
+      } else {
+        // Ensure user-provided name is unique
+        if (allProjects.some(project => project.projectName === proposedName)) {
+          throw new Error(`[DB] Project name "${proposedName}" already exists`);
+        }
       }
+      
 
       const newProject = {
         ...originalProject,
