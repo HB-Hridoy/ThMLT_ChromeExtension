@@ -1,6 +1,10 @@
 import { BaseModel } from './BaseModel.js';
 import cacheManager from '../../utils/cache/cacheManager.js';
 import { semanticTable } from '../../utils/semanticTable.js';
+import { showHomeScreen } from '../../core/screens/home/home.js';
+import { isPrimitiveDataInitialized, setPrimitiveDataInitialized } from '../../core/screens/primitiveColor/primitiveColor.js';
+import { isSemanticDataInitialized, setSemanticDataInitialized } from '../../core/screens/semanticColor/semanticColor.js';
+import { setIsTypographyScreeenDataInitialized } from '../../core/screens/typography/typographyManagement.js';
 
 export class ProjectModel extends BaseModel {
   constructor() {
