@@ -3093,9 +3093,12 @@ const {
   add,
   remove
 } = Dexie;
+const ThMLT_DB_Schema = {
+  dbName: "ThMLTDatabase-Alpha2"
+};
 class ThMLTDatabase extends Dexie {
   constructor() {
-    super("ThMLTDatabase");
+    super(ThMLT_DB_Schema.dbName);
     this.projects = null;
     this.primitiveColors = null;
     this.semanticColors = null;

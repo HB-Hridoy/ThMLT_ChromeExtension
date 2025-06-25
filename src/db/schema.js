@@ -1,4 +1,5 @@
 const ThMLT_DB_Schema = {
+  dbName: "ThMLTDatabase-Alpha2",
   version: 2,
   stores: {
     projects: "++projectId, projectName, deleted, deletedAt, [deleted+deletedAt], lastModified",

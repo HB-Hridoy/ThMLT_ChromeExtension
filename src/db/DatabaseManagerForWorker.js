@@ -1,9 +1,9 @@
 import Dexie from 'dexie';
-// import ThMLT_DB_Schema from './schema.js';
+import ThMLT_DB_Schema from './schema.js';
 
 class ThMLTDatabase extends Dexie {
   constructor() {
-    super('ThMLTDatabase');
+    super(ThMLT_DB_Schema.dbName);
 
     this.projects = null;
     this.primitiveColors = null;
