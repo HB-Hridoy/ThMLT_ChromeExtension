@@ -346,7 +346,7 @@ async function handleTranslationsDataCopy(){
   }
 }
 
-async function handleProjectDuplicateButton() {
+async function handleProjectDuplication(newProjectName) {
   const projectName = cacheManager.projects.activeProjectName();
 
   const confirmed = await confirmationModal.confirm({
@@ -357,7 +357,8 @@ async function handleProjectDuplicateButton() {
   if (confirmed) {
     try {
       const newProjectData = await db.projects.duplicateProject({
-        projectId: cacheManager.projects.activeProjectId
+        projectId: cacheManager.projects.activeProjectId,
+        newProjectName: newProjectName
       });
 
       console.log(newProjectData);
