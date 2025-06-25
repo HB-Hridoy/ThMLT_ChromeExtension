@@ -403,15 +403,21 @@ function handleProjectDetailsNameInputChange(e) {
   } else {
     projectRenameInputError.classList.add("hidden");
     projectRenameInput.style.borderColor = "";
+function handleProjectDetailsVersionInputChange(e) {
+  const inputValue = e.target.value.trim();
 
-    replaceClass(projectRenameButton, "bg-", "bg-blue-700");
-    replaceClass(projectRenameButton, "hover:bg-", "hover:bg-blue-800");
-    projectRenameButton.disabled = false;
+  if (inputValue.length < 1) {
+    projectDetailsVersionInputError.textContent = "Version is required.";
+    projectDetailsVersionInputError.classList.remove("hidden");
+    projectDetailsVersionInput.style.borderColor = "red";
+  } else {
+    projectDetailsVersionInputError.classList.add("hidden");
+    projectDetailsVersionInput.style.borderColor = "";
   }
 
-  if (!inputValue || inputValue === cacheManager.projects.activeProjectName()) {
-    projectRenameInputError.classList.add("hidden");
-    projectRenameInput.style.borderColor = "";
+  validateProjectDetailsForm();
+}
+
 function handleProjectDuplicateInput() {
   const inputValue = projectDuplicateInput.value.trim();
   let errorMessage = "";
