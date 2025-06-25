@@ -45,6 +45,10 @@ let projectDuplicateButton;
 let projectDeleteButton;
 let projectDeleteInput;
 
+let importColorThemesButton;
+let importTypographyButton;
+let importTranslationsButton;
+
 let db = null;
 
 export async function showProjectSettingsScreen() {
@@ -107,6 +111,11 @@ export async function showProjectSettingsScreen() {
   projectDuplicateInput = document.getElementById("project-duplicate-name-input");
   projectDuplicateInputError = document.getElementById("project-duplicate-name-input-error");
   projectDuplicateButton = document.getElementById("project-duplicate-action-button");
+
+    // ** Import color themes ** //
+  importColorThemesButton = document.getElementById("import-color-themes-button");
+  importTypographyButton = document.getElementById("import-typography-button");
+  importTranslationsButton = document.getElementById("import-translations-button");
 
 
   // ========== GLOBAL VARIABLE END ===========//
@@ -207,6 +216,17 @@ export async function showProjectSettingsScreen() {
     
   });
 
+  importColorThemesButton.addEventListener("click", async () => {
+    await handleColorThemesImport();
+  });
+
+  importTypographyButton.addEventListener("click", async () => {
+    await handleTypographyImport();
+  });
+
+  importTranslationsButton.addEventListener("click", async () => {
+    await handleTranslationsImport();
+  });
   // ========== EVENT LISTENERS END ===========//
 
   listenersAdded = true;
