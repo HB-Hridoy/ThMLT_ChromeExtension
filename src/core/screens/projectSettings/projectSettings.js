@@ -419,3 +419,22 @@ function handleProjectDeleteInputChange(e) {
   }
 }
 
+async function handleTranslationsImport(){
+
+      if (translationStatusImported.classList.contains("hidden")) {
+        importTranslations();
+      } else {
+        
+        const confirmed = await confirmationModal.confirm({
+          message: "Importing translations will overwrite the existing translations. Are you sure you want to continue?",
+          confirmButtonText: "Yes, Update"
+        });
+
+        if (confirmed) {
+          importTranslations(true);
+        }
+      }
+
+    }
+
+
