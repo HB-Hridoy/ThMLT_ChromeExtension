@@ -317,9 +317,6 @@ export class ProjectModel extends BaseModel {
       if (!originalProject) {
         throw new Error(`[DB] Project with ID ${projectId} not found`);
       }
-  
-      // Create new project with _copy suffix and generate a new ID
-      const newProjectId = crypto.randomUUID();
 
       const newProjectId = crypto.randomUUID();
       let proposedName = newProjectName?.trim() || null;
@@ -535,27 +532,27 @@ export class ProjectModel extends BaseModel {
       });
   
       // Populate semantic colors for each theme mode
-      semanticColors.forEach(semanticColor => {
-        Object.entries(semanticColor.themeValues).forEach(async ([themeMode, linkedPrimitive]) => {
+      for (const semanticColor of semanticColors) {
+        for (const [themeMode, linkedPrimitive] of Object.entries(semanticColor.themeValues)) {
           if (!semantic[themeMode]) {
             semantic[themeMode] = {};
           }
 
-          let linkedPrimitiveValue = ""
-          if (linkedPrimitive !== semanticTable.defaultValue){
+          let linkedPrimitiveValue = "";
+          if (linkedPrimitive !== semanticTable.defaultValue) {
             const linkedPrimitiveId = parseInt(linkedPrimitive, 10);
             linkedPrimitiveValue = primitiveNames[linkedPrimitiveId];
 
             console.log(`Linked primitive id - ${linkedPrimitiveId}`);
             console.log(`Linked primitive value - ${linkedPrimitiveValue}`);
-            
-            
-          } else{
+          } else {
             linkedPrimitiveValue = linkedPrimitive;
           }
+
           semantic[themeMode][semanticColor.semanticName] = linkedPrimitiveValue;
-        });
-      });
+        }
+      }
+
   
       // Assemble the final JSON object
       const exportData = {
