@@ -9,6 +9,7 @@ export class ContentScriptCacheManager {
     this.primitiveCache = new BaseCache("primitive", "primitiveId");
     this.semanticCache = new BaseCache("semantic", "semanticId");
     this.fontCache = new BaseCache("font", "fontId");
+    this.typographyCache = new BaseCache("typography", "typographyId");
     this.translationCache = new BaseCache("translation", "translationId");
 
     this.#selectedProjectId = "";
@@ -29,20 +30,3 @@ export class ContentScriptCacheManager {
 const contentScriptCache = new ContentScriptCacheManager();
 
 export { contentScriptCache };
-
-
-export const CACHE_KEYS = {
-  TRANSLATION_DATA : 'translationData',
-  FONTS_DATA : 'fontsData',
-  COLOR_DATA: 'colorData',
-  DEFAULT_THEME_MODE: 'defaultThemeMode',
-
-  AI2_SELECTED_PROJECT: 'ai2_selected_project',
-  PREVIOUS_AI2_SELECTED_PROJECT: 'previousAi2SelectedProject',
-  HAS_PROJECT_CHANGED: 'hasProjectChanged',
-
-  IS_TRANSLATION_DATA_CHANGED: 'isTranslationDataChanged',
-  IS_FONT_DATA_CHANGED: 'isFontDataChanged',
-  IS_COLOR_DATA_CHANGED: 'isColorDataChanged'
-  
-};

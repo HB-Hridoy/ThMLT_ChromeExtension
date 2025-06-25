@@ -5,14 +5,15 @@
         <div id="textFormatterNavTabs" class="textFormatterNavTabs">
             <div id="translation-tab" isTabSelected="true" tfTabindex="1" class="textFormatterNavTabSelected">
                 Translation</div>
-            <div id="font-tab" isTabSelected="false" tfTabindex="2" class="textFormatterNavTab">Font</div>
+            <div id="typography-tab" isTabSelected="false" tfTabindex="2" class="textFormatterNavTab">Typography</div>
             <div id="color-tab" isTabSelected="false" tfTabindex="3" class="textFormatterNavTab">Color</div>
         </div>
 
         <div class="screensContainerParent">
             <div class="screensContainer" style="display: block;">
                 <div>
-                    <div id="text-formatter-modal-formatted-text">Please select a translation, font, and color.</div>
+                    <div id="text-formatter-modal-formatted-text">Please select a translation, typography, and color.
+                    </div>
                 </div>
 
                 <!-- Translation Screen -->
@@ -46,22 +47,22 @@
 
                 </div>
 
-                <!-- Font Screen -->
-                <div id="font-screen" style="display: none;">
-                    <table id="text-formatter-modal-fonts-table" class="tableWrapper">
+                <!-- Typography Screen -->
+                <div id="typography-screen" style="display: none;">
+                    <table id="text-formatter-modal-typography-table" class="tableWrapper">
                         <thead>
                             <tr>
-                                <th>Font Name</th>
-                                <th>Font Value</th>
+                                <th>Typography Name</th>
+                                <th>Typography Value</th>
                             </tr>
                         </thead>
-                        <tbody class="text-formatter-modal-fonts-table-body"></tbody>
+                        <tbody class="text-formatter-modal-typography-table-body"></tbody>
                     </table>
 
-                    <div class="no-fonts-screen">
+                    <div class="no-typography-screen">
                         <div class="content">
                             <p>Oops !!</p>
-                            <p>No fonts data found</p>
+                            <p>No typography data found</p>
                         </div>
                     </div>
                 </div>
