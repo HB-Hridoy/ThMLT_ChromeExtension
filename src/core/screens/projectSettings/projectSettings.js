@@ -221,9 +221,19 @@ function restoreDefaults() {
 
   replaceClass(projectDeleteButton, "bg-", "bg-gray-500");
   replaceClass(projectDeleteButton, "hover:bg-", "hover:bg-gray-600");
+function validateProjectDetailsForm() {
+  const hasError =
+    !projectDetailsNameInputError.classList.contains("hidden") ||
+    !projectDetailsAuthorInputError.classList.contains("hidden") ||
+    !projectDetailsVersionInputError.classList.contains("hidden");
 
   projectDeleteButton.disabled = true;
+  const allFilled =
+    projectDetailsNameInput.value.trim().length > 0 &&
+    projectDetailsAuthorInput.value.trim().length > 0 &&
+    projectDetailsVersionInput.value.trim().length > 0;
 
+  setButtonState(projectDetailsUpdateButton, !hasError && allFilled);
 }
 
 
