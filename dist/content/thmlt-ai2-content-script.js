@@ -363,8 +363,16 @@ class BaseCache {
     console.log(`[CACHE] Deleted ${this.#type} ${id}:`, deleted);
     return deleted;
   }
-  isExist({ id }) {
-    return this.#items.some((item) => item[this.#idField] === id);
+  isExist({ id, name }) {
+    if (id !== void 0) {
+      return this.#items.some((item) => item[this.#idField] === id);
+    }
+    if (name !== void 0) {
+      const nameField = `${this.#type}Name`;
+      return this.#items.some((item) => item[nameField] === name);
+    }
+    console.warn(`[CACHE] [WARN] isExist called without 'id' or 'name'.`);
+    return false;
   }
   existName({ name, nameField }) {
     return this.#items.some((item) => item[nameField] === name);
