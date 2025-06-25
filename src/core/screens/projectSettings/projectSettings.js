@@ -14,6 +14,10 @@ let listenersAdded = false;
 
 let projectSettingsTitle;
 
+let homePage = null;
+let detailsPage = null;
+let duplicationPage = null;
+let deletionPage = null;
 
 let downloadColorsButton;
 let copyColorsButton;
@@ -55,8 +59,13 @@ export async function showProjectSettingsScreen() {
 
   // ========== GLOBAL VARIABLE BEGIN ===========//
 
-  colorThemesDataDownloadButton = document.getElementById("project-data-download-button");
-  colorThemesDataCopyButton = document.getElementById("project-data-copy-button");
+    // ** Project Settings Home ** //
+
+  homePage = document.getElementById("project-settings-home-page");
+  detailsPage = document.getElementById("project-settings-details-page");
+  duplicationPage = document.getElementById("project-settings-duplication-page");
+  deletionPage = document.getElementById("project-settings-deletion-page");
+
   downloadColorsButton = document.getElementById("download-colors");
   copyColorsButton = document.getElementById("copy-colors");
 
