@@ -9,6 +9,7 @@ export function handleDbChange({ table, type, data }) {
     semanticColors: "semanticId",
     fonts: "fontId",
     projects: "projectId",
+    typography: "typographyId"
   };
 
   const cacheMap = {
@@ -17,6 +18,7 @@ export function handleDbChange({ table, type, data }) {
     semanticColors: contentScriptCache.semanticCache,
     fonts: contentScriptCache.fontCache,
     projects: contentScriptCache.projectCache,
+    typography: contentScriptCache.typographyCache
   };
 
   const idField = idFields[table];
