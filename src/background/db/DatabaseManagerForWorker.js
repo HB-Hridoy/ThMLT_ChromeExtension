@@ -3103,6 +3103,7 @@ class ThMLTDatabase extends Dexie {
     this.primitiveColors = null;
     this.semanticColors = null;
     this.fonts = null;
+    this.typography = null;
     this.translations = null;
   }
 }
@@ -3130,6 +3131,7 @@ class DatabaseManager {
       this.db.primitiveColors = this.db.table("primitiveColors");
       this.db.semanticColors = this.db.table("semanticColors");
       this.db.fonts = this.db.table("fonts");
+      this.db.typography = this.db.table("typography");
       this.db.translations = this.db.table("translations");
       this.initialized = true;
       console.log("DatabaseManager initialized successfully");
@@ -3154,6 +3156,9 @@ class DatabaseManager {
   }
   get fonts() {
     return this.db?.fonts;
+  }
+  get typography() {
+    return this.db?.typography;
   }
   get translations() {
     return this.db?.translations;
