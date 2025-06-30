@@ -5,6 +5,7 @@ import { handlePrimitivesDataFetch } from './handlers/primitiveColorsHandler.js'
 import { handleSemanticsDataFetch } from './handlers/semanticColorsHandler.js';
 import { handleFontsDataFetch } from './handlers/fontsHandler.js';
 import { handleTranslationsDataFetch } from './handlers/translationsHandler.js';
+import { handleTypographyDataFetch } from './handlers/typographyHandler.js';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
@@ -15,6 +16,7 @@ const messageHandlers = {
     "COLORS:FETCH_PRIMITIVE": handlePrimitivesDataFetch,
     "COLORS:FETCH_SEMANTIC": handleSemanticsDataFetch,
     "FONTS:FETCH_DATA": handleFontsDataFetch,
+    "TYPOGRAPHY:FETCH_DATA": handleTypographyDataFetch,
     "TRANSLATIONS:FETCH_DATA": handleTranslationsDataFetch,
 
     "SESSION_STORAGE:SET": handleSessionStorage,
