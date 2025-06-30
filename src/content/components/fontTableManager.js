@@ -10,7 +10,7 @@ export class TypographyTableManager {
     this._selectedRow = null;
 
     const observer = new MutationObserver((mutationsList, observerInstance) => {
-      const tableBody = this._shadowRoot.querySelector(".text-formatter-modal-typography-table-body`");
+      const tableBody = this._shadowRoot.querySelector(".text-formatter-modal-typography-table-body");
     
       if (tableBody) {
         this._tableBody = tableBody;
