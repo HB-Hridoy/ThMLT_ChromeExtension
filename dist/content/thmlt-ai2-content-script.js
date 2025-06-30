@@ -1284,6 +1284,9 @@ class DataFetcher {
   fetchFontsData() {
     return this.fetch({ action: "FONTS:FETCH_DATA", cacheKey: "fontCache" });
   }
+  fetchTypographyData() {
+    return this.fetch({ action: "TYPOGRAPHY:FETCH_DATA", cacheKey: "typographyCache" });
+  }
   fetchTranslationsData() {
     return this.fetch({ action: "TRANSLATIONS:FETCH_DATA", cacheKey: "translationCache" });
   }
@@ -1291,6 +1294,7 @@ class DataFetcher {
     await this.fetchPrimitivesData();
     await this.fetchSemanticsData();
     await this.fetchFontsData();
+    await this.fetchTypographyData();
     await this.fetchTranslationsData();
   }
 }
@@ -1800,14 +1804,16 @@ function handleDbChange({ table, type, data }) {
     primitiveColors: "primitiveId",
     semanticColors: "semanticId",
     fonts: "fontId",
-    projects: "projectId"
+    projects: "projectId",
+    typography: "typographyId"
   };
   const cacheMap = {
     translations: contentScriptCache.translationCache,
     primitiveColors: contentScriptCache.primitiveCache,
     semanticColors: contentScriptCache.semanticCache,
     fonts: contentScriptCache.fontCache,
-    projects: contentScriptCache.projectCache
+    projects: contentScriptCache.projectCache,
+    typography: contentScriptCache.typographyCache
   };
   const idField = idFields[table];
   const cache = cacheMap[table];
