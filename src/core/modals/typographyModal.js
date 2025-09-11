@@ -72,7 +72,7 @@ class FontModal {
   const fields = [
     { input: typographyNameInput, error: typographyNameInputError },
     { input: linkedFontInput, error: linkedFontInputError },
-    { input: fontSizeInput, error: fontSizeInputError, disclaimer: fontSizeInputDiscalimer, defaultValue: "0" },
+    { input: fontSizeInput, error: fontSizeInputError, disclaimer: fontSizeInputDiscalimer, defaultValue: "12" },
     { input: lineHeightInput, error: lineHeightInputError, disclaimer: lineHeightInputDiscalimer, defaultValue: "0" },
     { input: letterSpacingInput, error: letterSpacingInputError, disclaimer: letterSpacingInputDiscalimer, defaultValue: "0" }
   ];
@@ -144,10 +144,12 @@ class FontModal {
     typographyModalElement.setAttribute("lineHeight", currentLineHeight);
     typographyModalElement.setAttribute("letterSpacing", currentLetterSpacing);
 
+    linkedFontInput.setAttribute("linkedFontId", currentLinkedFont);
+
     // Populate input fields
     if (typographyNameInput) typographyNameInput.value = currentTypographyName || "";
     if (linkedFontInput) linkedFontInput.value = cacheManager.fonts.getName({ fontId: currentLinkedFont }) || "";
-    if (fontSizeInput) fontSizeInput.value = currentFontSize || "0";
+    if (fontSizeInput) fontSizeInput.value = currentFontSize || "12";
     if (lineHeightInput) lineHeightInput.value = currentLineHeight || "0";
     if (letterSpacingInput) letterSpacingInput.value = currentLetterSpacing || "0";
   }
