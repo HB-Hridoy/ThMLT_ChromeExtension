@@ -167,10 +167,16 @@ export class ElementWatcher {
     );
 
     if (unprocessedElements.length === 0) {
-      this.log('All elements processed, stopping main observer');
-      this.mainObserver.disconnect();
-      return;
+      // Check if any elements require ongoing text watching
+      const needsWatch = this.config.elements.some(el => el.watchText);
+      
+      if (!needsWatch) {
+        this.log('All elements processed (no watchText), stopping main observer');
+        this.mainObserver.disconnect();
+        return;
+      }
     }
+
 
     this.checkAllElements();
   }
