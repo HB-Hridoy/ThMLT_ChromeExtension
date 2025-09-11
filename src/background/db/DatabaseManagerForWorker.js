@@ -3094,7 +3094,7 @@ const {
   remove
 } = Dexie;
 const ThMLT_DB_Schema = {
-  dbName: "ThMLTDatabase-Alpha2"
+  dbName: "ThMLTDatabase"
 };
 class ThMLTDatabase extends Dexie {
   constructor() {
