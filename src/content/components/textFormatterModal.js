@@ -3,7 +3,7 @@ import { ColorsTableManager } from "./colorsTableManager.js";
 import { contentScriptCache } from "../utils/cache/contentScriptCache.js";
 import AppContext from "../services/appContext.js";
 import { activeAI2TextArea } from "../content-script.js";
-import { FontsTableManager } from "./fontTableManager.js";
+import { TypographyTableManager } from "./fontTableManager.js";
 import { TranslationsTableManager } from "./translationsTableManager.js";
 import { debounce } from '../../utils/debounce.js'
 
@@ -15,7 +15,7 @@ class TextFormatterModal {
     this._tabManager = null;
 
     this._colorTableManager = null;
-    this._fontsTableManager = null;
+    this._typographyTableManager = null;
     this._translationsTableManager = null;
 
     this._formattedTextElement = null;
@@ -27,8 +27,8 @@ class TextFormatterModal {
     this._translationsSearchInput = null;
     this._noTranslationScreen = null;
 
-    this._fontsTable = null;
-    this._noFontsScreen = null;
+    this._typographyTable = null;
+    this._noTypographyScreen = null;
 
     this._colorsTable = null;
     this._colorsSearchInputParent = null;
@@ -50,7 +50,7 @@ class TextFormatterModal {
       this._tabManager = new TabManager(this._shadowRoot);
 
       this._colorTableManager = new ColorsTableManager();
-      this._fontsTableManager = new FontsTableManager();
+      this._typographyTableManager = new TypographyTableManager();
       this._translationsTableManager = new TranslationsTableManager();
 
       await this._createTextFormatterModal(this._shadowRoot);
@@ -119,8 +119,8 @@ class TextFormatterModal {
     this._translationsSearchInput = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input");
     this._noTranslationScreen = this._shadowRoot.querySelector(".no-translations-screen");
 
-    this._fontsTable = this._shadowRoot.getElementById("text-formatter-modal-fonts-table");
-    this._noFontsScreen = this._shadowRoot.querySelector(".no-fonts-screen");
+    this._typographyTable = this._shadowRoot.getElementById("text-formatter-modal-typography-table");
+    this._noTypographyScreen = this._shadowRoot.querySelector(".no-typography-screen");
 
     this._colorsTable = this._shadowRoot.getElementById("text-formatter-modal-colors-table");
     this._colorsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input-parent");
@@ -186,7 +186,7 @@ class TextFormatterModal {
 
   show(){
 
-    this._formattedTextElement.textContent = "Please select a translation, font, and color.";
+    this._formattedTextElement.textContent = "Please select a translation, typography, and color.";
     this._applyFormattedTextButton.classList.toggle("disabled", true);
 
     const primitivesData = contentScriptCache.primitiveCache.getAll();
@@ -205,13 +205,13 @@ class TextFormatterModal {
       this.setColorsScreenVisibility(false);
     }
 
-    const fontsData = contentScriptCache.fontCache.getAll();
+    const typographyData = contentScriptCache.typographyCache.getAll();
 
-    if (Array.isArray(fontsData) && fontsData.length > 0) {
-      this._fontsTableManager.render(fontsData);
-      this.setFontsScreenVisibility(true);
+    if (Array.isArray(typographyData) && typographyData.length > 0) {
+      this._typographyTableManager.render(typographyData);
+      this.SetTypographyScreenVisibility(true);
     } else {
-      this.setFontsScreenVisibility(false);
+      this.SetTypographyScreenVisibility(false);
     }
 
     const allTranslations = contentScriptCache.translationCache.getAll();
@@ -240,8 +240,8 @@ class TextFormatterModal {
       console.log(`text area found. creating chunks`);
       
 
-      if (oldTextChunks.translation && oldTextChunks.font && oldTextChunks.color){
-        this._formattedTextElement.textContent = `${oldTextChunks.translation}, ${oldTextChunks.font}, ${oldTextChunks.color}`
+      if (oldTextChunks.translation && oldTextChunks.typography && oldTextChunks.color){
+        this._formattedTextElement.textContent = `${oldTextChunks.translation}, ${oldTextChunks.typography}, ${oldTextChunks.color}`
       }
 
     }
@@ -263,21 +263,21 @@ class TextFormatterModal {
     return this._formattedTextElement.textContent;
   }
   
-  setFormattedText({ translation, font, color }) {
+  setFormattedText({ translation, typography, color }) {
     // Parse existing values from the current content
-    if (this._formattedTextElement.textContent === "Please select a translation, font, and color.") this._formattedTextElement.textContent = "#,#,#";
-    const [currentTranslation = '', currentFont = '', currentColor = ''] =
+    if (this._formattedTextElement.textContent === "Please select a translation, typography, and color.") this._formattedTextElement.textContent = "#,#,#";
+    const [currentTranslation = '', currentTypography = '', currentColor = ''] =
     this._formattedTextElement.textContent.split(',').map(s => s.trim());
   
     // Use new values if provided, otherwise retain old
     const newTranslation = translation !== undefined ? translation : currentTranslation;
-    const newFont = font !== undefined ? font : currentFont;
+    const newTypography = typography !== undefined ? typography : currentTypography;
     const newColor = color !== undefined ? color : currentColor;
   
-    this._formattedTextElement.textContent = `${newTranslation}, ${newFont}, ${newColor}`;
+    this._formattedTextElement.textContent = `${newTranslation}, ${newTypography}, ${newColor}`;
 
     if (this._formattedTextElement.textContent.trim() === "#, #, #"){
-      this._formattedTextElement.textContent = "Please select a translation, font, and color.";
+      this._formattedTextElement.textContent = "Please select a translation, typography, and color.";
       this._applyFormattedTextButton.classList.toggle("disabled", true);
     } else {
       this._applyFormattedTextButton.classList.toggle("disabled", false);
@@ -307,7 +307,7 @@ class TextFormatterModal {
 
     return {
       translation: match[1],
-      font: match[2],
+      typography: match[2],
       color: match[3],
       remainingText: (match[4] || '').trim()
     };
@@ -327,13 +327,13 @@ class TextFormatterModal {
     }
   }
 
-  setFontsScreenVisibility(show){
+  SetTypographyScreenVisibility(show){
     if (show) {
-      this._noFontsScreen.style.display = 'none';
-      this._fontsTable.style.display = "block";
+      this._noTypographyScreen.style.display = 'none';
+      this._typographyTable.style.display = "block";
     } else {
-      this._noFontsScreen.style.display = 'flex';
-      this._fontsTable.style.display = "none";
+      this._noTypographyScreen.style.display = 'flex';
+      this._typographyTable.style.display = "none";
     }
   }
 

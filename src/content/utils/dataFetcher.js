@@ -46,6 +46,10 @@ class DataFetcher {
     return this.fetch({ action: "FONTS:FETCH_DATA", cacheKey: "fontCache" });
   }
 
+  fetchTypographyData() {
+    return this.fetch({ action: "TYPOGRAPHY:FETCH_DATA", cacheKey: "typographyCache" });
+  }
+
   fetchTranslationsData() {
     return this.fetch({ action: "TRANSLATIONS:FETCH_DATA", cacheKey: "translationCache" });
   }
@@ -54,6 +58,7 @@ class DataFetcher {
     await this.fetchPrimitivesData();
     await this.fetchSemanticsData();
     await this.fetchFontsData();
+    await this.fetchTypographyData();
     await this.fetchTranslationsData();
   }
 }

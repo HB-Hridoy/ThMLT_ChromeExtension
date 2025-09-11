@@ -1,22 +1,22 @@
 import AppContext from "../services/appContext";
 import { textFormatterModal } from "./textFormatterModal";
 
-export class FontsTableManager {
+export class TypographyTableManager {
   constructor() {
     this._shadowRoot = AppContext.getShadowRoot();
     this._tableBody = null;
-    this._currentFonts = new Map(); // fontId -> font data
-    this._domElements = new Map(); // fontId -> DOM element
+    this._currentTypographies = new Map(); // typographyId -> typography data
+    this._domElements = new Map(); // typographyId -> DOM element
     this._selectedRow = null;
 
     const observer = new MutationObserver((mutationsList, observerInstance) => {
-      const tableBody = this._shadowRoot.querySelector(".text-formatter-modal-fonts-table-body");
+      const tableBody = this._shadowRoot.querySelector(".text-formatter-modal-typography-table-body");
     
       if (tableBody) {
         this._tableBody = tableBody;
     
         observerInstance.disconnect(); // Stop observing
-        console.log("Color Table body found and stored.");
+        console.log("typography body found and stored.");
       }
     });
     
@@ -28,16 +28,16 @@ export class FontsTableManager {
   }
 
   /**
-   * Main method to update the table with new font data
-   * @param {Array} newFonts - Array of font objects
+   * Main method to update the table with new typography data
+   * @param {Array} newTypography - Array of typography objects
    */
-  render(newFonts) {
-    const sortedFonts = this._sortFontsByOrderIndex(newFonts);
+  render(newTypographies) {
+    const sortedTypographies = this._sortTypographyByOrderIndex(newTypographies);
     
     if (this.isTableEmpty()) {
-      this._initialRender(sortedFonts);
+      this._initialRender(sortedTypographies);
     } else {
-      this._updateRender(sortedFonts);
+      this._updateRender(sortedTypographies);
     }
   }
 
@@ -50,28 +50,28 @@ export class FontsTableManager {
   }
 
   /**
-   * Sort fonts by orderIndex
-   * @param {Array} fonts - Array of font objects
+   * Sort typography by orderIndex
+   * @param {Array} typography - Array of typography objects
    * @returns {Array} Sorted array
    */
-  _sortFontsByOrderIndex(fonts) {
-    return [...fonts].sort((a, b) => a.orderIndex - b.orderIndex);
+  _sortTypographyByOrderIndex(typography) {
+    return [...typography].sort((a, b) => a.orderIndex - b.orderIndex);
   }
 
   /**
    * Initial render when table is empty
-   * @param {Array} sortedFonts - Sorted font data
+   * @param {Array} sortedTypographies - Sorted typography data
    */
-  _initialRender(sortedFonts) {
+  _initialRender(sortedTypographies) {
     const fragment = document.createDocumentFragment();
     
-    sortedFonts.forEach(font => {
-      const row = this._createFontRow(font);
+    sortedTypographies.forEach(typography => {
+      const row = this._createTypographyRow(typography);
       fragment.appendChild(row);
       
       // Store references
-      this._currentFonts.set(font.fontId, { ...font });
-      this._domElements.set(font.fontId, row);
+      this._currentTypographies.set(typography.typographyId, { ...typography });
+      this._domElements.set(typography.typographyId, row);
     });
     
     this._tableBody.appendChild(fragment);
@@ -79,64 +79,64 @@ export class FontsTableManager {
 
   /**
    * Update render when table has existing content
-   * @param {Array} sortedFonts - Sorted font data
+   * @param {Array} sortedTypographies - Sorted typography data
    */
-  _updateRender(sortedFonts) {
-    const newFontsMap = new Map(sortedFonts.map(font => [font.fontId, font]));
-    const currentFontIds = new Set(this._currentFonts.keys());
-    const newFontIds = new Set(newFontsMap.keys());
+  _updateRender(sortedTypographies) {
+    const newTypographiesMap = new Map(sortedTypographies.map(typography => [typography.typographyId, typography]));
+    const currentTypographyIds = new Set(this._currentTypographies.keys());
+    const newTypographyIds = new Set(newTypographiesMap.keys());
 
     // Find changes
-    const toAdd = [...newFontIds].filter(id => !currentFontIds.has(id));
-    const toRemove = [...currentFontIds].filter(id => !newFontIds.has(id));
-    const toUpdate = [...newFontIds].filter(id => 
-      currentFontIds.has(id) && this._hasFontChanged(this._currentFonts.get(id), newFontsMap.get(id))
+    const toAdd = [...newTypographyIds].filter(id => !currentTypographyIds.has(id));
+    const toRemove = [...currentTypographyIds].filter(id => !newTypographyIds.has(id));
+    const toUpdate = [...newTypographyIds].filter(id => 
+      currentTypographyIds.has(id) && this._hasTypographyChanged(this._currentTypographies.get(id), newTypographiesMap.get(id))
     );
 
-    // Remove obsolete fonts
-    this._removeFonts(toRemove);
+    // Remove obsolete typography
+    this._removeTypographies(toRemove);
 
-    // Update modified fonts
-    this._updateFonts(toUpdate, newFontsMap);
+    // Update modified typography
+    this._updateTypographies(toUpdate, newTypographiesMap);
 
-    // Add new fonts
-    this._addFonts(toAdd, newFontsMap);
+    // Add new typography
+    this._addTypographies(toAdd, newTypographiesMap);
 
     // Ensure correct order
-    this._reorderTable(sortedFonts);
+    this._reorderTable(sortedTypographies);
 
     // Update current state
-    this._currentFonts = newFontsMap;
+    this._currentTypographies = newTypographiesMap;
   }
 
   /**
-   * Check if font data has changed
-   * @param {Object} oldFont - Previous font data
-   * @param {Object} newFont - New font data
+   * Check if typography data has changed
+   * @param {Object} oldTypography - Previous typography data
+   * @param {Object} newTypography - New typography data
    * @returns {boolean}
    */
-  _hasFontChanged(oldFont, newFont) {
-    return oldFont.fontName !== newFont.fontName ||
-           oldFont.fontValue !== newFont.fontValue ||
-           oldFont.orderIndex !== newFont.orderIndex;
+  _hasTypographyChanged(oldTypography, newTypography) {
+    return oldTypography.typographyName !== newTypography.typographyName ||
+           oldTypography.linkedFont !== newTypography.linkedFont ||
+           oldTypography.orderIndex !== newTypography.orderIndex;
   }
 
   /**
-   * Create a new font row element
-   * @param {Object} font - Font data
+   * Create a new typography row element
+   * @param {Object} typography - Typography data
    * @returns {HTMLElement}
    */
-  _createFontRow(font) {
+  _createTypographyRow(typography) {
     const row = document.createElement('tr');
-    row.setAttribute('rowId', font.fontId);
+    row.setAttribute('rowId', typography.typographyId);
     
     const nameCell = document.createElement('td');
-    nameCell.classList.add("font-name");
-    nameCell.textContent = font.fontName;
+    nameCell.classList.add("typography-name");
+    nameCell.textContent = typography.typographyName;
     
     const valueCell = document.createElement('td');
-    valueCell.classList.add("font-value");
-    valueCell.textContent = font.fontValue;
+    valueCell.classList.add("typography-value");
+    valueCell.textContent = "";
     
     row.appendChild(nameCell);
     row.appendChild(valueCell);
@@ -146,7 +146,7 @@ export class FontsTableManager {
     row.addEventListener('click', ()=> {
       const colorText = this.setSelectedRow(row);
       textFormatterModal.setFormattedText({
-        font: colorText
+        typography: colorText
       })
     })
 
@@ -156,62 +156,62 @@ export class FontsTableManager {
   }
 
   /**
-   * Remove fonts from table
-   * @param {Array} fontIdsToRemove - Array of fontIds to remove
+   * Remove typography from table
+   * @param {Array} typographyIdsToRemove - Array of fontIds to remove
    */
-  _removeFonts(fontIdsToRemove) {
-    fontIdsToRemove.forEach(fontId => {
-      const row = this._domElements.get(fontId);
+  _removeTypographies(typographyIdsToRemove) {
+    typographyIdsToRemove.forEach(typographyId => {
+      const row = this._domElements.get(typographyId);
       if (row && row.parentNode) {
         row.parentNode.removeChild(row);
       }
-      this._domElements.delete(fontId);
-      this._currentFonts.delete(fontId);
+      this._domElements.delete(typographyId);
+      this._currentTypographies.delete(typographyId);
     });
   }
 
   /**
-   * Update existing font rows
-   * @param {Array} fontIdsToUpdate - Array of fontIds to update
-   * @param {Map} newFontsMap - Map of new font data
+   * Update existing typography rows
+   * @param {Array} typographyIdsToUpdate - Array of fontIds to update
+   * @param {Map} newTypographiesMap - Map of new typography data
    */
-  _updateFonts(fontIdsToUpdate, newFontsMap) {
-    fontIdsToUpdate.forEach(fontId => {
-      const row = this._domElements.get(fontId);
-      const newFont = newFontsMap.get(fontId);
+  _updateTypographies(typographyIdsToUpdate, newTypographiesMap) {
+    typographyIdsToUpdate.forEach(typographyId => {
+      const row = this._domElements.get(typographyId);
+      const newTypography = newTypographiesMap.get(typographyId);
       
-      if (row && newFont) {
+      if (row && newTypography) {
         const [nameCell, valueCell] = row.children;
-        nameCell.textContent = newFont.fontName;
-        valueCell.textContent = newFont.fontValue;
+        nameCell.textContent = newTypography.typographyName;
+        valueCell.textContent = "";
       }
     });
   }
 
   /**
-   * Add new font rows
-   * @param {Array} fontIdsToAdd - Array of fontIds to add
-   * @param {Map} newFontsMap - Map of new font data
+   * Add new typography rows
+   * @param {Array} typographyIdsToAdd - Array of fontIds to add
+   * @param {Map} newTypographiesMap - Map of new typography data
    */
-  _addFonts(fontIdsToAdd, newFontsMap) {
-    fontIdsToAdd.forEach(fontId => {
-      const font = newFontsMap.get(fontId);
-      const row = this._createFontRow(font);
+  _addTypographies(typographyIdsToAdd, newTypographiesMap) {
+    typographyIdsToAdd.forEach(typographyId => {
+      const typography = newTypographiesMap.get(typographyId);
+      const row = this._createTypographyRow(typography);
       
-      this._domElements.set(fontId, row);
+      this._domElements.set(typographyId, row);
       this._tableBody.appendChild(row);
     });
   }
 
   /**
    * Reorder table rows according to orderIndex
-   * @param {Array} sortedFonts - Fonts sorted by orderIndex
+   * @param {Array} sortedTypographies - Fonts sorted by orderIndex
    */
-  _reorderTable(sortedFonts) {
+  _reorderTable(sortedTypographies) {
     const fragment = document.createDocumentFragment();
     
-    sortedFonts.forEach(font => {
-      const row = this._domElements.get(font.fontId);
+    sortedTypographies.forEach(typography => {
+      const row = this._domElements.get(typography.typographyId);
       if (row) {
         fragment.appendChild(row);
       }
@@ -223,11 +223,11 @@ export class FontsTableManager {
   }
 
   /**
-   * Get current font data
-   * @returns {Array} Current fonts as array
+   * Get current typography data
+   * @returns {Array} Current typography as array
    */
-  getCurrentFonts() {
-    return Array.from(this._currentFonts.values());
+  getCurrentTypographies() {
+    return Array.from(this._currentTypographies.values());
   }
 
   /**
@@ -235,13 +235,13 @@ export class FontsTableManager {
    */
   clear() {
     this._tableBody.innerHTML = '';
-    this._currentFonts.clear();
+    this._currentTypographies.clear();
     this._domElements.clear();
   }
 
   getSelectedRow() {
     if (this._selectedRow) {
-      const nameElement = this._selectedRow.querySelector('.font-name');
+      const nameElement = this._selectedRow.querySelector('.typography-name');
       return nameElement ? nameElement.textContent : '#';
     }
     return '#';

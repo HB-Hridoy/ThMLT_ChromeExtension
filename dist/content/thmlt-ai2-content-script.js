@@ -363,8 +363,16 @@ class BaseCache {
     console.log(`[CACHE] Deleted ${this.#type} ${id}:`, deleted);
     return deleted;
   }
-  isExist({ id }) {
-    return this.#items.some((item) => item[this.#idField] === id);
+  isExist({ id, name }) {
+    if (id !== void 0) {
+      return this.#items.some((item) => item[this.#idField] === id);
+    }
+    if (name !== void 0) {
+      const nameField = `${this.#type}Name`;
+      return this.#items.some((item) => item[nameField] === name);
+    }
+    console.warn(`[CACHE] [WARN] isExist called without 'id' or 'name'.`);
+    return false;
   }
   existName({ name, nameField }) {
     return this.#items.some((item) => item[nameField] === name);
@@ -381,6 +389,7 @@ class ContentScriptCacheManager {
     this.primitiveCache = new BaseCache("primitive", "primitiveId");
     this.semanticCache = new BaseCache("semantic", "semanticId");
     this.fontCache = new BaseCache("font", "fontId");
+    this.typographyCache = new BaseCache("typography", "typographyId");
     this.translationCache = new BaseCache("translation", "translationId");
     this.#selectedProjectId = "";
   }
@@ -393,19 +402,19 @@ class ContentScriptCacheManager {
   }
 }
 const contentScriptCache = new ContentScriptCacheManager();
-class FontsTableManager {
+class TypographyTableManager {
   constructor() {
     this._shadowRoot = AppContext.getShadowRoot();
     this._tableBody = null;
-    this._currentFonts = /* @__PURE__ */ new Map();
+    this._currentTypographies = /* @__PURE__ */ new Map();
     this._domElements = /* @__PURE__ */ new Map();
     this._selectedRow = null;
     const observer = new MutationObserver((mutationsList, observerInstance) => {
-      const tableBody = this._shadowRoot.querySelector(".text-formatter-modal-fonts-table-body");
+      const tableBody = this._shadowRoot.querySelector(".text-formatter-modal-typography-table-body");
       if (tableBody) {
         this._tableBody = tableBody;
         observerInstance.disconnect();
-        console.log("Color Table body found and stored.");
+        console.log("typography body found and stored.");
       }
     });
     observer.observe(this._shadowRoot, {
@@ -414,15 +423,15 @@ class FontsTableManager {
     });
   }
   /**
-   * Main method to update the table with new font data
-   * @param {Array} newFonts - Array of font objects
+   * Main method to update the table with new typography data
+   * @param {Array} newTypography - Array of typography objects
    */
-  render(newFonts) {
-    const sortedFonts = this._sortFontsByOrderIndex(newFonts);
+  render(newTypographies) {
+    const sortedTypographies = this._sortTypographyByOrderIndex(newTypographies);
     if (this.isTableEmpty()) {
-      this._initialRender(sortedFonts);
+      this._initialRender(sortedTypographies);
     } else {
-      this._updateRender(sortedFonts);
+      this._updateRender(sortedTypographies);
     }
   }
   /**
@@ -433,130 +442,130 @@ class FontsTableManager {
     return this._tableBody.children.length === 0;
   }
   /**
-   * Sort fonts by orderIndex
-   * @param {Array} fonts - Array of font objects
+   * Sort typography by orderIndex
+   * @param {Array} typography - Array of typography objects
    * @returns {Array} Sorted array
    */
-  _sortFontsByOrderIndex(fonts) {
-    return [...fonts].sort((a, b) => a.orderIndex - b.orderIndex);
+  _sortTypographyByOrderIndex(typography) {
+    return [...typography].sort((a, b) => a.orderIndex - b.orderIndex);
   }
   /**
    * Initial render when table is empty
-   * @param {Array} sortedFonts - Sorted font data
+   * @param {Array} sortedTypographies - Sorted typography data
    */
-  _initialRender(sortedFonts) {
+  _initialRender(sortedTypographies) {
     const fragment = document.createDocumentFragment();
-    sortedFonts.forEach((font) => {
-      const row = this._createFontRow(font);
+    sortedTypographies.forEach((typography) => {
+      const row = this._createTypographyRow(typography);
       fragment.appendChild(row);
-      this._currentFonts.set(font.fontId, { ...font });
-      this._domElements.set(font.fontId, row);
+      this._currentTypographies.set(typography.typographyId, { ...typography });
+      this._domElements.set(typography.typographyId, row);
     });
     this._tableBody.appendChild(fragment);
   }
   /**
    * Update render when table has existing content
-   * @param {Array} sortedFonts - Sorted font data
+   * @param {Array} sortedTypographies - Sorted typography data
    */
-  _updateRender(sortedFonts) {
-    const newFontsMap = new Map(sortedFonts.map((font) => [font.fontId, font]));
-    const currentFontIds = new Set(this._currentFonts.keys());
-    const newFontIds = new Set(newFontsMap.keys());
-    const toAdd = [...newFontIds].filter((id) => !currentFontIds.has(id));
-    const toRemove = [...currentFontIds].filter((id) => !newFontIds.has(id));
-    const toUpdate = [...newFontIds].filter(
-      (id) => currentFontIds.has(id) && this._hasFontChanged(this._currentFonts.get(id), newFontsMap.get(id))
+  _updateRender(sortedTypographies) {
+    const newTypographiesMap = new Map(sortedTypographies.map((typography) => [typography.typographyId, typography]));
+    const currentTypographyIds = new Set(this._currentTypographies.keys());
+    const newTypographyIds = new Set(newTypographiesMap.keys());
+    const toAdd = [...newTypographyIds].filter((id) => !currentTypographyIds.has(id));
+    const toRemove = [...currentTypographyIds].filter((id) => !newTypographyIds.has(id));
+    const toUpdate = [...newTypographyIds].filter(
+      (id) => currentTypographyIds.has(id) && this._hasTypographyChanged(this._currentTypographies.get(id), newTypographiesMap.get(id))
     );
-    this._removeFonts(toRemove);
-    this._updateFonts(toUpdate, newFontsMap);
-    this._addFonts(toAdd, newFontsMap);
-    this._reorderTable(sortedFonts);
-    this._currentFonts = newFontsMap;
+    this._removeTypographies(toRemove);
+    this._updateTypographies(toUpdate, newTypographiesMap);
+    this._addTypographies(toAdd, newTypographiesMap);
+    this._reorderTable(sortedTypographies);
+    this._currentTypographies = newTypographiesMap;
   }
   /**
-   * Check if font data has changed
-   * @param {Object} oldFont - Previous font data
-   * @param {Object} newFont - New font data
+   * Check if typography data has changed
+   * @param {Object} oldTypography - Previous typography data
+   * @param {Object} newTypography - New typography data
    * @returns {boolean}
    */
-  _hasFontChanged(oldFont, newFont) {
-    return oldFont.fontName !== newFont.fontName || oldFont.fontValue !== newFont.fontValue || oldFont.orderIndex !== newFont.orderIndex;
+  _hasTypographyChanged(oldTypography, newTypography) {
+    return oldTypography.typographyName !== newTypography.typographyName || oldTypography.linkedFont !== newTypography.linkedFont || oldTypography.orderIndex !== newTypography.orderIndex;
   }
   /**
-   * Create a new font row element
-   * @param {Object} font - Font data
+   * Create a new typography row element
+   * @param {Object} typography - Typography data
    * @returns {HTMLElement}
    */
-  _createFontRow(font) {
+  _createTypographyRow(typography) {
     const row = document.createElement("tr");
-    row.setAttribute("rowId", font.fontId);
+    row.setAttribute("rowId", typography.typographyId);
     const nameCell = document.createElement("td");
-    nameCell.classList.add("font-name");
-    nameCell.textContent = font.fontName;
+    nameCell.classList.add("typography-name");
+    nameCell.textContent = typography.typographyName;
     const valueCell = document.createElement("td");
-    valueCell.classList.add("font-value");
-    valueCell.textContent = font.fontValue;
+    valueCell.classList.add("typography-value");
+    valueCell.textContent = "";
     row.appendChild(nameCell);
     row.appendChild(valueCell);
     row.addEventListener("click", () => {
       const colorText = this.setSelectedRow(row);
       textFormatterModal.setFormattedText({
-        font: colorText
+        typography: colorText
       });
     });
     return row;
   }
   /**
-   * Remove fonts from table
-   * @param {Array} fontIdsToRemove - Array of fontIds to remove
+   * Remove typography from table
+   * @param {Array} typographyIdsToRemove - Array of fontIds to remove
    */
-  _removeFonts(fontIdsToRemove) {
-    fontIdsToRemove.forEach((fontId) => {
-      const row = this._domElements.get(fontId);
+  _removeTypographies(typographyIdsToRemove) {
+    typographyIdsToRemove.forEach((typographyId) => {
+      const row = this._domElements.get(typographyId);
       if (row && row.parentNode) {
         row.parentNode.removeChild(row);
       }
-      this._domElements.delete(fontId);
-      this._currentFonts.delete(fontId);
+      this._domElements.delete(typographyId);
+      this._currentTypographies.delete(typographyId);
     });
   }
   /**
-   * Update existing font rows
-   * @param {Array} fontIdsToUpdate - Array of fontIds to update
-   * @param {Map} newFontsMap - Map of new font data
+   * Update existing typography rows
+   * @param {Array} typographyIdsToUpdate - Array of fontIds to update
+   * @param {Map} newTypographiesMap - Map of new typography data
    */
-  _updateFonts(fontIdsToUpdate, newFontsMap) {
-    fontIdsToUpdate.forEach((fontId) => {
-      const row = this._domElements.get(fontId);
-      const newFont = newFontsMap.get(fontId);
-      if (row && newFont) {
+  _updateTypographies(typographyIdsToUpdate, newTypographiesMap) {
+    typographyIdsToUpdate.forEach((typographyId) => {
+      const row = this._domElements.get(typographyId);
+      const newTypography = newTypographiesMap.get(typographyId);
+      if (row && newTypography) {
         const [nameCell, valueCell] = row.children;
-        nameCell.textContent = newFont.fontName;
-        valueCell.textContent = newFont.fontValue;
+        nameCell.textContent = newTypography.typographyName;
+        valueCell.textContent = "";
       }
     });
   }
   /**
-   * Add new font rows
-   * @param {Array} fontIdsToAdd - Array of fontIds to add
-   * @param {Map} newFontsMap - Map of new font data
+   * Add new typography rows
+   * @param {Array} typographyIdsToAdd - Array of fontIds to add
+   * @param {Map} newTypographiesMap - Map of new typography data
    */
-  _addFonts(fontIdsToAdd, newFontsMap) {
-    fontIdsToAdd.forEach((fontId) => {
-      const font = newFontsMap.get(fontId);
-      const row = this._createFontRow(font);
-      this._domElements.set(fontId, row);
+  _addTypographies(typographyIdsToAdd, newTypographiesMap) {
+    typographyIdsToAdd.forEach((typographyId) => {
+      const typography = newTypographiesMap.get(typographyId);
+      const row = this._createTypographyRow(typography);
+      this._domElements.set(typographyId, row);
       this._tableBody.appendChild(row);
     });
   }
   /**
    * Reorder table rows according to orderIndex
-   * @param {Array} sortedFonts - Fonts sorted by orderIndex
+   * @param {Array} sortedTypographies - Fonts sorted by orderIndex
    */
-  _reorderTable(sortedFonts) {
+  _reorderTable(sortedTypographies) {
     const fragment = document.createDocumentFragment();
-    sortedFonts.forEach((font) => {
-      const row = this._domElements.get(font.fontId);
+    sortedTypographies.forEach((typography) => {
+      const row = this._domElements.get(typography.typographyId);
       if (row) {
         fragment.appendChild(row);
       }
@@ -565,23 +574,23 @@ class FontsTableManager {
     this._tableBody.appendChild(fragment);
   }
   /**
-   * Get current font data
-   * @returns {Array} Current fonts as array
+   * Get current typography data
+   * @returns {Array} Current typography as array
    */
-  getCurrentFonts() {
-    return Array.from(this._currentFonts.values());
+  getCurrentTypographies() {
+    return Array.from(this._currentTypographies.values());
   }
   /**
    * Clear the table
    */
   clear() {
     this._tableBody.innerHTML = "";
-    this._currentFonts.clear();
+    this._currentTypographies.clear();
     this._domElements.clear();
   }
   getSelectedRow() {
     if (this._selectedRow) {
-      const nameElement = this._selectedRow.querySelector(".font-name");
+      const nameElement = this._selectedRow.querySelector(".typography-name");
       return nameElement ? nameElement.textContent : "#";
     }
     return "#";
@@ -935,7 +944,7 @@ class TextFormatterModal {
     this._textFormatterModalElement = null;
     this._tabManager = null;
     this._colorTableManager = null;
-    this._fontsTableManager = null;
+    this._typographyTableManager = null;
     this._translationsTableManager = null;
     this._formattedTextElement = null;
     this._applyFormattedTextButton = null;
@@ -944,8 +953,8 @@ class TextFormatterModal {
     this._translationsSearchInputParent = null;
     this._translationsSearchInput = null;
     this._noTranslationScreen = null;
-    this._fontsTable = null;
-    this._noFontsScreen = null;
+    this._typographyTable = null;
+    this._noTypographyScreen = null;
     this._colorsTable = null;
     this._colorsSearchInputParent = null;
     this._colorsSearchInput = null;
@@ -960,7 +969,7 @@ class TextFormatterModal {
       this._shadowRoot = AppContext.getShadowRoot();
       this._tabManager = new TabManager(this._shadowRoot);
       this._colorTableManager = new ColorsTableManager();
-      this._fontsTableManager = new FontsTableManager();
+      this._typographyTableManager = new TypographyTableManager();
       this._translationsTableManager = new TranslationsTableManager();
       await this._createTextFormatterModal(this._shadowRoot);
       this._addEventListeners();
@@ -1002,8 +1011,8 @@ class TextFormatterModal {
     this._translationsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input-parent");
     this._translationsSearchInput = this._shadowRoot.querySelector(".text-formatter-modal-translation-search-input");
     this._noTranslationScreen = this._shadowRoot.querySelector(".no-translations-screen");
-    this._fontsTable = this._shadowRoot.getElementById("text-formatter-modal-fonts-table");
-    this._noFontsScreen = this._shadowRoot.querySelector(".no-fonts-screen");
+    this._typographyTable = this._shadowRoot.getElementById("text-formatter-modal-typography-table");
+    this._noTypographyScreen = this._shadowRoot.querySelector(".no-typography-screen");
     this._colorsTable = this._shadowRoot.getElementById("text-formatter-modal-colors-table");
     this._colorsSearchInputParent = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input-parent");
     this._colorsSearchInput = this._shadowRoot.querySelector(".text-formatter-modal-color-search-input");
@@ -1042,7 +1051,7 @@ class TextFormatterModal {
     console.log(`[TEXT FORMATTER MODAL] Event listeners added`);
   }
   show() {
-    this._formattedTextElement.textContent = "Please select a translation, font, and color.";
+    this._formattedTextElement.textContent = "Please select a translation, typography, and color.";
     this._applyFormattedTextButton.classList.toggle("disabled", true);
     const primitivesData = contentScriptCache.primitiveCache.getAll();
     const semanticsData = contentScriptCache.semanticCache.getAll();
@@ -1056,12 +1065,12 @@ class TextFormatterModal {
     } else {
       this.setColorsScreenVisibility(false);
     }
-    const fontsData = contentScriptCache.fontCache.getAll();
-    if (Array.isArray(fontsData) && fontsData.length > 0) {
-      this._fontsTableManager.render(fontsData);
-      this.setFontsScreenVisibility(true);
+    const typographyData = contentScriptCache.typographyCache.getAll();
+    if (Array.isArray(typographyData) && typographyData.length > 0) {
+      this._typographyTableManager.render(typographyData);
+      this.SetTypographyScreenVisibility(true);
     } else {
-      this.setFontsScreenVisibility(false);
+      this.SetTypographyScreenVisibility(false);
     }
     const allTranslations = contentScriptCache.translationCache.getAll();
     if (Array.isArray(allTranslations) && allTranslations.length > 0) {
@@ -1080,8 +1089,8 @@ class TextFormatterModal {
     if (activeAI2TextArea) {
       const oldTextChunks = this.parseFormattedText(activeAI2TextArea.value.trim());
       console.log(`text area found. creating chunks`);
-      if (oldTextChunks.translation && oldTextChunks.font && oldTextChunks.color) {
-        this._formattedTextElement.textContent = `${oldTextChunks.translation}, ${oldTextChunks.font}, ${oldTextChunks.color}`;
+      if (oldTextChunks.translation && oldTextChunks.typography && oldTextChunks.color) {
+        this._formattedTextElement.textContent = `${oldTextChunks.translation}, ${oldTextChunks.typography}, ${oldTextChunks.color}`;
       }
     }
     console.log("Text formatter modal opened");
@@ -1094,15 +1103,15 @@ class TextFormatterModal {
   getFormattedText() {
     return this._formattedTextElement.textContent;
   }
-  setFormattedText({ translation, font, color }) {
-    if (this._formattedTextElement.textContent === "Please select a translation, font, and color.") this._formattedTextElement.textContent = "#,#,#";
-    const [currentTranslation = "", currentFont = "", currentColor = ""] = this._formattedTextElement.textContent.split(",").map((s) => s.trim());
+  setFormattedText({ translation, typography, color }) {
+    if (this._formattedTextElement.textContent === "Please select a translation, typography, and color.") this._formattedTextElement.textContent = "#,#,#";
+    const [currentTranslation = "", currentTypography = "", currentColor = ""] = this._formattedTextElement.textContent.split(",").map((s) => s.trim());
     const newTranslation = translation !== void 0 ? translation : currentTranslation;
-    const newFont = font !== void 0 ? font : currentFont;
+    const newTypography = typography !== void 0 ? typography : currentTypography;
     const newColor = color !== void 0 ? color : currentColor;
-    this._formattedTextElement.textContent = `${newTranslation}, ${newFont}, ${newColor}`;
+    this._formattedTextElement.textContent = `${newTranslation}, ${newTypography}, ${newColor}`;
     if (this._formattedTextElement.textContent.trim() === "#, #, #") {
-      this._formattedTextElement.textContent = "Please select a translation, font, and color.";
+      this._formattedTextElement.textContent = "Please select a translation, typography, and color.";
       this._applyFormattedTextButton.classList.toggle("disabled", true);
     } else {
       this._applyFormattedTextButton.classList.toggle("disabled", false);
@@ -1127,7 +1136,7 @@ class TextFormatterModal {
     }
     return {
       translation: match[1],
-      font: match[2],
+      typography: match[2],
       color: match[3],
       remainingText: (match[4] || "").trim()
     };
@@ -1143,13 +1152,13 @@ class TextFormatterModal {
       this._translationTable.style.display = "none";
     }
   }
-  setFontsScreenVisibility(show) {
+  SetTypographyScreenVisibility(show) {
     if (show) {
-      this._noFontsScreen.style.display = "none";
-      this._fontsTable.style.display = "block";
+      this._noTypographyScreen.style.display = "none";
+      this._typographyTable.style.display = "block";
     } else {
-      this._noFontsScreen.style.display = "flex";
-      this._fontsTable.style.display = "none";
+      this._noTypographyScreen.style.display = "flex";
+      this._typographyTable.style.display = "none";
     }
   }
   setColorsScreenVisibility(show) {
@@ -1275,6 +1284,9 @@ class DataFetcher {
   fetchFontsData() {
     return this.fetch({ action: "FONTS:FETCH_DATA", cacheKey: "fontCache" });
   }
+  fetchTypographyData() {
+    return this.fetch({ action: "TYPOGRAPHY:FETCH_DATA", cacheKey: "typographyCache" });
+  }
   fetchTranslationsData() {
     return this.fetch({ action: "TRANSLATIONS:FETCH_DATA", cacheKey: "translationCache" });
   }
@@ -1282,6 +1294,7 @@ class DataFetcher {
     await this.fetchPrimitivesData();
     await this.fetchSemanticsData();
     await this.fetchFontsData();
+    await this.fetchTypographyData();
     await this.fetchTranslationsData();
   }
 }
@@ -1791,14 +1804,16 @@ function handleDbChange({ table, type, data }) {
     primitiveColors: "primitiveId",
     semanticColors: "semanticId",
     fonts: "fontId",
-    projects: "projectId"
+    projects: "projectId",
+    typography: "typographyId"
   };
   const cacheMap = {
     translations: contentScriptCache.translationCache,
     primitiveColors: contentScriptCache.primitiveCache,
     semanticColors: contentScriptCache.semanticCache,
     fonts: contentScriptCache.fontCache,
-    projects: contentScriptCache.projectCache
+    projects: contentScriptCache.projectCache,
+    typography: contentScriptCache.typographyCache
   };
   const idField = idFields[table];
   const cache = cacheMap[table];

@@ -1,14 +1,15 @@
 import Dexie from 'dexie';
-// import ThMLT_DB_Schema from './schema.js';
+import ThMLT_DB_Schema from './schema.js';
 
 class ThMLTDatabase extends Dexie {
   constructor() {
-    super('ThMLTDatabase');
+    super(ThMLT_DB_Schema.dbName);
 
     this.projects = null;
     this.primitiveColors = null;
     this.semanticColors = null;
     this.fonts = null;
+    this.typography = null;
     this.translations = null;
   }
 }
@@ -49,6 +50,7 @@ class DatabaseManager {
       this.db.primitiveColors = this.db.table('primitiveColors');
       this.db.semanticColors = this.db.table('semanticColors');
       this.db.fonts = this.db.table('fonts');
+      this.db.typography = this.db.table('typography');
       this.db.translations = this.db.table('translations');
             
       this.initialized = true;
@@ -79,6 +81,10 @@ class DatabaseManager {
 
   get fonts() {
     return this.db?.fonts;
+  }
+
+  get typography() {
+    return this.db?.typography;
   }
 
   get translations() {
