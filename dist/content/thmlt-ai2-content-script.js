@@ -1428,9 +1428,12 @@ class ElementWatcher {
       (el) => !this.processedElements.has(el.id || this.generateElementId(el))
     );
     if (unprocessedElements.length === 0) {
-      this.log("All elements processed, stopping main observer");
-      this.mainObserver.disconnect();
-      return;
+      const needsWatch = this.config.elements.some((el) => el.watchText);
+      if (!needsWatch) {
+        this.log("All elements processed (no watchText), stopping main observer");
+        this.mainObserver.disconnect();
+        return;
+      }
     }
     this.checkAllElements();
   }
@@ -1450,9 +1453,11 @@ class ElementWatcher {
    */
   checkElement(elementConfig, id) {
     const element = document.querySelector(elementConfig.selector);
-    if (element) {
+    if (!element) return;
+    const prevElement = this.watchers.get(id);
+    if (element !== prevElement) {
       this.log(`Element found: ${elementConfig.selector}`);
-      this.processedElements.add(id);
+      this.watchers.set(id, element);
       if (elementConfig.onFound) {
         try {
           elementConfig.onFound(element, elementConfig);
@@ -1460,9 +1465,9 @@ class ElementWatcher {
           console.error("Error in onFound callback:", error);
         }
       }
-      if (elementConfig.watchText && elementConfig.onTextChange) {
-        this.setupTextWatcher(element, elementConfig, id);
-      }
+    }
+    if (elementConfig.watchText && elementConfig.onTextChange) {
+      this.setupTextWatcher(element, elementConfig, id);
     }
   }
   /**
@@ -1475,7 +1480,14 @@ class ElementWatcher {
     const textObserver = new MutationObserver(() => {
       this.handleTextChangeThrottled(element, elementConfig, id);
     });
-    textObserver.observe(element, this.config.observeOptions);
+    textObserver.observe(element, {
+      characterData: true,
+      // detect text node changes
+      childList: true,
+      // detect child node additions/removals
+      subtree: true
+      // include nested nodes
+    });
     this.textObservers.set(id, textObserver);
     this.handleTextChange(element, elementConfig, id);
   }
@@ -1494,7 +1506,7 @@ class ElementWatcher {
    * Handle text changes
    */
   handleTextChange(element, elementConfig, id) {
-    const currentText = element.innerText.trim();
+    const currentText = (element.textContent || "").trim();
     const lastText = this.lastTexts.get(id) || "";
     if (currentText === lastText) return;
     this.log(`Text changed for ${elementConfig.selector}: "${lastText}" → "${currentText}"`);
@@ -1862,69 +1874,68 @@ elementWatcher.addElement({
   watchText: true,
   onFound: (el) => console.log("Found component name"),
   onTextChange: (newText, oldText, el) => {
-    if (newText.endsWith("(Label)")) {
-      createEditTextWithThmltModalButton();
-    }
+    console.log(`Component name changed from "${oldText}" to "${newText}"`);
+    createEditTextWithThmltModalButton();
   }
 });
 function createEditTextWithThmltModalButton() {
   const propertiesPanelTable = document.querySelector("table.ode-PropertiesPanel");
-  if (propertiesPanelTable) {
-    const targetRow = Array.from(propertiesPanelTable.querySelectorAll("tr")).find((row) => {
-      const propertyLabel = row.querySelector("div.ode-PropertyLabel");
-      return propertyLabel && propertyLabel.textContent.trim() === "Text";
-    });
-    const textArea = targetRow.nextElementSibling.querySelector(".ode-PropertyEditor");
-    activeAI2TextArea = textArea;
-    if (targetRow) {
-      const targetTd = targetRow.querySelector("td:has(div.ode-PropertyLabel)").querySelector('td[align="left"][style*="vertical-align: top;"] img.ode-PropertyHelpWidget').parentElement;
-      if (targetTd) {
-        const newTd = document.createElement("td");
-        newTd.setAttribute("editTextWithThMLT", "true");
-        newTd.setAttribute("align", "left");
-        newTd.style.verticalAlign = "top";
-        newTd.id = "my-newTd";
-        newTd.innerHTML = `
-          <div class="EditTextWithThMLTButton" style="
-                                                      position: relative;
-                                                      display: flex;
-                                                      align-items: center;
-                                                      justify-content: center;
-                                                      gap: 5px;
-                                                      padding: 4px 10px;
-                                                      transition: background 0.2s, opacity 0.1s;
-                                                      color: #444;
-                                                      font-family: 'Poppins', Helvetica, Arial, sans-serif;
-                                                      font-weight: 500;
-                                                      font-size: 1.06em;
-                                                      white-space: nowrap;
-                                                      background-color: #a5cf47;
-                                                      border: 1px solid #444;
-                                                      border-radius: 4px;
-                                                      background-image: unset;
-                                                      text-shadow: unset;
-                                                      box-shadow: 1px 1px;
-                                                      cursor: pointer;
-          ">
-          <div style="font-size: 0.75rem">ThMLT</div>
-          </div>
-        `;
-        targetTd.insertAdjacentElement("afterend", newTd);
-        newTd.addEventListener("click", async (e) => {
-          const clickedElement = e.target.closest('td[editTextWithThMLT="true"]');
-          if (clickedElement) {
-            handleTextFormatterButtonClick();
-          }
-        });
-      } else {
-        console.log("Target <td> element not found.");
-      }
-    } else {
-      console.log("Specific table row not found.");
-    }
-  } else {
+  if (!propertiesPanelTable) {
     console.log('Table with class "ode-PropertiesPanel" not found.');
+    return;
   }
+  const targetRows = Array.from(propertiesPanelTable.querySelectorAll("tr")).filter((row) => {
+    const propertyLabel = row.querySelector("div.ode-PropertyLabel");
+    return propertyLabel && propertyLabel.textContent.trim() === "Text";
+  });
+  targetRows.forEach((targetRow) => {
+    const textAreaRow = targetRow.nextElementSibling;
+    if (!textAreaRow) return;
+    const textArea = textAreaRow.querySelector(".ode-PropertyEditor");
+    if (textArea) {
+      activeAI2TextArea = textArea;
+    }
+    const targetTd = targetRow.querySelector("td img.ode-PropertyHelpWidget")?.parentElement;
+    if (!targetTd) {
+      console.log("Target <td> element not found for row:", targetRow);
+      return;
+    }
+    if (targetRow.querySelector('td[editTextWithThMLT="true"]')) return;
+    const newTd = document.createElement("td");
+    newTd.setAttribute("editTextWithThMLT", "true");
+    newTd.setAttribute("align", "left");
+    newTd.style.verticalAlign = "top";
+    newTd.innerHTML = `
+      <div class="EditTextWithThMLTButton" style="
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 4px 10px;
+        transition: background 0.2s, opacity 0.1s;
+        color: #444;
+        font-family: 'Poppins', Helvetica, Arial, sans-serif;
+        font-weight: 500;
+        font-size: 1.06em;
+        white-space: nowrap;
+        background-color: #a5cf47;
+        border: 1px solid #444;
+        border-radius: 4px;
+        background-image: unset;
+        text-shadow: unset;
+        box-shadow: 1px 1px;
+        cursor: pointer;
+      ">
+        <div style="font-size: 0.75rem">ThMLT</div>
+      </div>
+    `;
+    targetTd.insertAdjacentElement("afterend", newTd);
+    newTd.addEventListener("click", () => {
+      activeAI2TextArea = textArea;
+      handleTextFormatterButtonClick();
+    });
+  });
 }
 function handleTextFormatterButtonClick() {
   const selectedProjectId = contentScriptCache.getSelectedProjectId();

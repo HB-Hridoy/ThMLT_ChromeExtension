@@ -167,10 +167,16 @@ export class ElementWatcher {
     );
 
     if (unprocessedElements.length === 0) {
-      this.log('All elements processed, stopping main observer');
-      this.mainObserver.disconnect();
-      return;
+      // Check if any elements require ongoing text watching
+      const needsWatch = this.config.elements.some(el => el.watchText);
+      
+      if (!needsWatch) {
+        this.log('All elements processed (no watchText), stopping main observer');
+        this.mainObserver.disconnect();
+        return;
+      }
     }
+
 
     this.checkAllElements();
   }
@@ -192,12 +198,16 @@ export class ElementWatcher {
    */
   checkElement(elementConfig, id) {
     const element = document.querySelector(elementConfig.selector);
-    
-    if (element) {
+
+    if (!element) return;
+
+    const prevElement = this.watchers.get(id);
+
+    // Call onFound only if the element is new
+    if (element !== prevElement) {
       this.log(`Element found: ${elementConfig.selector}`);
-      this.processedElements.add(id);
-      
-      // Call onFound callback
+      this.watchers.set(id, element);
+
       if (elementConfig.onFound) {
         try {
           elementConfig.onFound(element, elementConfig);
@@ -205,13 +215,15 @@ export class ElementWatcher {
           console.error('Error in onFound callback:', error);
         }
       }
+    }
 
-      // Setup text watching if needed
-      if (elementConfig.watchText && elementConfig.onTextChange) {
-        this.setupTextWatcher(element, elementConfig, id);
-      }
+    // Always setup or re-setup text watcher
+    if (elementConfig.watchText && elementConfig.onTextChange) {
+      this.setupTextWatcher(element, elementConfig, id);
     }
   }
+
+
 
   /**
    * Setup text change observer for an element
@@ -226,12 +238,20 @@ export class ElementWatcher {
       this.handleTextChangeThrottled(element, elementConfig, id);
     });
 
-    textObserver.observe(element, this.config.observeOptions);
+    textObserver.observe(element, {
+      characterData: true, // detect text node changes
+      childList: true,     // detect child node additions/removals
+      subtree: true        // include nested nodes
+    });
+
     this.textObservers.set(id, textObserver);
 
-    // Check initial text
+    // Run once immediately
     this.handleTextChange(element, elementConfig, id);
   }
+
+
+
 
   /**
    * Handle text changes with throttling
@@ -251,23 +271,25 @@ export class ElementWatcher {
    * Handle text changes
    */
   handleTextChange(element, elementConfig, id) {
-    const currentText = element.innerText.trim();
-    const lastText = this.lastTexts.get(id) || '';
+    // Normalize text (removes extra whitespace/newlines)
+    const currentText = (element.textContent || "").trim();
+    const lastText = this.lastTexts.get(id) || "";
 
     if (currentText === lastText) return;
 
     this.log(`Text changed for ${elementConfig.selector}: "${lastText}" → "${currentText}"`);
-    
+
     this.lastTexts.set(id, currentText);
 
     if (elementConfig.onTextChange) {
       try {
         elementConfig.onTextChange(currentText, lastText, element, elementConfig);
       } catch (error) {
-        console.error('Error in onTextChange callback:', error);
+        console.error("Error in onTextChange callback:", error);
       }
     }
   }
+
 
   /**
    * Generate unique ID for element config
