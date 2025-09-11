@@ -15,6 +15,7 @@ class ThMLTDatabase extends window.Dexie {
     this.primitiveColors = this.table('primitiveColors');
     this.semanticColors = this.table('semanticColors');
     this.fonts = this.table('fonts');
+    this.typography = this.table('typography');
     this.translations = this.table('translations');
   }
 }
