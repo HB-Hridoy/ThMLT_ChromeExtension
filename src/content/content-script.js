@@ -46,9 +46,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     watchText: true,
     onFound: (el) => console.log('Found component name'),
     onTextChange: (newText, oldText, el) => {
-      if (newText.endsWith('(Label)')) {
-        createEditTextWithThmltModalButton();
-      }
+      console.log(`Component name changed from "${oldText}" to "${newText}"`);
+
+      createEditTextWithThmltModalButton();
     }
   });
 
